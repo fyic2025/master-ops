@@ -1,0 +1,77 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "C:/Users/YOUR_USERNAME/Documents"],
+      "env": {},
+      "description": "Access local filesystem - useful for reading/writing files in Claude Desktop"
+    },
+    "everything": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-everything"],
+      "description": "Fast file search using Everything (Windows only)"
+    },
+    "brave-search": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+      "env": {
+        "BRAVE_API_KEY": "YOUR_BRAVE_API_KEY_HERE"
+      },
+      "description": "Web search via Brave Search API"
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "ghp_YOUR_GITHUB_TOKEN_HERE"
+      },
+      "description": "GitHub integration - manage repos, issues, PRs"
+    },
+    "hubspot": {
+      "command": "npx",
+      "args": ["-y", "@hubspot/mcp-server"],
+      "env": {
+        "HUBSPOT_ACCESS_TOKEN": "pat-ap1-YOUR_HUBSPOT_TOKEN_HERE"
+      },
+      "description": "HubSpot CRM integration - manage contacts, deals, tickets"
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "description": "Persistent memory across Claude conversations"
+    },
+    "n8n-builder": {
+      "command": "n8n-mcp",
+      "args": [],
+      "env": {
+        "N8N_API_URL": "https://your-n8n-instance.com",
+        "N8N_API_KEY": "YOUR_N8N_API_KEY_HERE",
+        "MCP_MODE": "stdio",
+        "LOG_LEVEL": "warn",
+        "DISABLE_CONSOLE_OUTPUT": "true"
+      },
+      "description": "n8n workflow automation - build and manage workflows from Claude"
+    },
+    "apify": {
+      "command": "npx",
+      "args": ["-y", "@apify/actors-mcp-server"],
+      "env": {
+        "APIFY_TOKEN": "apify_api_YOUR_APIFY_TOKEN_HERE"
+      },
+      "description": "Apify web scraping and automation actors"
+    },
+    "supabase": {
+      "command": "npx",
+      "args": ["-y", "@supabase/mcp-server-supabase"],
+      "env": {
+        "SUPABASE_ACCESS_TOKEN": "sbp_YOUR_SUPABASE_ACCESS_TOKEN_HERE"
+      },
+      "description": "Supabase integration - manage databases, auth, storage"
+    },
+    "smartlead": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://mcp.smartlead.ai/sse?user_api_key=YOUR_SMARTLEAD_API_KEY_HERE"],
+      "description": "Smartlead email outreach and campaign management"
+    }
+  }
+}

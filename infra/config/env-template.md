@@ -87,6 +87,37 @@ POSTMARK_FROM_EMAIL=noreply@yourdomain.com
 
 ---
 
+## Claude Desktop MCP Servers
+
+**Note**: These are configured in `claude_desktop_config.json`, not in `.env` files.
+See [mcp-servers-setup.md](mcp-servers-setup.md) for full setup instructions.
+
+```bash
+# Supabase MCP
+SUPABASE_ACCESS_TOKEN=sbp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+# n8n MCP
+N8N_API_URL=https://your-n8n-instance.com
+N8N_API_KEY=your_n8n_api_key_here
+
+# GitHub MCP
+GITHUB_PERSONAL_ACCESS_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+# Smartlead MCP (embedded in URL)
+# https://mcp.smartlead.ai/sse?user_api_key=YOUR_API_KEY_HERE
+
+# HubSpot MCP
+HUBSPOT_ACCESS_TOKEN=pat-ap1-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+# Brave Search MCP
+BRAVE_API_KEY=BSAxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+# Apify MCP
+APIFY_TOKEN=apify_api_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+---
+
 ## Business-Specific Variables
 
 ### Teelixir

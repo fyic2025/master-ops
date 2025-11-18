@@ -84,6 +84,46 @@ This document provides an overview of the tools and services integrated into the
 
 ---
 
+## Claude Desktop (MCP Servers)
+
+**Purpose**: Extend Claude's capabilities through Model Context Protocol (MCP) integrations
+
+- **Config Location**: `%AppData%\Claude\claude_desktop_config.json` (Windows)
+- **Template**: See [claude-desktop-config.example.json](claude-desktop-config.example.json)
+- **Full Setup Guide**: See [mcp-servers-setup.md](mcp-servers-setup.md)
+
+### Configured MCP Servers
+
+#### Core Integrations
+- **Supabase MCP**: Direct database operations, task tracking, memory storage
+- **n8n MCP**: Build workflows, trigger automations, manage supervisor tasks
+- **GitHub MCP**: Repository management, PR/issue handling, git operations
+- **Smartlead MCP**: Email campaign creation and management
+- **HubSpot MCP**: CRM operations, contact/deal management
+
+#### Utility Servers
+- **Memory MCP**: Persistent memory across Claude conversations
+- **Brave Search MCP**: Web search capabilities for research
+- **Apify MCP**: Web scraping and data extraction actors
+- **Filesystem MCP**: Local file access and management
+- **Everything MCP**: Fast file search (Windows only)
+
+### Integration Benefits
+
+**Direct Database Access**: Query and update Supabase tables without API calls
+**Workflow Automation**: Create n8n workflows conversationally
+**Code Management**: Manage git repos, PRs, and issues from Claude
+**Multi-Service Orchestration**: Combine multiple services in single conversation
+
+### Security Notes
+
+- MCP config file contains sensitive API keys - never commit to git
+- Use read-only tokens where possible
+- Rotate credentials regularly
+- See [mcp-servers-setup.md](mcp-servers-setup.md) for security best practices
+
+---
+
 ## Configuration Management
 
 - All API keys and secrets stored in `.env` files (never committed)

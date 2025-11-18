@@ -37,6 +37,8 @@ Each business has its own dedicated folder for business-specific code, configura
 - **[config/](infra/config/)** - Service configurations and environment templates
   - [tools-config.md](infra/config/tools-config.md) - Overview of integrated tools and services
   - [env-template.md](infra/config/env-template.md) - Environment variable template
+  - [claude-desktop-config.example.json](infra/config/claude-desktop-config.example.json) - MCP servers template
+  - [mcp-servers-setup.md](infra/config/mcp-servers-setup.md) - Claude Desktop MCP setup guide
 
 ### Shared Resources
 
@@ -56,6 +58,12 @@ This repository integrates with:
 - **n8n** - Workflow automation and integration platform
 - **Smartlead** - Email outreach and lead generation
 - **Claude Code** - AI-powered development assistant for automation and coding
+- **Claude Desktop (MCP)** - Extended integrations via Model Context Protocol servers
+  - Direct Supabase database operations
+  - n8n workflow creation and management
+  - GitHub repository management
+  - HubSpot CRM integration
+  - Web search and scraping capabilities
 
 See [infra/config/tools-config.md](infra/config/tools-config.md) for detailed configuration information.
 
@@ -94,6 +102,13 @@ See [infra/config/tools-config.md](infra/config/tools-config.md) for detailed co
    - Set up Supabase project and database
    - Configure n8n workflows
    - Connect Smartlead campaigns
+
+5. **Set up Claude Desktop MCP Servers** (Optional but Recommended)
+   - Copy [infra/config/claude-desktop-config.example.json](infra/config/claude-desktop-config.example.json)
+   - Rename to `claude_desktop_config.json` in Claude Desktop's config directory
+   - Replace placeholder values with actual API keys
+   - Follow detailed setup in [infra/config/mcp-servers-setup.md](infra/config/mcp-servers-setup.md)
+   - Restart Claude Desktop
 
 ### Working with Claude Code
 
