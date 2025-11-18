@@ -87,10 +87,10 @@ See [infra/config/tools-config.md](infra/config/tools-config.md) for detailed co
    ```
 
 2. **Set up environment variables**
-   - Copy [infra/config/env-template.md](infra/config/env-template.md)
-   - Create `.env` files in relevant directories
-   - Fill in actual API keys and credentials
-   - Ensure `.env` is in `.gitignore`
+   - Copy `.env.example` to `.env` in the repo root
+   - Fill in your actual Supabase credentials (see Supabase Setup below)
+   - Add other API keys as needed
+   - Ensure `.env` is in `.gitignore` (already configured)
 
 3. **Install dependencies** (when applicable)
    ```bash
@@ -122,6 +122,88 @@ This repository is designed to work seamlessly with Claude Code:
 - "Create a new n8n workflow for syncing Teelixir orders to Supabase"
 - "Update the shared library with a new utility function"
 - "Generate a prompt template for customer support emails"
+
+---
+
+## Supabase Setup
+
+### 1. Create Supabase Project
+
+1. Go to [supabase.com](https://supabase.com) and create a new project
+2. Choose a region close to your users
+3. Set a strong database password (save it securely)
+4. Wait for project provisioning (~2 minutes)
+
+### 2. Get Your Credentials
+
+Navigate to **Settings → API** in your Supabase dashboard:
+
+- **Project URL**: `https://[your-project-id].supabase.co`
+- **Anon/Public Key**: Safe to use client-side (starts with `eyJhbGci...`)
+- **Service Role Key**: Server-side only - has full database access (starts with `eyJhbGci...`)
+
+### 3. Configure Environment Variables
+
+1. Copy `.env.example` to `.env` in the repository root:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Fill in your Supabase credentials:
+   ```bash
+   SUPABASE_URL=https://your-project-id.supabase.co
+   SUPABASE_ANON_KEY=eyJhbGci...your-anon-key
+   SUPABASE_SERVICE_ROLE_KEY=eyJhbGci...your-service-role-key
+   ```
+
+3. **Never commit `.env`** - it's already in `.gitignore`
+
+### 4. Run the Task Tracking Schema
+
+Execute the AI task tracking schema in your Supabase project:
+
+**Option A: Via Supabase Dashboard (Recommended)**
+1. Go to **SQL Editor** in your Supabase dashboard
+2. Create a new query
+3. Copy the contents of [infra/supabase/schema-tasks.sql](infra/supabase/schema-tasks.sql)
+4. Paste and click **Run**
+5. Verify tables created: `tasks`, `task_logs`, and views
+
+**Option B: Via CLI** (if you have Supabase CLI installed)
+```bash
+supabase db push --local  # for local development
+# or
+psql $DATABASE_URL < infra/supabase/schema-tasks.sql  # for remote
+```
+
+### 5. Verify Setup
+
+Test your connection using the TypeScript client:
+
+```typescript
+import { supabase, serviceClient } from './infra/supabase/client'
+
+// Test connection
+const { data, error } = await supabase.from('tasks').select('count')
+console.log('Connection successful!', data)
+```
+
+### Security Notes
+
+- **Anon Key**: Safe for client-side use, respects Row Level Security (RLS)
+- **Service Role Key**:
+  - Bypasses RLS - use only server-side
+  - Never expose in client code or commit to git
+  - Use for n8n workflows, admin operations, and server automation
+- **Rotate keys** if accidentally exposed
+- Consider enabling **RLS policies** for production use
+
+### Next Steps
+
+- Set up Row Level Security (RLS) policies for your tables
+- Configure authentication if needed
+- Create database backups
+- Monitor usage in Supabase dashboard
 
 ---
 
