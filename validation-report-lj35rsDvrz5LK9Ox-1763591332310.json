@@ -1,0 +1,418 @@
+{
+  "valid": false,
+  "score": 86,
+  "checks": [
+    {
+      "id": "struct-001",
+      "category": "structure",
+      "severity": "error",
+      "passed": true,
+      "message": "Workflow has a name",
+      "details": "Name: \"3. Sync Orders to Unleashed\""
+    },
+    {
+      "id": "struct-002",
+      "category": "structure",
+      "severity": "error",
+      "passed": true,
+      "message": "Workflow has at least one node",
+      "details": "Node count: 12"
+    },
+    {
+      "id": "struct-003",
+      "category": "structure",
+      "severity": "error",
+      "passed": true,
+      "message": "Workflow has connections object",
+      "details": "Connections defined"
+    },
+    {
+      "id": "struct-004",
+      "category": "structure",
+      "severity": "error",
+      "passed": false,
+      "message": "Workflow has a trigger node",
+      "details": "No trigger node found",
+      "recommendation": "Add a trigger node (scheduleTrigger, webhook, or cron)"
+    },
+    {
+      "id": "struct-005",
+      "category": "structure",
+      "severity": "error",
+      "passed": true,
+      "message": "All nodes have unique names",
+      "details": "12 unique node names"
+    },
+    {
+      "id": "struct-006",
+      "category": "structure",
+      "severity": "error",
+      "passed": true,
+      "message": "All nodes have type and typeVersion",
+      "details": "12/12 nodes have type"
+    },
+    {
+      "id": "struct-007",
+      "category": "structure",
+      "severity": "warning",
+      "passed": true,
+      "message": "All nodes have position [x, y]",
+      "details": "12/12 nodes have position"
+    },
+    {
+      "id": "struct-008",
+      "category": "structure",
+      "severity": "warning",
+      "passed": true,
+      "message": "Workflow has more than one node",
+      "details": "Node count: 12"
+    },
+    {
+      "id": "struct-009",
+      "category": "structure",
+      "severity": "warning",
+      "passed": true,
+      "message": "Workflow has reasonable complexity (< 50 nodes)",
+      "details": "Node count: 12"
+    },
+    {
+      "id": "struct-010",
+      "category": "structure",
+      "severity": "info",
+      "passed": true,
+      "message": "No disabled nodes in workflow",
+      "details": "No disabled nodes"
+    },
+    {
+      "id": "naming-001",
+      "category": "naming",
+      "severity": "warning",
+      "passed": true,
+      "message": "Workflow name is descriptive (>= 5 characters)",
+      "details": "Name length: 27"
+    },
+    {
+      "id": "naming-002",
+      "category": "naming",
+      "severity": "warning",
+      "passed": true,
+      "message": "Workflow name is not generic",
+      "details": "Name is specific"
+    },
+    {
+      "id": "naming-003",
+      "category": "naming",
+      "severity": "info",
+      "passed": true,
+      "message": "Workflow name uses appropriate case",
+      "details": "Name uses appropriate case"
+    },
+    {
+      "id": "naming-004",
+      "category": "naming",
+      "severity": "warning",
+      "passed": true,
+      "message": "All nodes have descriptive names",
+      "details": "All node names are descriptive"
+    },
+    {
+      "id": "naming-005",
+      "category": "naming",
+      "severity": "info",
+      "passed": false,
+      "message": "Workflow has tags for organization",
+      "details": "No tags defined",
+      "recommendation": "Add tags to categorize the workflow"
+    },
+    {
+      "id": "conn-001",
+      "category": "connections",
+      "severity": "error",
+      "passed": true,
+      "message": "All connection sources reference existing nodes",
+      "details": "All sources valid"
+    },
+    {
+      "id": "conn-002",
+      "category": "connections",
+      "severity": "error",
+      "passed": true,
+      "message": "All connection targets reference existing nodes",
+      "details": "All targets valid"
+    },
+    {
+      "id": "conn-003",
+      "category": "connections",
+      "severity": "warning",
+      "passed": true,
+      "message": "No orphaned nodes (unconnected)",
+      "details": "All nodes connected"
+    },
+    {
+      "id": "conn-005",
+      "category": "connections",
+      "severity": "warning",
+      "passed": true,
+      "message": "No direct circular connections detected",
+      "details": "No circular connections"
+    },
+    {
+      "id": "conn-006-Check Success",
+      "category": "connections",
+      "severity": "warning",
+      "passed": true,
+      "message": "IF node \"Check Success\" has both true/false paths",
+      "details": "Both paths configured"
+    },
+    {
+      "id": "conn-007-Loop Over Orders",
+      "category": "connections",
+      "severity": "warning",
+      "passed": true,
+      "message": "Loop node \"Loop Over Orders\" has connections",
+      "details": "Loop configured"
+    },
+    {
+      "id": "conn-008",
+      "category": "connections",
+      "severity": "error",
+      "passed": true,
+      "message": "Connection structure is valid",
+      "details": "Valid connection structure"
+    },
+    {
+      "id": "settings-001",
+      "category": "settings",
+      "severity": "info",
+      "passed": true,
+      "message": "Workflow has settings configured",
+      "details": "Settings defined"
+    },
+    {
+      "id": "settings-002",
+      "category": "settings",
+      "severity": "warning",
+      "passed": true,
+      "message": "Error execution data is saved",
+      "details": "saveDataErrorExecution: all"
+    },
+    {
+      "id": "settings-003",
+      "category": "settings",
+      "severity": "info",
+      "passed": true,
+      "message": "Success execution data is saved",
+      "details": "saveDataSuccessExecution: all"
+    },
+    {
+      "id": "settings-004",
+      "category": "settings",
+      "severity": "info",
+      "passed": false,
+      "message": "Timezone is configured",
+      "details": "No timezone set",
+      "recommendation": "Set timezone for accurate cron scheduling"
+    },
+    {
+      "id": "settings-005",
+      "category": "settings",
+      "severity": "info",
+      "passed": true,
+      "message": "Using latest execution order",
+      "details": "executionOrder: v1"
+    },
+    {
+      "id": "settings-006",
+      "category": "settings",
+      "severity": "info",
+      "passed": false,
+      "message": "Execution timeout configured for complex workflows",
+      "details": "No timeout set",
+      "recommendation": "Set executionTimeout for complex workflows"
+    },
+    {
+      "id": "security-001",
+      "category": "security",
+      "severity": "error",
+      "passed": true,
+      "message": "No credential data in workflow (only references)",
+      "details": "Only credential references"
+    },
+    {
+      "id": "security-002",
+      "category": "security",
+      "severity": "warning",
+      "passed": true,
+      "message": "All external HTTP requests use HTTPS",
+      "details": "All requests use HTTPS"
+    },
+    {
+      "id": "security-003",
+      "category": "security",
+      "severity": "error",
+      "passed": true,
+      "message": "All webhook paths are unique",
+      "details": "0 unique paths out of 0"
+    },
+    {
+      "id": "security-004",
+      "category": "security",
+      "severity": "warning",
+      "passed": true,
+      "message": "No potential secrets in code nodes",
+      "details": "No secrets detected in code"
+    },
+    {
+      "id": "security-005",
+      "category": "security",
+      "severity": "warning",
+      "passed": true,
+      "message": "SQL queries use proper escaping",
+      "details": "No SQL injection risks detected"
+    },
+    {
+      "id": "security-006",
+      "category": "security",
+      "severity": "warning",
+      "passed": true,
+      "message": "No command execution in code nodes",
+      "details": "No command execution detected"
+    },
+    {
+      "id": "security-007",
+      "category": "security",
+      "severity": "info",
+      "passed": true,
+      "message": "Webhook responses sanitized for XSS",
+      "details": "No HTML responses detected"
+    },
+    {
+      "id": "perf-001",
+      "category": "performance",
+      "severity": "info",
+      "passed": true,
+      "message": "Workflow has reasonable size (≤ 30 nodes)",
+      "details": "Node count: 12"
+    },
+    {
+      "id": "perf-002",
+      "category": "performance",
+      "severity": "info",
+      "passed": true,
+      "message": "HTTP requests in loops are rate-limited",
+      "details": "1 loop(s) detected",
+      "recommendation": "Ensure loops with HTTP requests have rate limiting"
+    },
+    {
+      "id": "perf-003",
+      "category": "performance",
+      "severity": "info",
+      "passed": false,
+      "message": "Code nodes are concise and efficient",
+      "details": "Large code nodes: Prepare Unleashed Data",
+      "recommendation": "Consider splitting large code nodes into multiple nodes"
+    },
+    {
+      "id": "perf-004",
+      "category": "performance",
+      "severity": "info",
+      "passed": true,
+      "message": "Data transformation strategy is appropriate",
+      "details": "2 Set nodes, 0 Function nodes"
+    },
+    {
+      "id": "perf-005",
+      "category": "performance",
+      "severity": "warning",
+      "passed": false,
+      "message": "Cron frequency is reasonable (not every minute)",
+      "details": "High frequency crons: Schedule",
+      "recommendation": "Consider reducing cron frequency to avoid overload"
+    },
+    {
+      "id": "best-001",
+      "category": "best-practices",
+      "severity": "info",
+      "passed": false,
+      "message": "Workflow has error handling",
+      "details": "No error handling",
+      "recommendation": "Add error handling nodes"
+    },
+    {
+      "id": "best-002",
+      "category": "best-practices",
+      "severity": "info",
+      "passed": 27,
+      "message": "Workflow has documentation",
+      "details": "Documentation present"
+    },
+    {
+      "id": "best-003",
+      "category": "best-practices",
+      "severity": "info",
+      "passed": true,
+      "message": "Node names follow consistent naming convention",
+      "details": "Consistent Title Case"
+    },
+    {
+      "id": "best-004",
+      "category": "best-practices",
+      "severity": "info",
+      "passed": true,
+      "message": "Workflow is inactive by default (safe deployment)",
+      "details": "Workflow is inactive"
+    },
+    {
+      "id": "best-005",
+      "category": "best-practices",
+      "severity": "info",
+      "passed": true,
+      "message": "Update operations should be idempotent",
+      "details": "0 update operation(s)"
+    },
+    {
+      "id": "best-006",
+      "category": "best-practices",
+      "severity": "info",
+      "passed": false,
+      "message": "Workflow includes logging for debugging",
+      "details": "No logging detected",
+      "recommendation": "Add console.log statements for debugging"
+    },
+    {
+      "id": "best-007",
+      "category": "best-practices",
+      "severity": "info",
+      "passed": true,
+      "message": "Workflow validates input data",
+      "details": "Validation nodes present"
+    },
+    {
+      "id": "best-008",
+      "category": "best-practices",
+      "severity": "info",
+      "passed": true,
+      "message": "Complex workflows use v1 execution order",
+      "details": "Execution order: v1"
+    },
+    {
+      "id": "cred-000",
+      "category": "credentials",
+      "severity": "warning",
+      "passed": false,
+      "message": "Could not fetch credentials from n8n",
+      "details": "n8n API Error (405 Method Not Allowed): {\"message\":\"GET method not allowed\"}",
+      "recommendation": "Check n8n connection and API access"
+    }
+  ],
+  "summary": {
+    "totalChecks": 49,
+    "passed": 40,
+    "failed": 9,
+    "warnings": 2,
+    "errors": 1,
+    "criticalIssues": [
+      "Workflow has a trigger node"
+    ]
+  }
+}
