@@ -10,6 +10,15 @@ from datetime import datetime
 from pathlib import Path
 import re
 
+# Fix Windows console encoding for emojis
+if sys.platform == 'win32':
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+    except AttributeError:
+        import codecs
+        sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
+        sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
+
 # Windows notification support
 try:
     from win10toast import ToastNotifier
