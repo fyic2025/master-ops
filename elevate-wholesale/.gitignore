@@ -1,0 +1,45 @@
+# Environment Variables (NEVER COMMIT)
+.env
+.env.*
+!.env.example
+
+# Credentials & Secrets
+*.key
+*.pem
+*.p12
+credentials.json
+secrets.json
+
+# Node modules
+node_modules/
+package-lock.json
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+
+# OS Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Supabase
+.supabase/
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
