@@ -1,0 +1,242 @@
+{
+  "name": "Daily Operations Summary Report",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * *"
+            }
+          ]
+        }
+      },
+      "name": "Daily at 9 AM",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [250, 400]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM integration_health_summary",
+        "additionalFields": {}
+      },
+      "name": "Get Integration Health",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [450, 300],
+      "credentials": {
+        "postgres": {
+          "id": "2",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM business_performance_comparison",
+        "additionalFields": {}
+      },
+      "name": "Get Business Performance",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [450, 400],
+      "credentials": {
+        "postgres": {
+          "id": "2",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM workflow_performance_summary LIMIT 10",
+        "additionalFields": {}
+      },
+      "name": "Get Workflow Stats",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [450, 500],
+      "credentials": {
+        "postgres": {
+          "id": "2",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT COUNT(*) as total_errors, COUNT(DISTINCT source) as affected_services FROM integration_logs WHERE level = 'error' AND created_at > NOW() - INTERVAL '24 hours'",
+        "additionalFields": {}
+      },
+      "name": "Get Error Summary",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [450, 200],
+      "credentials": {
+        "postgres": {
+          "id": "2",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "const healthData = $input.item(0).json;\nconst businessData = $input.item(1).json;\nconst workflowData = $input.item(2).json;\nconst errorData = $input.item(3).json;\n\nconst report = {\n  date: new Date().toLocaleDateString(),\n  health: healthData,\n  business: businessData,\n  workflows: workflowData,\n  errors: errorData\n};\n\nreturn { json: report };"
+      },
+      "name": "Compile Report",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [650, 400]
+    },
+    {
+      "parameters": {
+        "channel": "#daily-reports",
+        "text": ":bar_chart: *Master-Ops Daily Summary*\n*Date:* {{$json[\"date\"]}}\n\n*System Health:*\n{{$json[\"health\"].map(h => `• ${h.source}: ${h.error_rate_pct}% error rate`).join('\\n')}}\n\n*Business Performance:*\n{{$json[\"business\"].map(b => `• ${b.business_name}: ${b.success_rate_pct}% success rate`).join('\\n')}}\n\n*Top Workflows:*\n{{$json[\"workflows\"].slice(0,5).map(w => `• ${w.workflow_name}: ${w.success_rate_pct}% success`).join('\\n')}}\n\n*Errors (24h):*\nTotal: {{$json[\"errors\"][0].total_errors}}\nAffected Services: {{$json[\"errors\"][0].affected_services}}\n\n_View details: `ops stats`_",
+        "otherOptions": {
+          "mrkdwn": true
+        },
+        "attachments": []
+      },
+      "name": "Send Slack Report",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [850, 300],
+      "credentials": {
+        "slackApi": {
+          "id": "1",
+          "name": "Slack Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "reports@master-ops.com",
+        "toEmail": "team@master-ops.com",
+        "subject": "Master-Ops Daily Summary - {{$json[\"date\"]}}",
+        "text": "See attached daily summary report",
+        "options": {
+          "attachments": "report.json"
+        }
+      },
+      "name": "Send Email Report",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [850, 500],
+      "credentials": {
+        "smtp": {
+          "id": "3",
+          "name": "SMTP Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "daily_reports",
+        "columns": "report_date,report_data",
+        "additionalFields": {}
+      },
+      "name": "Archive Report",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1050, 400],
+      "credentials": {
+        "postgres": {
+          "id": "2",
+          "name": "Supabase"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Daily at 9 AM": {
+      "main": [[
+        {
+          "node": "Get Error Summary",
+          "type": "main",
+          "index": 0
+        },
+        {
+          "node": "Get Integration Health",
+          "type": "main",
+          "index": 0
+        },
+        {
+          "node": "Get Business Performance",
+          "type": "main",
+          "index": 0
+        },
+        {
+          "node": "Get Workflow Stats",
+          "type": "main",
+          "index": 0
+        }
+      ]]
+    },
+    "Get Error Summary": {
+      "main": [[{
+        "node": "Compile Report",
+        "type": "main",
+        "index": 0
+      }]]
+    },
+    "Get Integration Health": {
+      "main": [[{
+        "node": "Compile Report",
+        "type": "main",
+        "index": 0
+      }]]
+    },
+    "Get Business Performance": {
+      "main": [[{
+        "node": "Compile Report",
+        "type": "main",
+        "index": 0
+      }]]
+    },
+    "Get Workflow Stats": {
+      "main": [[{
+        "node": "Compile Report",
+        "type": "main",
+        "index": 0
+      }]]
+    },
+    "Compile Report": {
+      "main": [[
+        {
+          "node": "Send Slack Report",
+          "type": "main",
+          "index": 0
+        },
+        {
+          "node": "Send Email Report",
+          "type": "main",
+          "index": 0
+        }
+      ]]
+    },
+    "Send Slack Report": {
+      "main": [[{
+        "node": "Archive Report",
+        "type": "main",
+        "index": 0
+      }]]
+    },
+    "Send Email Report": {
+      "main": [[{
+        "node": "Archive Report",
+        "type": "main",
+        "index": 0
+      }]]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "1"
+}

@@ -1,0 +1,168 @@
+{
+  "name": "Supabase Weekly Cleanup (Sunday 2 AM)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "weeksInterval": 1,
+              "triggerAtHour": 2,
+              "triggerAtMinute": 0,
+              "triggerAtDayOfWeek": 0
+            }
+          ]
+        }
+      },
+      "name": "Every Sunday 2 AM",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "command": "cd /root/master-ops && npx tsx .claude/skills/supabase-expert/scripts/cleanup-maintenance.ts"
+      },
+      "name": "Run Cleanup",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "filePath": "/root/master-ops/logs/supabase-cleanup.json"
+      },
+      "name": "Read Results",
+      "type": "n8n-nodes-base.readBinaryFile",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "mode": "jsonToBinary",
+        "options": {}
+      },
+      "name": "Parse JSON",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "channel": "#operations",
+        "text": "=🧹 Supabase Weekly Cleanup Report\n\n*Timestamp:* {{ $json.timestamp }}\n\n*Logs Cleaned:*\n• Integration logs: {{ $json.logs_cleaned.integration_logs }} records\n• Workflow logs: {{ $json.logs_cleaned.workflow_logs }} records\n• API metrics: {{ $json.logs_cleaned.api_metrics }} records\n\n*Orphaned Records:*\n• Task logs without tasks: {{ $json.orphaned_records.task_logs_without_tasks }}\n• Stale workflow logs (>6mo): {{ $json.orphaned_records.workflow_logs_stale }}\n\n*Stale Tasks:* {{ $json.stale_tasks.length }}\n{{ $json.stale_tasks.map(t => '• ' + t.title + ' (' + t.age_days + ' days old)').join('\\n') }}\n\n*Maintenance Performed:*\n{{ $json.maintenance_performed.map(m => '• ' + m).join('\\n') }}\n\n✅ Cleanup complete!",
+        "otherOptions": {}
+      },
+      "name": "Send Summary to Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.1,
+      "position": [1050, 300],
+      "credentials": {
+        "slackApi": {
+          "id": "1",
+          "name": "Slack"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "schema": "public",
+        "table": "workflow_execution_logs",
+        "columns": "workflow_id,workflow_name,execution_id,status,mode,started_at,finished_at,duration_ms,data_json",
+        "additionalFields": {},
+        "options": {}
+      },
+      "name": "Log Execution",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [1250, 300],
+      "credentials": {
+        "postgres": {
+          "id": "2",
+          "name": "Supabase"
+        }
+      },
+      "executeOnce": false,
+      "alwaysOutputData": false,
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "connections": {
+    "Every Sunday 2 AM": {
+      "main": [
+        [
+          {
+            "node": "Run Cleanup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Cleanup": {
+      "main": [
+        [
+          {
+            "node": "Read Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Results": {
+      "main": [
+        [
+          {
+            "node": "Parse JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse JSON": {
+      "main": [
+        [
+          {
+            "node": "Send Summary to Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Summary to Slack": {
+      "main": [
+        [
+          {
+            "node": "Log Execution",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "supabase",
+      "id": "supabase-monitoring"
+    },
+    {
+      "name": "maintenance",
+      "id": "database-maintenance"
+    }
+  ],
+  "meta": {
+    "instanceId": "master-ops-automation"
+  },
+  "pinData": {},
+  "versionId": "1.0.0"
+}

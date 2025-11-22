@@ -1,0 +1,538 @@
+{
+  "name": "Unleashed → HubSpot Order Sync (Deals)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Schedule (Every 6 Hours)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://api.unleashedsoftware.com/SalesOrders/1?pageSize=200",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "api-auth-id",
+              "value": "={{ $env.UNLEASHED_TEELIXIR_API_ID }}"
+            },
+            {
+              "name": "api-auth-signature",
+              "value": "={{ $env.UNLEASHED_TEELIXIR_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fetch-unleashed-orders",
+      "name": "Fetch Unleashed Sales Orders",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Split response into individual order items\nconst response = $input.item.json;\nconst orders = response.Items || [];\n\nreturn orders.map(order => ({ json: order }));"
+      },
+      "id": "split-orders",
+      "name": "Split into Items",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "orderGuid",
+              "value": "={{ $json.Guid }}"
+            },
+            {
+              "name": "orderNumber",
+              "value": "={{ $json.OrderNumber }}"
+            },
+            {
+              "name": "customerCode",
+              "value": "={{ $json.Customer?.CustomerCode || '' }}"
+            },
+            {
+              "name": "customerName",
+              "value": "={{ $json.Customer?.CustomerName || '' }}"
+            },
+            {
+              "name": "orderDate",
+              "value": "={{ $json.OrderDate }}"
+            },
+            {
+              "name": "orderStatus",
+              "value": "={{ $json.OrderStatus }}"
+            },
+            {
+              "name": "totalAmount",
+              "value": "={{ $json.SubTotal || 0 }}"
+            },
+            {
+              "name": "taxAmount",
+              "value": "={{ $json.Tax || 0 }}"
+            },
+            {
+              "name": "orderTotal",
+              "value": "={{ ($json.SubTotal || 0) + ($json.Tax || 0) }}"
+            },
+            {
+              "name": "currency",
+              "value": "={{ $json.Currency?.CurrencyCode || 'AUD' }}"
+            },
+            {
+              "name": "products",
+              "value": "={{ JSON.stringify($json.SalesOrderLines || []) }}"
+            }
+          ]
+        }
+      },
+      "id": "parse-order-data",
+      "name": "Parse Order Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.customerCode }}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "id": "has-customer",
+      "name": "Has Customer?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=SELECT hubspot_id FROM hubspot_sync_log\nWHERE external_id = '{{ $json.customerCode }}'\n  AND external_source = 'unleashed'\n  AND object_type = 'contact'\n  AND sync_status = 'success'\nORDER BY last_synced_at DESC\nLIMIT 1",
+        "options": {}
+      },
+      "id": "lookup-hubspot-contact",
+      "name": "Lookup HubSpot Contact ID",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1250, 200],
+      "credentials": {
+        "postgres": {
+          "id": "2",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.length }}",
+              "operation": "equal",
+              "value2": 0
+            }
+          ]
+        }
+      },
+      "id": "contact-not-found",
+      "name": "Contact Not Found?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1450, 200]
+    },
+    {
+      "parameters": {
+        "url": "https://api.hubapi.com/crm/v3/objects/deals/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"filterGroups\": [\n    {\n      \"filters\": [\n        {\n          \"propertyName\": \"unleashed_order_id\",\n          \"operator\": \"EQ\",\n          \"value\": \"{{ $node['Parse Order Data'].json.orderGuid }}\"\n        }\n      ]\n    }\n  ],\n  \"properties\": [\"dealname\", \"unleashed_order_id\", \"deal_source\"],\n  \"limit\": 1\n}",
+        "options": {}
+      },
+      "id": "check-existing-deal",
+      "name": "Check Existing Deal",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1650, 100],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "HubSpot API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.total }}",
+              "operation": "equal",
+              "value2": 0
+            }
+          ]
+        }
+      },
+      "id": "deal-not-found",
+      "name": "Deal Not Found?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1850, 100]
+    },
+    {
+      "parameters": {
+        "url": "https://api.hubapi.com/crm/v3/objects/deals",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"properties\": {\n    \"dealname\": \"Unleashed Order #{{ $node['Parse Order Data'].json.orderNumber }} - {{ $node['Parse Order Data'].json.customerName }}\",\n    \"dealstage\": \"qualifiedtobuy\",\n    \"amount\": {{ $node['Parse Order Data'].json.orderTotal }},\n    \"closedate\": \"{{ $node['Parse Order Data'].json.orderDate }}\",\n    \"pipeline\": \"default\",\n    \"deal_source\": \"unleashed_order\",\n    \"source_business\": \"teelixir\",\n    \"unleashed_order_id\": \"{{ $node['Parse Order Data'].json.orderGuid }}\",\n    \"unleashed_order_number\": \"{{ $node['Parse Order Data'].json.orderNumber }}\",\n    \"order_total\": {{ $node['Parse Order Data'].json.orderTotal }},\n    \"fulfillment_status\": \"{{ $node['Parse Order Data'].json.orderStatus }}\",\n    \"payment_status\": \"paid\",\n    \"products_ordered\": {{ $node['Parse Order Data'].json.products }}\n  }\n}",
+        "options": {}
+      },
+      "id": "create-deal",
+      "name": "Create Deal in HubSpot",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [2050, 50],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "HubSpot API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.hubapi.com/crm/v3/objects/deals/{{ $node['Check Existing Deal'].json.results[0].id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"properties\": {\n    \"amount\": {{ $node['Parse Order Data'].json.orderTotal }},\n    \"order_total\": {{ $node['Parse Order Data'].json.orderTotal }},\n    \"fulfillment_status\": \"{{ $node['Parse Order Data'].json.orderStatus }}\",\n    \"products_ordered\": {{ $node['Parse Order Data'].json.products }}\n  }\n}",
+        "options": {
+          "method": "PATCH"
+        }
+      },
+      "id": "update-deal",
+      "name": "Update Existing Deal",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [2050, 150],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "HubSpot API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.hubapi.com/crm/v3/objects/deals/{{ $json.id }}/associations/contacts/{{ $node['Lookup HubSpot Contact ID'].json[0].hubspot_id }}/1",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "method": "PUT"
+        }
+      },
+      "id": "associate-deal-contact",
+      "name": "Associate Deal → Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [2250, 100],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "HubSpot API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=SELECT log_hubspot_sync(\n  'deal',\n  '{{ $node[\"Parse Order Data\"].json.orderGuid }}',\n  'unleashed',\n  '{{ $json.id }}',\n  'to_hubspot',\n  '{{ $node[\"Deal Not Found?\"].json.total === 0 ? \"create\" : \"update\" }}',\n  '{{ JSON.stringify($json.properties) }}'::jsonb\n) as sync_id",
+        "options": {}
+      },
+      "id": "log-sync",
+      "name": "Log Sync to Supabase",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [2450, 100],
+      "credentials": {
+        "postgres": {
+          "id": "2",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=INSERT INTO integration_logs (\n  source,\n  service,\n  operation,\n  level,\n  status,\n  message,\n  details_json\n) VALUES (\n  'hubspot',\n  'unleashed_sync',\n  'sync_order',\n  'info',\n  'success',\n  'Synced Unleashed order to HubSpot deal',\n  '{{ JSON.stringify({\n    unleashed_order_id: $node[\"Parse Order Data\"].json.orderGuid,\n    order_number: $node[\"Parse Order Data\"].json.orderNumber,\n    hubspot_deal_id: $json.id,\n    customer_code: $node[\"Parse Order Data\"].json.customerCode,\n    order_total: $node[\"Parse Order Data\"].json.orderTotal\n  }) }}'::jsonb\n)",
+        "options": {}
+      },
+      "id": "log-integration",
+      "name": "Log Integration",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [2650, 100],
+      "credentials": {
+        "postgres": {
+          "id": "2",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=INSERT INTO integration_logs (\n  source,\n  service,\n  operation,\n  level,\n  status,\n  message,\n  details_json\n) VALUES (\n  'hubspot',\n  'unleashed_sync',\n  'skip_order_no_contact',\n  'warning',\n  'skipped',\n  'Skipped order - contact not found in HubSpot',\n  '{{ JSON.stringify({\n    unleashed_order_id: $node[\"Parse Order Data\"].json.orderGuid,\n    order_number: $node[\"Parse Order Data\"].json.orderNumber,\n    customer_code: $node[\"Parse Order Data\"].json.customerCode,\n    reason: \"Contact not synced yet\"\n  }) }}'::jsonb\n)",
+        "options": {}
+      },
+      "id": "log-skip-no-contact",
+      "name": "Log Skip (No Contact)",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1650, 300],
+      "credentials": {
+        "postgres": {
+          "id": "2",
+          "name": "Supabase"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule (Every 6 Hours)": {
+      "main": [
+        [
+          {
+            "node": "Fetch Unleashed Sales Orders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Unleashed Sales Orders": {
+      "main": [
+        [
+          {
+            "node": "Split into Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split into Items": {
+      "main": [
+        [
+          {
+            "node": "Parse Order Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Order Data": {
+      "main": [
+        [
+          {
+            "node": "Has Customer?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Customer?": {
+      "main": [
+        [
+          {
+            "node": "Lookup HubSpot Contact ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lookup HubSpot Contact ID": {
+      "main": [
+        [
+          {
+            "node": "Contact Not Found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Contact Not Found?": {
+      "main": [
+        [
+          {
+            "node": "Log Skip (No Contact)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Check Existing Deal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Existing Deal": {
+      "main": [
+        [
+          {
+            "node": "Deal Not Found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deal Not Found?": {
+      "main": [
+        [
+          {
+            "node": "Create Deal in HubSpot",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Existing Deal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Deal in HubSpot": {
+      "main": [
+        [
+          {
+            "node": "Associate Deal → Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Existing Deal": {
+      "main": [
+        [
+          {
+            "node": "Associate Deal → Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Associate Deal → Contact": {
+      "main": [
+        [
+          {
+            "node": "Log Sync to Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Sync to Supabase": {
+      "main": [
+        [
+          {
+            "node": "Log Integration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1",
+  "id": "unleashed-order-sync",
+  "meta": {
+    "instanceId": "master-ops"
+  },
+  "tags": []
+}

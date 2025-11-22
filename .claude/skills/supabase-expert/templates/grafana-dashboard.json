@@ -1,0 +1,281 @@
+{
+  "dashboard": {
+    "title": "Supabase Master-Ops Monitoring",
+    "tags": ["supabase", "master-ops", "monitoring"],
+    "timezone": "browser",
+    "editable": true,
+    "graphTooltip": 1,
+    "time": {
+      "from": "now-24h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Overall Health Status",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
+        "targets": [
+          {
+            "format": "table",
+            "rawSql": "SELECT \n  CASE \n    WHEN error_rate < 5 THEN 'Healthy'\n    WHEN error_rate < 15 THEN 'Warning'\n    ELSE 'Critical'\n  END as status,\n  error_rate\nFROM (\n  SELECT \n    (COUNT(*) FILTER (WHERE level = 'error')::float / NULLIF(COUNT(*), 0) * 100) as error_rate\n  FROM integration_logs\n  WHERE created_at > NOW() - INTERVAL '24 hours'\n) stats",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "graphMode": "none",
+          "colorMode": "value",
+          "textMode": "value_and_name"
+        }
+      },
+      {
+        "id": 2,
+        "title": "Total Operations (24h)",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0},
+        "targets": [
+          {
+            "format": "table",
+            "rawSql": "SELECT COUNT(*) as total_operations\nFROM integration_logs\nWHERE created_at > NOW() - INTERVAL '24 hours'",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Success Rate (24h)",
+        "type": "gauge",
+        "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0},
+        "targets": [
+          {
+            "format": "table",
+            "rawSql": "SELECT \n  (COUNT(*) FILTER (WHERE status = 'success')::float / NULLIF(COUNT(*), 0) * 100) as success_rate\nFROM integration_logs\nWHERE created_at > NOW() - INTERVAL '24 hours'",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "steps": [
+              {"value": 0, "color": "red"},
+              {"value": 75, "color": "yellow"},
+              {"value": 90, "color": "green"}
+            ]
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Active Businesses",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 18, "y": 0},
+        "targets": [
+          {
+            "format": "table",
+            "rawSql": "SELECT COUNT(*) as active_businesses\nFROM businesses\nWHERE status = 'active'",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Integration Operations Over Time",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+        "targets": [
+          {
+            "format": "time_series",
+            "rawSql": "SELECT \n  time_bucket('1 hour', created_at) AS time,\n  source,\n  COUNT(*) as operations\nFROM integration_logs\nWHERE created_at > NOW() - INTERVAL '24 hours'\nGROUP BY time_bucket('1 hour', created_at), source\nORDER BY time",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Operations"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Error Rate by Source",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4},
+        "targets": [
+          {
+            "format": "time_series",
+            "rawSql": "SELECT \n  time_bucket('1 hour', created_at) AS time,\n  source,\n  (COUNT(*) FILTER (WHERE level = 'error')::float / NULLIF(COUNT(*), 0) * 100) as error_rate\nFROM integration_logs\nWHERE created_at > NOW() - INTERVAL '24 hours'\nGROUP BY time_bucket('1 hour', created_at), source\nORDER BY time",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "percent", "label": "Error Rate"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Integration Health Summary",
+        "type": "table",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+        "targets": [
+          {
+            "format": "table",
+            "rawSql": "SELECT * FROM integration_health_summary ORDER BY error_rate DESC",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Recent Errors",
+        "type": "table",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12},
+        "targets": [
+          {
+            "format": "table",
+            "rawSql": "SELECT \n  source,\n  message,\n  created_at\nFROM integration_logs\nWHERE level = 'error'\n  AND created_at > NOW() - INTERVAL '1 hour'\nORDER BY created_at DESC\nLIMIT 20",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Workflow Success Rate",
+        "type": "piechart",
+        "gridPos": {"h": 8, "w": 6, "x": 0, "y": 20},
+        "targets": [
+          {
+            "format": "table",
+            "rawSql": "SELECT \n  status,\n  COUNT(*) as count\nFROM workflow_execution_logs\nWHERE started_at > NOW() - INTERVAL '24 hours'\nGROUP BY status",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Top Workflows by Executions",
+        "type": "bargauge",
+        "gridPos": {"h": 8, "w": 6, "x": 6, "y": 20},
+        "targets": [
+          {
+            "format": "table",
+            "rawSql": "SELECT \n  workflow_name,\n  COUNT(*) as executions\nFROM workflow_execution_logs\nWHERE started_at > NOW() - INTERVAL '24 hours'\nGROUP BY workflow_name\nORDER BY executions DESC\nLIMIT 10",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Business Activity",
+        "type": "table",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 20},
+        "targets": [
+          {
+            "format": "table",
+            "rawSql": "SELECT * FROM business_activity ORDER BY total_operations DESC",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "API Response Time (P95)",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 28},
+        "targets": [
+          {
+            "format": "time_series",
+            "rawSql": "SELECT \n  time_bucket('5 minutes', created_at) AS time,\n  service,\n  percentile_cont(0.95) WITHIN GROUP (ORDER BY duration_ms) as p95_duration\nFROM api_metrics\nWHERE created_at > NOW() - INTERVAL '24 hours'\nGROUP BY time_bucket('5 minutes', created_at), service\nORDER BY time",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "ms", "label": "Response Time (P95)"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 13,
+        "title": "Task Status Distribution",
+        "type": "piechart",
+        "gridPos": {"h": 8, "w": 6, "x": 12, "y": 28},
+        "targets": [
+          {
+            "format": "table",
+            "rawSql": "SELECT \n  status,\n  COUNT(*) as count\nFROM tasks\nGROUP BY status",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 14,
+        "title": "Database Growth (Rows per Day)",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 18, "y": 28},
+        "targets": [
+          {
+            "format": "table",
+            "rawSql": "SELECT COUNT(*) as rows_today\nFROM integration_logs\nWHERE created_at::date = CURRENT_DATE",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 15,
+        "title": "Stale Integrations Alert",
+        "type": "table",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 36},
+        "targets": [
+          {
+            "format": "table",
+            "rawSql": "SELECT * FROM stale_integrations",
+            "refId": "A"
+          }
+        ],
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": {"params": [0], "type": "gt"},
+              "query": {"params": ["A", "5m", "now"]},
+              "type": "query"
+            }
+          ],
+          "name": "Stale Integrations Detected"
+        }
+      },
+      {
+        "id": 16,
+        "title": "Businesses Needing Attention",
+        "type": "table",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 36},
+        "targets": [
+          {
+            "format": "table",
+            "rawSql": "SELECT * FROM businesses_needing_attention",
+            "refId": "A"
+          }
+        ]
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "business",
+          "type": "query",
+          "query": "SELECT slug FROM businesses WHERE status = 'active' ORDER BY slug",
+          "multi": true,
+          "includeAll": true
+        },
+        {
+          "name": "source",
+          "type": "query",
+          "query": "SELECT DISTINCT source FROM integration_logs ORDER BY source",
+          "multi": true,
+          "includeAll": true
+        }
+      ]
+    },
+    "refresh": "30s"
+  },
+  "overwrite": true
+}

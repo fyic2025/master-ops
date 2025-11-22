@@ -1,0 +1,147 @@
+{
+  "ci": {
+    "collect": {
+      "numberOfRuns": 5,
+      "startServerCommand": null,
+      "url": [],
+      "settings": {
+        "preset": "desktop",
+        "throttling": {
+          "rttMs": 40,
+          "throughputKbps": 10240,
+          "cpuSlowdownMultiplier": 1
+        },
+        "screenEmulation": {
+          "mobile": false,
+          "width": 1350,
+          "height": 940,
+          "deviceScaleFactor": 1,
+          "disabled": false
+        },
+        "emulatedUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Chrome-Lighthouse"
+      }
+    },
+    "assert": {
+      "preset": "lighthouse:recommended",
+      "assertions": {
+        "categories:performance": ["error", {"minScore": 0.95}],
+        "categories:accessibility": ["error", {"minScore": 0.95}],
+        "categories:best-practices": ["error", {"minScore": 0.95}],
+        "categories:seo": ["error", {"minScore": 0.95}],
+
+        "first-contentful-paint": ["error", {"maxNumericValue": 1800}],
+        "largest-contentful-paint": ["error", {"maxNumericValue": 2500}],
+        "cumulative-layout-shift": ["error", {"maxNumericValue": 0.1}],
+        "total-blocking-time": ["error", {"maxNumericValue": 200}],
+        "speed-index": ["error", {"maxNumericValue": 3400}],
+
+        "interactive": ["error", {"maxNumericValue": 3500}],
+        "max-potential-fid": ["error", {"maxNumericValue": 100}],
+
+        "uses-long-cache-ttl": "warn",
+        "uses-optimized-images": "error",
+        "uses-webp-images": "error",
+        "uses-text-compression": "error",
+        "uses-responsive-images": "error",
+        "efficient-animated-content": "warn",
+        "modern-image-formats": "error",
+
+        "render-blocking-resources": "error",
+        "unused-css-rules": "warn",
+        "unused-javascript": "warn",
+        "unminified-css": "error",
+        "unminified-javascript": "error",
+
+        "critical-request-chains": "warn",
+        "uses-rel-preconnect": "warn",
+        "uses-rel-preload": "warn",
+        "font-display": "error",
+
+        "dom-size": ["warn", {"maxNumericValue": 1500}],
+        "bootup-time": ["warn", {"maxNumericValue": 3500}],
+        "mainthread-work-breakdown": ["warn", {"maxNumericValue": 4000}],
+
+        "redirects": "error",
+        "uses-http2": "error",
+        "uses-passive-listeners": "error",
+        "no-document-write": "error",
+
+        "aria-allowed-attr": "error",
+        "aria-required-attr": "error",
+        "aria-required-children": "error",
+        "aria-required-parent": "error",
+        "aria-roles": "error",
+        "aria-valid-attr-value": "error",
+        "aria-valid-attr": "error",
+        "button-name": "error",
+        "bypass": "error",
+        "color-contrast": "error",
+        "document-title": "error",
+        "duplicate-id-aria": "error",
+        "heading-order": "error",
+        "html-has-lang": "error",
+        "html-lang-valid": "error",
+        "image-alt": "error",
+        "input-image-alt": "error",
+        "label": "error",
+        "link-name": "error",
+        "list": "error",
+        "listitem": "error",
+        "meta-viewport": "error",
+        "tabindex": "error",
+
+        "canonical": "error",
+        "hreflang": "warn",
+        "is-crawlable": "error",
+        "link-text": "error",
+        "meta-description": "error",
+        "robots-txt": "warn",
+        "structured-data": "warn"
+      }
+    },
+    "upload": {
+      "target": "temporary-public-storage"
+    },
+    "server": {}
+  },
+  "mobile": {
+    "collect": {
+      "numberOfRuns": 5,
+      "settings": {
+        "preset": "mobile",
+        "throttling": {
+          "rttMs": 150,
+          "throughputKbps": 1638,
+          "requestLatencyMs": 562.5,
+          "downloadThroughputKbps": 1474.5,
+          "uploadThroughputKbps": 675,
+          "cpuSlowdownMultiplier": 4
+        },
+        "screenEmulation": {
+          "mobile": true,
+          "width": 375,
+          "height": 667,
+          "deviceScaleFactor": 2,
+          "disabled": false
+        },
+        "emulatedUserAgent": "Mozilla/5.0 (Linux; Android 11; moto g power (2022)) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36 Chrome-Lighthouse"
+      }
+    },
+    "assert": {
+      "preset": "lighthouse:recommended",
+      "assertions": {
+        "categories:performance": ["error", {"minScore": 0.95}],
+        "categories:accessibility": ["error", {"minScore": 0.95}],
+        "categories:best-practices": ["error", {"minScore": 0.95}],
+        "categories:seo": ["error", {"minScore": 0.95}],
+
+        "first-contentful-paint": ["error", {"maxNumericValue": 1800}],
+        "largest-contentful-paint": ["error", {"maxNumericValue": 2500}],
+        "cumulative-layout-shift": ["error", {"maxNumericValue": 0.1}],
+        "total-blocking-time": ["error", {"maxNumericValue": 600}],
+        "speed-index": ["error", {"maxNumericValue": 3400}],
+        "interactive": ["error", {"maxNumericValue": 3800}]
+      }
+    }
+  }
+}

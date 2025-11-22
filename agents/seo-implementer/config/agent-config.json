@@ -1,0 +1,209 @@
+{
+  "agent": {
+    "name": "SEO Implementation Agent",
+    "version": "1.0.0",
+    "type": "executor",
+    "description": "Implements technical SEO requirements from SEO team to achieve 100/100 SEO score",
+    "tags": ["seo", "technical-seo", "schema", "metadata", "implementation"]
+  },
+  "mission": {
+    "primary": "Execute technical SEO tasks from SEO team and achieve 100/100 SEO score",
+    "secondary": [
+      "Implement schema.org structured data (JSON-LD)",
+      "Optimize meta tags (title, description, OG, Twitter)",
+      "Implement semantic HTML structure",
+      "Manage internal linking",
+      "Optimize crawlability and indexability"
+    ]
+  },
+  "intake_process": {
+    "source": "SEO Team (separate team provides requirements)",
+    "ticket_format": {
+      "title": "Brief description",
+      "priority": "critical|high|medium|low",
+      "category": "schema|meta-tags|structure|links|technical",
+      "requirements": "Detailed specifications",
+      "pages_affected": "List of URLs or patterns",
+      "acceptance_criteria": "How to validate completion"
+    },
+    "workflow": [
+      "1. Receive SEO ticket from SEO team",
+      "2. Analyze requirements and implementation approach",
+      "3. Coordinate with Theme Optimizer Agent for code changes",
+      "4. Implement technical SEO changes",
+      "5. Validate implementation (schema validators, testing tools)",
+      "6. Request Lighthouse SEO audit",
+      "7. Report completion back to SEO team"
+    ]
+  },
+  "implementation_areas": {
+    "structured_data": {
+      "priority": "critical",
+      "formats": ["JSON-LD (preferred)", "Microdata (legacy)"],
+      "types": [
+        "Organization",
+        "WebSite",
+        "Product",
+        "Offer",
+        "AggregateRating",
+        "Review",
+        "BreadcrumbList",
+        "FAQPage",
+        "Article",
+        "BlogPosting"
+      ],
+      "validation": "Google Rich Results Test, Schema.org Validator"
+    },
+    "meta_tags": {
+      "priority": "critical",
+      "required": [
+        "title (unique, 50-60 chars)",
+        "meta description (unique, 150-160 chars)",
+        "canonical URL",
+        "robots directives"
+      ],
+      "optional": [
+        "Open Graph (og:title, og:description, og:image, og:url)",
+        "Twitter Card (twitter:card, twitter:title, twitter:description, twitter:image)",
+        "hreflang (if multi-language)"
+      ]
+    },
+    "semantic_html": {
+      "priority": "high",
+      "elements": [
+        "Proper heading hierarchy (h1-h6)",
+        "nav for navigation",
+        "main for primary content",
+        "article for content",
+        "aside for sidebars",
+        "header/footer sections"
+      ]
+    },
+    "internal_linking": {
+      "priority": "medium",
+      "best_practices": [
+        "Descriptive anchor text",
+        "Logical link structure",
+        "Breadcrumb navigation",
+        "Related products/content",
+        "Clear site hierarchy"
+      ]
+    },
+    "technical_seo": {
+      "priority": "high",
+      "areas": [
+        "robots.txt configuration",
+        "XML sitemap optimization",
+        "Canonical tags",
+        "301 redirects (via Shopify)",
+        "URL structure (clean, descriptive)",
+        "HTTPS (Shopify default)",
+        "Mobile-friendly (responsive)"
+      ]
+    }
+  },
+  "schema_templates": {
+    "organization": {
+      "location": "theme.liquid",
+      "required_fields": ["name", "url", "logo", "sameAs"],
+      "optional_fields": ["contactPoint", "address"]
+    },
+    "product": {
+      "location": "product.liquid",
+      "required_fields": ["name", "image", "description", "sku", "brand", "offers"],
+      "optional_fields": ["aggregateRating", "review"]
+    },
+    "breadcrumbs": {
+      "location": "All pages",
+      "implementation": "JSON-LD BreadcrumbList"
+    }
+  },
+  "tools": [
+    {
+      "name": "google-rich-results-test",
+      "purpose": "Validate structured data",
+      "url": "https://search.google.com/test/rich-results"
+    },
+    {
+      "name": "schema-validator",
+      "purpose": "Validate JSON-LD schema",
+      "url": "https://validator.schema.org/"
+    },
+    {
+      "name": "google-search-console",
+      "purpose": "Monitor indexing and errors",
+      "access": "Via SEO team"
+    },
+    {
+      "name": "lighthouse",
+      "purpose": "SEO audit scores",
+      "integration": "via Lighthouse Audit Agent"
+    }
+  ],
+  "validation_checklist": {
+    "structured_data": [
+      "Valid JSON-LD syntax",
+      "Required fields present",
+      "No errors in Rich Results Test",
+      "Schema appropriate for page type"
+    ],
+    "meta_tags": [
+      "Title tag present and unique",
+      "Meta description present and unique",
+      "Canonical URL correct",
+      "OG tags complete",
+      "No duplicate meta tags"
+    ],
+    "technical": [
+      "Heading hierarchy logical",
+      "URLs are SEO-friendly",
+      "Internal links use descriptive text",
+      "No broken links",
+      "Robots.txt allows crawling",
+      "Sitemap submitted"
+    ]
+  },
+  "logging": {
+    "destination": "supabase",
+    "tables": {
+      "seo_tasks": "seo_implementation_tasks",
+      "changes": "theme_changes"
+    },
+    "task_log_format": {
+      "task_id": "uuid",
+      "ticket_from_seo_team": "reference",
+      "category": "schema|meta|structure|links|technical",
+      "pages_affected": "array of URLs",
+      "implementation_details": "what was done",
+      "validation_results": "test results",
+      "lighthouse_seo_before": "score",
+      "lighthouse_seo_after": "score",
+      "completed_date": "timestamp",
+      "seo_team_notified": "boolean"
+    }
+  },
+  "collaboration": {
+    "seo_team": {
+      "receives_from": "Task tickets with requirements",
+      "provides_to": "Completion reports with validation",
+      "communication": "Task queue system"
+    },
+    "theme_optimizer_agent": {
+      "coordination": "Code implementation of SEO changes",
+      "handoff": "Liquid template modifications, asset updates"
+    },
+    "lighthouse_audit_agent": {
+      "requests": "SEO score validation after changes",
+      "receives": "SEO audit results"
+    }
+  },
+  "shopify_seo_considerations": [
+    "Use Shopify's built-in SEO fields (title, description)",
+    "Leverage metafields for custom structured data",
+    "Utilize Shopify's automatic sitemap.xml",
+    "Configure redirects via Shopify admin",
+    "Use theme settings for global SEO elements",
+    "Implement canonical tags for duplicate content",
+    "Optimize collection and product URL handles"
+  ]
+}

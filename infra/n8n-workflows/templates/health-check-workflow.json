@@ -1,0 +1,145 @@
+{
+  "name": "System Health Check",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "*/5 * * * *"
+            }
+          ]
+        }
+      },
+      "name": "Every 5 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "command": "cd /root/master-ops && npx tsx tools/health-checks/integration-health-check.ts"
+      },
+      "name": "Run Health Check",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{$json[\"exitCode\"]}}",
+              "operation": "equal",
+              "value2": 0
+            }
+          ]
+        }
+      },
+      "name": "Check Result",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "status",
+              "value": "healthy"
+            }
+          ]
+        }
+      },
+      "name": "All Healthy",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [850, 200]
+    },
+    {
+      "parameters": {
+        "channel": "#alerts",
+        "text": ":warning: System Health Check Failed!\n\nOne or more integrations are unhealthy. Check logs for details.\n\nRun: `ops health-check --verbose`",
+        "attachments": []
+      },
+      "name": "Send Slack Alert",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [850, 400],
+      "credentials": {
+        "slackApi": {
+          "id": "1",
+          "name": "Slack Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "integration_logs",
+        "columns": "source,level,status,message,details_json",
+        "additionalFields": {}
+      },
+      "name": "Log to Supabase",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1050, 300],
+      "credentials": {
+        "postgres": {
+          "id": "2",
+          "name": "Supabase"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Every 5 Minutes": {
+      "main": [[{
+        "node": "Run Health Check",
+        "type": "main",
+        "index": 0
+      }]]
+    },
+    "Run Health Check": {
+      "main": [[{
+        "node": "Check Result",
+        "type": "main",
+        "index": 0
+      }]]
+    },
+    "Check Result": {
+      "main": [
+        [{
+          "node": "All Healthy",
+          "type": "main",
+          "index": 0
+        }],
+        [{
+          "node": "Send Slack Alert",
+          "type": "main",
+          "index": 0
+        }]
+      ]
+    },
+    "All Healthy": {
+      "main": [[{
+        "node": "Log to Supabase",
+        "type": "main",
+        "index": 0
+      }]]
+    },
+    "Send Slack Alert": {
+      "main": [[{
+        "node": "Log to Supabase",
+        "type": "main",
+        "index": 0
+      }]]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "1"
+}

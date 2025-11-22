@@ -1,0 +1,138 @@
+{
+  "agent": {
+    "name": "Lighthouse Audit Agent",
+    "version": "1.0.0",
+    "type": "guardian",
+    "description": "Enforces 100/100 Lighthouse standards across all categories with zero compromise",
+    "tags": ["performance", "audit", "quality-gate", "lighthouse"]
+  },
+  "mission": {
+    "primary": "Achieve and maintain 100/100 Lighthouse scores",
+    "secondary": [
+      "Block deployments below 95/100 threshold",
+      "Identify specific optimization opportunities",
+      "Track performance trends over time",
+      "Generate comprehensive audit reports"
+    ]
+  },
+  "targets": {
+    "lighthouse": {
+      "performance": 100,
+      "accessibility": 100,
+      "bestPractices": 100,
+      "seo": 100,
+      "minimum_deployment_threshold": 95
+    },
+    "coreWebVitals": {
+      "lcp": {
+        "target": 2.5,
+        "unit": "seconds",
+        "description": "Largest Contentful Paint"
+      },
+      "fid": {
+        "target": 100,
+        "unit": "milliseconds",
+        "description": "First Input Delay"
+      },
+      "cls": {
+        "target": 0.1,
+        "unit": "score",
+        "description": "Cumulative Layout Shift"
+      },
+      "tti": {
+        "target": 3.5,
+        "unit": "seconds",
+        "description": "Time to Interactive"
+      },
+      "tbt": {
+        "target": 200,
+        "unit": "milliseconds",
+        "description": "Total Blocking Time"
+      }
+    }
+  },
+  "tools": [
+    {
+      "name": "lighthouse-ci",
+      "version": "latest",
+      "config": "config/lighthouse-config.json",
+      "options": {
+        "throttling": "mobile3G",
+        "screenEmulation": {
+          "mobile": true,
+          "width": 375,
+          "height": 667,
+          "deviceScaleFactor": 2
+        },
+        "runs": 5,
+        "median": true
+      }
+    },
+    {
+      "name": "chrome-devtools-protocol",
+      "purpose": "Deep performance profiling"
+    },
+    {
+      "name": "webpagetest",
+      "purpose": "Real-world performance testing",
+      "locations": ["us-east", "us-west", "eu-central", "apac-sydney"]
+    },
+    {
+      "name": "core-web-vitals-api",
+      "purpose": "Real user monitoring data"
+    }
+  ],
+  "logging": {
+    "destination": "supabase",
+    "tables": {
+      "audits": "lighthouse_audits",
+      "trends": "performance_trends",
+      "alerts": "performance_alerts"
+    },
+    "retention": {
+      "audits": "365 days",
+      "trends": "forever",
+      "alerts": "90 days"
+    }
+  },
+  "reporting": {
+    "realtime": true,
+    "dashboards": [
+      "performance-overview",
+      "core-web-vitals",
+      "audit-history",
+      "competitive-benchmark"
+    ],
+    "alerts": {
+      "score_drop": {
+        "threshold": 5,
+        "notification": ["slack", "email"]
+      },
+      "core_vital_failure": {
+        "immediate": true,
+        "notification": ["slack", "email", "sms"]
+      }
+    }
+  },
+  "validation_gates": {
+    "pre_deployment": {
+      "minimum_score": 95,
+      "all_categories": true,
+      "core_vitals_pass": true,
+      "no_critical_issues": true
+    },
+    "post_deployment": {
+      "verify_within": "5 minutes",
+      "rollback_threshold": 90
+    }
+  },
+  "best_practices": [
+    "Mobile-first testing always",
+    "Test with throttled network (3G/4G)",
+    "Multiple geographic locations",
+    "Real-world user conditions simulation",
+    "Competitive benchmarking",
+    "Historical trend analysis",
+    "Proactive optimization recommendations"
+  ]
+}

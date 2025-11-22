@@ -1,0 +1,213 @@
+{
+  "agent": {
+    "name": "Accessibility Agent",
+    "version": "1.0.0",
+    "type": "compliance",
+    "description": "Ensures WCAG 2.1 AA/AAA compliance and 100/100 accessibility scores",
+    "tags": ["accessibility", "wcag", "aria", "compliance", "a11y"]
+  },
+  "mission": {
+    "primary": "Achieve 100/100 Lighthouse accessibility score with zero violations",
+    "secondary": [
+      "WCAG 2.1 Level AA compliance (minimum)",
+      "WCAG 2.1 Level AAA (target where feasible)",
+      "ADA compliance",
+      "AODA compliance (Canada)",
+      "Best practices beyond legal requirements"
+    ]
+  },
+  "standards": {
+    "wcag_2_1": {
+      "level_aa": "required",
+      "level_aaa": "target",
+      "principles": [
+        "Perceivable",
+        "Operable",
+        "Understandable",
+        "Robust"
+      ]
+    },
+    "legal_compliance": [
+      "ADA (Americans with Disabilities Act)",
+      "AODA (Accessibility for Ontarians with Disabilities Act)",
+      "Section 508",
+      "EN 301 549"
+    ]
+  },
+  "audit_categories": {
+    "keyboard_navigation": {
+      "priority": "critical",
+      "requirements": [
+        "All interactive elements keyboard accessible",
+        "Logical tab order",
+        "Visible focus indicators",
+        "No keyboard traps",
+        "Skip navigation links"
+      ]
+    },
+    "screen_readers": {
+      "priority": "critical",
+      "requirements": [
+        "Semantic HTML structure",
+        "Proper ARIA labels where needed",
+        "Alt text for all images",
+        "Descriptive link text",
+        "Form labels properly associated",
+        "Live regions for dynamic content"
+      ]
+    },
+    "color_contrast": {
+      "priority": "critical",
+      "requirements": [
+        "Text contrast 4.5:1 minimum (AA)",
+        "Large text contrast 3:1 minimum (AA)",
+        "Text contrast 7:1 target (AAA)",
+        "UI component contrast 3:1 minimum",
+        "Focus indicator contrast adequate"
+      ]
+    },
+    "visual_design": {
+      "priority": "high",
+      "requirements": [
+        "Text resizable to 200%",
+        "Content reflows at 400% zoom",
+        "No horizontal scrolling (mobile)",
+        "Adequate spacing between interactive elements",
+        "Clear visual hierarchy"
+      ]
+    },
+    "forms": {
+      "priority": "critical",
+      "requirements": [
+        "All inputs have associated labels",
+        "Error messages clear and accessible",
+        "Required fields indicated",
+        "Input purpose identified",
+        "Group related fields with fieldset/legend"
+      ]
+    },
+    "multimedia": {
+      "priority": "high",
+      "requirements": [
+        "Captions for videos",
+        "Transcripts for audio",
+        "Audio description where needed",
+        "No autoplay or controls provided",
+        "Accessible media controls"
+      ]
+    }
+  },
+  "tools": [
+    {
+      "name": "axe-core",
+      "purpose": "Automated accessibility testing",
+      "coverage": "~57% of WCAG issues"
+    },
+    {
+      "name": "pa11y",
+      "purpose": "CI accessibility testing",
+      "coverage": "Automated violation detection"
+    },
+    {
+      "name": "lighthouse",
+      "purpose": "Accessibility audits",
+      "integration": "via Lighthouse Audit Agent"
+    },
+    {
+      "name": "wave",
+      "purpose": "Visual accessibility evaluation",
+      "usage": "Supplemental testing"
+    },
+    {
+      "name": "nvda-simulator",
+      "purpose": "Screen reader testing simulation",
+      "usage": "Validation of screen reader UX"
+    }
+  ],
+  "testing_strategy": {
+    "automated": {
+      "tools": ["axe-core", "pa11y", "lighthouse"],
+      "frequency": "Every code change",
+      "coverage": "~60% of issues"
+    },
+    "manual": {
+      "tasks": [
+        "Keyboard navigation testing",
+        "Screen reader testing (simulated)",
+        "Zoom/resize testing",
+        "Color blindness simulation",
+        "Focus indicator verification"
+      ],
+      "frequency": "Major changes, monthly audit",
+      "coverage": "~40% of issues (critical)"
+    }
+  },
+  "aria_guidelines": {
+    "prefer_semantic_html": true,
+    "aria_only_when_needed": true,
+    "common_patterns": {
+      "navigation": "nav with aria-label",
+      "buttons": "button element (not div with role=button)",
+      "links": "a element with meaningful text",
+      "headings": "h1-h6 in logical hierarchy",
+      "lists": "ul/ol/li for list content",
+      "forms": "label associated with input",
+      "images": "img with alt text",
+      "icons": "aria-hidden=true with adjacent text"
+    }
+  },
+  "common_violations": {
+    "missing_alt_text": {
+      "severity": "critical",
+      "fix": "Add descriptive alt text to all img elements"
+    },
+    "low_contrast": {
+      "severity": "critical",
+      "fix": "Adjust colors to meet 4.5:1 ratio minimum"
+    },
+    "missing_labels": {
+      "severity": "critical",
+      "fix": "Associate label with every form input"
+    },
+    "invalid_aria": {
+      "severity": "high",
+      "fix": "Use valid ARIA attributes per spec"
+    },
+    "heading_order": {
+      "severity": "medium",
+      "fix": "Use logical h1-h6 hierarchy"
+    },
+    "link_text": {
+      "severity": "medium",
+      "fix": "Use descriptive link text (not 'click here')"
+    },
+    "focus_indicators": {
+      "severity": "high",
+      "fix": "Ensure visible focus on all interactive elements"
+    }
+  },
+  "logging": {
+    "destination": "supabase",
+    "tables": {
+      "violations": "accessibility_violations",
+      "fixes": "accessibility_fixes",
+      "audits": "accessibility_audits"
+    }
+  },
+  "collaboration": {
+    "lighthouse_audit_agent": "Receives accessibility score requirements",
+    "theme_optimizer_agent": "Implements accessibility fixes in code",
+    "seo_implementation_agent": "Coordinates on semantic HTML"
+  },
+  "output_format": {
+    "violation_report": {
+      "severity": "critical|high|medium|low",
+      "wcag_criterion": "e.g., 1.4.3 Contrast",
+      "element": "CSS selector or description",
+      "current_state": "what's wrong",
+      "required_fix": "specific remediation",
+      "code_example": "working code sample",
+      "testing_steps": "how to verify fix"
+    }
+  }
+}

@@ -1,0 +1,741 @@
+{
+  "name": "Smartlead → HubSpot Outreach Tracking (FIXED)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "smartlead-webhook",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Smartlead Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 400],
+      "webhookId": "smartlead-webhook",
+      "notes": "Receives webhook events from Smartlead:\n- EMAIL_SENT\n- EMAIL_OPEN\n- EMAIL_LINK_CLICK\n- EMAIL_REPLY\n- LEAD_UNSUBSCRIBED"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "event_type",
+              "value": "={{ $json.event_type }}"
+            },
+            {
+              "name": "campaign_id",
+              "value": "={{ $json.campaign_id }}"
+            },
+            {
+              "name": "campaign_name",
+              "value": "={{ $json.campaign_name || '' }}"
+            },
+            {
+              "name": "lead_id",
+              "value": "={{ $json.lead_id }}"
+            },
+            {
+              "name": "lead_email",
+              "value": "={{ $json.lead_email }}"
+            },
+            {
+              "name": "lead_first_name",
+              "value": "={{ $json.lead_first_name || '' }}"
+            },
+            {
+              "name": "lead_last_name",
+              "value": "={{ $json.lead_last_name || '' }}"
+            },
+            {
+              "name": "timestamp",
+              "value": "={{ $json.timestamp }}"
+            },
+            {
+              "name": "email_sequence_number",
+              "value": "={{ $json.data?.email_sequence_number || 0 }}"
+            },
+            {
+              "name": "email_subject",
+              "value": "={{ $json.data?.email_subject || '' }}"
+            }
+          ]
+        }
+      },
+      "id": "parse-webhook-data",
+      "name": "Parse Webhook Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [450, 400]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT get_hubspot_id('{{ $json.lead_email }}', 'smartlead', 'contact') as hubspot_id",
+        "options": {}
+      },
+      "id": "check-hubspot-contact",
+      "name": "Check HubSpot Contact",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [650, 400],
+      "credentials": {
+        "postgres": {
+          "id": "2",
+          "name": "Supabase"
+        }
+      },
+      "notes": "Check if we've already synced this contact to HubSpot"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.hubspot_id }}",
+              "operation": "isEmpty"
+            }
+          ]
+        }
+      },
+      "id": "contact-exists-check",
+      "name": "Contact Exists in HubSpot?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [850, 400]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.hubapi.com/crm/v3/objects/contacts/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "method": "POST",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"filterGroups\": [{\n    \"filters\": [{\n      \"propertyName\": \"email\",\n      \"operator\": \"EQ\",\n      \"value\": \"{{ $json.lead_email }}\"\n    }]\n  }]\n}",
+        "options": {}
+      },
+      "id": "search-hubspot",
+      "name": "Search HubSpot by Email",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1050, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "HubSpot API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.hubapi.com/crm/v3/objects/contacts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "method": "POST",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"properties\": {\n    \"email\": \"{{ $json.lead_email }}\",\n    \"firstname\": \"{{ $json.lead_first_name }}\",\n    \"lastname\": \"{{ $json.lead_last_name }}\",\n    \"smartlead_campaign_id\": \"{{ $json.campaign_id }}\",\n    \"smartlead_campaign_name\": \"{{ $json.campaign_name }}\",\n    \"smartlead_lead_id\": \"{{ $json.lead_id }}\",\n    \"cold_outreach_status\": \"contacted\",\n    \"first_outreach_date\": \"{{ $json.timestamp }}\"\n  }\n}",
+        "options": {}
+      },
+      "id": "create-hubspot-contact",
+      "name": "Create HubSpot Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1250, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "HubSpot API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "id",
+              "value": "={{ $json.results?.[0]?.id || $json.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "merge-contact-data",
+      "name": "Merge Contact Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [1450, 400]
+    },
+    {
+      "parameters": {
+        "mode": "rules",
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.event_type }}",
+                    "rightValue": "EMAIL_SENT",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "output": 0
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.event_type }}",
+                    "rightValue": "EMAIL_OPEN",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "output": 1
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.event_type }}",
+                    "rightValue": "EMAIL_LINK_CLICK",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "output": 2
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.event_type }}",
+                    "rightValue": "EMAIL_REPLY",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "output": 3
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.event_type }}",
+                    "rightValue": "LEAD_UNSUBSCRIBED",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "output": 4
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "event-type-switch",
+      "name": "Event Type?",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 2,
+      "position": [1650, 400]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.hubapi.com/crm/v3/objects/contacts/{{ $json.id }}?properties=outreach_email_count",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "method": "GET",
+        "options": {}
+      },
+      "id": "fetch-sent-count",
+      "name": "Fetch Current Email Count",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1850, 200],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "HubSpot API"
+        }
+      },
+      "notes": "CRITICAL: Fetch current counter before incrementing"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.hubapi.com/crm/v3/objects/contacts/{{ $json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "method": "PATCH",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"properties\": {\n    \"last_outreach_email_sent\": \"{{ $json.timestamp }}\",\n    \"outreach_email_count\": {{ (parseInt($node['Fetch Current Email Count'].json.properties.outreach_email_count) || 0) + 1 }},\n    \"last_email_sequence_number\": {{ $json.email_sequence_number }},\n    \"last_email_subject\": \"{{ $json.email_subject }}\"\n  }\n}",
+        "options": {}
+      },
+      "id": "update-email-sent",
+      "name": "Update: Email Sent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [2050, 200],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "HubSpot API"
+        }
+      },
+      "notes": "Now uses fetched counter value"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.hubapi.com/crm/v3/objects/contacts/{{ $json.id }}?properties=email_open_count",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "method": "GET",
+        "options": {}
+      },
+      "id": "fetch-open-count",
+      "name": "Fetch Current Open Count",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1850, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "HubSpot API"
+        }
+      },
+      "notes": "CRITICAL: Fetch current counter before incrementing"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.hubapi.com/crm/v3/objects/contacts/{{ $json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "method": "PATCH",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"properties\": {\n    \"last_email_open_date\": \"{{ $json.timestamp }}\",\n    \"email_open_count\": {{ (parseInt($node['Fetch Current Open Count'].json.properties.email_open_count) || 0) + 1 }},\n    \"cold_outreach_status\": \"engaged\"\n  }\n}",
+        "options": {}
+      },
+      "id": "update-email-open",
+      "name": "Update: Email Opened",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [2050, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "HubSpot API"
+        }
+      },
+      "notes": "Now uses fetched counter value"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.hubapi.com/crm/v3/objects/contacts/{{ $json.id }}?properties=email_click_count",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "method": "GET",
+        "options": {}
+      },
+      "id": "fetch-click-count",
+      "name": "Fetch Current Click Count",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1850, 400],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "HubSpot API"
+        }
+      },
+      "notes": "CRITICAL: Fetch current counter before incrementing"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.hubapi.com/crm/v3/objects/contacts/{{ $json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "method": "PATCH",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"properties\": {\n    \"last_email_click_date\": \"{{ $json.timestamp }}\",\n    \"email_click_count\": {{ (parseInt($node['Fetch Current Click Count'].json.properties.email_click_count) || 0) + 1 }},\n    \"cold_outreach_status\": \"highly_engaged\"\n  }\n}",
+        "options": {}
+      },
+      "id": "update-email-click",
+      "name": "Update: Link Clicked",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [2050, 400],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "HubSpot API"
+        }
+      },
+      "notes": "Now uses fetched counter value"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.hubapi.com/crm/v3/objects/contacts/{{ $json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "method": "PATCH",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"properties\": {\n    \"last_email_reply_date\": \"{{ $json.timestamp }}\",\n    \"cold_outreach_status\": \"replied\"\n  }\n}",
+        "options": {}
+      },
+      "id": "update-email-reply",
+      "name": "Update: Email Reply",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [2050, 500],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "HubSpot API"
+        }
+      },
+      "notes": "Reply doesn't need counter - just timestamp and status"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.hubapi.com/crm/v3/objects/contacts/{{ $json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "method": "PATCH",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"properties\": {\n    \"unsubscribed_from_outreach\": true,\n    \"cold_outreach_status\": \"unsubscribed\",\n    \"unsubscribe_date\": \"{{ $json.timestamp }}\"\n  }\n}",
+        "options": {}
+      },
+      "id": "update-unsubscribed",
+      "name": "Update: Unsubscribed",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [2050, 600],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "HubSpot API"
+        }
+      },
+      "notes": "Unsubscribe doesn't need counter - just flag and timestamp"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT log_smartlead_sync(\n  '{{ $json.event_type }}',\n  '{{ $json.lead_id }}',\n  '{{ $json.campaign_id }}',\n  'hubspot',\n  '{{ $json.id }}',\n  'success'::sync_status,\n  '{{ $json }}'::jsonb\n)",
+        "options": {}
+      },
+      "id": "log-to-supabase",
+      "name": "Log to Supabase",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [2250, 400],
+      "credentials": {
+        "postgres": {
+          "id": "2",
+          "name": "Supabase"
+        }
+      },
+      "notes": "Log sync event for tracking and debugging"
+    }
+  ],
+  "connections": {
+    "Smartlead Webhook": {
+      "main": [
+        [
+          {
+            "node": "Parse Webhook Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Webhook Data": {
+      "main": [
+        [
+          {
+            "node": "Check HubSpot Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check HubSpot Contact": {
+      "main": [
+        [
+          {
+            "node": "Contact Exists in HubSpot?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Contact Exists in HubSpot?": {
+      "main": [
+        [
+          {
+            "node": "Search HubSpot by Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge Contact Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search HubSpot by Email": {
+      "main": [
+        [
+          {
+            "node": "Create HubSpot Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create HubSpot Contact": {
+      "main": [
+        [
+          {
+            "node": "Merge Contact Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Contact Data": {
+      "main": [
+        [
+          {
+            "node": "Event Type?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Event Type?": {
+      "main": [
+        [
+          {
+            "node": "Fetch Current Email Count",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fetch Current Open Count",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fetch Current Click Count",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update: Email Reply",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update: Unsubscribed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Current Email Count": {
+      "main": [
+        [
+          {
+            "node": "Update: Email Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update: Email Sent": {
+      "main": [
+        [
+          {
+            "node": "Log to Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Current Open Count": {
+      "main": [
+        [
+          {
+            "node": "Update: Email Opened",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update: Email Opened": {
+      "main": [
+        [
+          {
+            "node": "Log to Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Current Click Count": {
+      "main": [
+        [
+          {
+            "node": "Update: Link Clicked",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update: Link Clicked": {
+      "main": [
+        [
+          {
+            "node": "Log to Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update: Email Reply": {
+      "main": [
+        [
+          {
+            "node": "Log to Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update: Unsubscribed": {
+      "main": [
+        [
+          {
+            "node": "Log to Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

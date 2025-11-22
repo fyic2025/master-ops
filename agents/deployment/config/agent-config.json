@@ -1,0 +1,293 @@
+{
+  "agent": {
+    "name": "Deployment & Validation Agent",
+    "version": "1.0.0",
+    "type": "orchestrator",
+    "description": "Orchestrates zero-defect deployments with comprehensive validation gates",
+    "tags": ["deployment", "validation", "orchestration", "qa", "release"]
+  },
+  "mission": {
+    "primary": "Execute zero-defect deployments with comprehensive validation",
+    "secondary": [
+      "Enforce validation gates before deployment",
+      "Coordinate between agents for deployment readiness",
+      "Manage staging and production deployments",
+      "Provide rollback capability",
+      "Document deployment history"
+    ]
+  },
+  "validation_gates": {
+    "gate_1_code_quality": {
+      "order": 1,
+      "required": true,
+      "checks": [
+        "Liquid syntax validation",
+        "JavaScript linting (ESLint)",
+        "CSS validation",
+        "No console.log statements in production code",
+        "Git working directory clean"
+      ],
+      "blocking": true
+    },
+    "gate_2_lighthouse_audit": {
+      "order": 2,
+      "required": true,
+      "checks": [
+        "Performance score ≥ 95/100",
+        "Accessibility score ≥ 95/100",
+        "Best Practices score ≥ 95/100",
+        "SEO score ≥ 95/100",
+        "All Core Web Vitals pass",
+        "No critical issues"
+      ],
+      "blocking": true,
+      "executor": "Lighthouse Audit Agent"
+    },
+    "gate_3_accessibility": {
+      "order": 3,
+      "required": true,
+      "checks": [
+        "Zero critical accessibility violations",
+        "WCAG 2.1 AA compliance",
+        "Keyboard navigation functional",
+        "Screen reader compatible"
+      ],
+      "blocking": true,
+      "executor": "Accessibility Agent"
+    },
+    "gate_4_seo_validation": {
+      "order": 4,
+      "required": true,
+      "checks": [
+        "Structured data valid (no errors)",
+        "Meta tags present and unique",
+        "Canonical URLs correct",
+        "No broken internal links",
+        "Robots.txt allows crawling"
+      ],
+      "blocking": true,
+      "executor": "SEO Implementation Agent"
+    },
+    "gate_5_functionality": {
+      "order": 5,
+      "required": true,
+      "checks": [
+        "Add to cart functional",
+        "Checkout accessible",
+        "Forms submitting correctly",
+        "Navigation working",
+        "Search functional",
+        "No JavaScript errors in console"
+      ],
+      "blocking": true
+    },
+    "gate_6_visual_regression": {
+      "order": 6,
+      "required": false,
+      "checks": [
+        "No unintended visual changes",
+        "Layout intact",
+        "Images loading correctly",
+        "Responsive design maintained"
+      ],
+      "blocking": false
+    }
+  },
+  "deployment_environments": {
+    "development": {
+      "purpose": "Local development and testing",
+      "url_pattern": "*.myshopify.com (theme preview)",
+      "validation_gates": ["gate_1_code_quality"],
+      "approval_required": false
+    },
+    "staging": {
+      "purpose": "Pre-production testing and validation",
+      "url_pattern": "staging subdomain or theme preview",
+      "validation_gates": [
+        "gate_1_code_quality",
+        "gate_2_lighthouse_audit",
+        "gate_3_accessibility",
+        "gate_4_seo_validation",
+        "gate_5_functionality",
+        "gate_6_visual_regression"
+      ],
+      "approval_required": false,
+      "auto_deploy": true
+    },
+    "production": {
+      "purpose": "Live customer-facing site",
+      "url_pattern": "teelixir-au.myshopify.com, custom domain",
+      "validation_gates": [
+        "gate_1_code_quality",
+        "gate_2_lighthouse_audit",
+        "gate_3_accessibility",
+        "gate_4_seo_validation",
+        "gate_5_functionality"
+      ],
+      "approval_required": true,
+      "approval_from": "human",
+      "auto_deploy": false,
+      "post_deployment_validation": true
+    }
+  },
+  "deployment_workflow": {
+    "steps": [
+      {
+        "step": 1,
+        "name": "Pre-deployment Validation",
+        "actions": [
+          "Run all validation gates",
+          "Collect validation results",
+          "Generate pre-deployment report",
+          "Determine go/no-go decision"
+        ]
+      },
+      {
+        "step": 2,
+        "name": "Staging Deployment",
+        "actions": [
+          "Deploy to staging environment",
+          "Run post-deployment smoke tests",
+          "Validate staging environment",
+          "Generate staging validation report"
+        ]
+      },
+      {
+        "step": 3,
+        "name": "Production Approval",
+        "actions": [
+          "Request human approval",
+          "Provide deployment summary",
+          "Show validation results",
+          "Wait for approval/rejection"
+        ]
+      },
+      {
+        "step": 4,
+        "name": "Production Deployment",
+        "actions": [
+          "Create backup/rollback point",
+          "Deploy to production",
+          "Run post-deployment validation",
+          "Monitor for issues (5 minutes)",
+          "Generate deployment report"
+        ]
+      },
+      {
+        "step": 5,
+        "name": "Post-Deployment",
+        "actions": [
+          "Run Lighthouse audit on production",
+          "Verify Core Web Vitals",
+          "Check for errors in monitoring",
+          "Update deployment log",
+          "Notify team of success"
+        ]
+      }
+    ]
+  },
+  "rollback_strategy": {
+    "triggers": [
+      "Lighthouse score drops below 90/100",
+      "Critical accessibility violation in production",
+      "JavaScript errors affecting functionality",
+      "Core Web Vital failure",
+      "Human approval for rollback"
+    ],
+    "process": [
+      "1. Identify issue and severity",
+      "2. Determine if rollback necessary",
+      "3. Execute rollback to previous theme version",
+      "4. Validate rollback successful",
+      "5. Document incident",
+      "6. Coordinate fix with appropriate agent",
+      "7. Re-deploy once fixed"
+    ],
+    "rollback_time_target": "5 minutes"
+  },
+  "tools": [
+    {
+      "name": "shopify-cli",
+      "purpose": "Theme deployment",
+      "commands": ["theme push", "theme pull", "theme list"]
+    },
+    {
+      "name": "git",
+      "purpose": "Version control and rollback",
+      "usage": "Track all changes, enable rollback"
+    },
+    {
+      "name": "lighthouse-ci",
+      "purpose": "Automated performance validation",
+      "integration": "via Lighthouse Audit Agent"
+    },
+    {
+      "name": "playwright/puppeteer",
+      "purpose": "Automated functionality testing",
+      "usage": "Smoke tests, critical user flows"
+    }
+  ],
+  "logging": {
+    "destination": "supabase",
+    "tables": {
+      "deployments": "deployment_history",
+      "validations": "deployment_validations",
+      "rollbacks": "deployment_rollbacks"
+    },
+    "deployment_log_format": {
+      "deployment_id": "uuid",
+      "timestamp": "ISO 8601",
+      "brand": "teelixir|elevate",
+      "environment": "staging|production",
+      "theme_version": "git commit hash",
+      "changes_included": "array of change_ids",
+      "validation_results": {
+        "gate_1": "pass|fail",
+        "gate_2": "pass|fail",
+        "gate_3": "pass|fail",
+        "gate_4": "pass|fail",
+        "gate_5": "pass|fail",
+        "gate_6": "pass|warning|fail"
+      },
+      "lighthouse_scores": {
+        "performance": 100,
+        "accessibility": 100,
+        "best_practices": 100,
+        "seo": 100
+      },
+      "approval": {
+        "required": true,
+        "approved_by": "human name/id",
+        "approved_at": "timestamp"
+      },
+      "status": "success|failed|rolled_back",
+      "deployment_duration": "seconds",
+      "post_deployment_validation": "pass|fail",
+      "issues_detected": "array of issues"
+    }
+  },
+  "monitoring": {
+    "post_deployment": {
+      "duration": "5 minutes",
+      "checks": [
+        "Lighthouse audit on live site",
+        "JavaScript console errors",
+        "Network requests (no 404s)",
+        "Core Web Vitals real-time",
+        "User-facing functionality"
+      ]
+    },
+    "ongoing": {
+      "daily_health_check": true,
+      "performance_monitoring": "continuous",
+      "alert_on_regression": true
+    }
+  },
+  "communication": {
+    "pre_deployment": "Validation gate results to all agents",
+    "deployment_in_progress": "Status updates",
+    "deployment_complete": "Success report with validation",
+    "deployment_failed": "Failure details and recommendations",
+    "rollback_executed": "Incident report and recovery plan"
+  }
+}

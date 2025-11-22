@@ -1,0 +1,83 @@
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+
+# Environment variables
+.env
+.env.local
+.env.production
+.env.staging
+.env.*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Reports
+reports/*.json
+reports/*.html
+reports/*.pdf
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Lighthouse output
+lighthouse-results/
+*.lighthouse.json
+lhci-data/
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
+.project
+.classpath
+.settings/
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Cache
+.cache/
+.parcel-cache/
+.eslintcache
+
+# Sensitive data
+*.pem
+*.key
+*.cert
+credentials.json
+secrets.json
+
+# Backup files
+*.backup
+*.bak
+*.old
+
+# Large files
+*.mp4
+*.mov
+*.avi
+*.zip (except intentional archives)

@@ -1,0 +1,223 @@
+{
+  "name": "Supabase Health Check (Every 6 Hours)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      },
+      "name": "Every 6 Hours",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "command": "cd /root/master-ops && npx tsx .claude/skills/supabase-expert/scripts/health-check.ts"
+      },
+      "name": "Run Health Check",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "filePath": "/root/master-ops/logs/supabase-health-check.json"
+      },
+      "name": "Read Results",
+      "type": "n8n-nodes-base.readBinaryFile",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "mode": "jsonToBinary",
+        "options": {}
+      },
+      "name": "Parse JSON",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.overall_status }}",
+              "operation": "notEqual",
+              "value2": "healthy"
+            }
+          ]
+        }
+      },
+      "name": "Has Issues?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "schema": "public",
+        "table": "integration_logs",
+        "columns": "source,service,operation,level,status,message,details_json",
+        "additionalFields": {},
+        "options": {}
+      },
+      "name": "Log to Supabase (Healthy)",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [1250, 200],
+      "credentials": {
+        "postgres": {
+          "id": "2",
+          "name": "Supabase"
+        }
+      },
+      "executeOnce": false,
+      "alwaysOutputData": false,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "channel": "#alerts",
+        "text": "=🔴 Supabase Health Check Alert\n\n*Status:* {{ $json.overall_status.toUpperCase() }}\n*Timestamp:* {{ $json.timestamp }}\n\n*Critical Issues:*\n{{ $json.critical_issues.map(i => '• ' + i).join('\\n') }}\n\n*Warnings:*\n{{ $json.warnings.map(w => '• ' + w).join('\\n') }}\n\n*Integration Health:*\n{{ $json.checks.integrations.by_source.map(s => '• ' + s.source + ': ' + s.error_rate.toFixed(1) + '% errors').join('\\n') }}\n\n<https://app.supabase.com/project/qcvfxxsnqvdfmpbcgdni|View Dashboard>",
+        "otherOptions": {}
+      },
+      "name": "Send Slack Alert",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.1,
+      "position": [1250, 400],
+      "credentials": {
+        "slackApi": {
+          "id": "1",
+          "name": "Slack"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "schema": "public",
+        "table": "integration_logs",
+        "columns": "source,service,operation,level,status,message,details_json",
+        "additionalFields": {},
+        "options": {}
+      },
+      "name": "Log to Supabase (Issues)",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [1450, 400],
+      "credentials": {
+        "postgres": {
+          "id": "2",
+          "name": "Supabase"
+        }
+      },
+      "executeOnce": false,
+      "alwaysOutputData": false,
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "connections": {
+    "Every 6 Hours": {
+      "main": [
+        [
+          {
+            "node": "Run Health Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Health Check": {
+      "main": [
+        [
+          {
+            "node": "Read Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Results": {
+      "main": [
+        [
+          {
+            "node": "Parse JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse JSON": {
+      "main": [
+        [
+          {
+            "node": "Has Issues?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Issues?": {
+      "main": [
+        [
+          {
+            "node": "Log to Supabase (Healthy)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Slack Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Slack Alert": {
+      "main": [
+        [
+          {
+            "node": "Log to Supabase (Issues)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "supabase",
+      "id": "supabase-monitoring"
+    },
+    {
+      "name": "health-check",
+      "id": "health-monitoring"
+    }
+  ],
+  "meta": {
+    "instanceId": "master-ops-automation"
+  },
+  "pinData": {},
+  "versionId": "1.0.0"
+}

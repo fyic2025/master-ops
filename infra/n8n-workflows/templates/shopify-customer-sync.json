@@ -1,0 +1,484 @@
+{
+  "name": "Shopify Customer → HubSpot Sync",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "shopify-customer-sync",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "shopify-customer-sync"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "email",
+              "value": "={{ $json.customer.email }}"
+            },
+            {
+              "name": "firstName",
+              "value": "={{ $json.customer.first_name }}"
+            },
+            {
+              "name": "lastName",
+              "value": "={{ $json.customer.last_name }}"
+            },
+            {
+              "name": "phone",
+              "value": "={{ $json.customer.phone }}"
+            },
+            {
+              "name": "shopifyCustomerId",
+              "value": "={{ $json.customer.id }}"
+            },
+            {
+              "name": "shopifyStore",
+              "value": "={{ $json.store || 'teelixir' }}"
+            },
+            {
+              "name": "acceptsMarketing",
+              "value": "={{ $json.customer.accepts_marketing }}"
+            },
+            {
+              "name": "ordersCount",
+              "value": "={{ $json.customer.orders_count }}"
+            },
+            {
+              "name": "totalSpent",
+              "value": "={{ $json.customer.total_spent }}"
+            },
+            {
+              "name": "customerState",
+              "value": "={{ $json.customer.state }}"
+            },
+            {
+              "name": "tags",
+              "value": "={{ $json.customer.tags }}"
+            },
+            {
+              "name": "note",
+              "value": "={{ $json.customer.note }}"
+            },
+            {
+              "name": "address",
+              "value": "={{ JSON.stringify($json.customer.default_address) }}"
+            }
+          ]
+        }
+      },
+      "id": "parse-shopify-data",
+      "name": "Parse Shopify Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT get_hubspot_id('{{ $json.shopifyCustomerId }}', 'shopify_{{ $json.shopifyStore }}', 'contact') as hubspot_id",
+        "options": {}
+      },
+      "id": "check-existing-sync",
+      "name": "Check Existing Sync",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [650, 300],
+      "credentials": {
+        "postgres": {
+          "id": "2",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.hubspot_id }}",
+              "operation": "isEmpty"
+            }
+          ]
+        }
+      },
+      "id": "hubspot-contact-exists",
+      "name": "HubSpot Contact Exists?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://api.hubapi.com/crm/v3/objects/contacts/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": []
+        },
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"filterGroups\": [\n    {\n      \"filters\": [\n        {\n          \"propertyName\": \"email\",\n          \"operator\": \"EQ\",\n          \"value\": \"{{ $json.email }}\"\n        }\n      ]\n    }\n  ],\n  \"properties\": [\"email\", \"firstname\", \"lastname\"],\n  \"limit\": 1\n}",
+        "options": {}
+      },
+      "id": "search-hubspot-by-email",
+      "name": "Search HubSpot by Email",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1050, 200],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "HubSpot API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.total }}",
+              "operation": "equal",
+              "value2": 0
+            }
+          ]
+        }
+      },
+      "id": "contact-found",
+      "name": "Contact Found?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1250, 200]
+    },
+    {
+      "parameters": {
+        "url": "https://api.hubapi.com/crm/v3/objects/contacts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"properties\": {\n    \"email\": \"{{ $json.email }}\",\n    \"firstname\": \"{{ $json.firstName }}\",\n    \"lastname\": \"{{ $json.lastName }}\",\n    \"phone\": \"{{ $json.phone }}\",\n    \"contact_type\": \"customer\",\n    \"source_business\": \"{{ $json.shopifyStore }}\",\n    \"shopify_customer_id\": \"{{ $json.shopifyCustomerId }}\",\n    \"shopify_total_spent\": {{ $json.totalSpent }},\n    \"shopify_order_count\": {{ $json.ordersCount }},\n    \"shopify_customer_status\": \"{{ $json.customerState }}\"\n  }\n}",
+        "options": {}
+      },
+      "id": "create-hubspot-contact",
+      "name": "Create HubSpot Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1450, 100],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "HubSpot API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.hubapi.com/crm/v3/objects/contacts/{{ $json.results[0].id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"properties\": {\n    \"firstname\": \"{{ $json.firstName }}\",\n    \"lastname\": \"{{ $json.lastName }}\",\n    \"phone\": \"{{ $json.phone }}\",\n    \"shopify_customer_id\": \"{{ $json.shopifyCustomerId }}\",\n    \"shopify_total_spent\": {{ $json.totalSpent }},\n    \"shopify_order_count\": {{ $json.ordersCount }},\n    \"shopify_customer_status\": \"{{ $json.customerState }}\"\n  }\n}",
+        "options": {
+          "method": "PATCH"
+        }
+      },
+      "id": "update-hubspot-contact",
+      "name": "Update HubSpot Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1450, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "HubSpot API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.hubapi.com/crm/v3/objects/contacts/{{ $node[\"Check Existing Sync\"].json.hubspot_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"properties\": {\n    \"firstname\": \"{{ $json.firstName }}\",\n    \"lastname\": \"{{ $json.lastName }}\",\n    \"phone\": \"{{ $json.phone }}\",\n    \"shopify_total_spent\": {{ $json.totalSpent }},\n    \"shopify_order_count\": {{ $json.ordersCount }},\n    \"shopify_customer_status\": \"{{ $json.customerState }}\"\n  }\n}",
+        "options": {
+          "method": "PATCH"
+        }
+      },
+      "id": "update-existing-contact",
+      "name": "Update Existing Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1050, 400],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "HubSpot API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=SELECT log_hubspot_sync(\n  'contact',\n  '{{ $json.shopifyCustomerId }}',\n  'shopify_{{ $json.shopifyStore }}',\n  '{{ $json.id }}',\n  'to_hubspot',\n  '{{ $node[\"HubSpot Contact Exists?\"].json.operation || \"create\" }}',\n  '{{ JSON.stringify($json.properties) }}'::jsonb\n) as sync_id",
+        "options": {}
+      },
+      "id": "log-success-to-supabase",
+      "name": "Log Success to Supabase",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1650, 200],
+      "credentials": {
+        "postgres": {
+          "id": "2",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=INSERT INTO integration_logs (\n  source,\n  service,\n  operation,\n  level,\n  status,\n  message,\n  details_json\n) VALUES (\n  'hubspot',\n  'customer_sync',\n  'sync_customer',\n  'info',\n  'success',\n  'Synced Shopify customer to HubSpot',\n  '{{ JSON.stringify({\n    shopify_customer_id: $json.shopifyCustomerId,\n    hubspot_contact_id: $json.id,\n    email: $json.email,\n    store: $json.shopifyStore\n  }) }}'::jsonb\n)",
+        "options": {}
+      },
+      "id": "log-integration",
+      "name": "Log Integration",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1850, 200],
+      "credentials": {
+        "postgres": {
+          "id": "2",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=SELECT log_hubspot_sync_error(\n  'contact',\n  '{{ $json.shopifyCustomerId }}',\n  'shopify_{{ $json.shopifyStore }}',\n  '',\n  'to_hubspot',\n  'sync',\n  '{{ $json.error }}',\n  '{{ JSON.stringify($json.errorDetails) }}'::jsonb\n) as error_id",
+        "options": {}
+      },
+      "id": "log-error-to-supabase",
+      "name": "Log Error to Supabase",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1650, 500],
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "channel": "#integration-errors",
+        "text": "=❌ Failed to sync Shopify customer to HubSpot\n\nCustomer: {{ $json.email }}\nStore: {{ $json.shopifyStore }}\nError: {{ $json.error }}\n\nPlease check the integration logs for details.",
+        "otherOptions": {}
+      },
+      "id": "send-slack-alert",
+      "name": "Send Slack Alert",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [1850, 500],
+      "credentials": {
+        "slackApi": {
+          "id": "1",
+          "name": "Slack"
+        }
+      },
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Parse Shopify Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Shopify Data": {
+      "main": [
+        [
+          {
+            "node": "Check Existing Sync",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Existing Sync": {
+      "main": [
+        [
+          {
+            "node": "HubSpot Contact Exists?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HubSpot Contact Exists?": {
+      "main": [
+        [
+          {
+            "node": "Search HubSpot by Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Existing Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search HubSpot by Email": {
+      "main": [
+        [
+          {
+            "node": "Contact Found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Contact Found?": {
+      "main": [
+        [
+          {
+            "node": "Create HubSpot Contact",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update HubSpot Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create HubSpot Contact": {
+      "main": [
+        [
+          {
+            "node": "Log Success to Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update HubSpot Contact": {
+      "main": [
+        [
+          {
+            "node": "Log Success to Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Existing Contact": {
+      "main": [
+        [
+          {
+            "node": "Log Success to Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Success to Supabase": {
+      "main": [
+        [
+          {
+            "node": "Log Integration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Error to Supabase": {
+      "main": [
+        [
+          {
+            "node": "Send Slack Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1",
+  "id": "shopify-customer-sync",
+  "meta": {
+    "instanceId": "master-ops"
+  },
+  "tags": []
+}

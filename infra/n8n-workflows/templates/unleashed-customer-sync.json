@@ -1,0 +1,476 @@
+{
+  "name": "Unleashed → HubSpot Customer Sync (B2B Only)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Schedule (Every 6 Hours)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://api.unleashedsoftware.com/Customers/1?pageSize=200",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "api-auth-id",
+              "value": "={{ $env.UNLEASHED_API_ID }}"
+            },
+            {
+              "name": "api-auth-signature",
+              "value": "={{ $env.UNLEASHED_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fetch-unleashed-customers",
+      "name": "Fetch Unleashed Customers",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Split response into individual customer items\nconst response = $input.item.json;\nconst customers = response.Items || [];\n\nreturn customers.map(customer => ({ json: customer }));"
+      },
+      "id": "split-customers",
+      "name": "Split into Items",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "customerCode",
+              "value": "={{ $json.CustomerCode }}"
+            },
+            {
+              "name": "customerName",
+              "value": "={{ $json.CustomerName }}"
+            },
+            {
+              "name": "email",
+              "value": "={{ $json.Email || $json.EmailAddress || '' }}"
+            },
+            {
+              "name": "phone",
+              "value": "={{ $json.PhoneNumber || $json.Mobile || '' }}"
+            },
+            {
+              "name": "address",
+              "value": "={{ JSON.stringify($json.PhysicalAddress) }}"
+            },
+            {
+              "name": "unleashedGuid",
+              "value": "={{ $json.Guid }}"
+            },
+            {
+              "name": "createdOn",
+              "value": "={{ $json.CreatedOn }}"
+            },
+            {
+              "name": "lastModified",
+              "value": "={{ $json.LastModifiedOn }}"
+            }
+          ]
+        }
+      },
+      "id": "parse-customer-data",
+      "name": "Parse Customer Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.email }}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "id": "has-email",
+      "name": "Has Email?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://api.hubapi.com/crm/v3/objects/contacts/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"filterGroups\": [\n    {\n      \"filters\": [\n        {\n          \"propertyName\": \"email\",\n          \"operator\": \"EQ\",\n          \"value\": \"{{ $json.email }}\"\n        }\n      ]\n    }\n  ],\n  \"properties\": [\"email\", \"shopify_customer_id\", \"unleashed_customer_code\"],\n  \"limit\": 1\n}",
+        "options": {}
+      },
+      "id": "search-hubspot-by-email",
+      "name": "Search HubSpot by Email",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1250, 200],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "HubSpot API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.total }}",
+              "operation": "equal",
+              "value2": 0
+            }
+          ]
+        }
+      },
+      "id": "contact-not-found",
+      "name": "Contact Not Found?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1450, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Check if contact has shopify_customer_id\n// If YES = B2C customer (from Shopify, skip)\n// If NO = B2B customer (create in HubSpot)\n\nconst searchResult = $input.item.json;\n\nif (searchResult.total > 0) {\n  const contact = searchResult.results[0];\n  const hasShopifyId = contact.properties.shopify_customer_id;\n  \n  return [{\n    json: {\n      ...contact,\n      isB2C: !!hasShopifyId,\n      isB2B: !hasShopifyId,\n      action: hasShopifyId ? 'skip_b2c' : 'update_b2b'\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    isB2C: false,\n    isB2B: true,\n    action: 'create_b2b'\n  }\n}];"
+      },
+      "id": "check-b2c-b2b",
+      "name": "Check B2C vs B2B",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1650, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.isB2C }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "is-b2c",
+      "name": "Is B2C (Skip)?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1850, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://api.hubapi.com/crm/v3/objects/contacts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"properties\": {\n    \"email\": \"{{ $node['Parse Customer Data'].json.email }}\",\n    \"firstname\": \"{{ $node['Parse Customer Data'].json.customerName.split(' ')[0] }}\",\n    \"lastname\": \"{{ $node['Parse Customer Data'].json.customerName.split(' ').slice(1).join(' ') || 'Unknown' }}\",\n    \"phone\": \"{{ $node['Parse Customer Data'].json.phone }}\",\n    \"contact_type\": \"distributor\",\n    \"wholesale_account\": true,\n    \"source_business\": \"teelixir\",\n    \"unleashed_customer_code\": \"{{ $node['Parse Customer Data'].json.customerCode }}\"\n  }\n}",
+        "options": {}
+      },
+      "id": "create-b2b-contact",
+      "name": "Create B2B Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [2050, 100],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "HubSpot API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.hubapi.com/crm/v3/objects/contacts/{{ $node['Check B2C vs B2B'].json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"properties\": {\n    \"contact_type\": \"distributor\",\n    \"wholesale_account\": true,\n    \"unleashed_customer_code\": \"{{ $node['Parse Customer Data'].json.customerCode }}\"\n  }\n}",
+        "options": {
+          "method": "PATCH"
+        }
+      },
+      "id": "update-b2b-contact",
+      "name": "Update B2B Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [2050, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "HubSpot API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=SELECT log_hubspot_sync(\n  'contact',\n  '{{ $node[\"Parse Customer Data\"].json.unleashedGuid }}',\n  'unleashed',\n  '{{ $json.id }}',\n  'to_hubspot',\n  '{{ $node[\"Check B2C vs B2B\"].json.action }}',\n  '{{ JSON.stringify($json.properties) }}'::jsonb\n) as sync_id",
+        "options": {}
+      },
+      "id": "log-sync",
+      "name": "Log Sync to Supabase",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [2250, 200],
+      "credentials": {
+        "postgres": {
+          "id": "2",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=INSERT INTO integration_logs (\n  source,\n  service,\n  operation,\n  level,\n  status,\n  message,\n  details_json\n) VALUES (\n  'hubspot',\n  'unleashed_sync',\n  'sync_b2b_customer',\n  'info',\n  'success',\n  'Synced B2B customer from Unleashed to HubSpot',\n  '{{ JSON.stringify({\n    unleashed_code: $node[\"Parse Customer Data\"].json.customerCode,\n    hubspot_id: $json.id,\n    email: $node[\"Parse Customer Data\"].json.email,\n    action: $node[\"Check B2C vs B2B\"].json.action\n  }) }}'::jsonb\n)",
+        "options": {}
+      },
+      "id": "log-integration",
+      "name": "Log Integration",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [2450, 200],
+      "credentials": {
+        "postgres": {
+          "id": "2",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=INSERT INTO integration_logs (\n  source,\n  service,\n  operation,\n  level,\n  status,\n  message,\n  details_json\n) VALUES (\n  'hubspot',\n  'unleashed_sync',\n  'skip_b2c_customer',\n  'info',\n  'success',\n  'Skipped B2C customer (already synced from Shopify)',\n  '{{ JSON.stringify({\n    email: $node[\"Parse Customer Data\"].json.email,\n    unleashed_code: $node[\"Parse Customer Data\"].json.customerCode,\n    reason: \"Has shopify_customer_id\"\n  }) }}'::jsonb\n)",
+        "options": {}
+      },
+      "id": "log-skip-b2c",
+      "name": "Log Skip (B2C)",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [2050, 500],
+      "credentials": {
+        "postgres": {
+          "id": "2",
+          "name": "Supabase"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule (Every 6 Hours)": {
+      "main": [
+        [
+          {
+            "node": "Fetch Unleashed Customers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Unleashed Customers": {
+      "main": [
+        [
+          {
+            "node": "Split into Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split into Items": {
+      "main": [
+        [
+          {
+            "node": "Parse Customer Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Customer Data": {
+      "main": [
+        [
+          {
+            "node": "Has Email?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Email?": {
+      "main": [
+        [
+          {
+            "node": "Search HubSpot by Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search HubSpot by Email": {
+      "main": [
+        [
+          {
+            "node": "Contact Not Found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Contact Not Found?": {
+      "main": [
+        [
+          {
+            "node": "Create B2B Contact",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Check B2C vs B2B",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check B2C vs B2B": {
+      "main": [
+        [
+          {
+            "node": "Is B2C (Skip)?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is B2C (Skip)?": {
+      "main": [
+        [
+          {
+            "node": "Log Skip (B2C)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update B2B Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create B2B Contact": {
+      "main": [
+        [
+          {
+            "node": "Log Sync to Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update B2B Contact": {
+      "main": [
+        [
+          {
+            "node": "Log Sync to Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Sync to Supabase": {
+      "main": [
+        [
+          {
+            "node": "Log Integration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1",
+  "id": "unleashed-customer-sync",
+  "meta": {
+    "instanceId": "master-ops"
+  },
+  "tags": []
+}

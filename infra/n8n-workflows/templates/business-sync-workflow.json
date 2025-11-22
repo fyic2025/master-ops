@@ -1,0 +1,170 @@
+{
+  "name": "Business Data Sync - HubSpot",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 */4 * * *"
+            }
+          ]
+        }
+      },
+      "name": "Every 4 Hours",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "command": "cd /root/master-ops && npx tsx examples/02-sync-business-to-hubspot.ts"
+      },
+      "name": "Run Business Sync",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{$json[\"exitCode\"]}}",
+              "operation": "equal",
+              "value2": 0
+            }
+          ]
+        }
+      },
+      "name": "Check Success",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT COUNT(*) as synced_count FROM businesses WHERE hubspot_company_id IS NOT NULL",
+        "additionalFields": {}
+      },
+      "name": "Get Sync Stats",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [850, 200],
+      "credentials": {
+        "postgres": {
+          "id": "2",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "channel": "#sync-alerts",
+        "text": ":warning: Business Sync Failed\n\nSync to HubSpot failed. Check logs for details.\n\nCommand: `ops logs --source=hubspot --errors-only`",
+        "attachments": []
+      },
+      "name": "Send Failure Alert",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [850, 400],
+      "credentials": {
+        "slackApi": {
+          "id": "1",
+          "name": "Slack Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "channel": "#sync-updates",
+        "text": ":white_check_mark: Business Sync Completed\n\n{{$json[\"synced_count\"]}} businesses synced to HubSpot successfully.",
+        "attachments": []
+      },
+      "name": "Send Success Notification",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [1050, 200],
+      "credentials": {
+        "slackApi": {
+          "id": "1",
+          "name": "Slack Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "workflow_execution_logs",
+        "columns": "workflow_id,workflow_name,status,started_at,finished_at",
+        "additionalFields": {}
+      },
+      "name": "Log Execution",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1250, 300],
+      "credentials": {
+        "postgres": {
+          "id": "2",
+          "name": "Supabase"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Every 4 Hours": {
+      "main": [[{
+        "node": "Run Business Sync",
+        "type": "main",
+        "index": 0
+      }]]
+    },
+    "Run Business Sync": {
+      "main": [[{
+        "node": "Check Success",
+        "type": "main",
+        "index": 0
+      }]]
+    },
+    "Check Success": {
+      "main": [
+        [{
+          "node": "Get Sync Stats",
+          "type": "main",
+          "index": 0
+        }],
+        [{
+          "node": "Send Failure Alert",
+          "type": "main",
+          "index": 0
+        }]
+      ]
+    },
+    "Get Sync Stats": {
+      "main": [[{
+        "node": "Send Success Notification",
+        "type": "main",
+        "index": 0
+      }]]
+    },
+    "Send Success Notification": {
+      "main": [[{
+        "node": "Log Execution",
+        "type": "main",
+        "index": 0
+      }]]
+    },
+    "Send Failure Alert": {
+      "main": [[{
+        "node": "Log Execution",
+        "type": "main",
+        "index": 0
+      }]]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "1"
+}

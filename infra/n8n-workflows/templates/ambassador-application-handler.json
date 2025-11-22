@@ -1,0 +1,459 @@
+{
+  "name": "Ambassador Application Handler",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ambassador-application",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "ambassador-application"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "email",
+              "value": "={{ $json.customer.email }}"
+            },
+            {
+              "name": "firstName",
+              "value": "={{ $json.customer.first_name }}"
+            },
+            {
+              "name": "lastName",
+              "value": "={{ $json.customer.last_name }}"
+            },
+            {
+              "name": "phone",
+              "value": "={{ $json.customer.phone }}"
+            },
+            {
+              "name": "customerId",
+              "value": "={{ $json.customer.id }}"
+            },
+            {
+              "name": "tags",
+              "value": "={{ $json.customer.tags }}"
+            },
+            {
+              "name": "note",
+              "value": "={{ $json.customer.note }}"
+            },
+            {
+              "name": "businessName",
+              "value": "={{ $json.customer.note }}"
+            },
+            {
+              "name": "shopifyStore",
+              "value": "teelixir"
+            }
+          ]
+        }
+      },
+      "id": "parse-application",
+      "name": "Parse Application Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.tags }}",
+              "operation": "contains",
+              "value2": "wholesale"
+            }
+          ]
+        }
+      },
+      "id": "is-wholesale-application",
+      "name": "Is Wholesale Application?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://api.hubapi.com/crm/v3/objects/contacts/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"filterGroups\": [\n    {\n      \"filters\": [\n        {\n          \"propertyName\": \"email\",\n          \"operator\": \"EQ\",\n          \"value\": \"{{ $json.email }}\"\n        }\n      ]\n    }\n  ],\n  \"properties\": [\"email\", \"firstname\", \"lastname\"],\n  \"limit\": 1\n}",
+        "options": {}
+      },
+      "id": "search-existing-contact",
+      "name": "Search Existing Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [850, 200],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "HubSpot API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.total }}",
+              "operation": "equal",
+              "value2": 0
+            }
+          ]
+        }
+      },
+      "id": "contact-exists",
+      "name": "Contact Exists?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1050, 200]
+    },
+    {
+      "parameters": {
+        "url": "https://api.hubapi.com/crm/v3/objects/contacts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"properties\": {\n    \"email\": \"{{ $json.email }}\",\n    \"firstname\": \"{{ $json.firstName }}\",\n    \"lastname\": \"{{ $json.lastName }}\",\n    \"phone\": \"{{ $json.phone }}\",\n    \"contact_type\": \"ambassador\",\n    \"ambassador_status\": \"prospect\",\n    \"source_business\": \"teelixir\",\n    \"application_date\": \"{{ new Date().toISOString() }}\",\n    \"shopify_customer_id\": \"{{ $json.customerId }}\",\n    \"wholesale_account\": true\n  }\n}",
+        "options": {}
+      },
+      "id": "create-contact",
+      "name": "Create Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1250, 100],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "HubSpot API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.hubapi.com/crm/v3/objects/contacts/{{ $json.results[0].id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"properties\": {\n    \"contact_type\": \"ambassador\",\n    \"ambassador_status\": \"prospect\",\n    \"application_date\": \"{{ new Date().toISOString() }}\",\n    \"shopify_customer_id\": \"{{ $json.customerId }}\",\n    \"wholesale_account\": true\n  }\n}",
+        "options": {
+          "method": "PATCH"
+        }
+      },
+      "id": "update-contact",
+      "name": "Update Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1250, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "HubSpot API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.hubapi.com/crm/v3/objects/deals",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"properties\": {\n    \"dealname\": \"Ambassador Application - {{ $json.firstName }} {{ $json.lastName }}\",\n    \"dealstage\": \"appointment_scheduled\",\n    \"pipeline\": \"default\",\n    \"deal_source\": \"website_form\",\n    \"source_business\": \"teelixir\",\n    \"closedate\": \"{{ new Date(Date.now() + 14*24*60*60*1000).toISOString() }}\"\n  }\n}",
+        "options": {}
+      },
+      "id": "create-deal",
+      "name": "Create Deal",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1450, 200],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "HubSpot API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.hubapi.com/crm/v3/objects/deals/{{ $json.id }}/associations/contacts/{{ $node[\"Create Contact\"].json.id || $node[\"Update Contact\"].json.id }}/3",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "method": "PUT"
+        }
+      },
+      "id": "associate-deal-contact",
+      "name": "Associate Deal to Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1650, 200],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "HubSpot API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "channel": "#ambassador-applications",
+        "text": "=🌟 New Ambassador Application Received!\n\n👤 Name: {{ $json.firstName }} {{ $json.lastName }}\n📧 Email: {{ $json.email }}\n📱 Phone: {{ $json.phone }}\n🏢 Business: {{ $json.businessName }}\n\n🔗 View in HubSpot: https://app.hubspot.com/contacts/xxxxx/contact/{{ $node[\"Create Contact\"].json.id || $node[\"Update Contact\"].json.id }}\n\nPlease review and approve the application.",
+        "otherOptions": {}
+      },
+      "id": "notify-team",
+      "name": "Notify Team (Slack)",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [1850, 200],
+      "credentials": {
+        "slackApi": {
+          "id": "1",
+          "name": "Slack"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "fromEmail": "ambassadors@teelixir.com.au",
+        "toEmail": "={{ $json.email }}",
+        "subject": "Thank you for your Ambassador Application! 🌟",
+        "emailType": "html",
+        "message": "=<html>\n<body>\n<p>Hi {{ $json.firstName }},</p>\n\n<p>Thank you for applying to become a Teelixir Ambassador!</p>\n\n<p>We've received your application and our team will review it within the next 2-3 business days. We're excited to learn more about you and how we can work together to spread the word about Teelixir's premium medicinal mushrooms.</p>\n\n<p><strong>What happens next?</strong></p>\n<ul>\n<li>Our team will review your application</li>\n<li>If approved, you'll receive an email with your ambassador welcome package</li>\n<li>You'll get access to exclusive wholesale pricing and marketing materials</li>\n</ul>\n\n<p>If you have any questions in the meantime, feel free to reply to this email.</p>\n\n<p>Warm regards,<br>\nThe Teelixir Team</p>\n\n<p style=\"font-size: 12px; color: #666;\">Teelixir - Premium Medicinal Mushrooms</p>\n</body>\n</html>",
+        "options": {}
+      },
+      "id": "send-confirmation-email",
+      "name": "Send Confirmation Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [2050, 200],
+      "credentials": {
+        "smtp": {
+          "id": "3",
+          "name": "SMTP"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=INSERT INTO integration_logs (\n  source,\n  service,\n  operation,\n  level,\n  status,\n  message,\n  details_json\n) VALUES (\n  'hubspot',\n  'ambassador_application',\n  'create_application',\n  'info',\n  'success',\n  'Ambassador application processed',\n  '{{ JSON.stringify({\n    email: $json.email,\n    name: $json.firstName + \" \" + $json.lastName,\n    hubspot_contact_id: $node[\"Create Contact\"].json.id || $node[\"Update Contact\"].json.id,\n    hubspot_deal_id: $node[\"Create Deal\"].json.id\n  }) }}'::jsonb\n)",
+        "options": {}
+      },
+      "id": "log-application",
+      "name": "Log Application",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [2250, 200],
+      "credentials": {
+        "postgres": {
+          "id": "2",
+          "name": "Supabase"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Parse Application Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Application Data": {
+      "main": [
+        [
+          {
+            "node": "Is Wholesale Application?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Wholesale Application?": {
+      "main": [
+        [
+          {
+            "node": "Search Existing Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Existing Contact": {
+      "main": [
+        [
+          {
+            "node": "Contact Exists?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Contact Exists?": {
+      "main": [
+        [
+          {
+            "node": "Create Contact",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Contact": {
+      "main": [
+        [
+          {
+            "node": "Create Deal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Contact": {
+      "main": [
+        [
+          {
+            "node": "Create Deal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Deal": {
+      "main": [
+        [
+          {
+            "node": "Associate Deal to Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Associate Deal to Contact": {
+      "main": [
+        [
+          {
+            "node": "Notify Team (Slack)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Team (Slack)": {
+      "main": [
+        [
+          {
+            "node": "Send Confirmation Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Confirmation Email": {
+      "main": [
+        [
+          {
+            "node": "Log Application",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1",
+  "id": "ambassador-application-handler",
+  "meta": {
+    "instanceId": "master-ops"
+  },
+  "tags": []
+}

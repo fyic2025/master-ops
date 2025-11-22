@@ -1,0 +1,490 @@
+{
+  "name": "Supabase Master-Ops Monitoring",
+  "description": "Comprehensive monitoring dashboard for Master-Ops Supabase database across all 4 businesses",
+  "parameters": [],
+  "ordered_cards": [
+    {
+      "name": "Overall Health Status",
+      "description": "System health based on error rate",
+      "display": "scalar",
+      "visualization_settings": {
+        "scalar.field": "status",
+        "scalar.switch_positive_negative": false
+      },
+      "dataset_query": {
+        "type": "native",
+        "native": {
+          "query": "SELECT \n  CASE \n    WHEN error_rate < 5 THEN 'Healthy ✅'\n    WHEN error_rate < 15 THEN 'Warning ⚠️'\n    ELSE 'Critical 🚨'\n  END as status,\n  ROUND(error_rate, 2) as error_percentage\nFROM (\n  SELECT \n    (COUNT(*) FILTER (WHERE level = 'error')::float / NULLIF(COUNT(*), 0) * 100) as error_rate\n  FROM integration_logs\n  WHERE created_at > NOW() - INTERVAL '24 hours'\n) stats",
+          "template-tags": {}
+        },
+        "database": null
+      },
+      "col": 0,
+      "row": 0,
+      "sizeX": 4,
+      "sizeY": 3
+    },
+    {
+      "name": "Total Operations (24h)",
+      "description": "Total operations across all integrations in last 24 hours",
+      "display": "scalar",
+      "visualization_settings": {
+        "scalar.field": "total_operations"
+      },
+      "dataset_query": {
+        "type": "native",
+        "native": {
+          "query": "SELECT COUNT(*) as total_operations\nFROM integration_logs\nWHERE created_at > NOW() - INTERVAL '24 hours'",
+          "template-tags": {}
+        },
+        "database": null
+      },
+      "col": 4,
+      "row": 0,
+      "sizeX": 4,
+      "sizeY": 3
+    },
+    {
+      "name": "Success Rate (24h)",
+      "description": "Overall success rate for all operations",
+      "display": "gauge",
+      "visualization_settings": {
+        "gauge.segments": [
+          {"min": 0, "max": 75, "color": "#ED6E6E"},
+          {"min": 75, "max": 90, "color": "#F9CF48"},
+          {"min": 90, "max": 100, "color": "#84BB4C"}
+        ]
+      },
+      "dataset_query": {
+        "type": "native",
+        "native": {
+          "query": "SELECT \n  ROUND((COUNT(*) FILTER (WHERE status = 'success')::float / NULLIF(COUNT(*), 0) * 100), 2) as success_rate\nFROM integration_logs\nWHERE created_at > NOW() - INTERVAL '24 hours'",
+          "template-tags": {}
+        },
+        "database": null
+      },
+      "col": 8,
+      "row": 0,
+      "sizeX": 4,
+      "sizeY": 3
+    },
+    {
+      "name": "Active Businesses",
+      "description": "Number of active businesses in system",
+      "display": "scalar",
+      "visualization_settings": {
+        "scalar.field": "active_businesses"
+      },
+      "dataset_query": {
+        "type": "native",
+        "native": {
+          "query": "SELECT COUNT(*) as active_businesses\nFROM businesses\nWHERE status = 'active'",
+          "template-tags": {}
+        },
+        "database": null
+      },
+      "col": 12,
+      "row": 0,
+      "sizeX": 4,
+      "sizeY": 3
+    },
+    {
+      "name": "Operations by Source (24h)",
+      "description": "Integration operations grouped by source",
+      "display": "line",
+      "visualization_settings": {
+        "graph.dimensions": ["time"],
+        "graph.metrics": ["operations"],
+        "graph.x_axis.title_text": "Time",
+        "graph.y_axis.title_text": "Operations"
+      },
+      "dataset_query": {
+        "type": "native",
+        "native": {
+          "query": "SELECT \n  date_trunc('hour', created_at) AS time,\n  source,\n  COUNT(*) as operations\nFROM integration_logs\nWHERE created_at > NOW() - INTERVAL '24 hours'\nGROUP BY date_trunc('hour', created_at), source\nORDER BY time",
+          "template-tags": {}
+        },
+        "database": null
+      },
+      "col": 0,
+      "row": 3,
+      "sizeX": 8,
+      "sizeY": 6
+    },
+    {
+      "name": "Error Rate by Source (24h)",
+      "description": "Error rate percentage by integration source",
+      "display": "line",
+      "visualization_settings": {
+        "graph.dimensions": ["time"],
+        "graph.metrics": ["error_rate"],
+        "graph.x_axis.title_text": "Time",
+        "graph.y_axis.title_text": "Error Rate (%)"
+      },
+      "dataset_query": {
+        "type": "native",
+        "native": {
+          "query": "SELECT \n  date_trunc('hour', created_at) AS time,\n  source,\n  ROUND((COUNT(*) FILTER (WHERE level = 'error')::float / NULLIF(COUNT(*), 0) * 100), 2) as error_rate\nFROM integration_logs\nWHERE created_at > NOW() - INTERVAL '24 hours'\nGROUP BY date_trunc('hour', created_at), source\nORDER BY time",
+          "template-tags": {}
+        },
+        "database": null
+      },
+      "col": 8,
+      "row": 3,
+      "sizeX": 8,
+      "sizeY": 6
+    },
+    {
+      "name": "Integration Health Summary",
+      "description": "Health metrics for each integration source",
+      "display": "table",
+      "visualization_settings": {},
+      "dataset_query": {
+        "type": "native",
+        "native": {
+          "query": "SELECT * FROM integration_health_summary ORDER BY error_rate DESC",
+          "template-tags": {}
+        },
+        "database": null
+      },
+      "col": 0,
+      "row": 9,
+      "sizeX": 8,
+      "sizeY": 6
+    },
+    {
+      "name": "Recent Errors",
+      "description": "Most recent error logs",
+      "display": "table",
+      "visualization_settings": {
+        "table.columns": [
+          {"name": "source", "enabled": true},
+          {"name": "message", "enabled": true},
+          {"name": "created_at", "enabled": true}
+        ]
+      },
+      "dataset_query": {
+        "type": "native",
+        "native": {
+          "query": "SELECT \n  source,\n  service,\n  operation,\n  message,\n  created_at\nFROM integration_logs\nWHERE level = 'error'\n  AND created_at > NOW() - INTERVAL '1 hour'\nORDER BY created_at DESC\nLIMIT 20",
+          "template-tags": {}
+        },
+        "database": null
+      },
+      "col": 8,
+      "row": 9,
+      "sizeX": 8,
+      "sizeY": 6
+    },
+    {
+      "name": "Workflow Success Rate",
+      "description": "Workflow execution status distribution",
+      "display": "pie",
+      "visualization_settings": {
+        "pie.dimension": "status",
+        "pie.metric": "count"
+      },
+      "dataset_query": {
+        "type": "native",
+        "native": {
+          "query": "SELECT \n  status,\n  COUNT(*) as count\nFROM workflow_execution_logs\nWHERE started_at > NOW() - INTERVAL '24 hours'\nGROUP BY status",
+          "template-tags": {}
+        },
+        "database": null
+      },
+      "col": 0,
+      "row": 15,
+      "sizeX": 4,
+      "sizeY": 5
+    },
+    {
+      "name": "Top Workflows by Executions",
+      "description": "Most frequently executed workflows",
+      "display": "bar",
+      "visualization_settings": {
+        "graph.dimensions": ["workflow_name"],
+        "graph.metrics": ["executions"]
+      },
+      "dataset_query": {
+        "type": "native",
+        "native": {
+          "query": "SELECT \n  workflow_name,\n  COUNT(*) as executions\nFROM workflow_execution_logs\nWHERE started_at > NOW() - INTERVAL '24 hours'\nGROUP BY workflow_name\nORDER BY executions DESC\nLIMIT 10",
+          "template-tags": {}
+        },
+        "database": null
+      },
+      "col": 4,
+      "row": 15,
+      "sizeX": 4,
+      "sizeY": 5
+    },
+    {
+      "name": "Business Activity",
+      "description": "Activity metrics per business",
+      "display": "table",
+      "visualization_settings": {},
+      "dataset_query": {
+        "type": "native",
+        "native": {
+          "query": "SELECT * FROM business_activity ORDER BY total_operations DESC",
+          "template-tags": {}
+        },
+        "database": null
+      },
+      "col": 8,
+      "row": 15,
+      "sizeX": 8,
+      "sizeY": 5
+    },
+    {
+      "name": "API Response Time (P95)",
+      "description": "95th percentile API response time by service",
+      "display": "line",
+      "visualization_settings": {
+        "graph.dimensions": ["time"],
+        "graph.metrics": ["p95_duration"],
+        "graph.x_axis.title_text": "Time",
+        "graph.y_axis.title_text": "Response Time (ms)"
+      },
+      "dataset_query": {
+        "type": "native",
+        "native": {
+          "query": "SELECT \n  date_trunc('minute', created_at) AS time,\n  service,\n  percentile_cont(0.95) WITHIN GROUP (ORDER BY duration_ms) as p95_duration\nFROM api_metrics\nWHERE created_at > NOW() - INTERVAL '24 hours'\nGROUP BY date_trunc('minute', created_at), service\nORDER BY time",
+          "template-tags": {}
+        },
+        "database": null
+      },
+      "col": 0,
+      "row": 20,
+      "sizeX": 8,
+      "sizeY": 6
+    },
+    {
+      "name": "Task Status Distribution",
+      "description": "Current task status breakdown",
+      "display": "pie",
+      "visualization_settings": {
+        "pie.dimension": "status",
+        "pie.metric": "count"
+      },
+      "dataset_query": {
+        "type": "native",
+        "native": {
+          "query": "SELECT \n  status,\n  COUNT(*) as count\nFROM tasks\nGROUP BY status",
+          "template-tags": {}
+        },
+        "database": null
+      },
+      "col": 8,
+      "row": 20,
+      "sizeX": 4,
+      "sizeY": 6
+    },
+    {
+      "name": "Database Growth Rate",
+      "description": "New records added today",
+      "display": "scalar",
+      "visualization_settings": {
+        "scalar.field": "rows_today"
+      },
+      "dataset_query": {
+        "type": "native",
+        "native": {
+          "query": "SELECT COUNT(*) as rows_today\nFROM integration_logs\nWHERE created_at::date = CURRENT_DATE",
+          "template-tags": {}
+        },
+        "database": null
+      },
+      "col": 12,
+      "row": 20,
+      "sizeX": 4,
+      "sizeY": 6
+    },
+    {
+      "name": "Stale Integrations Alert",
+      "description": "Integrations with no activity in 24+ hours",
+      "display": "table",
+      "visualization_settings": {
+        "table.columns": [
+          {"name": "source", "enabled": true},
+          {"name": "hours_since_last_activity", "enabled": true},
+          {"name": "last_activity", "enabled": true}
+        ]
+      },
+      "dataset_query": {
+        "type": "native",
+        "native": {
+          "query": "SELECT * FROM stale_integrations ORDER BY hours_since_last_activity DESC",
+          "template-tags": {}
+        },
+        "database": null
+      },
+      "col": 0,
+      "row": 26,
+      "sizeX": 8,
+      "sizeY": 5
+    },
+    {
+      "name": "Businesses Needing Attention",
+      "description": "Businesses with high error rates or stale activity",
+      "display": "table",
+      "visualization_settings": {},
+      "dataset_query": {
+        "type": "native",
+        "native": {
+          "query": "SELECT * FROM businesses_needing_attention ORDER BY error_rate DESC",
+          "template-tags": {}
+        },
+        "database": null
+      },
+      "col": 8,
+      "row": 26,
+      "sizeX": 8,
+      "sizeY": 5
+    },
+    {
+      "name": "Hourly Operation Volume",
+      "description": "Operations and errors by hour for trend analysis",
+      "display": "line",
+      "visualization_settings": {
+        "graph.dimensions": ["hour"],
+        "graph.metrics": ["operations", "errors"],
+        "graph.x_axis.title_text": "Hour",
+        "graph.y_axis.title_text": "Count"
+      },
+      "dataset_query": {
+        "type": "native",
+        "native": {
+          "query": "SELECT\n  date_trunc('hour', created_at) as hour,\n  COUNT(*) as operations,\n  COUNT(*) FILTER (WHERE level = 'error') as errors\nFROM integration_logs\nWHERE created_at > NOW() - INTERVAL '7 days'\nGROUP BY date_trunc('hour', created_at)\nORDER BY hour DESC\nLIMIT 168",
+          "template-tags": {}
+        },
+        "database": null
+      },
+      "col": 0,
+      "row": 31,
+      "sizeX": 8,
+      "sizeY": 6
+    },
+    {
+      "name": "Error Rate Trend (30 days)",
+      "description": "Daily error rate for trend analysis",
+      "display": "line",
+      "visualization_settings": {
+        "graph.dimensions": ["date"],
+        "graph.metrics": ["error_rate"],
+        "graph.x_axis.title_text": "Date",
+        "graph.y_axis.title_text": "Error Rate (%)"
+      },
+      "dataset_query": {
+        "type": "native",
+        "native": {
+          "query": "SELECT\n  created_at::date as date,\n  ROUND((COUNT(*) FILTER (WHERE level = 'error')::float / NULLIF(COUNT(*), 0) * 100), 2) as error_rate\nFROM integration_logs\nWHERE created_at > NOW() - INTERVAL '30 days'\nGROUP BY created_at::date\nORDER BY date DESC",
+          "template-tags": {}
+        },
+        "database": null
+      },
+      "col": 8,
+      "row": 31,
+      "sizeX": 8,
+      "sizeY": 6
+    },
+    {
+      "name": "HubSpot Sync Status",
+      "description": "HubSpot synchronization status per business",
+      "display": "table",
+      "visualization_settings": {},
+      "dataset_query": {
+        "type": "native",
+        "native": {
+          "query": "SELECT * FROM hubspot_sync_status ORDER BY last_sync_at DESC",
+          "template-tags": {}
+        },
+        "database": null
+      },
+      "col": 0,
+      "row": 37,
+      "sizeX": 8,
+      "sizeY": 5
+    },
+    {
+      "name": "Workflow Performance Summary",
+      "description": "Success rates and execution times per workflow",
+      "display": "table",
+      "visualization_settings": {},
+      "dataset_query": {
+        "type": "native",
+        "native": {
+          "query": "SELECT * FROM workflow_performance_summary ORDER BY success_rate ASC",
+          "template-tags": {}
+        },
+        "database": null
+      },
+      "col": 8,
+      "row": 37,
+      "sizeX": 8,
+      "sizeY": 5
+    },
+    {
+      "name": "Latest Lighthouse Scores",
+      "description": "Most recent Lighthouse performance audit scores",
+      "display": "table",
+      "visualization_settings": {},
+      "dataset_query": {
+        "type": "native",
+        "native": {
+          "query": "SELECT * FROM latest_lighthouse_scores ORDER BY performance_score ASC",
+          "template-tags": {}
+        },
+        "database": null
+      },
+      "col": 0,
+      "row": 42,
+      "sizeX": 8,
+      "sizeY": 5
+    },
+    {
+      "name": "Active Performance Alerts",
+      "description": "Currently open performance alerts",
+      "display": "table",
+      "visualization_settings": {},
+      "dataset_query": {
+        "type": "native",
+        "native": {
+          "query": "SELECT * FROM active_performance_alerts ORDER BY severity DESC, created_at DESC",
+          "template-tags": {}
+        },
+        "database": null
+      },
+      "col": 8,
+      "row": 42,
+      "sizeX": 8,
+      "sizeY": 5
+    }
+  ],
+  "filters": [
+    {
+      "name": "Business",
+      "slug": "business",
+      "type": "string/=",
+      "default": null,
+      "sectionId": "string"
+    },
+    {
+      "name": "Source",
+      "slug": "source",
+      "type": "string/=",
+      "default": null,
+      "sectionId": "string"
+    },
+    {
+      "name": "Time Range",
+      "slug": "time_range",
+      "type": "date/range",
+      "default": "past7days",
+      "sectionId": "date"
+    }
+  ],
+  "auto_apply_filters": true,
+  "enable_embedding": false,
+  "cache_ttl": 300
+}

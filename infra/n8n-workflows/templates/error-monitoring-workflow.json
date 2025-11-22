@@ -1,0 +1,177 @@
+{
+  "name": "Error Monitoring & Alerting",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "*/15 * * * *"
+            }
+          ]
+        }
+      },
+      "name": "Every 15 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT source, COUNT(*) as error_count, MAX(created_at) as latest_error, jsonb_agg(DISTINCT message) as error_messages FROM integration_logs WHERE level = 'error' AND created_at > NOW() - INTERVAL '15 minutes' GROUP BY source HAVING COUNT(*) > 0",
+        "additionalFields": {}
+      },
+      "name": "Query Recent Errors",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [450, 300],
+      "credentials": {
+        "postgres": {
+          "id": "2",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{$json[\"error_count\"]}}",
+              "operation": "largerEqual",
+              "value2": 3
+            }
+          ]
+        }
+      },
+      "name": "Check Error Threshold",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "channel": "#critical-alerts",
+        "text": ":rotating_light: *Critical Error Alert*\n\n*Service:* {{$json[\"source\"]}}\n*Error Count:* {{$json[\"error_count\"]}} errors in last 15 minutes\n*Latest Error:* {{$json[\"latest_error\"]}}\n\n*Recent Errors:*\n{{$json[\"error_messages\"]}}\n\n*Action Required:*\n```\nops logs --source={{$json[\"source\"]}} --errors-only -n 20\nops test-integration {{$json[\"source\"]}}\n```",
+        "otherOptions": {
+          "mrkdwn": true
+        },
+        "attachments": []
+      },
+      "name": "Send Critical Alert",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [850, 200],
+      "credentials": {
+        "slackApi": {
+          "id": "1",
+          "name": "Slack Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "channel": "#error-log",
+        "text": ":warning: Error detected in {{$json[\"source\"]}}\n\n{{$json[\"error_count\"]}} errors in last 15 minutes\n\nView details: `ops logs --source={{$json[\"source\"]}} --errors-only`",
+        "attachments": []
+      },
+      "name": "Send Warning",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [850, 400],
+      "credentials": {
+        "slackApi": {
+          "id": "1",
+          "name": "Slack Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "alert_history",
+        "columns": "alert_type,service,error_count,severity,details_json",
+        "additionalFields": {}
+      },
+      "name": "Log Alert",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1050, 300],
+      "credentials": {
+        "postgres": {
+          "id": "2",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{$env[\"PAGERDUTY_WEBHOOK_URL\"]}}",
+        "method": "POST",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "={\n  \"routing_key\": \"{{$env[\"PAGERDUTY_KEY\"]}}\",\n  \"event_action\": \"trigger\",\n  \"payload\": {\n    \"summary\": \"Critical errors in {{$json[\"source\"]}}\",\n    \"severity\": \"error\",\n    \"source\": \"master-ops\",\n    \"custom_details\": {\n      \"error_count\": {{$json[\"error_count\"]}},\n      \"service\": \"{{$json[\"source\"]}}\"\n    }\n  }\n}"
+      },
+      "name": "Trigger PagerDuty",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [1050, 100]
+    }
+  ],
+  "connections": {
+    "Every 15 Minutes": {
+      "main": [[{
+        "node": "Query Recent Errors",
+        "type": "main",
+        "index": 0
+      }]]
+    },
+    "Query Recent Errors": {
+      "main": [[{
+        "node": "Check Error Threshold",
+        "type": "main",
+        "index": 0
+      }]]
+    },
+    "Check Error Threshold": {
+      "main": [
+        [{
+          "node": "Send Critical Alert",
+          "type": "main",
+          "index": 0
+        }],
+        [{
+          "node": "Send Warning",
+          "type": "main",
+          "index": 0
+        }]
+      ]
+    },
+    "Send Critical Alert": {
+      "main": [[
+        {
+          "node": "Trigger PagerDuty",
+          "type": "main",
+          "index": 0
+        },
+        {
+          "node": "Log Alert",
+          "type": "main",
+          "index": 0
+        }
+      ]]
+    },
+    "Send Warning": {
+      "main": [[{
+        "node": "Log Alert",
+        "type": "main",
+        "index": 0
+      }]]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "1"
+}

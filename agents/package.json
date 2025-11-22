@@ -1,0 +1,63 @@
+{
+  "name": "@master-ops/ai-agent-team",
+  "version": "1.0.0",
+  "description": "AI Agent Team for Shopify website optimization - Achieve 100/100 Lighthouse scores",
+  "main": "tools/agent-cli.ts",
+  "bin": {
+    "agent-cli": "./tools/agent-cli.ts"
+  },
+  "scripts": {
+    "build": "tsc",
+    "setup": "ts-node tools/agent-cli.ts setup",
+    "setup:complete": "./scripts/setup-complete.sh",
+    "baseline": "ts-node tools/baseline-audit.ts",
+    "lighthouse:audit": "ts-node tools/agent-cli.ts lighthouse audit",
+    "lighthouse:multi": "ts-node tools/agent-cli.ts lighthouse multi-page",
+    "lighthouse:trends": "ts-node tools/agent-cli.ts lighthouse trends",
+    "deploy": "ts-node tools/agent-cli.ts deploy execute",
+    "deploy:rollback": "ts-node tools/agent-cli.ts deploy rollback",
+    "deploy:list": "ts-node tools/agent-cli.ts deploy list",
+    "monitor:alerts": "ts-node tools/agent-cli.ts monitor alerts",
+    "monitor:scores": "ts-node tools/agent-cli.ts monitor scores",
+    "agent:status": "ts-node tools/agent-cli.ts agent status",
+    "test": "echo \"Tests not yet implemented\"",
+    "db:init": "echo 'Run database-schema.sql in Supabase SQL Editor'"
+  },
+  "keywords": [
+    "shopify",
+    "lighthouse",
+    "performance",
+    "accessibility",
+    "seo",
+    "optimization",
+    "ai",
+    "agents",
+    "claude-code"
+  ],
+  "author": "Master Operations",
+  "license": "MIT",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "commander": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "eslint": "^8.54.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.3.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-org/master-ops.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-org/master-ops/issues"
+  },
+  "homepage": "https://github.com/your-org/master-ops#readme"
+}

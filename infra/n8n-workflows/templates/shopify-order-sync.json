@@ -1,0 +1,464 @@
+{
+  "name": "Shopify Order → HubSpot Deal Sync",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "shopify-order-sync",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "shopify-order-sync"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "orderId",
+              "value": "={{ $json.order.id }}"
+            },
+            {
+              "name": "orderName",
+              "value": "={{ $json.order.name }}"
+            },
+            {
+              "name": "orderNumber",
+              "value": "={{ $json.order.order_number }}"
+            },
+            {
+              "name": "email",
+              "value": "={{ $json.order.email }}"
+            },
+            {
+              "name": "customerEmail",
+              "value": "={{ $json.order.customer?.email || $json.order.email }}"
+            },
+            {
+              "name": "customerId",
+              "value": "={{ $json.order.customer?.id }}"
+            },
+            {
+              "name": "totalPrice",
+              "value": "={{ $json.order.total_price }}"
+            },
+            {
+              "name": "financialStatus",
+              "value": "={{ $json.order.financial_status }}"
+            },
+            {
+              "name": "fulfillmentStatus",
+              "value": "={{ $json.order.fulfillment_status || 'pending' }}"
+            },
+            {
+              "name": "shopifyStore",
+              "value": "={{ $json.store || 'teelixir' }}"
+            },
+            {
+              "name": "createdAt",
+              "value": "={{ $json.order.created_at }}"
+            },
+            {
+              "name": "lineItems",
+              "value": "={{ JSON.stringify($json.order.line_items) }}"
+            },
+            {
+              "name": "tags",
+              "value": "={{ $json.order.tags }}"
+            }
+          ]
+        }
+      },
+      "id": "parse-order-data",
+      "name": "Parse Order Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT get_hubspot_id('{{ $json.customerId }}', 'shopify_{{ $json.shopifyStore }}', 'contact') as hubspot_contact_id",
+        "options": {}
+      },
+      "id": "get-hubspot-contact",
+      "name": "Get HubSpot Contact ID",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [650, 300],
+      "credentials": {
+        "postgres": {
+          "id": "2",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.hubspot_contact_id }}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "id": "contact-exists",
+      "name": "Contact Exists?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://api.hubapi.com/crm/v3/objects/contacts/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"filterGroups\": [\n    {\n      \"filters\": [\n        {\n          \"propertyName\": \"email\",\n          \"operator\": \"EQ\",\n          \"value\": \"{{ $json.customerEmail }}\"\n        }
+      ]\n    }\n  ],\n  \"properties\": [\"email\"],\n  \"limit\": 1\n}",
+        "options": {}
+      },
+      "id": "search-contact-by-email",
+      "name": "Search Contact by Email",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1050, 400],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "HubSpot API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT get_hubspot_id('{{ $json.orderId }}', 'shopify_{{ $json.shopifyStore }}', 'deal') as hubspot_deal_id",
+        "options": {}
+      },
+      "id": "check-deal-exists",
+      "name": "Check Deal Exists",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1050, 200],
+      "credentials": {
+        "postgres": {
+          "id": "2",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.hubspot_deal_id }}",
+              "operation": "isEmpty"
+            }
+          ]
+        }
+      },
+      "id": "deal-exists",
+      "name": "Deal Exists?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1250, 200]
+    },
+    {
+      "parameters": {
+        "url": "https://api.hubapi.com/crm/v3/objects/deals",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"properties\": {\n    \"dealname\": \"Order {{ $json.orderName }} - {{ $json.shopifyStore }}\",\n    \"amount\": {{ $json.totalPrice }},\n    \"dealstage\": \"closedwon\",\n    \"pipeline\": \"default\",\n    \"closedate\": \"{{ $json.createdAt }}\",\n    \"deal_source\": \"shopify_order\",\n    \"source_business\": \"{{ $json.shopifyStore }}\",\n    \"shopify_order_id\": \"{{ $json.orderId }}\",\n    \"shopify_order_name\": \"{{ $json.orderName }}\",\n    \"order_total\": {{ $json.totalPrice }},\n    \"fulfillment_status\": \"{{ $json.fulfillmentStatus }}\",\n    \"payment_status\": \"{{ $json.financialStatus }}\",\n    \"products_ordered\": \"{{ $json.lineItems }}\"\n  }\n}",
+        "options": {}
+      },
+      "id": "create-deal",
+      "name": "Create Deal",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1450, 100],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "HubSpot API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.hubapi.com/crm/v3/objects/deals/{{ $node[\"Check Deal Exists\"].json.hubspot_deal_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"properties\": {\n    \"amount\": {{ $json.totalPrice }},\n    \"order_total\": {{ $json.totalPrice }},\n    \"fulfillment_status\": \"{{ $json.fulfillmentStatus }}\",\n    \"payment_status\": \"{{ $json.financialStatus }}\",\n    \"products_ordered\": \"{{ $json.lineItems }}\"\n  }\n}",
+        "options": {
+          "method": "PATCH"
+        }
+      },
+      "id": "update-deal",
+      "name": "Update Deal",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1450, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "HubSpot API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.hubapi.com/crm/v3/objects/deals/{{ $json.id }}/associations/contacts/{{ $node[\"Get HubSpot Contact ID\"].json.hubspot_contact_id }}/3",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "method": "PUT"
+        }
+      },
+      "id": "associate-deal-contact",
+      "name": "Associate Deal to Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1650, 200],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "HubSpot API"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=SELECT log_hubspot_sync(\n  'deal',\n  '{{ $json.orderId }}',\n  'shopify_{{ $json.shopifyStore }}',\n  '{{ $json.id }}',\n  'to_hubspot',\n  '{{ $node[\"Deal Exists?\"].json.operation || \"create\" }}',\n  '{{ JSON.stringify($json.properties) }}'::jsonb\n) as sync_id",
+        "options": {}
+      },
+      "id": "log-deal-sync",
+      "name": "Log Deal Sync",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1850, 200],
+      "credentials": {
+        "postgres": {
+          "id": "2",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=INSERT INTO integration_logs (\n  source,\n  service,\n  operation,\n  level,\n  status,\n  message,\n  details_json\n) VALUES (\n  'hubspot',\n  'order_sync',\n  'sync_order',\n  'info',\n  'success',\n  'Synced Shopify order to HubSpot deal',\n  '{{ JSON.stringify({\n    shopify_order_id: $json.orderId,\n    hubspot_deal_id: $json.id,\n    order_name: $json.orderName,\n    amount: $json.totalPrice,\n    store: $json.shopifyStore\n  }) }}'::jsonb\n)",
+        "options": {}
+      },
+      "id": "log-integration",
+      "name": "Log Integration",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [2050, 200],
+      "credentials": {
+        "postgres": {
+          "id": "2",
+          "name": "Supabase"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Parse Order Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Order Data": {
+      "main": [
+        [
+          {
+            "node": "Get HubSpot Contact ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get HubSpot Contact ID": {
+      "main": [
+        [
+          {
+            "node": "Contact Exists?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Contact Exists?": {
+      "main": [
+        [
+          {
+            "node": "Check Deal Exists",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Search Contact by Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Contact by Email": {
+      "main": [
+        [
+          {
+            "node": "Check Deal Exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Deal Exists": {
+      "main": [
+        [
+          {
+            "node": "Deal Exists?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deal Exists?": {
+      "main": [
+        [
+          {
+            "node": "Create Deal",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Deal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Deal": {
+      "main": [
+        [
+          {
+            "node": "Associate Deal to Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Deal": {
+      "main": [
+        [
+          {
+            "node": "Associate Deal to Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Associate Deal to Contact": {
+      "main": [
+        [
+          {
+            "node": "Log Deal Sync",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Deal Sync": {
+      "main": [
+        [
+          {
+            "node": "Log Integration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1",
+  "id": "shopify-order-sync",
+  "meta": {
+    "instanceId": "master-ops"
+  },
+  "tags": []
+}
