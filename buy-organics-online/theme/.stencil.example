@@ -1,0 +1,6 @@
+{
+  "normalStoreUrl": "https://store-hhhi.mybigcommerce.com",
+  "accessToken": "your_access_token_here",
+  "port": 3000,
+  "apiVersion": "v3"
+}

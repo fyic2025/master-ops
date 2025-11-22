@@ -135,3 +135,7 @@ $RECYCLE.BIN/
 .directory
 .Trash-*
 .nfs*
+
+# BigCommerce credentials
+**/.stencil
+**/secrets.stencil.json

@@ -1,0 +1,104 @@
+<ul class="tabs" data-tab>
+    <li class="tab is-active">
+        <a class="tab-title" href="#tab-description">{{lang 'products.description'}}</a>
+    </li>
+    {{#if product.warranty}}
+        <li class="tab">
+            <a class="tab-title" href="#tab-warranty">{{lang 'products.warranty'}}</a>
+        </li>
+    {{/if}}
+    {{#all product.custom_fields theme_settings.show_custom_fields_tabs}}
+        <li class="tab">
+            <a class="tab-title" href="#tab-{{dashcase (lowercase (sanitize theme_settings.pdp-custom-fields-tab-label))}}">{{sanitize theme_settings.pdp-custom-fields-tab-label}}</a>
+        </li>
+    {{/all}}
+    {{#all settings.show_product_reviews theme_settings.show_product_reviews product.reviews.total}}
+        <li class="tab">
+            <a class="tab-title productView-reviewTabLink" href="#tab-reviews">{{lang 'products.reviews.header' total=product.reviews.total}}</a>
+        </li>
+    {{/all}}
+    <li class="tab">
+        <a class="tab-title productView-reviewTabLink" href="#tab-reviews">Reviews</a>
+    </li>
+</ul>
+<div class="tabs-contents">
+    <div class="tab-content is-active" id="tab-description">
+        {{{product.description}}}
+    </div>
+   {{#if product.warranty}}
+       <div class="tab-content" id="tab-warranty">
+           {{{product.warranty}}}
+       </div>
+   {{/if}}
+   {{#all product.custom_fields theme_settings.show_custom_fields_tabs}}
+      <div class="tab-content" id="tab-{{dashcase (lowercase (sanitize theme_settings.pdp-custom-fields-tab-label))}}">
+         <dl class="productView-info">
+            {{#each product.custom_fields}}
+               <dt class="productView-info-name">{{name}}:</dt>
+               <dd class="productView-info-value">{{{value}}}</dd>
+            {{/each}}
+         </dl>
+      </div>
+   {{/all}}
+   {{#all settings.show_product_reviews theme_settings.show_product_reviews}}
+       <div class="tab-content" id="tab-reviews">
+           {{> components/products/reviews reviews=product.reviews product=product urls=urls}}
+       </div>
+   {{/all}}
+   <div class="tab-content" id="tab-reviews">
+       <div id="ReviewsWidget"></div>
+        <link rel="stylesheet" href="https://d1azc1qln24ryf.cloudfront.net/40686/revsglobal-pr-mod/style-cf.css?-c0avz5">
+        <script src="https://widget.reviews.co.uk/combined/dist.js?v1" defer></script>
+        <link rel="stylesheet" href="https://widget.reviews.co.uk/combined/style.css?v1">
+        
+        <script>
+            new ReviewsWidget('#ReviewsWidget', {
+                store: 'buy-organics-online',
+                widget: 'combined-widget',
+                options: {
+                    types: 'product_review',
+                    per_page: 10,
+                    /* Product Reviews Settings */
+                    product_review: {
+                        sku: '{{product.id}}',
+                        
+                        structured_data: {
+    
+                          brand: '{{product.brand.name}}',
+                          mpn: '{{product.upc}}',
+                          
+                          description: '',
+                          
+                          offers: [{
+                            type: 'Offer',
+                            priceCurrency: '{{currency_selector.active_currency_code}}',
+                            
+                            price: '{{product.price.with_tax.value}}',
+                            
+                            itemCondition: 'http://schema.org/NewCondition',
+                            availability: 'http://schema.org/{{#if product.pre_order}}PreOrder{{else if product.out_of_stock}}OutOfStock{{else if product.can_purchase '===' false}}OutOfStock{{else}}InStock{{/if}}',
+                            url: '{{product.url}}',
+                            priceValidUntil: '{{moment "now" "YYYY"}}',
+                            
+                        }]
+                            
+                        },
+                        
+    
+                    }
+                }
+            });
+        </script>
+        <style>
+            .CombinedWidget.reviews-combined-widget .RatingStars i.RatingStars__star
+            {
+                color: #ffa500;
+            }
+            .ruk_rating_snippet
+            {
+                display: flex;
+                align-items: baseline;
+            }
+        </style>
+   </div>
+</div>
