@@ -52,6 +52,17 @@ Key additions:
 - **`hide-kalsio-product.js`** - Script to hide invalid product via API
 - **`process-gsc-exports.js`** - Processes GSC export data
 
+**Running Scripts:**
+```bash
+# Copy .env.example to .env and add your credentials
+cp .env.example .env
+
+# Edit .env with your BigCommerce API credentials
+# Then run scripts:
+node process-all-404s.js
+node fix-all-404s.js
+```
+
 ### Documentation
 
 - **`COMPLETE-404-FIX-GUIDE.md`** - Complete implementation guide

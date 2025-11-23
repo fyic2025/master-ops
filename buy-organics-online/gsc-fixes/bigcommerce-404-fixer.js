@@ -2,9 +2,9 @@ const https = require('https');
 const fs = require('fs');
 
 // BigCommerce API Credentials
-const STORE_HASH = 's-hhhi';  // Extracted from CDN URLs
-const ACCESS_TOKEN = '53109ca1d454eb5b4db3ee0914ae51f82dd99f36328f66bb1872b33611df8779';
-const CLIENT_ID = 'kwdwl551b9w1u0nmyg4rwhr1up086ms';
+const STORE_HASH = process.env.BC_STORE_HASH || 'YOUR_STORE_HASH';
+const ACCESS_TOKEN = process.env.BC_ACCESS_TOKEN || 'YOUR_ACCESS_TOKEN';
+const CLIENT_ID = process.env.BC_CLIENT_ID || 'YOUR_CLIENT_ID';
 
 // 404 URLs from GSC (excluding API endpoints and special files)
 const PRODUCT_404_URLS = [

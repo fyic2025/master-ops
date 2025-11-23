@@ -1,7 +1,7 @@
 const https = require('https');
 
-const STORE_HASH = 's-hhhi';
-const ACCESS_TOKEN = '53109ca1d454eb5b4db3ee0914ae51f82dd99f36328f66bb1872b33611df8779';
+const STORE_HASH = process.env.BC_STORE_HASH || 'YOUR_STORE_HASH';
+const ACCESS_TOKEN = process.env.BC_ACCESS_TOKEN || 'YOUR_ACCESS_TOKEN';
 
 console.log('Searching for Kalsio calcium supplement product...\n');
 
