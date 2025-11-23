@@ -1,0 +1,10 @@
+{
+  "sequences": [
+    {
+      "seq_number": 4,
+      "seq_delay_details": {"delay_in_days": 7},
+      "subject": "Final follow-up - {{company_name}}",
+      "email_body": "<p>Last email about the Teelixir partnership.</p><p><strong>Summary:</strong></p><ul><li>10-25% commission on wellness products</li><li>$0 to start, no ongoing costs</li><li>Avg partner: $250/month passive income</li><li>Set up in 5 minutes</li></ul><p>If this interests {{company_name}}, apply here: <a href=\"https://teelixir.com/pages/ambassador-program\">https://teelixir.com/pages/ambassador-program</a></p><p>If not, no worries - I'll close your file.</p><p>Best regards,<br>Teelixir Partnerships</p>"
+    }
+  ]
+}

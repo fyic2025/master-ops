@@ -9,7 +9,7 @@ dotenv.config();
 
 const N8N_BASE_URL = process.env.N8N_BASE_URL;
 const N8N_API_KEY = process.env.N8N_API_KEY;
-const WORKFLOW_ID = '9Q1cCAnZh0yyqVsP';
+const WORKFLOW_ID = '0pogf2zEuEcRup83';
 
 async function checkAndActivate() {
   console.log('🔍 Checking n8n workflow status...\n');

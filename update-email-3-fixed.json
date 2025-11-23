@@ -1,0 +1,6 @@
+{
+  "seq_number": 3,
+  "seq_delay_details": {"delay_in_days": 5},
+  "subject": "{{company_name}} - wellness product revenue",
+  "email_body": "<p>Quick check-in about the Ambassador program for {{company_name}}.</p><p><strong>What makes this different:</strong></p><ul><li>Zero investment required</li><li>No inventory management</li><li>Products ship directly from us</li><li>You focus on your business, earn passive commissions</li></ul><p>Most beauty/wellness businesses who join say they wish they'd started sooner.</p><p>Full details: <a href=\"https://teelixir.com.au/pages/teelixir-wholesale-support/\">https://teelixir.com.au/pages/teelixir-wholesale-support/</a></p><p>Worth 5 minutes?</p><p>Teelixir Team</p>"
+}
