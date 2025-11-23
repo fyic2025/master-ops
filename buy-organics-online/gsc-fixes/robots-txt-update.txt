@@ -1,0 +1,17 @@
+# Add these lines to your BigCommerce robots.txt
+# This will prevent Google from indexing API endpoints and special files
+
+# Block API endpoints from being crawled
+Disallow: /api/
+Disallow: /api/storefront/
+Disallow: /your/api/
+
+# Block Android app deep linking file (if not using Android app)
+Disallow: /.well-known/assetlinks.json
+
+# How to update robots.txt in BigCommerce:
+# 1. Log into BigCommerce admin
+# 2. Go to: Server Settings > Robots.txt
+# 3. Add the above lines to your existing robots.txt
+# 4. Save changes
+# 5. Verify at: https://www.buyorganicsonline.com.au/robots.txt

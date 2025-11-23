@@ -1,0 +1,3 @@
+Domain,Old Path,Manual URL/Path,Dynamic Target Type,Dynamic Target ID
+your-domain.com,/old-path,/new-path,,
+your-domain.com,/dynamic-product-redirect,,Product,123

@@ -1,0 +1,8 @@
+# Block RSS feeds from being crawled
+Disallow: /rss.php
+
+# Block API endpoints from being crawled
+Disallow: /api/
+
+# Block specific paths that don't exist
+Disallow: /.well-known/assetlinks.json

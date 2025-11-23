@@ -1,0 +1,3 @@
+https://www.buyorganicsonline.com.au/rss.php?action=searchproducts&type=rss
+https://www.buyorganicsonline.com.au/rss.php?action=popularproducts&type=atom
+https://www.buyorganicsonline.com.au/rss.php?action=popularproducts&type=rss
