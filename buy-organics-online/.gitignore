@@ -1,0 +1,19 @@
+
+# Sensitive files with API keys and credentials
+EC2-2-ACTIVE-SYNC-DISCOVERY.md
+TEELIXIR-UNLEASHED-SHOPIFY-ANALYSIS.md
+ec2-2-source-code/helpers/chatgpt.helpers.js
+ec2-2-source-code/helpers/kik.helpers.js
+
+# Downloaded EC2 files (may contain credentials)
+ec2-2-source-code/
+
+# Environment files
+.env
+.env.local
+*.pem
+download-files/
+
+# Backup files
+*-old.ts
+*-old.js
