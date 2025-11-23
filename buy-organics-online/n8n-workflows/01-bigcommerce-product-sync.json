@@ -1,0 +1,227 @@
+{
+  "name": "BOO - BigCommerce Product Sync",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 3 * * *"
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO automation_logs (workflow_name, workflow_type, status, started_at) VALUES ('BOO - BigCommerce Product Sync', 'product_sync', 'running', NOW()) RETURNING id",
+        "additionalFields": {}
+      },
+      "id": "log-start",
+      "name": "Log Start",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [450, 300],
+      "credentials": {
+        "supabaseApi": {
+          "id": "supabase-boo",
+          "name": "Supabase - BOO"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.bigcommerce.com/stores/hhhi/v3/catalog/products?include=variants,images&limit=250&page={{ $json.page || 1 }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "fetch-bc-products",
+      "name": "Fetch BC Products",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [650, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "bigcommerce-boo",
+          "name": "BigCommerce - BOO"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "jsonata",
+        "jsonataExpression": "data"
+      },
+      "id": "extract-products",
+      "name": "Extract Products",
+      "type": "n8n-nodes-base.itemLists",
+      "typeVersion": 3.4,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const products = $input.all();\nconst transformed = [];\n\nfor (const product of products) {\n  const p = product.json;\n  \n  // Transform to our schema\n  transformed.push({\n    product_id: p.id,\n    variant_id: p.variant_id || null,\n    sku: p.sku,\n    name: p.name,\n    price: parseFloat(p.price) || 0,\n    sale_price: parseFloat(p.sale_price) || null,\n    cost_price: parseFloat(p.cost_price) || null,\n    retail_price: parseFloat(p.retail_price) || null,\n    inventory_level: parseInt(p.inventory_level) || 0,\n    is_visible: p.is_visible || true,\n    availability: p.availability || 'available',\n    barcode: p.upc || p.gtin || p.ean || null,\n    gtin: p.gtin || null,\n    upc: p.upc || null,\n    ean: p.ean || null,\n    mpn: p.mpn || null,\n    brand: p.brand_name || null,\n    weight: parseFloat(p.weight) || null,\n    width: parseFloat(p.width) || null,\n    height: parseFloat(p.height) || null,\n    depth: parseFloat(p.depth) || null,\n    categories: JSON.stringify(p.categories || []),\n    images: JSON.stringify(p.images || []),\n    custom_fields: JSON.stringify(p.custom_fields || []),\n    metadata: JSON.stringify({\n      type: p.type,\n      description: p.description,\n      page_title: p.page_title,\n      meta_description: p.meta_description,\n      condition: p.condition,\n      sort_order: p.sort_order,\n      bin_picking_number: p.bin_picking_number\n    }),\n    last_synced_at: new Date().toISOString()\n  });\n}\n\nreturn transformed.map(item => ({ json: item }));"
+      },
+      "id": "transform-data",
+      "name": "Transform Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "table": "ecommerce_products",
+        "onConflict": "sku",
+        "options": {}
+      },
+      "id": "upsert-to-supabase",
+      "name": "Upsert to Supabase",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [1250, 300],
+      "credentials": {
+        "supabaseApi": {
+          "id": "supabase-boo",
+          "name": "Supabase - BOO"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "has-next-page",
+              "leftValue": "={{ $('Fetch BC Products').item.json.meta.pagination.current_page }}",
+              "rightValue": "={{ $('Fetch BC Products').item.json.meta.pagination.total_pages }}",
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-more-pages",
+      "name": "Check More Pages",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1450, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{\n  json: {\n    page: ($('Fetch BC Products').item.json.meta.pagination.current_page || 0) + 1\n  }\n}];"
+      },
+      "id": "next-page",
+      "name": "Next Page",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1650, 200]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=UPDATE automation_logs SET status='success', records_processed={{ $('Fetch BC Products').item.json.meta.pagination.total || 0 }}, completed_at=NOW() WHERE id={{ $('Log Start').item.json[0].id }}",
+        "additionalFields": {}
+      },
+      "id": "log-success",
+      "name": "Log Success",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [1650, 400],
+      "credentials": {
+        "supabaseApi": {
+          "id": "supabase-boo",
+          "name": "Supabase - BOO"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=UPDATE automation_logs SET status='error', error_details=jsonb_build_object('message', '{{ $json.message }}'), completed_at=NOW() WHERE id={{ $('Log Start').item.json[0].id }}",
+        "additionalFields": {}
+      },
+      "id": "log-error",
+      "name": "Log Error",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [850, 500],
+      "credentials": {
+        "supabaseApi": {
+          "id": "supabase-boo",
+          "name": "Supabase - BOO"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [[{ "node": "Log Start", "type": "main", "index": 0 }]]
+    },
+    "Log Start": {
+      "main": [[{ "node": "Fetch BC Products", "type": "main", "index": 0 }]]
+    },
+    "Fetch BC Products": {
+      "main": [[{ "node": "Extract Products", "type": "main", "index": 0 }]]
+    },
+    "Extract Products": {
+      "main": [[{ "node": "Transform Data", "type": "main", "index": 0 }]]
+    },
+    "Transform Data": {
+      "main": [[{ "node": "Upsert to Supabase", "type": "main", "index": 0 }]]
+    },
+    "Upsert to Supabase": {
+      "main": [[{ "node": "Check More Pages", "type": "main", "index": 0 }]]
+    },
+    "Check More Pages": {
+      "main": [
+        [{ "node": "Next Page", "type": "main", "index": 0 }],
+        [{ "node": "Log Success", "type": "main", "index": 0 }]
+      ]
+    },
+    "Next Page": {
+      "main": [[{ "node": "Fetch BC Products", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": ""
+  },
+  "versionId": "",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "automation.growthcohq.com"
+  },
+  "id": "",
+  "tags": [
+    {
+      "name": "BOO",
+      "createdAt": ""
+    },
+    {
+      "name": "Product Sync",
+      "createdAt": ""
+    }
+  ]
+}

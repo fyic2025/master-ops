@@ -1,0 +1,32 @@
+{
+  "backup_date": "2025-11-22T10:27:30.073Z",
+  "active_theme": {
+    "uuid": "29a94020-a117-013b-d9f3-12e86e7e6270",
+    "variations": [
+      {
+        "uuid": "2a8e1c00-a117-013b-d9f3-12e86e7e6270",
+        "name": "Light",
+        "description": "Ideal for a wide range of businesses and brands, this design is fully responsive, simple, and ready for you to add your branding, logo, and products. It comes ready to build a clean looking and beautiful store with features such as homepage carousel, social media icons, featured and top selling products, and faceted search (which is available on select BigCommerce plans). Fully express your brand by using our Theme Editor to quickly and easily style your site's fonts and colors, all without the need to write code.",
+        "external_id": "light"
+      },
+      {
+        "uuid": "2ae89600-a117-013b-d9f3-12e86e7e6270",
+        "name": "Bold",
+        "description": "Ideal for a wide range of businesses and brands, this design is fully responsive, simple, and ready for you to add your branding, logo, and products. It comes ready to build a clean looking and beautiful store with features such as homepage carousel, social media icons, featured and top selling products, and faceted search (which is available on select BigCommerce plans). Fully express your brand by using our Theme Editor to quickly and easily style your site's fonts and colors, all without the need to write code.",
+        "external_id": "bold"
+      },
+      {
+        "uuid": "2b175ab0-a117-013b-d9f3-12e86e7e6270",
+        "name": "Warm",
+        "description": "Ideal for a wide range of businesses and brands, this design is fully responsive, simple, and ready for you to add your branding, logo, and products. It comes ready to build a clean looking and beautiful store with features such as homepage carousel, social media icons, featured and top selling products, and faceted search (which is available on select BigCommerce plans). Fully express your brand by using our Theme Editor to quickly and easily style your site's fonts and colors, all without the need to write code.",
+        "external_id": "warm"
+      }
+    ],
+    "name": "Cornerstone-BOO-Cust",
+    "is_private": true,
+    "is_active": true,
+    "updated_at": "2025-10-29T01:08:25Z"
+  },
+  "store_url": "https://store-hhhi.mybigcommerce.com",
+  "rollback_instructions": "To rollback, go to BigCommerce Admin → Storefront → My Themes, find the previous theme and click Apply"
+}

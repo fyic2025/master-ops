@@ -1,0 +1,1 @@
+<?php interface Supplier{    public function update();}

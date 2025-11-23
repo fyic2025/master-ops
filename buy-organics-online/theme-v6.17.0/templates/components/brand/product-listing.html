@@ -1,0 +1,37 @@
+{{> components/products/filter sort=pagination.brand.sort}}
+
+<form action="{{urls.compare}}" method='POST' {{#if settings.data_tag_enabled}} data-list-name="Brand: {{brand.name}}" {{/if}} data-product-compare>
+    {{#if theme_settings.product_list_display_mode '===' 'grid'}}
+        {{> components/products/grid products=brand.products show_compare=brand.show_compare theme_settings=theme_settings event="list"}}
+    {{else}}
+        {{> components/products/list products=brand.products show_compare=brand.show_compare theme_settings=theme_settings event="list"}}
+    {{/if}}
+    <div id="ProductloadingStatus" class="page-load-status">
+        <div class="infinite-scroll-request">
+            <img src="{{cdn 'img/loading.svg'}}" alt="Loading" />
+        </div>
+    </div>
+</form>
+
+<div id="more">
+{{> components/common/paginator pagination.brand}}
+</div>
+
+{{!-- jQuery is already bundled in theme-bundle.main.js --}}
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-infinitescroll/3.0.2/infinite-scroll.pkgd.min.js" defer></script>
+<script type="text/javascript">
+// Only initialize infinite scroll on brand listing pages
+$(document).ready(function() {
+    // Only run if we have pagination, a product grid, and the product compare form (not on cart)
+    if ($('#more .pagination-item--next').length > 0 &&
+        $('.productGrid').length > 0 &&
+        $('form[data-product-compare]').length > 0) {
+        $('.productGrid').infiniteScroll({
+            path: '#more .pagination-item--next > a',
+            append: '.product',
+            history: false,
+            status: '#ProductloadingStatus'
+        });
+    }
+});
+</script>
