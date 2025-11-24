@@ -1,0 +1,55 @@
+# ==============================================================================
+# SECURITY: Prevent credential leaks
+# ==============================================================================
+# Add these lines to your .gitignore file
+
+# Environment files with credentials
+.env
+.env.local
+.env.production
+.env.development
+.env.*.local
+*.env
+
+# Master credentials file
+MASTER-CREDENTIALS-COMPLETE.env
+*CREDENTIALS*.env
+
+# Backup files from security cleanup
+*.backup
+
+# AWS credentials
+.aws/credentials
+.aws/config
+
+# Database dumps with sensitive data
+*.sql
+*.dump
+
+# Configuration files with secrets
+config/secrets.json
+config/credentials.json
+secrets.json
+credentials.json
+
+# IDE/Editor files that may contain secrets
+.vscode/settings.json
+.idea/
+
+# Logs that may contain sensitive data
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+temp/
+tmp/
+*.tmp
+
+# SSH keys
+*.pem
+*.key
+id_rsa
+id_rsa.pub
