@@ -1,5 +1,52 @@
 # Session Notes - 2025-11-25
 
+---
+
+## 🚨 ACTION REQUIRED - Customer Interactions System Ready
+
+**Status:** Code complete, awaiting credentials to run initial sync
+
+### What Was Built (This Session)
+Full system for syncing LiveChat + Email to Supabase for customer intelligence:
+
+| Component | File | Status |
+|-----------|------|--------|
+| Database Schema | `supabase/customer-interactions-schema.sql` | ✅ Ready to apply |
+| LiveChat Sync | `scripts/sync-livechat-to-supabase.ts` | ✅ Code complete |
+| Email Sync | `scripts/sync-email-to-supabase.ts` | ✅ Code complete |
+| Categorization | `scripts/categorize-interactions.ts` | ✅ 20+ patterns |
+| Analytics | `scripts/analyze-customer-interactions.ts` | ✅ Code complete |
+| Setup Test | `scripts/test-customer-interactions-setup.ts` | ✅ Code complete |
+| n8n Workflow | `infra/n8n-workflows/templates/customer-interactions-sync.json` | ✅ Template ready |
+| Documentation | `CUSTOMER-INTERACTIONS-README.md` | ✅ Complete guide |
+
+### Your Action Items
+
+```bash
+# 1. Apply schema to Supabase (BOO database: usibnysqelovfuctmkqw)
+#    Run in SQL Editor: buy-organics-online/supabase/customer-interactions-schema.sql
+
+# 2. Set up credentials in your .env file:
+BOO_LIVECHAT_PAT_BASE64=<base64 of 19fb8d83-75ec-4419-8b98-ed4f64766cd0:YOUR_PAT>
+BOO_SALES_IMAP_PASS=<16-char Gmail app password for sales@buyorganicsonline.com.au>
+
+# 3. Test setup
+npx tsx buy-organics-online/scripts/test-customer-interactions-setup.ts
+
+# 4. Run initial sync (12 months of history)
+npx tsx buy-organics-online/scripts/sync-livechat-to-supabase.ts --full
+npx tsx buy-organics-online/scripts/sync-email-to-supabase.ts --full
+
+# 5. Analyze results
+npx tsx buy-organics-online/scripts/categorize-interactions.ts
+npx tsx buy-organics-online/scripts/analyze-customer-interactions.ts
+```
+
+### Goal
+Identify top customer queries to understand what AI agent needs to handle for automated responses.
+
+---
+
 ## LiveChat Integration
 
 ### Connection Status: ✅ WORKING
