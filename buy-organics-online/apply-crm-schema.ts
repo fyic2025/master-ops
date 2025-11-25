@@ -1,58 +1,88 @@
 /**
  * Apply CRM Schema to Supabase
  *
- * This script reads the CRM schema SQL file and applies it to Supabase
- * using the Supabase client's RPC/SQL execution capability.
+ * This script applies the CRM schema SQL to the BOO Supabase database
+ * using a direct PostgreSQL connection.
  *
  * Run: npx tsx apply-crm-schema.ts
  */
 
-import { createClient } from '@supabase/supabase-js'
+import { Pool } from 'pg'
 import * as fs from 'fs'
 import * as path from 'path'
 
-// Configuration
-const SUPABASE_URL = process.env.BOO_SUPABASE_URL || 'https://usibnysqelovfuctmkqw.supabase.co'
-const SUPABASE_SERVICE_ROLE_KEY = process.env.BOO_SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzaWJueXNxZWxvdmZ1Y3Rta3F3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDQ4ODA4OCwiZXhwIjoyMDY2MDY0MDg4fQ.B9uihsaUvwkJWFAuKAtu7uij1KiXVoiHPHa9mm-Tz1s'
+// Database connection string for BOO Supabase
+// Try direct connection first, fallback to pooler
+const connectionString = process.env.BOO_SUPABASE_CONNECTION_STRING ||
+  `postgresql://postgres:${encodeURIComponent('Welcome1A20301qaz')}@db.usibnysqelovfuctmkqw.supabase.co:5432/postgres`
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+const pool = new Pool({
+  connectionString,
+  ssl: { rejectUnauthorized: false },
+  connectionTimeoutMillis: 30000,
+  idleTimeoutMillis: 30000,
+})
+
+/**
+ * Execute a single SQL statement
+ */
+async function executeSql(sql: string, statementNum: number, total: number): Promise<boolean> {
+  const client = await pool.connect()
+  try {
+    await client.query(sql)
+    return true
+  } catch (error: any) {
+    // Ignore "already exists" errors
+    if (error.message.includes('already exists') ||
+        error.message.includes('duplicate key') ||
+        error.message.includes('relation') && error.message.includes('already exists')) {
+      console.log(`   [${statementNum}/${total}] Skipped (already exists)`)
+      return true
+    }
+    console.error(`   [${statementNum}/${total}] Error: ${error.message.substring(0, 100)}`)
+    return false
+  } finally {
+    client.release()
+  }
+}
 
 /**
  * Split SQL file into individual statements
  */
 function splitSqlStatements(sql: string): string[] {
-  // Remove comments
-  let cleanSql = sql
-    .replace(/--[^\n]*/g, '') // Remove single line comments
-    .replace(/\/\*[\s\S]*?\*\//g, '') // Remove multi-line comments
-
-  // Split by semicolons, but be careful with functions
   const statements: string[] = []
   let currentStatement = ''
-  let inFunction = false
-  let dollarQuote = ''
+  let inDollarQuote = false
+  let dollarQuoteTag = ''
 
-  const lines = cleanSql.split('\n')
+  const lines = sql.split('\n')
 
   for (const line of lines) {
-    const trimmedLine = line.trim()
+    // Skip pure comment lines
+    if (line.trim().startsWith('--') && !inDollarQuote) {
+      continue
+    }
 
-    // Check for $$ or $something$ dollar quoting
-    const dollarMatch = trimmedLine.match(/\$[\w]*\$/)
-    if (dollarMatch && !inFunction) {
-      inFunction = true
-      dollarQuote = dollarMatch[0]
-    } else if (dollarMatch && dollarMatch[0] === dollarQuote && inFunction) {
-      inFunction = false
-      dollarQuote = ''
+    // Check for dollar quoting (used in functions)
+    const dollarMatches = line.match(/\$[\w]*\$/g)
+    if (dollarMatches) {
+      for (const match of dollarMatches) {
+        if (!inDollarQuote) {
+          inDollarQuote = true
+          dollarQuoteTag = match
+        } else if (match === dollarQuoteTag) {
+          inDollarQuote = false
+          dollarQuoteTag = ''
+        }
+      }
     }
 
     currentStatement += line + '\n'
 
-    // Only split on semicolon if not inside a function
-    if (trimmedLine.endsWith(';') && !inFunction) {
+    // Check if statement is complete
+    if (line.trim().endsWith(';') && !inDollarQuote) {
       const stmt = currentStatement.trim()
-      if (stmt.length > 1) {
+      if (stmt.length > 1 && !stmt.match(/^--/)) {
         statements.push(stmt)
       }
       currentStatement = ''
@@ -61,50 +91,189 @@ function splitSqlStatements(sql: string): string[] {
 
   // Add any remaining statement
   if (currentStatement.trim().length > 1) {
-    statements.push(currentStatement.trim())
+    const stmt = currentStatement.trim()
+    if (!stmt.match(/^--/)) {
+      statements.push(stmt)
+    }
   }
 
   return statements
 }
 
 /**
- * Execute SQL statements one by one
+ * Group related statements (like CREATE TABLE with its indexes)
  */
-async function executeSql(sql: string): Promise<{ success: boolean; error?: string }> {
-  try {
-    const { error } = await supabase.rpc('exec_sql', { sql_query: sql })
+function groupStatements(statements: string[]): string[][] {
+  const groups: string[][] = []
+  let currentGroup: string[] = []
+  let lastTableName = ''
 
-    if (error) {
-      return { success: false, error: error.message }
+  for (const stmt of statements) {
+    const createTableMatch = stmt.match(/CREATE TABLE(?:\s+IF NOT EXISTS)?\s+(\w+)/i)
+    const createIndexMatch = stmt.match(/CREATE INDEX.*ON\s+(\w+)/i)
+    const alterTableMatch = stmt.match(/ALTER TABLE\s+(\w+)/i)
+
+    if (createTableMatch) {
+      // Start new group for table
+      if (currentGroup.length > 0) {
+        groups.push(currentGroup)
+      }
+      currentGroup = [stmt]
+      lastTableName = createTableMatch[1]
+    } else if ((createIndexMatch && createIndexMatch[1] === lastTableName) ||
+               (alterTableMatch && alterTableMatch[1] === lastTableName)) {
+      // Add to current group if related to current table
+      currentGroup.push(stmt)
+    } else {
+      // Standalone statement
+      if (currentGroup.length > 0) {
+        groups.push(currentGroup)
+        currentGroup = []
+        lastTableName = ''
+      }
+      groups.push([stmt])
     }
-    return { success: true }
-  } catch (err: any) {
-    return { success: false, error: err.message }
   }
+
+  if (currentGroup.length > 0) {
+    groups.push(currentGroup)
+  }
+
+  return groups
 }
 
-/**
- * Apply schema using direct REST API
- */
-async function applySchemaViaRest(sql: string): Promise<void> {
-  // Use the Supabase Management API or direct PostgreSQL connection
-  // For now, we'll create individual tables via the Supabase client
-
-  console.log('⚠️  Note: For full schema application, use the Supabase Dashboard SQL Editor')
-  console.log('   URL: https://supabase.com/dashboard/project/usibnysqelovfuctmkqw/sql/new')
+async function main(): Promise<void> {
+  console.log('='.repeat(60))
+  console.log('APPLY CRM SCHEMA TO BOO SUPABASE')
+  console.log('='.repeat(60))
   console.log('')
-  console.log('   Copy the contents of: supabase-schema-crm.sql')
-  console.log('   And paste into the SQL editor, then click "Run"')
+
+  // Read the SQL file
+  const schemaPath = path.join(__dirname, 'supabase-schema-crm.sql')
+
+  if (!fs.existsSync(schemaPath)) {
+    console.error('Schema file not found:', schemaPath)
+    process.exit(1)
+  }
+
+  const schemaSql = fs.readFileSync(schemaPath, 'utf-8')
+  console.log(`Read schema file: ${schemaSql.length} characters`)
+
+  // Test connection
   console.log('')
-}
+  console.log('Testing database connection...')
+  try {
+    const client = await pool.connect()
+    const result = await client.query('SELECT NOW() as time, current_database() as db')
+    console.log(`Connected to: ${result.rows[0].db}`)
+    console.log(`Server time: ${result.rows[0].time}`)
+    client.release()
+  } catch (error: any) {
+    console.error('Connection failed:', error.message)
+    process.exit(1)
+  }
 
-/**
- * Verify tables were created
- */
-async function verifyTables(): Promise<void> {
-  console.log('🔍 Verifying CRM tables...')
+  // Split into statements
+  console.log('')
+  console.log('Parsing SQL statements...')
+  const statements = splitSqlStatements(schemaSql)
+  console.log(`Found ${statements.length} SQL statements`)
 
-  const tables = [
+  // Execute statements
+  console.log('')
+  console.log('Executing schema...')
+  console.log('-'.repeat(40))
+
+  let successful = 0
+  let failed = 0
+  let skipped = 0
+
+  for (let i = 0; i < statements.length; i++) {
+    const stmt = statements[i]
+
+    // Extract what type of statement this is
+    let stmtType = 'Unknown'
+    if (stmt.match(/CREATE TABLE/i)) {
+      const match = stmt.match(/CREATE TABLE(?:\s+IF NOT EXISTS)?\s+(\w+)/i)
+      stmtType = `CREATE TABLE ${match?.[1] || ''}`
+    } else if (stmt.match(/CREATE INDEX/i)) {
+      const match = stmt.match(/CREATE INDEX(?:\s+IF NOT EXISTS)?\s+(\w+)/i)
+      stmtType = `CREATE INDEX ${match?.[1] || ''}`
+    } else if (stmt.match(/CREATE OR REPLACE FUNCTION/i)) {
+      const match = stmt.match(/CREATE OR REPLACE FUNCTION\s+(\w+)/i)
+      stmtType = `CREATE FUNCTION ${match?.[1] || ''}`
+    } else if (stmt.match(/CREATE OR REPLACE VIEW/i)) {
+      const match = stmt.match(/CREATE OR REPLACE VIEW\s+(\w+)/i)
+      stmtType = `CREATE VIEW ${match?.[1] || ''}`
+    } else if (stmt.match(/CREATE TRIGGER/i)) {
+      const match = stmt.match(/CREATE TRIGGER\s+(\w+)/i)
+      stmtType = `CREATE TRIGGER ${match?.[1] || ''}`
+    } else if (stmt.match(/ALTER TABLE/i)) {
+      const match = stmt.match(/ALTER TABLE\s+(\w+)/i)
+      stmtType = `ALTER TABLE ${match?.[1] || ''}`
+    } else if (stmt.match(/INSERT INTO/i)) {
+      const match = stmt.match(/INSERT INTO\s+(\w+)/i)
+      stmtType = `INSERT INTO ${match?.[1] || ''}`
+    } else if (stmt.match(/CREATE EXTENSION/i)) {
+      stmtType = 'CREATE EXTENSION'
+    } else if (stmt.match(/GRANT/i)) {
+      stmtType = 'GRANT'
+    } else if (stmt.match(/CREATE POLICY/i)) {
+      const match = stmt.match(/CREATE POLICY\s+"([^"]+)"/i)
+      stmtType = `CREATE POLICY ${match?.[1] || ''}`
+    } else if (stmt.match(/DROP TRIGGER/i)) {
+      stmtType = 'DROP TRIGGER'
+    } else if (stmt.match(/DROP POLICY/i)) {
+      stmtType = 'DROP POLICY'
+    } else if (stmt.match(/DO \$\$/i)) {
+      stmtType = 'DO BLOCK'
+    }
+
+    process.stdout.write(`   [${i + 1}/${statements.length}] ${stmtType.padEnd(40)}`)
+
+    try {
+      const client = await pool.connect()
+      try {
+        await client.query(stmt)
+        console.log('OK')
+        successful++
+      } catch (error: any) {
+        if (error.message.includes('already exists') ||
+            error.message.includes('duplicate key') ||
+            error.code === '42P07' || // Relation already exists
+            error.code === '42710' || // Object already exists
+            error.code === '42P16') { // Policy already exists
+          console.log('SKIP (exists)')
+          skipped++
+        } else {
+          console.log(`FAIL: ${error.message.substring(0, 50)}`)
+          failed++
+        }
+      } finally {
+        client.release()
+      }
+    } catch (error: any) {
+      console.log(`FAIL: ${error.message.substring(0, 50)}`)
+      failed++
+    }
+  }
+
+  // Summary
+  console.log('')
+  console.log('='.repeat(60))
+  console.log('SCHEMA APPLICATION COMPLETE')
+  console.log('='.repeat(60))
+  console.log('')
+  console.log(`   Successful: ${successful}`)
+  console.log(`   Skipped:    ${skipped} (already exist)`)
+  console.log(`   Failed:     ${failed}`)
+  console.log('')
+
+  // Verify tables
+  console.log('Verifying CRM tables...')
+  console.log('-'.repeat(40))
+
+  const crmTables = [
     'customers',
     'customer_addresses',
     'orders',
@@ -125,79 +294,44 @@ async function verifyTables(): Promise<void> {
     'customer_wishlists'
   ]
 
-  const results: { table: string; exists: boolean }[] = []
+  const client = await pool.connect()
+  let existingCount = 0
 
-  for (const table of tables) {
+  for (const table of crmTables) {
     try {
-      const { error } = await supabase.from(table).select('*').limit(1)
-      results.push({ table, exists: !error })
-    } catch {
-      results.push({ table, exists: false })
+      const result = await client.query(`
+        SELECT COUNT(*) as count
+        FROM information_schema.tables
+        WHERE table_schema = 'public'
+          AND table_name = $1
+      `, [table])
+
+      const exists = parseInt(result.rows[0].count) > 0
+      const status = exists ? '  EXISTS' : '  MISSING'
+      console.log(`   ${status} ${table}`)
+      if (exists) existingCount++
+    } catch (error) {
+      console.log(`   ERROR  ${table}`)
     }
   }
 
-  console.log('')
-  console.log('Table Status:')
-  console.log('-'.repeat(40))
+  client.release()
 
-  for (const result of results) {
-    const status = result.exists ? '✅' : '❌'
-    console.log(`  ${status} ${result.table}`)
+  console.log('')
+  console.log(`${existingCount}/${crmTables.length} CRM tables exist`)
+  console.log('')
+
+  // Close pool
+  await pool.end()
+
+  if (existingCount === crmTables.length) {
+    console.log('CRM schema applied successfully!')
+    console.log('')
+    console.log('Next step: Run the data population script:')
+    console.log('  npx tsx populate-crm-data.ts')
+  } else {
+    console.log('Some tables are missing. Check errors above.')
   }
-
-  const existingCount = results.filter(r => r.exists).length
-  console.log('')
-  console.log(`${existingCount}/${tables.length} tables exist`)
-}
-
-async function main(): Promise<void> {
-  console.log('='.repeat(60))
-  console.log('APPLY CRM SCHEMA TO SUPABASE')
-  console.log('='.repeat(60))
-  console.log('')
-
-  // Read the SQL file
-  const schemaPath = path.join(__dirname, 'supabase-schema-crm.sql')
-
-  if (!fs.existsSync(schemaPath)) {
-    console.error('❌ Schema file not found:', schemaPath)
-    process.exit(1)
-  }
-
-  const schemaSql = fs.readFileSync(schemaPath, 'utf-8')
-  console.log(`📄 Read schema file: ${schemaSql.length} characters`)
-  console.log('')
-
-  // Try to verify if tables already exist
-  await verifyTables()
-
-  console.log('')
-  console.log('='.repeat(60))
-  console.log('TO APPLY THE SCHEMA:')
-  console.log('='.repeat(60))
-  console.log('')
-  console.log('1. Open Supabase SQL Editor:')
-  console.log('   https://supabase.com/dashboard/project/usibnysqelovfuctmkqw/sql/new')
-  console.log('')
-  console.log('2. Copy the contents of:')
-  console.log('   /home/user/master-ops/buy-organics-online/supabase-schema-crm.sql')
-  console.log('')
-  console.log('3. Paste into the SQL editor and click "Run"')
-  console.log('')
-  console.log('4. After applying, run this verification again:')
-  console.log('   npx tsx apply-crm-schema.ts')
-  console.log('')
-
-  // Generate a curl command for direct SQL execution if management API is available
-  console.log('='.repeat(60))
-  console.log('ALTERNATIVE: Direct PostgreSQL Connection')
-  console.log('='.repeat(60))
-  console.log('')
-  console.log('If you have psql access, you can run:')
-  console.log('')
-  console.log('  psql "postgresql://postgres:[PASSWORD]@db.usibnysqelovfuctmkqw.supabase.co:5432/postgres" \\')
-  console.log('    -f supabase-schema-crm.sql')
-  console.log('')
 }
 
 main().catch(console.error)
