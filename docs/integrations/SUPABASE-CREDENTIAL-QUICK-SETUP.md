@@ -25,13 +25,13 @@ Name: Supabase
 ### Connection Settings
 
 ```
-Host: db.qcvfxxsnqvdfmpbcgdni.supabase.co
+Host: See MASTER-CREDENTIALS-COMPLETE.env → SUPABASE_DB_HOST
 
 Database: postgres
 
 User: postgres
 
-Password: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjdmZ4eHNucXZkZm1wYmNnZG5pIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0ODU2NzIyNywiZXhwIjoyMDY0MTQzMjI3fQ.JLTj1pOvZLoWUKfCV5NtctNI-lkEBhCzF7C9Axm6nf8
+Password: See MASTER-CREDENTIALS-COMPLETE.env → SUPABASE_SERVICE_ROLE_KEY
 
 Port: 5432
 ```

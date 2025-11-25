@@ -4,131 +4,141 @@ This directory contains all operational scripts organized by function.
 
 ## Directory Structure
 
-### `/tests`
-Testing scripts for individual services and integrations.
-
-**Contents**:
-- `test-hubspot.ts` - HubSpot connection and API tests
-- `test-supabase.ts` - Supabase connection and query tests
-- `test-n8n-connection.ts` - n8n connection validation
-- `test-n8n-library.ts` - n8n library functionality tests
-- `test-unleashed-auth.ts` - Unleashed authentication tests
-- `test-unleashed-workflow.ts` - Unleashed workflow tests
-- `test-fixed-auth.ts` - Fixed authentication implementation tests
-
-**Usage**:
-```bash
-npx tsx scripts/tests/test-hubspot.ts
-npx tsx scripts/tests/test-supabase.ts
+```
+scripts/
+├── analysis/        # Diagnostic, analysis, and exploration scripts
+├── auth/            # OAuth and authentication scripts
+├── checks/          # Validation, verification, and health check scripts
+├── data/            # Data export, import, sync, and query scripts
+├── financials/      # Xero and financial integration scripts
+├── fixes/           # One-off fix and repair scripts
+├── hubspot/         # HubSpot-specific operations
+├── integration/     # Integration tests and frameworks
+├── integration-tests/ # Legacy integration tests
+├── misc/            # Miscellaneous utilities
+├── setup/           # Setup and configuration scripts
+├── sync/            # Legacy sync scripts
+├── tests/           # Service connection tests
+└── workflows/       # n8n workflow management
 ```
 
 ---
 
-### `/fixes`
-One-off fix scripts for data corrections and system repairs.
+## `/checks` - Validation & Verification (27 scripts)
 
-**Contents**:
-- `fix-all-properties.ts` - Bulk property corrections
-- `fix-hubspot-unique-properties.ts` - HubSpot unique constraint fixes
-- `fix-crypto-import.ts` - Crypto module import fixes
-- `fix-crypto-restriction.ts` - Crypto restriction workarounds
-- `fix-unleashed-signature.ts` - Unleashed signature generation fixes
-- `fix-unleashed-workflow.ts` - Unleashed workflow corrections
-- `fix-with-pure-js-hmac.ts` - Pure JavaScript HMAC implementation
-- `apply-unleashed-fix.ts` - Apply Unleashed authentication fix
-- `create-properties.ts` - Create missing HubSpot properties
+Scripts for validating configurations, verifying data integrity, and health checks.
 
-**Usage**:
 ```bash
-npx tsx scripts/fixes/fix-all-properties.ts
+npx tsx scripts/checks/verify-credentials.ts      # Verify all credentials
+npx tsx scripts/checks/check-all-businesses.ts    # Check all business configs
+npx tsx scripts/checks/validate-workflow.ts       # Validate n8n workflows
+```
+
+---
+
+## `/tests` - Service Connection Tests (15 scripts)
+
+Test scripts for individual service connections and APIs.
+
+```bash
+npx tsx scripts/tests/test-hubspot.ts        # Test HubSpot connection
+npx tsx scripts/tests/test-supabase.ts       # Test Supabase connection
+npx tsx scripts/tests/test-n8n-connection.ts # Test n8n connection
+npx tsx scripts/tests/test-smartlead.ts      # Test SmartLead API
+```
+
+---
+
+## `/analysis` - Diagnostics & Analysis
+
+Scripts for exploring data, diagnosing issues, and analyzing systems.
+
+```bash
+npx tsx scripts/analysis/analyze-workflow.ts      # Analyze n8n workflows
+npx tsx scripts/analysis/diagnose-workflow-errors.ts # Debug workflow issues
+npx tsx scripts/analysis/explore-newsync6.ts      # Explore RDS databases
+```
+
+---
+
+## `/data` - Data Operations (19 scripts)
+
+Export, import, sync, and query scripts for data management.
+
+```bash
+npx tsx scripts/data/export-beauty-leads-final.ts  # Export leads to CSV
+npx tsx scripts/data/sync-businesses-to-hubspot.ts # Sync to HubSpot
+npx tsx scripts/data/import-teelixir-products.ts   # Import products
+```
+
+---
+
+## `/setup` - Configuration & Setup
+
+Scripts for setting up services and creating resources.
+
+```bash
+npx tsx scripts/setup/setup-n8n-credentials.ts    # Configure n8n credentials
+npx tsx scripts/setup/create-supabase-credential.ts # Create Supabase creds
+npx tsx scripts/setup/setup-multi-business.ts     # Multi-business setup
+```
+
+---
+
+## `/fixes` - One-Off Fixes
+
+Scripts for fixing specific issues or applying patches.
+
+```bash
+npx tsx scripts/fixes/fix-all-properties.ts       # Fix HubSpot properties
+npx tsx scripts/fixes/fix-unleashed-workflow.ts   # Fix Unleashed auth
 ```
 
 **Note**: Review fix scripts before running - they may modify production data.
 
 ---
 
-### `/workflows`
-n8n workflow management and validation scripts.
+## `/workflows` - n8n Workflow Management
 
-**Contents**:
-- Workflow activation, analysis, and deployment scripts
-- Workflow validation and testing tools
-- Workflow monitoring and diagnostics
+Scripts for managing n8n workflows.
 
-**Usage**:
 ```bash
-npx tsx scripts/workflows/activate-unleashed-workflow.ts
-npx tsx scripts/workflows/force-refresh-workflow.ts
+npx tsx scripts/workflows/activate-n8n-workflow.ts  # Activate workflow
+npx tsx scripts/workflows/force-refresh-workflow.ts # Force refresh
+npx tsx scripts/workflows/list-n8n-workflows.ts     # List all workflows
 ```
 
 ---
 
-### `/analysis`
-Diagnostic and analysis scripts for troubleshooting.
+## `/financials` - Xero & Financial Scripts
 
-**Contents**:
-- System health checks
-- Field and configuration verification
-- Execution monitoring
-- Data validation scripts
+Xero OAuth, chart of accounts, and financial reporting scripts.
 
-**Usage**:
 ```bash
-npx tsx scripts/analysis/deep-execution-check.ts
-npx tsx scripts/analysis/verify-property-constraints.ts
+npx tsx scripts/financials/setup-xero-auth-direct.ts  # Xero OAuth setup
+npx tsx scripts/financials/analyze-chart-of-accounts.ts # Analyze COA
 ```
 
 ---
 
-### `/integration-tests`
-Integration testing framework and test suites.
+## `/hubspot` - HubSpot Operations
 
-**Contents**:
-- `integration-test-framework.ts` - Core testing framework
-- `example-integration-test.ts` - Example integration tests
-- `run-integration-tests.ts` - Test suite runner
-- `test-workflow-credentials.ts` - Credential validation tests
+HubSpot-specific scripts for properties and sync.
 
-**Usage**:
 ```bash
-npx tsx scripts/integration-tests/run-integration-tests.ts
+npx tsx scripts/hubspot/get-hubspot-properties.ts   # Get property schema
+npx tsx scripts/hubspot/deploy-hubspot-sync.ts      # Deploy sync workflow
 ```
 
 ---
 
-### `/auth`
-Authentication and OAuth implementation scripts.
+## `/integration` - Integration Framework
 
-**Contents**:
-- `oauth-strategies.ts` - OAuth flow implementations
-- `generate-auth-code.ts` - OAuth code generation
-- `test-oauth.ts` - OAuth testing utilities
+Integration testing frameworks and OAuth implementations.
 
-**Usage**:
 ```bash
-npx tsx scripts/auth/generate-auth-code.ts
-npx tsx scripts/auth/test-oauth.ts
-```
-
----
-
-### `/sync`
-Data synchronization scripts between systems.
-
-**Contents**:
-- `sync-businesses-to-hubspot.ts` - Business data sync to HubSpot
-- `sync-all-remaining.ts` - Sync remaining records
-- `get-businesses.ts` - Fetch business data
-- `get-hubspot-properties.ts` - Fetch HubSpot property schemas
-- `find-teelixir-project.ts` - Locate specific projects
-- `list-unique-company-properties.ts` - List unique company fields
-- `sample-businesses.ts` - Sample business data
-- `execute-and-monitor.ts` - Execute and monitor sync jobs
-
-**Usage**:
-```bash
-npx tsx scripts/sync/sync-businesses-to-hubspot.ts
-npx tsx scripts/sync/get-businesses.ts
+npx tsx scripts/integration/run-integration-tests.ts  # Run all tests
+npx tsx scripts/integration/oauth-strategies.ts       # OAuth flows
 ```
 
 ---
@@ -143,36 +153,14 @@ npx tsx scripts/<category>/<script-name>.ts
 
 ### Environment Variables
 
-Most scripts require environment variables from `.env`:
+Most scripts require credentials from `MASTER-CREDENTIALS-COMPLETE.env`:
 
 ```bash
-SUPABASE_URL=your-url
-SUPABASE_ANON_KEY=your-key
-HUBSPOT_ACCESS_TOKEN=your-token
-N8N_API_URL=your-n8n-url
-N8N_API_KEY=your-key
-```
+# Load credentials first
+export $(grep -v '^#' MASTER-CREDENTIALS-COMPLETE.env | xargs)
 
-### Common Patterns
-
-**Test a connection**:
-```bash
-npx tsx scripts/tests/test-<service>.ts
-```
-
-**Run integration tests**:
-```bash
-npx tsx scripts/integration-tests/run-integration-tests.ts
-```
-
-**Sync data**:
-```bash
-npx tsx scripts/sync/sync-businesses-to-hubspot.ts
-```
-
-**Analyze system**:
-```bash
-npx tsx scripts/analysis/deep-execution-check.ts
+# Then run scripts
+npx tsx scripts/checks/verify-credentials.ts
 ```
 
 ---
@@ -182,42 +170,24 @@ npx tsx scripts/analysis/deep-execution-check.ts
 ### Adding New Scripts
 
 1. Place script in appropriate category folder
-2. Use descriptive, action-oriented names
+2. Use descriptive, action-oriented names (verb-noun pattern)
 3. Add documentation header to script
-4. Update this README with script description
-5. Test script before committing
+4. Test script before committing
 
-### Script Template
+### Naming Conventions
 
-```typescript
-/**
- * Script Name
- *
- * Purpose: Brief description of what this script does
- * Usage: npx tsx scripts/<category>/<script-name>.ts
- *
- * Environment Variables Required:
- * - VAR_NAME: Description
- */
-
-import { supabase } from '../infra/supabase/client'
-
-async function main() {
-  // Implementation
-}
-
-main().catch(console.error)
-```
+| Prefix | Purpose | Example |
+|--------|---------|---------|
+| `check-` | Validate/verify something | `check-credentials.ts` |
+| `test-` | Test a service connection | `test-hubspot.ts` |
+| `verify-` | Verify data integrity | `verify-multi-business.ts` |
+| `export-` | Export data | `export-leads.ts` |
+| `import-` | Import data | `import-products.ts` |
+| `sync-` | Sync between systems | `sync-to-hubspot.ts` |
+| `setup-` | Initial setup | `setup-n8n.ts` |
+| `fix-` | One-off fix | `fix-properties.ts` |
+| `analyze-` | Analysis/exploration | `analyze-workflow.ts` |
 
 ---
 
-## Migration from Root
-
-All scripts were previously in the root directory. They have been organized into categories for better maintainability.
-
-**Previous location**: `/root/master-ops/*.ts`
-**New location**: `/root/master-ops/scripts/<category>/*.ts`
-
----
-
-**Last Updated**: 2025-11-20
+**Last Updated**: 2025-11-25

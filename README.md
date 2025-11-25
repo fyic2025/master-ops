@@ -4,10 +4,11 @@
 
 ## Quick Links
 
-- 🚀 [Daily Sync Automation](README_DAILY_SYNC.md) - Auto-commit and push at 7 PM daily
-- 📊 [Productivity System](productivity-system/README.md) - ACRA-aligned execution engine
-- 🏗️ [Infrastructure Setup](#technologies--services) - Supabase, n8n, Smartlead
-- 📚 [Business Folders](#business-folders) - Teelixir, Elevate Wholesale, Buy Organics Online, Red Hill Fresh
+- [Documentation Index](docs/INDEX.md) - Start here for all documentation
+- [Quick Start](docs/getting-started/QUICK-START.md) - Setup guide
+- [Architecture](docs/getting-started/ARCHITECTURE.md) - System design
+- [Credentials Setup](docs/getting-started/CREDENTIALS-SETUP-GUIDE.md) - Configure credentials
+- [Productivity System](productivity-system/README.md) - ACRA-aligned execution engine
 
 ---
 
@@ -25,53 +26,56 @@ This Business OS is built on **ACRA frameworks** (Attract, Convert, Retain, Asce
 
 ## Repository Structure
 
-### Business Folders
+```
+master-ops/
+├── buy-organics-online/     # Buy Organics Online (BigCommerce)
+├── elevate-wholesale/       # Elevate Wholesale (Shopify)
+├── teelixir/               # Teelixir (BigCommerce)
+├── red-hill-fresh/         # Red Hill Fresh (WordPress)
+├── shared/                 # Shared libraries and utilities
+│   └── libs/              # Service connectors (HubSpot, BigCommerce, etc.)
+├── scripts/               # Organized scripts by category
+│   ├── checks/           # Validation and health checks
+│   ├── tests/            # Service connection tests
+│   ├── analysis/         # Diagnostics and exploration
+│   ├── data/             # Export, import, sync scripts
+│   ├── setup/            # Configuration scripts
+│   ├── fixes/            # One-off fix scripts
+│   └── workflows/        # n8n workflow management
+├── infra/                 # Infrastructure configuration
+│   ├── n8n-workflows/    # Workflow templates
+│   ├── supabase/         # Database schemas
+│   └── config/           # Service configs
+├── docs/                  # Documentation (see INDEX.md)
+├── data/                  # Working data files (gitignored)
+├── agents/                # AI optimization agents
+├── tools/                 # CLI tools and utilities
+└── .claude/               # Claude AI skills
+```
 
-- **[teelixir/](teelixir/)** - Teelixir business operations
-- **[elevate-wholesale/](elevate-wholesale/)** - Elevate Wholesale operations
-- **[buy-organics-online/](buy-organics-online/)** - Buy Organics Online operations
-- **[red-hill-fresh/](red-hill-fresh/)** - Red Hill Fresh (delivery ops Thu-Fri)
+### Business Projects
 
-### Department Structure
-
-#### 📊 Productivity System ✅ Active
-**Purpose**: Strategic execution engine ensuring daily work drives ACRA growth
-
-**Key Features**:
-- Daily planning with brutal prioritization
-- End-of-day productivity assessment
-- Pattern detection and strategic drift prevention
-- Automated git sync at 7 PM ([Setup Guide](README_DAILY_SYNC.md))
-
-[View Documentation](productivity-system/README.md)
-
-### Infrastructure
-
-**[infra/](infra/)** - Shared infrastructure, workflows, and service configurations
-
-- **[n8n-workflows/](infra/n8n-workflows/)** - Automated workflows
-- **[supabase/](infra/supabase/)** - Database schemas, migrations
-- **[config/](infra/config/)** - Service configurations
-
-### Shared Resources
-
-**[shared/](shared/)** - Reusable components across all businesses
-
-- **[libs/](shared/libs/)** - Shared libraries
-- **[prompts/](shared/prompts/)** - AI prompts and templates
-- **[specs/](shared/specs/)** - Specifications and documentation
+| Project | Platform | Status |
+|---------|----------|--------|
+| [buy-organics-online/](buy-organics-online/) | BigCommerce | Active |
+| [elevate-wholesale/](elevate-wholesale/) | Shopify | Active |
+| [teelixir/](teelixir/) | BigCommerce | Configured |
+| [red-hill-fresh/](red-hill-fresh/) | WordPress | Configured |
 
 ---
 
 ## Technologies & Services
 
-- **Supabase** - PostgreSQL database, auth, storage
-- **n8n** - Workflow automation platform
-- **Smartlead** - Email outreach
-- **Claude Code** - AI development assistant
-- **Claude Desktop (MCP)** - Extended integrations
-
-See [infra/config/tools-config.md](infra/config/tools-config.md) for detailed configuration.
+| Service | Purpose |
+|---------|---------|
+| **Supabase** | PostgreSQL database, auth, storage |
+| **n8n** | Workflow automation platform |
+| **BigCommerce** | E-commerce (BOO, Teelixir) |
+| **Shopify** | E-commerce (Elevate) |
+| **HubSpot** | CRM and contact management |
+| **SmartLead** | Email outreach campaigns |
+| **Xero** | Accounting integration |
+| **Unleashed** | Inventory management |
 
 ---
 
@@ -79,49 +83,79 @@ See [infra/config/tools-config.md](infra/config/tools-config.md) for detailed co
 
 ### Prerequisites
 
-- Python 3.7+ (for daily sync automation)
-- Node.js 18+ (for development)
-- Git with SSH configured
-- VS Code with Claude Code extension
+- Node.js 18+
+- Git configured
+- Access to service credentials
 
 ### Quick Setup
 
-1. **Clone and setup**
+1. **Clone repository**
    ```bash
    git clone git@github.com:fyic2025/master-ops.git
    cd master-ops
    ```
 
-2. **Install Python dependencies**
+2. **Setup credentials**
    ```bash
-   pip install -r requirements.txt
+   cp .env.template MASTER-CREDENTIALS-COMPLETE.env
+   # Fill in your credentials
    ```
 
-3. **Setup Daily Auto-Sync** (runs at 7 PM)
+3. **Load credentials**
    ```bash
-   setup_daily_sync.bat
-   ```
-   Then follow [SETUP_TASK_SCHEDULER.md](SETUP_TASK_SCHEDULER.md)
+   # Bash/WSL
+   export $(grep -v '^#' MASTER-CREDENTIALS-COMPLETE.env | xargs)
 
-4. **Configure environment variables**
-   - Copy `.env.example` to `.env`
-   - Add Supabase, n8n credentials
-   - Never commit `.env`
+   # PowerShell
+   . .\load-credentials.ps1
+   ```
+
+4. **Verify setup**
+   ```bash
+   npx tsx scripts/checks/verify-credentials.ts
+   ```
+
+See [docs/getting-started/QUICK-START.md](docs/getting-started/QUICK-START.md) for detailed instructions.
 
 ---
 
-## Daily Workflow
+## Documentation
 
-### Morning (5min)
-1. Run `plan-day` from Productivity System
-2. Focus on Top 3 ACRA-aligned tasks
+All documentation is organized in the [docs/](docs/) folder:
 
-### Evening (Automatic at 7 PM)
-1. Daily sync script commits and pushes changes
-2. Generates intelligent commit messages from work logs
-3. Sends Windows notification with results
+- **[docs/INDEX.md](docs/INDEX.md)** - Documentation navigation
+- **[docs/getting-started/](docs/getting-started/)** - Setup and architecture
+- **[docs/integrations/](docs/integrations/)** - Service integration guides
+- **[docs/features/](docs/features/)** - Campaign and feature docs
+- **[docs/operations/](docs/operations/)** - Deployment and operations
 
-[Full Daily Sync Documentation](README_DAILY_SYNC.md)
+---
+
+## Scripts
+
+Scripts are organized in [scripts/](scripts/):
+
+```bash
+# Verify credentials
+npx tsx scripts/checks/verify-credentials.ts
+
+# Test a service
+npx tsx scripts/tests/test-hubspot.ts
+
+# Run integration tests
+npx tsx scripts/integration/run-integration-tests.ts
+```
+
+See [scripts/README.md](scripts/README.md) for full documentation.
+
+---
+
+## Security
+
+- Never commit credentials or `.env` files
+- Store credentials in `MASTER-CREDENTIALS-COMPLETE.env` (gitignored)
+- Use environment variables for all scripts
+- See [docs/getting-started/CREDENTIALS-SETUP-GUIDE.md](docs/getting-started/CREDENTIALS-SETUP-GUIDE.md)
 
 ---
 
@@ -135,52 +169,4 @@ See [infra/config/tools-config.md](infra/config/tools-config.md) for detailed co
 
 ---
 
-## Success Metrics
-
-### System Health
-- [ ] Daily logging consistency >90%
-- [ ] ACRA alignment score average >7/10
-- [ ] Strategic work time >50%
-- [ ] Automated daily git sync working
-
-### Business Health (ACRA)
-- [ ] Customer acquisition growing (Attract)
-- [ ] Conversion rate improving (Convert)
-- [ ] Churn rate decreasing (Retain)
-- [ ] Customer value increasing (Ascend)
-
----
-
-## Automation Features
-
-### ✅ Daily Git Sync (NEW)
-- Automatic commits at 7 PM
-- Intelligent commit messages from work logs
-- Windows notifications
-- Error handling and logging
-
-[Setup Guide](README_DAILY_SYNC.md) | [Task Scheduler Setup](SETUP_TASK_SCHEDULER.md)
-
----
-
-## Support & Documentation
-
-- **Productivity System**: [productivity-system/README.md](productivity-system/README.md)
-- **Daily Sync**: [README_DAILY_SYNC.md](README_DAILY_SYNC.md)
-- **Infrastructure**: [infra/config/](infra/config/)
-- **Skills**: Located in each department's `skills/` folder
-
----
-
-## Security
-
-- Never commit credentials or `.env` files
-- Use SSH keys for GitHub (configured ✅)
-- API keys stored in environment variables
-- Service role keys server-side only
-
----
-
-**Remember**: This Business OS exists to keep you aligned with growth, not busy with systems. If the system itself becomes the work, you've drifted.
-
-**Last Updated**: 2025-11-21
+**Last Updated**: 2025-11-25

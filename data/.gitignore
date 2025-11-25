@@ -1,0 +1,15 @@
+# Data directory - ignore working files
+# Keep structure, ignore contents
+
+# Export files
+exports/*.csv
+exports/*.xlsx
+
+# Backup files
+backups/*.json
+backups/*.sql
+
+# But keep .gitkeep files
+!exports/.gitkeep
+!backups/.gitkeep
+!email-templates/.gitkeep

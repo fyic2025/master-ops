@@ -19,23 +19,23 @@ Before importing workflows, set up these credentials:
 ### 1. BigCommerce API
 - **Name:** `BigCommerce - BOO`
 - **Type:** Custom API
-- **Store Hash:** `hhhi`
-- **Client ID:** `nvmcwck5yr15lob1q911z68d4r6erxy`
-- **Access Token:** `d9y2srla3treynpbtmp4f3u1bomdna2`
+- **Store Hash:** See `MASTER-CREDENTIALS-COMPLETE.env` → `BOO_BC_STORE_HASH`
+- **Client ID:** See `MASTER-CREDENTIALS-COMPLETE.env` → `BOO_BC_CLIENT_ID`
+- **Access Token:** See `MASTER-CREDENTIALS-COMPLETE.env` → `BOO_BC_ACCESS_TOKEN`
 
 ### 2. Supabase
 - **Name:** `Supabase - BOO`
 - **Type:** Supabase
-- **Host:** `https://usibnysqelovfuctmkqw.supabase.co`
-- **Service Role Key:** `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzaWJueXNxZWxvdmZ1Y3Rta3F3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDQ4ODA4OCwiZXhwIjoyMDY2MDY0MDg4fQ.B9uihsaUvwkJWFAuKAtu7uij1KiXVoiHPHa9mm-Tz1s`
+- **Host:** See `MASTER-CREDENTIALS-COMPLETE.env` → `BOO_SUPABASE_URL`
+- **Service Role Key:** See `MASTER-CREDENTIALS-COMPLETE.env` → `BOO_SUPABASE_SERVICE_ROLE_KEY`
 
 ### 3. Oborne FTP
 - **Name:** `FTP - Oborne`
 - **Type:** FTP
-- **Host:** `ftp3.ch2.net.au`
+- **Host:** See `MASTER-CREDENTIALS-COMPLETE.env` → `OBORNE_FTP_HOST`
 - **Port:** `21`
-- **Username:** `retail_310`
-- **Password:** `am2SH6wWevAY&#+Q`
+- **Username:** See `MASTER-CREDENTIALS-COMPLETE.env` → `OBORNE_FTP_USER`
+- **Password:** See `MASTER-CREDENTIALS-COMPLETE.env` → `OBORNE_FTP_PASS`
 
 ### 4. HTTP (for UHP and Kadac)
 - No special credentials needed (public URLs)

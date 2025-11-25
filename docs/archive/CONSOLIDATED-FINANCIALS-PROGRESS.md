@@ -260,8 +260,8 @@ XERO_ELEVATE_CLIENT_ID=1E2EE797CCFC4CEC8F8E0CCD75940869
 XERO_ELEVATE_CLIENT_SECRET=<actual-secret-not-timestamp>
 
 # Supabase
-SUPABASE_URL=https://qcvfxxsnqvdfmpbcgdni.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjdmZ4eHNucXZkZm1wYmNnZG5pIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0ODU2NzIyNywiZXhwIjoyMDY0MTQzMjI3fQ.JLTj1pOvZLoWUKfCV5NtctNI-lkEBhCzF7C9Axm6nf8
+SUPABASE_URL=See MASTER-CREDENTIALS-COMPLETE.env
+SUPABASE_SERVICE_ROLE_KEY=See MASTER-CREDENTIALS-COMPLETE.env
 ```
 
 **IMPORTANT:** The "client secrets" shown in your screenshots are creation timestamps, not actual secrets. You need to:
