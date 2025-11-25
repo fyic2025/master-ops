@@ -1,0 +1,317 @@
+{
+  "generated_at": "2025-11-25T13:04:12.903Z",
+  "overall": {
+    "total_orders": 10000,
+    "orders_with_dispatch": 9423,
+    "avg_dispatch_days": 2.867770349145707,
+    "slow_orders": 2350,
+    "slow_percentage": 24.938979093706887
+  },
+  "monthly_trend": [
+    {
+      "month": "2024-12",
+      "orders": 547,
+      "avg_days": "3.13",
+      "slow_pct": "27.8"
+    },
+    {
+      "month": "2025-01",
+      "orders": 604,
+      "avg_days": "2.78",
+      "slow_pct": "22.5"
+    },
+    {
+      "month": "2025-02",
+      "orders": 446,
+      "avg_days": "2.90",
+      "slow_pct": "26.7"
+    },
+    {
+      "month": "2025-03",
+      "orders": 524,
+      "avg_days": "3.31",
+      "slow_pct": "33.8"
+    },
+    {
+      "month": "2025-04",
+      "orders": 494,
+      "avg_days": "3.49",
+      "slow_pct": "31.8"
+    },
+    {
+      "month": "2025-05",
+      "orders": 376,
+      "avg_days": "3.35",
+      "slow_pct": "33.0"
+    },
+    {
+      "month": "2025-06",
+      "orders": 359,
+      "avg_days": "3.78",
+      "slow_pct": "31.2"
+    },
+    {
+      "month": "2025-07",
+      "orders": 382,
+      "avg_days": "2.73",
+      "slow_pct": "25.9"
+    },
+    {
+      "month": "2025-08",
+      "orders": 449,
+      "avg_days": "3.77",
+      "slow_pct": "34.3"
+    },
+    {
+      "month": "2025-09",
+      "orders": 416,
+      "avg_days": "3.31",
+      "slow_pct": "31.5"
+    },
+    {
+      "month": "2025-10",
+      "orders": 510,
+      "avg_days": "2.55",
+      "slow_pct": "25.5"
+    },
+    {
+      "month": "2025-11",
+      "orders": 289,
+      "avg_days": "2.26",
+      "slow_pct": "20.8"
+    }
+  ],
+  "brand_analysis": [
+    {
+      "brand": "Synergy",
+      "totalOrders": 3,
+      "slowOrders": 3,
+      "avgDays": "4.67",
+      "slowPct": "100.0"
+    },
+    {
+      "brand": "Ever",
+      "totalOrders": 5,
+      "slowOrders": 5,
+      "avgDays": "4.60",
+      "slowPct": "100.0"
+    },
+    {
+      "brand": "Natural",
+      "totalOrders": 7,
+      "slowOrders": 7,
+      "avgDays": "4.57",
+      "slowPct": "100.0"
+    },
+    {
+      "brand": "The",
+      "totalOrders": 11,
+      "slowOrders": 11,
+      "avgDays": "6.18",
+      "slowPct": "100.0"
+    },
+    {
+      "brand": "Mindful",
+      "totalOrders": 6,
+      "slowOrders": 6,
+      "avgDays": "5.17",
+      "slowPct": "100.0"
+    },
+    {
+      "brand": "Unknown",
+      "totalOrders": 4,
+      "slowOrders": 4,
+      "avgDays": "6.00",
+      "slowPct": "100.0"
+    },
+    {
+      "brand": "Leda",
+      "totalOrders": 5,
+      "slowOrders": 5,
+      "avgDays": "4.20",
+      "slowPct": "100.0"
+    },
+    {
+      "brand": "Nutritionist",
+      "totalOrders": 9,
+      "slowOrders": 9,
+      "avgDays": "4.56",
+      "slowPct": "100.0"
+    },
+    {
+      "brand": "Niulife",
+      "totalOrders": 3,
+      "slowOrders": 3,
+      "avgDays": "7.33",
+      "slowPct": "100.0"
+    },
+    {
+      "brand": "Yogi",
+      "totalOrders": 7,
+      "slowOrders": 7,
+      "avgDays": "4.14",
+      "slowPct": "100.0"
+    },
+    {
+      "brand": "Salt",
+      "totalOrders": 4,
+      "slowOrders": 4,
+      "avgDays": "4.25",
+      "slowPct": "100.0"
+    },
+    {
+      "brand": "Weleda",
+      "totalOrders": 3,
+      "slowOrders": 3,
+      "avgDays": "4.33",
+      "slowPct": "100.0"
+    },
+    {
+      "brand": "Retrokitchen",
+      "totalOrders": 6,
+      "slowOrders": 6,
+      "avgDays": "4.50",
+      "slowPct": "100.0"
+    },
+    {
+      "brand": "Ausganica",
+      "totalOrders": 4,
+      "slowOrders": 4,
+      "avgDays": "10.75",
+      "slowPct": "100.0"
+    },
+    {
+      "brand": "Grants",
+      "totalOrders": 3,
+      "slowOrders": 3,
+      "avgDays": "5.67",
+      "slowPct": "100.0"
+    },
+    {
+      "brand": "Planet",
+      "totalOrders": 10,
+      "slowOrders": 10,
+      "avgDays": "4.60",
+      "slowPct": "100.0"
+    },
+    {
+      "brand": "Wild",
+      "totalOrders": 8,
+      "slowOrders": 8,
+      "avgDays": "5.50",
+      "slowPct": "100.0"
+    },
+    {
+      "brand": "Protein",
+      "totalOrders": 6,
+      "slowOrders": 6,
+      "avgDays": "5.17",
+      "slowPct": "100.0"
+    },
+    {
+      "brand": "Bass",
+      "totalOrders": 4,
+      "slowOrders": 4,
+      "avgDays": "4.75",
+      "slowPct": "100.0"
+    },
+    {
+      "brand": "Macro",
+      "totalOrders": 4,
+      "slowOrders": 4,
+      "avgDays": "4.50",
+      "slowPct": "100.0"
+    },
+    {
+      "brand": "Aloe",
+      "totalOrders": 3,
+      "slowOrders": 3,
+      "avgDays": "4.33",
+      "slowPct": "100.0"
+    },
+    {
+      "brand": "Healing",
+      "totalOrders": 4,
+      "slowOrders": 4,
+      "avgDays": "4.75",
+      "slowPct": "100.0"
+    },
+    {
+      "brand": "Faith",
+      "totalOrders": 9,
+      "slowOrders": 9,
+      "avgDays": "9.00",
+      "slowPct": "100.0"
+    },
+    {
+      "brand": "Real",
+      "totalOrders": 3,
+      "slowOrders": 3,
+      "avgDays": "4.67",
+      "slowPct": "100.0"
+    },
+    {
+      "brand": "Nirvana",
+      "totalOrders": 4,
+      "slowOrders": 4,
+      "avgDays": "4.25",
+      "slowPct": "100.0"
+    }
+  ],
+  "state_analysis": [
+    {
+      "state": "Unknown",
+      "totalOrders": 11,
+      "avgDays": "3.36",
+      "slowPct": "45.5"
+    },
+    {
+      "state": "Victoria",
+      "totalOrders": 3466,
+      "avgDays": "3.25",
+      "slowPct": "26.3"
+    },
+    {
+      "state": "Australian Capital Territory",
+      "totalOrders": 114,
+      "avgDays": "2.79",
+      "slowPct": "23.7"
+    },
+    {
+      "state": "New South Wales",
+      "totalOrders": 2512,
+      "avgDays": "2.72",
+      "slowPct": "24.8"
+    },
+    {
+      "state": "South Australia",
+      "totalOrders": 477,
+      "avgDays": "2.66",
+      "slowPct": "25.6"
+    },
+    {
+      "state": "Queensland",
+      "totalOrders": 1865,
+      "avgDays": "2.63",
+      "slowPct": "23.7"
+    },
+    {
+      "state": "Tasmania",
+      "totalOrders": 141,
+      "avgDays": "2.50",
+      "slowPct": "24.1"
+    },
+    {
+      "state": "Western Australia",
+      "totalOrders": 759,
+      "avgDays": "2.49",
+      "slowPct": "22.1"
+    },
+    {
+      "state": "Northern Territory",
+      "totalOrders": 51,
+      "avgDays": "2.27",
+      "slowPct": "23.5"
+    }
+  ]
+}
