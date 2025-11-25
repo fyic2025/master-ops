@@ -31,7 +31,7 @@ There are a few important arguments to know about when using this component:
     image is undefined.
 
 `lqip_size`:
-    If you want to specify a particular size for the LQIP image, you can do so with this argument. A default of 80
+    If you want to specify a particular size for the LQIP image, you can do so with this argument. A default of 40
     pixels wide will be used otherwise. This argument has no effect if the lazyload mode is not "lazyload+lqip".
 
 --}}
@@ -41,7 +41,7 @@ There are a few important arguments to know about when using this component:
   {{#unless lazyload '==' 'disabled'}}
     {{#if lazyload '==' 'lazyload+lqip'}}
     {{!-- If we want a LQIP, include it as the default srcset (will be overwritten by lazysizes) --}}
-    srcset="{{getImageSrcset image 1x=(default lqip_size '80w')}}"
+    srcset="{{getImageSrcset image 1x=(default lqip_size '40w')}}"
     {{else}}
       {{!-- If we don't want a LQIP, use a 1px transparent gif for the stand-in image
             This requires no additional network request, so it's fast --}}
