@@ -5,9 +5,9 @@
 import { BigCommerceConnector } from '../shared/libs/integrations/bigcommerce'
 
 const bigcommerceClient = new BigCommerceConnector({
-  storeHash: 'hhhi',
-  accessToken: 'eeikmonznnsxcq4f24m9d6uvv1e0qjn',
-  clientId: 'dpl0bkhwwslejw3yk2vo9z7w54iusv2',
+  storeHash: process.env.BOO_BC_STORE_HASH!,
+  accessToken: process.env.BOO_BC_ACCESS_TOKEN!,
+  clientId: process.env.BOO_BC_CLIENT_ID!,
 })
 
 interface LogAnalysis {
