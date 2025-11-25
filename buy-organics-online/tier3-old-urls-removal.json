@@ -1,0 +1,41 @@
+{
+  "timestamp": "2025-11-25T08:41:24.450Z",
+  "tier": 3,
+  "description": "Old URLs (2-3 years) - low risk",
+  "confidence": "75%",
+  "total": 2,
+  "ids": [
+    38854,
+    38873
+  ],
+  "details": [
+    {
+      "id": 38854,
+      "from_path": "/organic-times-popping-corn-200g-on-sale-bb-31st-jan-2023/",
+      "target_type": "category",
+      "target_destination": "Category ID: 498",
+      "target_entity_id": 498,
+      "category": "sale-expiry",
+      "site_id": 1000,
+      "tier": 3,
+      "reason": "Sale URL 2.9 years old",
+      "confidence": 75,
+      "risk": "low",
+      "age_years": 2.9026255707762556
+    },
+    {
+      "id": 38873,
+      "from_path": "/organic-times-popping-corn-200g-on-sale-bb-31sr-jan-2023/",
+      "target_type": "category",
+      "target_destination": "Category ID: 498",
+      "target_entity_id": 498,
+      "category": "sale-expiry",
+      "site_id": 1000,
+      "tier": 3,
+      "reason": "Sale URL 2.9 years old",
+      "confidence": 75,
+      "risk": "low",
+      "age_years": 2.9026255707762556
+    }
+  ]
+}

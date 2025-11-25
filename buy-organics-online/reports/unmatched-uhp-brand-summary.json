@@ -1,0 +1,23 @@
+{
+  "timestamp": "2025-11-25T02:33:55.505Z",
+  "total_unmatched": 1150,
+  "total_brands": 1,
+  "brands": [
+    {
+      "brand_name": "NO BRAND",
+      "brand_id": "NO_BRAND",
+      "total_products": 1150,
+      "zero_stock": 1150,
+      "low_stock": 0,
+      "in_stock": 0,
+      "total_stock_level": 0,
+      "can_delete": true
+    }
+  ],
+  "deletion_candidates": [
+    {
+      "brand_name": "NO BRAND",
+      "product_count": 1150
+    }
+  ]
+}

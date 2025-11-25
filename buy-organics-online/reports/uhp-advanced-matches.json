@@ -1,0 +1,280 @@
+{
+  "timestamp": "2025-11-25T05:10:23.230Z",
+  "summary": {
+    "total_bc_products": 523,
+    "total_uhp_products": 1062,
+    "total_matches": 24,
+    "high_confidence": 0,
+    "medium_confidence": 1,
+    "low_confidence": 23
+  },
+  "high_confidence_matches": [],
+  "medium_confidence_matches": [
+    {
+      "bc_id": "00ab5132-78be-4c47-a57c-ec1d6e69dffa",
+      "bc_product_id": 33619,
+      "bc_sku": "UN - TM25",
+      "bc_name": "Tom Organic Pads Overnight x 8",
+      "uhp_id": "3691fd7d-e91c-43db-95ff-b8e62c5dc8e5",
+      "uhp_name": "Pads Extra Overnight",
+      "uhp_brand": "TOM Organic",
+      "score": "70.0",
+      "details": "Brand: Exact match; Keywords: 2 matches (pads, overnight)"
+    }
+  ],
+  "low_confidence_matches": [
+    {
+      "bc_id": "92e0bd79-da39-4c0e-8a4a-b18fce4a32f7",
+      "bc_product_id": 11123,
+      "bc_sku": "UN - CH171",
+      "bc_name": "Cheeki Stainless Steel Bottle Insulated in Champagne 600ml",
+      "uhp_id": "8c9f0798-768a-4cf3-aef3-7cd78b4df237",
+      "uhp_name": "Stainless Steel Bottle Insulated Slate",
+      "uhp_brand": "Cheeki",
+      "score": "64.0",
+      "details": "Brand: Exact match; Keywords: 4 matches (stainless, steel, bottle)"
+    },
+    {
+      "bc_id": "f189c48a-87b6-495c-8bad-52f14d62bcae",
+      "bc_product_id": 11361,
+      "bc_sku": "UN - CH173",
+      "bc_name": "Cheeki Stainless Steel Bottle Insulated Ocean 600ml",
+      "uhp_id": "8c9f0798-768a-4cf3-aef3-7cd78b4df237",
+      "uhp_name": "Stainless Steel Bottle Insulated Slate",
+      "uhp_brand": "Cheeki",
+      "score": "64.0",
+      "details": "Brand: Exact match; Keywords: 4 matches (stainless, steel, bottle)"
+    },
+    {
+      "bc_id": "86fb2858-e83b-4b4c-bad7-4393dd52f9f6",
+      "bc_product_id": 19714,
+      "bc_sku": "UN - WEL85",
+      "bc_name": "Weleda Pomegranate Firming Face Serum 30ml",
+      "uhp_id": "431c07fb-28f1-4540-b17b-e8c304dca5b5",
+      "uhp_name": "Firming Face Serum Pomegranate & Maca Peptides",
+      "uhp_brand": "Weleda",
+      "score": "64.0",
+      "details": "Brand: Exact match; Keywords: 4 matches (pomegranate, firming, face)"
+    },
+    {
+      "bc_id": "22878b89-b001-45d7-b403-b17a45f43e4a",
+      "bc_product_id": 19716,
+      "bc_sku": "UN - WEL87",
+      "bc_name": "Weleda Pomegranate Firming Night Cream 30ml",
+      "uhp_id": "ae286d0b-6912-4a6e-bc9f-3c8cf6b3c2fd",
+      "uhp_name": "Firming Night Cream Pomegranate & Maca Peptides",
+      "uhp_brand": "Weleda",
+      "score": "64.0",
+      "details": "Brand: Exact match; Keywords: 4 matches (pomegranate, firming, night)"
+    },
+    {
+      "bc_id": "f200e6f1-ba01-450f-a95c-e916380803af",
+      "bc_product_id": 19855,
+      "bc_sku": "UN - CH248",
+      "bc_name": "Cheeki Stainless Steel Bottle Insulated Pistachio 600ml",
+      "uhp_id": "8c9f0798-768a-4cf3-aef3-7cd78b4df237",
+      "uhp_name": "Stainless Steel Bottle Insulated Slate",
+      "uhp_brand": "Cheeki",
+      "score": "64.0",
+      "details": "Brand: Exact match; Keywords: 4 matches (stainless, steel, bottle)"
+    },
+    {
+      "bc_id": "04476d7b-721f-4c6c-9e3a-af0f2580ae08",
+      "bc_product_id": 19856,
+      "bc_sku": "UN - CH249",
+      "bc_name": "Cheeki Stainless Steel Bottle Insulated Silver 600ml",
+      "uhp_id": "8c9f0798-768a-4cf3-aef3-7cd78b4df237",
+      "uhp_name": "Stainless Steel Bottle Insulated Slate",
+      "uhp_brand": "Cheeki",
+      "score": "64.0",
+      "details": "Brand: Exact match; Keywords: 4 matches (stainless, steel, bottle)"
+    },
+    {
+      "bc_id": "71ace38e-e931-44f3-a941-15f82ff0d788",
+      "bc_product_id": 32624,
+      "bc_sku": "UN - AS08",
+      "bc_name": "Alchemy Golden Turmeric Elixir 300ml",
+      "uhp_id": "3ad0c4ba-65ec-4479-a8a0-ca29b16a2dcc",
+      "uhp_name": "Golden Turmeric Elixir Original",
+      "uhp_brand": "Alchemy",
+      "score": "62.5",
+      "details": "Brand: Exact match; Keywords: 3 matches (golden, turmeric, elixir)"
+    },
+    {
+      "bc_id": "f881bc7e-5e50-47a5-a6de-b2cf12b9a591",
+      "bc_product_id": 32725,
+      "bc_sku": "UN - CH165",
+      "bc_name": "Cheeki Stainless Steel Bottle Insulated Surf 400ml",
+      "uhp_id": "8c9f0798-768a-4cf3-aef3-7cd78b4df237",
+      "uhp_name": "Stainless Steel Bottle Insulated Slate",
+      "uhp_brand": "Cheeki",
+      "score": "64.0",
+      "details": "Brand: Exact match; Keywords: 4 matches (stainless, steel, bottle)"
+    },
+    {
+      "bc_id": "b03cf2ce-1554-40c0-9a1b-9a5de673d169",
+      "bc_product_id": 32726,
+      "bc_sku": "UN - CH176",
+      "bc_name": "Cheeki Stainless Steel Bottle Insulated Matte Black Sports Lid 600ml",
+      "uhp_id": "8c9f0798-768a-4cf3-aef3-7cd78b4df237",
+      "uhp_name": "Stainless Steel Bottle Insulated Slate",
+      "uhp_brand": "Cheeki",
+      "score": "64.0",
+      "details": "Brand: Exact match; Keywords: 4 matches (stainless, steel, bottle)"
+    },
+    {
+      "bc_id": "eccb0a0f-8f2c-4091-b099-9036d45783f7",
+      "bc_product_id": 32727,
+      "bc_sku": "UN - CH177",
+      "bc_name": "Cheeki Stainless Steel Bottle Insulated Pink Sports Lid 600ml",
+      "uhp_id": "8c9f0798-768a-4cf3-aef3-7cd78b4df237",
+      "uhp_name": "Stainless Steel Bottle Insulated Slate",
+      "uhp_brand": "Cheeki",
+      "score": "64.0",
+      "details": "Brand: Exact match; Keywords: 4 matches (stainless, steel, bottle)"
+    },
+    {
+      "bc_id": "7c50d325-94be-4c1b-9dcd-9bb574d991c6",
+      "bc_product_id": 32728,
+      "bc_sku": "UN - CH178",
+      "bc_name": "Cheeki Stainless Steel Bottle Insulated Topaz Sports Lid 600ml",
+      "uhp_id": "8c9f0798-768a-4cf3-aef3-7cd78b4df237",
+      "uhp_name": "Stainless Steel Bottle Insulated Slate",
+      "uhp_brand": "Cheeki",
+      "score": "64.0",
+      "details": "Brand: Exact match; Keywords: 4 matches (stainless, steel, bottle)"
+    },
+    {
+      "bc_id": "bfaa3eea-72c3-4701-b406-d45a107039c7",
+      "bc_product_id": 32752,
+      "bc_sku": "UN - CH263",
+      "bc_name": "Cheeki Stainless Steel Bottle Insulated Pink 600ml",
+      "uhp_id": "8c9f0798-768a-4cf3-aef3-7cd78b4df237",
+      "uhp_name": "Stainless Steel Bottle Insulated Slate",
+      "uhp_brand": "Cheeki",
+      "score": "64.0",
+      "details": "Brand: Exact match; Keywords: 4 matches (stainless, steel, bottle)"
+    },
+    {
+      "bc_id": "62f0c036-b5ee-48ef-b2f7-a8ff83796518",
+      "bc_product_id": 53412,
+      "bc_sku": "UN - CH167",
+      "bc_name": "Cheeki Stainless Steel Bottle Insulated Pink 400ml",
+      "uhp_id": "8c9f0798-768a-4cf3-aef3-7cd78b4df237",
+      "uhp_name": "Stainless Steel Bottle Insulated Slate",
+      "uhp_brand": "Cheeki",
+      "score": "64.0",
+      "details": "Brand: Exact match; Keywords: 4 matches (stainless, steel, bottle)"
+    },
+    {
+      "bc_id": "a04dc019-aa11-465f-8c32-74dfbfe01294",
+      "bc_product_id": 53414,
+      "bc_sku": "UN - CH170",
+      "bc_name": "Cheeki Stainless Steel Bottle Insulated 3D Jungle 600ml",
+      "uhp_id": "8c9f0798-768a-4cf3-aef3-7cd78b4df237",
+      "uhp_name": "Stainless Steel Bottle Insulated Slate",
+      "uhp_brand": "Cheeki",
+      "score": "64.0",
+      "details": "Brand: Exact match; Keywords: 4 matches (stainless, steel, bottle)"
+    },
+    {
+      "bc_id": "2f1865c9-8f08-4520-b8d5-284e55ef86b6",
+      "bc_product_id": 53415,
+      "bc_sku": "UN - CH179",
+      "bc_name": "Cheeki Stainless Steel Bottle Insulated 3D Watercolour 600ml",
+      "uhp_id": "8c9f0798-768a-4cf3-aef3-7cd78b4df237",
+      "uhp_name": "Stainless Steel Bottle Insulated Slate",
+      "uhp_brand": "Cheeki",
+      "score": "64.0",
+      "details": "Brand: Exact match; Keywords: 4 matches (stainless, steel, bottle)"
+    },
+    {
+      "bc_id": "477698a0-31fb-42fd-badc-26edc3e199dc",
+      "bc_product_id": 53751,
+      "bc_sku": "UN - HW49",
+      "bc_name": "Happy Way Vegan Protein Powder Chocolate Hazelnut 500g",
+      "uhp_id": "3df4bfe5-26e1-4e42-9442-568eb240abea",
+      "uhp_name": "Vegan Protein Powder Choc Peanut Butter",
+      "uhp_brand": "Happy Way",
+      "score": "64.0",
+      "details": "Brand: Exact match; Keywords: 4 matches (vegan, protein, powder)"
+    },
+    {
+      "bc_id": "874ce150-4d28-4193-83b3-e6f5e60188c7",
+      "bc_product_id": 54655,
+      "bc_sku": "UN - VE21",
+      "bc_name": "Vego Hazelnut Chocolate Spread Crunchy 6x200g",
+      "uhp_id": "82f57cbd-1501-43d6-b158-c1563b7b1553",
+      "uhp_name": "Hazelnut Chocolate Spread Crunchy",
+      "uhp_brand": "Vego",
+      "score": "64.0",
+      "details": "Brand: Exact match; Keywords: 4 matches (hazelnut, chocolate, spread)"
+    },
+    {
+      "bc_id": "36dbcdf3-1286-49d4-ac1b-fb15231e58fa",
+      "bc_product_id": 63196,
+      "bc_sku": "UN - MS34",
+      "bc_name": "Mingle Backyard Barbeque All Natural Seasoning 10 x 50g",
+      "uhp_id": "c757cc10-a27a-4fd4-9b96-067349e433f3",
+      "uhp_name": "Backyard Barbeque All Natural Seasoning",
+      "uhp_brand": "Mingle",
+      "score": "62.5",
+      "details": "Brand: Exact match; Keywords: 3 matches (backyard, barbeque, seasoning)"
+    },
+    {
+      "bc_id": "42135b12-b978-492e-ae64-8b2886027d6b",
+      "bc_product_id": 63197,
+      "bc_sku": "UN - MS35",
+      "bc_name": "Mingle Greek Garlic All Natural Seasoning 10 x 45g",
+      "uhp_id": "c2a3d940-56ac-4df3-a90b-8bf1d21d38a4",
+      "uhp_name": "Greek Garlic All Natural Seasoning",
+      "uhp_brand": "Mingle",
+      "score": "62.5",
+      "details": "Brand: Exact match; Keywords: 3 matches (greek, garlic, seasoning)"
+    },
+    {
+      "bc_id": "eabcaf43-936e-473a-9112-08964879e48d",
+      "bc_product_id": 63198,
+      "bc_sku": "UN - MS36",
+      "bc_name": "Mingle Guac & Avo All Natural Seasoning 10 x 45g",
+      "uhp_id": "532b1183-1b8f-4a97-9c27-f281684c38e4",
+      "uhp_name": "Guac & Avo All Natural Seasoning",
+      "uhp_brand": "Mingle",
+      "score": "60.0",
+      "details": "Brand: Exact match; Keywords: 2 matches (guac, seasoning)"
+    },
+    {
+      "bc_id": "590876d5-c74a-4fb1-99a4-f5a5e5b7c297",
+      "bc_product_id": 63199,
+      "bc_sku": "UN - MS38",
+      "bc_name": "Mingle Everything Bagel All Natural Seasoning 10 x 50g",
+      "uhp_id": "3e2c69b4-b1f9-427e-a113-7eaa7791f53a",
+      "uhp_name": "Everything Bagel All Natural Seasoning",
+      "uhp_brand": "Mingle",
+      "score": "62.5",
+      "details": "Brand: Exact match; Keywords: 3 matches (everything, bagel, seasoning)"
+    },
+    {
+      "bc_id": "9d8b6b72-cd1f-4c9f-b59f-6600dd0e46bd",
+      "bc_product_id": 63634,
+      "bc_sku": "UN - SOH10",
+      "bc_name": "Sodii Everyday Hydration Salts Salty Berry 30pk",
+      "uhp_id": "be599422-0724-4661-a12b-e42ee8fa0952",
+      "uhp_name": "Everyday Hydration Salts Salty Kiwi",
+      "uhp_brand": "Sodii",
+      "score": "64.0",
+      "details": "Brand: Exact match; Keywords: 4 matches (everyday, hydration, salts)"
+    },
+    {
+      "bc_id": "a6e4a41f-edcb-43ed-b2df-f7cbdabd95f4",
+      "bc_product_id": 63635,
+      "bc_sku": "UN - SOH11",
+      "bc_name": "Sodii Everyday Hydration Salts Salty Berry 185g",
+      "uhp_id": "be599422-0724-4661-a12b-e42ee8fa0952",
+      "uhp_name": "Everyday Hydration Salts Salty Kiwi",
+      "uhp_brand": "Sodii",
+      "score": "64.0",
+      "details": "Brand: Exact match; Keywords: 4 matches (everyday, hydration, salts)"
+    }
+  ]
+}

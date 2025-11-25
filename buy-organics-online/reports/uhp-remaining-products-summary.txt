@@ -1,0 +1,38 @@
+
+========================================
+UHP REMAINING UNMATCHED PRODUCTS SUMMARY
+========================================
+
+Date: 2025-11-25T05:22:07.324Z
+
+OVERVIEW:
+- Total unmatched products: 523
+- Advanced matches found: 24
+- Products from deleted brands: 0
+- Truly remaining unmatched: 499
+
+INVENTORY STATUS:
+- Products WITH inventory: 0
+- Products WITHOUT inventory: 499
+- Total stock units: 0
+
+TOP BRANDS (by product count):
+1. Cheeki - 34 products (0 with stock, 0 units)
+2. Acure - 33 products (0 with stock, 0 units)
+3. Alaffia - 31 products (0 with stock, 0 units)
+4. MACRO MIKE - 31 products (0 with stock, 0 units)
+5. Gaiam - 25 products (0 with stock, 0 units)
+6. Amazonia - 24 products (0 with stock, 0 units)
+7. Weleda - 24 products (0 with stock, 0 units)
+8. Eclipse - 24 products (0 with stock, 0 units)
+9. Retrokitchen - 18 products (0 with stock, 0 units)
+10. Dr Organic - 17 products (0 with stock, 0 units)
+
+RECOMMENDATIONS:
+1. Review products WITH inventory first (0 products)
+2. Consider deleting products WITHOUT inventory if brand discontinued
+3. Manual investigation needed for products with inventory
+
+FILES:
+- Detailed CSV: reports/uhp-remaining-unmatched-products.csv
+- Summary: reports/uhp-remaining-products-summary.txt

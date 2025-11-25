@@ -1,0 +1,938 @@
+{
+  "timestamp": "2025-11-25T01:29:41.051Z",
+  "summary": {
+    "bigcommerce": {
+      "redirectsCreated": 0,
+      "redirectsFailed": 57,
+      "productsDeleted": 57,
+      "productDeletesFailed": 0
+    },
+    "supabase": {
+      "productsDeleted": 57,
+      "productDeletesFailed": 0
+    }
+  },
+  "details": {
+    "redirectsCreated": [],
+    "redirectsFailed": [
+      {
+        "product_id": 3021,
+        "sku": "KAD - 99777",
+        "from": "/sun-valley-box-100-true-fruit-strips-tropical-120g-x-6/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 3062,
+        "sku": "KAD - 63820",
+        "from": "/lotus-maize-meal-organic-500g/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 3139,
+        "sku": "KAD - 32345",
+        "from": "/muesli-company-muesli-natural-wheat-free-750g/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 3172,
+        "sku": "KAD - 32342",
+        "from": "/the-muesli-company-muesli-toasted-wheat-free-750g/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 3173,
+        "sku": "KAD - 32346",
+        "from": "/muesli-premium-toasted-full-of-fruit-750-grams-by-muesli-company/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 3203,
+        "sku": "KAD - 426993",
+        "from": "/lotus-amaranth-flakes-rolled-organic-375g/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 3242,
+        "sku": "KAD - 411894",
+        "from": "/mustard-wholegrain-organic-200g-global-organics/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 3433,
+        "sku": "KAD - 7037",
+        "from": "/lotus-millet-puffed-organic-175g/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 3509,
+        "sku": "KAD - 2442",
+        "from": "/tahini-hulled-385g-mayvers-on-sale-bb-30-07-26/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 3510,
+        "sku": "KAD - 2451",
+        "from": "/tahini-unhulled-385-grams-by-mayvers/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 3616,
+        "sku": "KAD - 1650",
+        "from": "/nulax-250g/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 3725,
+        "sku": "KAD - 2555",
+        "from": "/tahini-hulled-organic-385g-mayvers-on-sale-bb-29-05-25/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 3733,
+        "sku": "KAD - 2556",
+        "from": "/tahini-unhulled-organic-385-grams-by-mayvers/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 3754,
+        "sku": "KAD - 48501",
+        "from": "/muir-glen-salsa-medium-organic-454g/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 3894,
+        "sku": "KAD - 435880",
+        "from": "/stoney-creek-golden-flaxseed-oil-280ml/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 7539,
+        "sku": "KAD - 457496",
+        "from": "/lotus-oatblend-400g/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 8349,
+        "sku": "KAD - 464916",
+        "from": "/eatrite-crackers-brown-rice-sea-salt-apple-cider-vinegar-100g/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 12094,
+        "sku": "KAD - 464849",
+        "from": "/global-organics-sauce-tamari-low-sodium-gf-organic-250ml/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 12249,
+        "sku": "KAD - 476799",
+        "from": "/naturtint-ash-blonde-8a/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 12361,
+        "sku": "KAD - 467592",
+        "from": "/lotus-pumpkin-seed-flour-raw-austrian-organic-250g/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 12378,
+        "sku": "KAD - 48530",
+        "from": "/muir-glen-tomatoes-fire-roasted-diced-organic-411g/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 12431,
+        "sku": "KAD - 48529",
+        "from": "/muir-glen-tomatoes-fire-roasted-crushed-organic-794g/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 12432,
+        "sku": "KAD - 48531",
+        "from": "/muir-glen-tomatoes-fire-roasted-diced-organic-793g/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 20450,
+        "sku": "KAD - 483130",
+        "from": "/wild-alkaline-water-360ml/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 34463,
+        "sku": "KAD - 475153",
+        "from": "/lakewood-organic-lemon-juice-946ml/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 41647,
+        "sku": "KAD - 447585",
+        "from": "/mouthwash-peppermint-powersmile-brightening-473-g-by-jason/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 48348,
+        "sku": "KAD - 490752",
+        "from": "/dr-pickles-tattoo-balm-75g/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 48349,
+        "sku": "KAD - 490764",
+        "from": "/dr-pickles-antibacterial-tattoo-foam-wash-50ml/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 48350,
+        "sku": "KAD - 490776",
+        "from": "/dr-pickles-3-in-1-body-wash-peppermint-hemp-500ml/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 48351,
+        "sku": "KAD - 490788",
+        "from": "/dr-pickles-3-in-1-body-wash-citrus-hemp-500ml/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 50143,
+        "sku": "KAD - 32310",
+        "from": "/manuka-health-honey-mgo-30-250g/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 50144,
+        "sku": "KAD - 32311",
+        "from": "/manuka-health-honey-mgo-30-500g/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 50146,
+        "sku": "KAD - 32316",
+        "from": "/manuka-health-honey-mgo-400-250g/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 50154,
+        "sku": "KAD - 472371",
+        "from": "/nulax-bars-40g-x-20/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 50179,
+        "sku": "KAD - 484961",
+        "from": "/clipper-clip-everyday-rich-roast-organic-coffee-100g/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 50181,
+        "sku": "KAD - 484985",
+        "from": "/clipper-clip-peppermint-20-tbags-20-tbags/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 50183,
+        "sku": "KAD - 485026",
+        "from": "/clipper-clip-chamomile-20-tbags-20-tbags/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 50184,
+        "sku": "KAD - 485038",
+        "from": "/clipper-clip-indian-chai-20-tbags-20-tbags/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 50185,
+        "sku": "KAD - 485040",
+        "from": "/clipper-clip-detox-20-tbags-20-tbags/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 50186,
+        "sku": "KAD - 485052",
+        "from": "/clipper-clip-white-tea-20-tbags-20-tbags/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 50187,
+        "sku": "KAD - 485064",
+        "from": "/clipper-clip-green-tea-decaf-20-tbags-20-tbags/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 50188,
+        "sku": "KAD - 485076",
+        "from": "/clipper-clip-licorice-tea-20-tbags-20-tbags/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 50191,
+        "sku": "KAD - 485193",
+        "from": "/clipper-clip-nighty-night-20-tbags/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 50193,
+        "sku": "KAD - 485260",
+        "from": "/clipper-clip-raspberry-leaf-20-tbags-20-tbags-20-tbags/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 50194,
+        "sku": "KAD - 485272",
+        "from": "/clipper-clip-org-dandelion-20-tbags-20-tbags-x-6/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 50212,
+        "sku": "KAD - 487456",
+        "from": "/i-am-grounded-coffee-fruit-bar-lemon-coconut-50g-x-10/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 50213,
+        "sku": "KAD - 487468",
+        "from": "/i-am-grounded-coffee-fruit-bar-espresso-tahini-50g-x-10/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 50214,
+        "sku": "KAD - 487470",
+        "from": "/i-am-grounded-coffee-fruit-bar-cocoa-almond-butter-50g-x-10/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 50216,
+        "sku": "KAD - 488602",
+        "from": "/sprout-organic-infant-formula-plant-based-organic-tin-700g-x-3/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 50218,
+        "sku": "KAD - 488626",
+        "from": "/sprout-organic-snack-bar-kids-plant-based-choc-brownie-30g-x-12/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 50219,
+        "sku": "KAD - 488638",
+        "from": "/sprout-organic-snack-bar-kids-plant-based-banana-bread-30g-x-12/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 50220,
+        "sku": "KAD - 488640",
+        "from": "/sprout-organic-snack-bar-kids-plant-based-super-berry-30g-x-12/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 50223,
+        "sku": "KAD - 488688",
+        "from": "/sprout-organic-plant-protein-shake-sachets-junior-chocolate-milkshake-35g-x-12/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 50224,
+        "sku": "KAD - 488690",
+        "from": "/sprout-organic-plant-protein-shake-sachets-junior-vanilla-milkshake-35g-x-12/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 63996,
+        "sku": "Copy of KAD - 485052",
+        "from": "/clipper-clip-white-tea-20-tbags-on-sale-bb-13-09-25/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 63997,
+        "sku": "Copy of KAD - 485040",
+        "from": "/clipper-clip-detox-20-tbags-on-sale-bb-10-09-25/",
+        "to": "/health-foods-organic-groceries/"
+      },
+      {
+        "product_id": 63998,
+        "sku": "Copy of KAD - 411894",
+        "from": "/mustard-wholegrain-organic-200g-global-organics-on-sale-bb-31-08-25/",
+        "to": "/health-foods-organic-groceries/"
+      }
+    ],
+    "productsDeletedBC": [
+      {
+        "product_id": 3021,
+        "sku": "KAD - 99777",
+        "name": "Sun Valley Box 100% True Fruit Strips Tropical 120g x 6"
+      },
+      {
+        "product_id": 3062,
+        "sku": "KAD - 63820",
+        "name": "Lotus Maize Meal Organic 500g"
+      },
+      {
+        "product_id": 3139,
+        "sku": "KAD - 32345",
+        "name": "Muesli Company Muesli Natural Wheat Free 750g"
+      },
+      {
+        "product_id": 3172,
+        "sku": "KAD - 32342",
+        "name": "The Muesli Company Muesli Toasted Wheat Free 750g"
+      },
+      {
+        "product_id": 3173,
+        "sku": "KAD - 32346",
+        "name": "Muesli Premium Toasted Full of Fruit 750g The Muesli Company"
+      },
+      {
+        "product_id": 3203,
+        "sku": "KAD - 426993",
+        "name": "Lotus Amaranth Flakes Rolled Organic 375g"
+      },
+      {
+        "product_id": 3242,
+        "sku": "KAD - 411894",
+        "name": "Mustard Wholegrain Organic 200g Global Organics"
+      },
+      {
+        "product_id": 3433,
+        "sku": "KAD - 7037",
+        "name": "Lotus Millet Puffed Organic 175g"
+      },
+      {
+        "product_id": 3509,
+        "sku": "KAD - 2442",
+        "name": "Tahini Hulled 385g Mayvers - ON SALE BB 30/07/26"
+      },
+      {
+        "product_id": 3510,
+        "sku": "KAD - 2451",
+        "name": "Tahini Unhulled 385g Mayvers"
+      },
+      {
+        "product_id": 3616,
+        "sku": "KAD - 1650",
+        "name": "NuLax Fruit Laxative with Senna Block Natural 250g"
+      },
+      {
+        "product_id": 3725,
+        "sku": "KAD - 2555",
+        "name": "Tahini Hulled Organic 385g Mayvers - ON SALE BB 29/05/25"
+      },
+      {
+        "product_id": 3733,
+        "sku": "KAD - 2556",
+        "name": "Tahini Unhulled Organic 385g Mayvers"
+      },
+      {
+        "product_id": 3754,
+        "sku": "KAD - 48501",
+        "name": "Muir Glen Salsa Medium Organic 454g"
+      },
+      {
+        "product_id": 3894,
+        "sku": "KAD - 435880",
+        "name": "Stoney Creek Golden Flaxseed Oil 280ml"
+      },
+      {
+        "product_id": 7539,
+        "sku": "KAD - 457496",
+        "name": "Lotus Oatblend 400g"
+      },
+      {
+        "product_id": 8349,
+        "sku": "KAD - 464916",
+        "name": "Eatrite Crackers Brown Rice Sea Salt & Apple Cider Vinegar 100g"
+      },
+      {
+        "product_id": 12094,
+        "sku": "KAD - 464849",
+        "name": "Global Organics Sauce Tamari Low Sodium GF Organic 250ml"
+      },
+      {
+        "product_id": 12249,
+        "sku": "KAD - 476799",
+        "name": "NaturTint Natural Hair Colour Ash Blonde 8A 155ml"
+      },
+      {
+        "product_id": 12361,
+        "sku": "KAD - 467592",
+        "name": "Lotus Pumpkin Seed Flour Raw Austrian Organic 250g"
+      },
+      {
+        "product_id": 12378,
+        "sku": "KAD - 48530",
+        "name": "Muir Glen Tomatoes Fire Roasted Diced Organic 411g"
+      },
+      {
+        "product_id": 12431,
+        "sku": "KAD - 48529",
+        "name": "Muir Glen Tomatoes Fire Roasted Crushed Organic 794g"
+      },
+      {
+        "product_id": 12432,
+        "sku": "KAD - 48531",
+        "name": "Muir Glen Tomatoes Fire Roasted Diced Organic 793g"
+      },
+      {
+        "product_id": 20450,
+        "sku": "KAD - 483130",
+        "name": "Wild Alkaline Water 360ml"
+      },
+      {
+        "product_id": 34463,
+        "sku": "KAD - 475153",
+        "name": "Lakewood Organic Lemon Juice 946ml"
+      },
+      {
+        "product_id": 41647,
+        "sku": "KAD - 447585",
+        "name": "Jason Mouthwash Peppermint Powersmile Brightening 473ml"
+      },
+      {
+        "product_id": 48348,
+        "sku": "KAD - 490752",
+        "name": "Dr Pickles Tattoo Balm 75g"
+      },
+      {
+        "product_id": 48349,
+        "sku": "KAD - 490764",
+        "name": "Dr Pickles Antibacterial Tattoo Foam Wash 50mL"
+      },
+      {
+        "product_id": 48350,
+        "sku": "KAD - 490776",
+        "name": "Dr Pickles 3 in 1 Body Wash Peppermint & Hemp 500mL"
+      },
+      {
+        "product_id": 48351,
+        "sku": "KAD - 490788",
+        "name": "Dr Pickles 3 in 1 Body Wash Citrus & Hemp 500ml"
+      },
+      {
+        "product_id": 50143,
+        "sku": "KAD - 32310",
+        "name": "Manuka Health Honey MGO™ 30+ 250g"
+      },
+      {
+        "product_id": 50144,
+        "sku": "KAD - 32311",
+        "name": "Manuka Health Honey MGO™ 30+ 500g"
+      },
+      {
+        "product_id": 50146,
+        "sku": "KAD - 32316",
+        "name": "Manuka Health Honey MGO™ 400+ 250g"
+      },
+      {
+        "product_id": 50154,
+        "sku": "KAD - 472371",
+        "name": "Nulax Bars 40g x 20"
+      },
+      {
+        "product_id": 50179,
+        "sku": "KAD - 484961",
+        "name": "Clipper Clip Everyday Rich Roast Organic Coffee 100g"
+      },
+      {
+        "product_id": 50181,
+        "sku": "KAD - 484985",
+        "name": "Clipper Clip Peppermint 20 Tbags"
+      },
+      {
+        "product_id": 50183,
+        "sku": "KAD - 485026",
+        "name": "Clipper Clip Chamomile 20 Tbags"
+      },
+      {
+        "product_id": 50184,
+        "sku": "KAD - 485038",
+        "name": "Clipper Clip Indian Chai 20 Tbags"
+      },
+      {
+        "product_id": 50185,
+        "sku": "KAD - 485040",
+        "name": "Clipper Clip Detox 20 Tbags"
+      },
+      {
+        "product_id": 50186,
+        "sku": "KAD - 485052",
+        "name": "Clipper Clip White Tea 20 Tbags"
+      },
+      {
+        "product_id": 50187,
+        "sku": "KAD - 485064",
+        "name": "Clipper Clip Green Tea Decaf 20 Tbags"
+      },
+      {
+        "product_id": 50188,
+        "sku": "KAD - 485076",
+        "name": "Clipper Clip Licorice Tea 20 Tbags"
+      },
+      {
+        "product_id": 50191,
+        "sku": "KAD - 485193",
+        "name": "Clipper Clip Nighty Night 20 tbags"
+      },
+      {
+        "product_id": 50193,
+        "sku": "KAD - 485260",
+        "name": "Clipper Clip Raspberry Leaf 20 Tbags 20 tbags 20 tbags"
+      },
+      {
+        "product_id": 50194,
+        "sku": "KAD - 485272",
+        "name": "Clipper Clip Org Dandelion 20 Tbags 20 tbags"
+      },
+      {
+        "product_id": 50212,
+        "sku": "KAD - 487456",
+        "name": "I AM GROUNDED Coffee Fruit Bar Lemon & Coconut 50g x 10"
+      },
+      {
+        "product_id": 50213,
+        "sku": "KAD - 487468",
+        "name": "I AM GROUNDED Coffee Fruit Bar Espresso & Tahini 50g x 10"
+      },
+      {
+        "product_id": 50214,
+        "sku": "KAD - 487470",
+        "name": "I AM GROUNDED Coffee Fruit Bar Cocoa & Almond Butter 50g x 10"
+      },
+      {
+        "product_id": 50216,
+        "sku": "KAD - 488602",
+        "name": "Sprout Organic Infant Formula Plant Based Organic (Tin) 700g x 3"
+      },
+      {
+        "product_id": 50218,
+        "sku": "KAD - 488626",
+        "name": "Sprout Organic Snack Bar Kids Plant Based Choc Brownie 30g x 12"
+      },
+      {
+        "product_id": 50219,
+        "sku": "KAD - 488638",
+        "name": "Sprout Organic Snack Bar Kids Plant Based Banana Bread 30g x 12"
+      },
+      {
+        "product_id": 50220,
+        "sku": "KAD - 488640",
+        "name": "Sprout Organic Snack Bar Kids Plant Based Super Berry 30g x 12"
+      },
+      {
+        "product_id": 50223,
+        "sku": "KAD - 488688",
+        "name": "Sprout Organic Plant Protein Shake Sachets Junior Chocolate Milkshake 35g x 12"
+      },
+      {
+        "product_id": 50224,
+        "sku": "KAD - 488690",
+        "name": "Sprout Organic Plant Protein Shake Sachets Junior Vanilla Milkshake 35g x 12"
+      },
+      {
+        "product_id": 63996,
+        "sku": "Copy of KAD - 485052",
+        "name": "Clipper Clip White Tea 20 Tbags - ON SALE BB 13/09/25"
+      },
+      {
+        "product_id": 63997,
+        "sku": "Copy of KAD - 485040",
+        "name": "Clipper Clip Detox 20 Tbags - ON SALE BB 10/09/25"
+      },
+      {
+        "product_id": 63998,
+        "sku": "Copy of KAD - 411894",
+        "name": "Mustard Wholegrain Organic 200g Global Organics - ON SALE BB 31/08/25"
+      }
+    ],
+    "productDeletesFailedBC": [],
+    "productsDeletedSupabase": [
+      {
+        "product_id": 3021,
+        "sku": "KAD - 99777",
+        "name": "Sun Valley Box 100% True Fruit Strips Tropical 120g x 6"
+      },
+      {
+        "product_id": 3062,
+        "sku": "KAD - 63820",
+        "name": "Lotus Maize Meal Organic 500g"
+      },
+      {
+        "product_id": 3139,
+        "sku": "KAD - 32345",
+        "name": "Muesli Company Muesli Natural Wheat Free 750g"
+      },
+      {
+        "product_id": 3172,
+        "sku": "KAD - 32342",
+        "name": "The Muesli Company Muesli Toasted Wheat Free 750g"
+      },
+      {
+        "product_id": 3173,
+        "sku": "KAD - 32346",
+        "name": "Muesli Premium Toasted Full of Fruit 750g The Muesli Company"
+      },
+      {
+        "product_id": 3203,
+        "sku": "KAD - 426993",
+        "name": "Lotus Amaranth Flakes Rolled Organic 375g"
+      },
+      {
+        "product_id": 3242,
+        "sku": "KAD - 411894",
+        "name": "Mustard Wholegrain Organic 200g Global Organics"
+      },
+      {
+        "product_id": 3433,
+        "sku": "KAD - 7037",
+        "name": "Lotus Millet Puffed Organic 175g"
+      },
+      {
+        "product_id": 3509,
+        "sku": "KAD - 2442",
+        "name": "Tahini Hulled 385g Mayvers - ON SALE BB 30/07/26"
+      },
+      {
+        "product_id": 3510,
+        "sku": "KAD - 2451",
+        "name": "Tahini Unhulled 385g Mayvers"
+      },
+      {
+        "product_id": 3616,
+        "sku": "KAD - 1650",
+        "name": "NuLax Fruit Laxative with Senna Block Natural 250g"
+      },
+      {
+        "product_id": 3725,
+        "sku": "KAD - 2555",
+        "name": "Tahini Hulled Organic 385g Mayvers - ON SALE BB 29/05/25"
+      },
+      {
+        "product_id": 3733,
+        "sku": "KAD - 2556",
+        "name": "Tahini Unhulled Organic 385g Mayvers"
+      },
+      {
+        "product_id": 3754,
+        "sku": "KAD - 48501",
+        "name": "Muir Glen Salsa Medium Organic 454g"
+      },
+      {
+        "product_id": 3894,
+        "sku": "KAD - 435880",
+        "name": "Stoney Creek Golden Flaxseed Oil 280ml"
+      },
+      {
+        "product_id": 7539,
+        "sku": "KAD - 457496",
+        "name": "Lotus Oatblend 400g"
+      },
+      {
+        "product_id": 8349,
+        "sku": "KAD - 464916",
+        "name": "Eatrite Crackers Brown Rice Sea Salt & Apple Cider Vinegar 100g"
+      },
+      {
+        "product_id": 12094,
+        "sku": "KAD - 464849",
+        "name": "Global Organics Sauce Tamari Low Sodium GF Organic 250ml"
+      },
+      {
+        "product_id": 12249,
+        "sku": "KAD - 476799",
+        "name": "NaturTint Natural Hair Colour Ash Blonde 8A 155ml"
+      },
+      {
+        "product_id": 12361,
+        "sku": "KAD - 467592",
+        "name": "Lotus Pumpkin Seed Flour Raw Austrian Organic 250g"
+      },
+      {
+        "product_id": 12378,
+        "sku": "KAD - 48530",
+        "name": "Muir Glen Tomatoes Fire Roasted Diced Organic 411g"
+      },
+      {
+        "product_id": 12431,
+        "sku": "KAD - 48529",
+        "name": "Muir Glen Tomatoes Fire Roasted Crushed Organic 794g"
+      },
+      {
+        "product_id": 12432,
+        "sku": "KAD - 48531",
+        "name": "Muir Glen Tomatoes Fire Roasted Diced Organic 793g"
+      },
+      {
+        "product_id": 20450,
+        "sku": "KAD - 483130",
+        "name": "Wild Alkaline Water 360ml"
+      },
+      {
+        "product_id": 34463,
+        "sku": "KAD - 475153",
+        "name": "Lakewood Organic Lemon Juice 946ml"
+      },
+      {
+        "product_id": 41647,
+        "sku": "KAD - 447585",
+        "name": "Jason Mouthwash Peppermint Powersmile Brightening 473ml"
+      },
+      {
+        "product_id": 48348,
+        "sku": "KAD - 490752",
+        "name": "Dr Pickles Tattoo Balm 75g"
+      },
+      {
+        "product_id": 48349,
+        "sku": "KAD - 490764",
+        "name": "Dr Pickles Antibacterial Tattoo Foam Wash 50mL"
+      },
+      {
+        "product_id": 48350,
+        "sku": "KAD - 490776",
+        "name": "Dr Pickles 3 in 1 Body Wash Peppermint & Hemp 500mL"
+      },
+      {
+        "product_id": 48351,
+        "sku": "KAD - 490788",
+        "name": "Dr Pickles 3 in 1 Body Wash Citrus & Hemp 500ml"
+      },
+      {
+        "product_id": 50143,
+        "sku": "KAD - 32310",
+        "name": "Manuka Health Honey MGO™ 30+ 250g"
+      },
+      {
+        "product_id": 50144,
+        "sku": "KAD - 32311",
+        "name": "Manuka Health Honey MGO™ 30+ 500g"
+      },
+      {
+        "product_id": 50146,
+        "sku": "KAD - 32316",
+        "name": "Manuka Health Honey MGO™ 400+ 250g"
+      },
+      {
+        "product_id": 50154,
+        "sku": "KAD - 472371",
+        "name": "Nulax Bars 40g x 20"
+      },
+      {
+        "product_id": 50179,
+        "sku": "KAD - 484961",
+        "name": "Clipper Clip Everyday Rich Roast Organic Coffee 100g"
+      },
+      {
+        "product_id": 50181,
+        "sku": "KAD - 484985",
+        "name": "Clipper Clip Peppermint 20 Tbags"
+      },
+      {
+        "product_id": 50183,
+        "sku": "KAD - 485026",
+        "name": "Clipper Clip Chamomile 20 Tbags"
+      },
+      {
+        "product_id": 50184,
+        "sku": "KAD - 485038",
+        "name": "Clipper Clip Indian Chai 20 Tbags"
+      },
+      {
+        "product_id": 50185,
+        "sku": "KAD - 485040",
+        "name": "Clipper Clip Detox 20 Tbags"
+      },
+      {
+        "product_id": 50186,
+        "sku": "KAD - 485052",
+        "name": "Clipper Clip White Tea 20 Tbags"
+      },
+      {
+        "product_id": 50187,
+        "sku": "KAD - 485064",
+        "name": "Clipper Clip Green Tea Decaf 20 Tbags"
+      },
+      {
+        "product_id": 50188,
+        "sku": "KAD - 485076",
+        "name": "Clipper Clip Licorice Tea 20 Tbags"
+      },
+      {
+        "product_id": 50191,
+        "sku": "KAD - 485193",
+        "name": "Clipper Clip Nighty Night 20 tbags"
+      },
+      {
+        "product_id": 50193,
+        "sku": "KAD - 485260",
+        "name": "Clipper Clip Raspberry Leaf 20 Tbags 20 tbags 20 tbags"
+      },
+      {
+        "product_id": 50194,
+        "sku": "KAD - 485272",
+        "name": "Clipper Clip Org Dandelion 20 Tbags 20 tbags"
+      },
+      {
+        "product_id": 50212,
+        "sku": "KAD - 487456",
+        "name": "I AM GROUNDED Coffee Fruit Bar Lemon & Coconut 50g x 10"
+      },
+      {
+        "product_id": 50213,
+        "sku": "KAD - 487468",
+        "name": "I AM GROUNDED Coffee Fruit Bar Espresso & Tahini 50g x 10"
+      },
+      {
+        "product_id": 50214,
+        "sku": "KAD - 487470",
+        "name": "I AM GROUNDED Coffee Fruit Bar Cocoa & Almond Butter 50g x 10"
+      },
+      {
+        "product_id": 50216,
+        "sku": "KAD - 488602",
+        "name": "Sprout Organic Infant Formula Plant Based Organic (Tin) 700g x 3"
+      },
+      {
+        "product_id": 50218,
+        "sku": "KAD - 488626",
+        "name": "Sprout Organic Snack Bar Kids Plant Based Choc Brownie 30g x 12"
+      },
+      {
+        "product_id": 50219,
+        "sku": "KAD - 488638",
+        "name": "Sprout Organic Snack Bar Kids Plant Based Banana Bread 30g x 12"
+      },
+      {
+        "product_id": 50220,
+        "sku": "KAD - 488640",
+        "name": "Sprout Organic Snack Bar Kids Plant Based Super Berry 30g x 12"
+      },
+      {
+        "product_id": 50223,
+        "sku": "KAD - 488688",
+        "name": "Sprout Organic Plant Protein Shake Sachets Junior Chocolate Milkshake 35g x 12"
+      },
+      {
+        "product_id": 50224,
+        "sku": "KAD - 488690",
+        "name": "Sprout Organic Plant Protein Shake Sachets Junior Vanilla Milkshake 35g x 12"
+      },
+      {
+        "product_id": 63996,
+        "sku": "Copy of KAD - 485052",
+        "name": "Clipper Clip White Tea 20 Tbags - ON SALE BB 13/09/25"
+      },
+      {
+        "product_id": 63997,
+        "sku": "Copy of KAD - 485040",
+        "name": "Clipper Clip Detox 20 Tbags - ON SALE BB 10/09/25"
+      },
+      {
+        "product_id": 63998,
+        "sku": "Copy of KAD - 411894",
+        "name": "Mustard Wholegrain Organic 200g Global Organics - ON SALE BB 31/08/25"
+      }
+    ],
+    "productDeletesFailedSupabase": []
+  }
+}

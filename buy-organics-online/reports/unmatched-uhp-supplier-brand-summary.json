@@ -1,0 +1,487 @@
+{
+  "timestamp": "2025-11-25T02:36:00.070Z",
+  "total_unmatched_supplier_products": 1062,
+  "total_brands": 120,
+  "brands": [
+    {
+      "brand_name": "Healing Concepts",
+      "product_count": 55
+    },
+    {
+      "brand_name": "Nutra Organics",
+      "product_count": 53
+    },
+    {
+      "brand_name": "Switch Nutrition",
+      "product_count": 49
+    },
+    {
+      "brand_name": "SuperFeast",
+      "product_count": 47
+    },
+    {
+      "brand_name": "Vrindavan",
+      "product_count": 46
+    },
+    {
+      "brand_name": "Weleda",
+      "product_count": 45
+    },
+    {
+      "brand_name": "Mingle",
+      "product_count": 33
+    },
+    {
+      "brand_name": "MACRO MIKE",
+      "product_count": 29
+    },
+    {
+      "brand_name": "Happy Way",
+      "product_count": 28
+    },
+    {
+      "brand_name": "Well & Good",
+      "product_count": 25
+    },
+    {
+      "brand_name": "Vital Zing",
+      "product_count": 24
+    },
+    {
+      "brand_name": "Protein Supplies Australia",
+      "product_count": 23
+    },
+    {
+      "brand_name": "YAVA",
+      "product_count": 22
+    },
+    {
+      "brand_name": "Gem",
+      "product_count": 19
+    },
+    {
+      "brand_name": "Wheatbags Love",
+      "product_count": 18
+    },
+    {
+      "brand_name": "Love My Earth",
+      "product_count": 18
+    },
+    {
+      "brand_name": "Vitawerx",
+      "product_count": 18
+    },
+    {
+      "brand_name": "Amazonia",
+      "product_count": 17
+    },
+    {
+      "brand_name": "Antipodes",
+      "product_count": 17
+    },
+    {
+      "brand_name": "TOM Organic",
+      "product_count": 17
+    },
+    {
+      "brand_name": "Giovanni",
+      "product_count": 15
+    },
+    {
+      "brand_name": "PBco",
+      "product_count": 15
+    },
+    {
+      "brand_name": "Kintra Blends",
+      "product_count": 14
+    },
+    {
+      "brand_name": "Euclove",
+      "product_count": 13
+    },
+    {
+      "brand_name": "Natural Life",
+      "product_count": 13
+    },
+    {
+      "brand_name": "Wotnot",
+      "product_count": 12
+    },
+    {
+      "brand_name": "Thrive Tallow",
+      "product_count": 12
+    },
+    {
+      "brand_name": "Mitchells Nutrition",
+      "product_count": 11
+    },
+    {
+      "brand_name": "Paleo Hero",
+      "product_count": 11
+    },
+    {
+      "brand_name": "Famous",
+      "product_count": 10
+    },
+    {
+      "brand_name": "BYRON BAY TALLOW",
+      "product_count": 9
+    },
+    {
+      "brand_name": "Botanika Blends",
+      "product_count": 9
+    },
+    {
+      "brand_name": "Evolution Botanicals",
+      "product_count": 9
+    },
+    {
+      "brand_name": "Morning Made",
+      "product_count": 9
+    },
+    {
+      "brand_name": "Amazing Oils",
+      "product_count": 8
+    },
+    {
+      "brand_name": "CLIF",
+      "product_count": 8
+    },
+    {
+      "brand_name": "Matcha Maiden",
+      "product_count": 8
+    },
+    {
+      "brand_name": "Cheeki",
+      "product_count": 7
+    },
+    {
+      "brand_name": "2die4 Live Foods",
+      "product_count": 7
+    },
+    {
+      "brand_name": "GIMME",
+      "product_count": 7
+    },
+    {
+      "brand_name": "Aloe Dent",
+      "product_count": 6
+    },
+    {
+      "brand_name": "ACURE",
+      "product_count": 6
+    },
+    {
+      "brand_name": "CleanLIFE",
+      "product_count": 6
+    },
+    {
+      "brand_name": "Power Super Foods",
+      "product_count": 6
+    },
+    {
+      "brand_name": "Every Bit Organic",
+      "product_count": 6
+    },
+    {
+      "brand_name": "Woohoo Body",
+      "product_count": 6
+    },
+    {
+      "brand_name": "Grin",
+      "product_count": 6
+    },
+    {
+      "brand_name": "Koala Eco",
+      "product_count": 6
+    },
+    {
+      "brand_name": "The Monday Food Co.",
+      "product_count": 6
+    },
+    {
+      "brand_name": "Peg Paste",
+      "product_count": 6
+    },
+    {
+      "brand_name": "Springhill Farm",
+      "product_count": 6
+    },
+    {
+      "brand_name": "Sow 'n Sow",
+      "product_count": 6
+    },
+    {
+      "brand_name": "Nirvana Organics",
+      "product_count": 6
+    },
+    {
+      "brand_name": "Eumundi Botanicals",
+      "product_count": 5
+    },
+    {
+      "brand_name": "Mindful Foods",
+      "product_count": 5
+    },
+    {
+      "brand_name": "Nimbus",
+      "product_count": 5
+    },
+    {
+      "brand_name": "Not Coffee",
+      "product_count": 5
+    },
+    {
+      "brand_name": "Naturally Good",
+      "product_count": 5
+    },
+    {
+      "brand_name": "Ora Health",
+      "product_count": 5
+    },
+    {
+      "brand_name": "Sodii",
+      "product_count": 5
+    },
+    {
+      "brand_name": "Tulsi",
+      "product_count": 5
+    },
+    {
+      "brand_name": "Davids Hydroxi Toothpaste ",
+      "product_count": 4
+    },
+    {
+      "brand_name": "EveryOrganics",
+      "product_count": 4
+    },
+    {
+      "brand_name": "Hi-D",
+      "product_count": 4
+    },
+    {
+      "brand_name": "Jack N' Jill",
+      "product_count": 4
+    },
+    {
+      "brand_name": "Little Harvesters",
+      "product_count": 4
+    },
+    {
+      "brand_name": "Naturally Sweet",
+      "product_count": 4
+    },
+    {
+      "brand_name": "SALT OF THE EARTH",
+      "product_count": 4
+    },
+    {
+      "brand_name": "Smart Protein Bar",
+      "product_count": 4
+    },
+    {
+      "brand_name": "Vego",
+      "product_count": 4
+    },
+    {
+      "brand_name": "Blue Dinosaur",
+      "product_count": 3
+    },
+    {
+      "brand_name": "Real Naturals",
+      "product_count": 3
+    },
+    {
+      "brand_name": "Biologika",
+      "product_count": 3
+    },
+    {
+      "brand_name": "Chai Tea",
+      "product_count": 3
+    },
+    {
+      "brand_name": "DJ&A",
+      "product_count": 3
+    },
+    {
+      "brand_name": "Dr Superfoods",
+      "product_count": 3
+    },
+    {
+      "brand_name": "Ecologic",
+      "product_count": 3
+    },
+    {
+      "brand_name": "Epic",
+      "product_count": 3
+    },
+    {
+      "brand_name": "Green Nutritionals",
+      "product_count": 3
+    },
+    {
+      "brand_name": "Hemp Foods Australia",
+      "product_count": 3
+    },
+    {
+      "brand_name": "Nirvana Originals",
+      "product_count": 3
+    },
+    {
+      "brand_name": "Niulife",
+      "product_count": 3
+    },
+    {
+      "brand_name": "Nutritionist Choice",
+      "product_count": 3
+    },
+    {
+      "brand_name": "OMG",
+      "product_count": 3
+    },
+    {
+      "brand_name": "Ritua",
+      "product_count": 3
+    },
+    {
+      "brand_name": "Saweet Way",
+      "product_count": 3
+    },
+    {
+      "brand_name": "Sacred Earth Medicine",
+      "product_count": 3
+    },
+    {
+      "brand_name": "The Broth Sisters",
+      "product_count": 3
+    },
+    {
+      "brand_name": "Alchemy",
+      "product_count": 2
+    },
+    {
+      "brand_name": "Buderim Ginger",
+      "product_count": 2
+    },
+    {
+      "brand_name": "Pimp My Salad",
+      "product_count": 2
+    },
+    {
+      "brand_name": "The Good Crisp Company",
+      "product_count": 2
+    },
+    {
+      "brand_name": "The Jojoba Company",
+      "product_count": 2
+    },
+    {
+      "brand_name": "Nature's Help",
+      "product_count": 2
+    },
+    {
+      "brand_name": "Planet Organic",
+      "product_count": 2
+    },
+    {
+      "brand_name": "Simply Clean",
+      "product_count": 2
+    },
+    {
+      "brand_name": "Tooshies",
+      "product_count": 2
+    },
+    {
+      "brand_name": "Tsuno",
+      "product_count": 2
+    },
+    {
+      "brand_name": "Martin & Pleasance",
+      "product_count": 2
+    },
+    {
+      "brand_name": "Zero Slim & Healthy",
+      "product_count": 2
+    },
+    {
+      "brand_name": "Alps",
+      "product_count": 1
+    },
+    {
+      "brand_name": "Bragg",
+      "product_count": 1
+    },
+    {
+      "brand_name": "Cayenne Nature's Wonder",
+      "product_count": 1
+    },
+    {
+      "brand_name": "Dr. Organic",
+      "product_count": 1
+    },
+    {
+      "brand_name": "Eden Healthfoods",
+      "product_count": 1
+    },
+    {
+      "brand_name": "Enviro Products",
+      "product_count": 1
+    },
+    {
+      "brand_name": "Naturely Nourish",
+      "product_count": 1
+    },
+    {
+      "brand_name": "The Ginger People",
+      "product_count": 1
+    },
+    {
+      "brand_name": "Hab Shifa",
+      "product_count": 1
+    },
+    {
+      "brand_name": "Lemon Myrtle Fragrances",
+      "product_count": 1
+    },
+    {
+      "brand_name": "Little Mashies",
+      "product_count": 1
+    },
+    {
+      "brand_name": "Natural Rubber Soothers",
+      "product_count": 1
+    },
+    {
+      "brand_name": "Organic Times",
+      "product_count": 1
+    },
+    {
+      "brand_name": "Peppertux",
+      "product_count": 1
+    },
+    {
+      "brand_name": "Quinby's",
+      "product_count": 1
+    },
+    {
+      "brand_name": "Retrokitchen",
+      "product_count": 1
+    },
+    {
+      "brand_name": "Solutions 4 Health",
+      "product_count": 1
+    },
+    {
+      "brand_name": "Sunraysia",
+      "product_count": 1
+    },
+    {
+      "brand_name": "Native Vanilla",
+      "product_count": 1
+    },
+    {
+      "brand_name": "Natural Value",
+      "product_count": 1
+    }
+  ]
+}

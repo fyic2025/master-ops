@@ -1,0 +1,1212 @@
+{
+  "timestamp": "2025-11-25T02:54:08.772Z",
+  "similarity_threshold": 75,
+  "summary": {
+    "total_unmatched_bc_products": 1150,
+    "brands_with_similar_match": 55,
+    "brands_no_match": 116,
+    "products_need_review": 432,
+    "products_safe_to_delete": 718
+  },
+  "similar_brands": [
+    {
+      "bc_brand": "Cheeki",
+      "uhp_brand": "Cheeki",
+      "similarity": "100.0",
+      "product_count": 46,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Acure",
+      "uhp_brand": "ACURE",
+      "similarity": "100.0",
+      "product_count": 33,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Alaffia",
+      "uhp_brand": "Alaffia",
+      "similarity": "100.0",
+      "product_count": 31,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "MACRO MIKE",
+      "uhp_brand": "MACRO MIKE",
+      "similarity": "100.0",
+      "product_count": 31,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Weleda",
+      "uhp_brand": "Weleda",
+      "similarity": "100.0",
+      "product_count": 26,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Gaiam",
+      "uhp_brand": "Gaiam",
+      "similarity": "100.0",
+      "product_count": 25,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Amazonia",
+      "uhp_brand": "Amazonia",
+      "similarity": "100.0",
+      "product_count": 24,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Retrokitchen",
+      "uhp_brand": "Retrokitchen",
+      "similarity": "100.0",
+      "product_count": 18,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Dr Organic",
+      "uhp_brand": "Dr. Organic",
+      "similarity": "100.0",
+      "product_count": 17,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Happy Way",
+      "uhp_brand": "Happy Way",
+      "similarity": "100.0",
+      "product_count": 17,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Giovanni",
+      "uhp_brand": "Giovanni",
+      "similarity": "100.0",
+      "product_count": 15,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Planet Organic",
+      "uhp_brand": "Planet Organic",
+      "similarity": "100.0",
+      "product_count": 15,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Mingle",
+      "uhp_brand": "Mingle",
+      "similarity": "100.0",
+      "product_count": 13,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Wotnot",
+      "uhp_brand": "Wotnot",
+      "similarity": "100.0",
+      "product_count": 9,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Biotuff",
+      "uhp_brand": "Biotuff",
+      "similarity": "100.0",
+      "product_count": 8,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Natracare",
+      "uhp_brand": "Natracare",
+      "similarity": "100.0",
+      "product_count": 7,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Bennetto",
+      "uhp_brand": "Bennetto",
+      "similarity": "100.0",
+      "product_count": 7,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Everyorganics",
+      "uhp_brand": "EveryOrganics",
+      "similarity": "100.0",
+      "product_count": 7,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Tooshies",
+      "uhp_brand": "Tooshies",
+      "similarity": "100.0",
+      "product_count": 6,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Grin",
+      "uhp_brand": "Grin",
+      "similarity": "100.0",
+      "product_count": 5,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Gem",
+      "uhp_brand": "Gem",
+      "similarity": "100.0",
+      "product_count": 5,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Schmidt's",
+      "uhp_brand": "Schmidt's",
+      "similarity": "100.0",
+      "product_count": 4,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Bragg",
+      "uhp_brand": "Bragg",
+      "similarity": "100.0",
+      "product_count": 4,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Book",
+      "uhp_brand": "Book",
+      "similarity": "100.0",
+      "product_count": 4,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Crystal",
+      "uhp_brand": "Crystal",
+      "similarity": "100.0",
+      "product_count": 4,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Comvita",
+      "uhp_brand": "Comvita",
+      "similarity": "100.0",
+      "product_count": 4,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Naturally Sweet",
+      "uhp_brand": "Naturally Sweet",
+      "similarity": "100.0",
+      "product_count": 3,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Organic Times",
+      "uhp_brand": "Organic Times",
+      "similarity": "100.0",
+      "product_count": 3,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Alchemy",
+      "uhp_brand": "Alchemy",
+      "similarity": "100.0",
+      "product_count": 3,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Supercharged",
+      "uhp_brand": "Supercharged Food",
+      "similarity": "75.0",
+      "product_count": 3,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Organic",
+      "uhp_brand": "Dr. Organic",
+      "similarity": "77.8",
+      "product_count": 3,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Antipodes",
+      "uhp_brand": "Antipodes",
+      "similarity": "100.0",
+      "product_count": 3,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Tom Organic",
+      "uhp_brand": "TOM Organic",
+      "similarity": "100.0",
+      "product_count": 2,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Vrindavan",
+      "uhp_brand": "Vrindavan",
+      "similarity": "100.0",
+      "product_count": 2,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Eucoclean",
+      "uhp_brand": "Eucoclean",
+      "similarity": "100.0",
+      "product_count": 2,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Sugarwrap",
+      "uhp_brand": "SugarWrap",
+      "similarity": "100.0",
+      "product_count": 2,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Vego",
+      "uhp_brand": "Vego",
+      "similarity": "100.0",
+      "product_count": 2,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Sodii",
+      "uhp_brand": "Sodii",
+      "similarity": "100.0",
+      "product_count": 2,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Auromere",
+      "uhp_brand": "Auromere",
+      "similarity": "100.0",
+      "product_count": 1,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Nirvana Organics",
+      "uhp_brand": "Nirvana Organics",
+      "similarity": "100.0",
+      "product_count": 1,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Bamboo",
+      "uhp_brand": "Go Bamboo",
+      "similarity": "75.0",
+      "product_count": 1,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Nutritionist Choice",
+      "uhp_brand": "Nutritionist Choice",
+      "similarity": "100.0",
+      "product_count": 1,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Ecobud",
+      "uhp_brand": "Ecobud",
+      "similarity": "100.0",
+      "product_count": 1,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Nutribiotic",
+      "uhp_brand": "Nutribiotic",
+      "similarity": "100.0",
+      "product_count": 1,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Niulife",
+      "uhp_brand": "Niulife",
+      "similarity": "100.0",
+      "product_count": 1,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "ACURE",
+      "uhp_brand": "ACURE",
+      "similarity": "100.0",
+      "product_count": 1,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Redmond",
+      "uhp_brand": "Redmond",
+      "similarity": "100.0",
+      "product_count": 1,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Arigato",
+      "uhp_brand": "Arigato",
+      "similarity": "100.0",
+      "product_count": 1,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Lakanto",
+      "uhp_brand": "Lakanto",
+      "similarity": "100.0",
+      "product_count": 1,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "Pbco.",
+      "uhp_brand": "PBco",
+      "similarity": "100.0",
+      "product_count": 1,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "PBCO",
+      "uhp_brand": "PBco",
+      "similarity": "100.0",
+      "product_count": 1,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "CleanLIFE",
+      "uhp_brand": "CleanLIFE",
+      "similarity": "100.0",
+      "product_count": 1,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "CLIF",
+      "uhp_brand": "CLIF",
+      "similarity": "100.0",
+      "product_count": 1,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "DJ&A",
+      "uhp_brand": "DJ&A",
+      "similarity": "100.0",
+      "product_count": 1,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    },
+    {
+      "bc_brand": "EveryOrganics",
+      "uhp_brand": "EveryOrganics",
+      "similarity": "100.0",
+      "product_count": 1,
+      "status": "SIMILAR_BRAND_IN_UHP"
+    }
+  ],
+  "no_match_brands": [
+    {
+      "bc_brand": "Ethique",
+      "best_match": "Faith In Nature",
+      "similarity": "38.5",
+      "product_count": 74,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "The",
+      "best_match": "Tooshies",
+      "similarity": "37.5",
+      "product_count": 71,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Earthwise",
+      "best_match": "The Broth Sisters",
+      "similarity": "46.7",
+      "product_count": 44,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Botanika",
+      "best_match": "Botanika Blends",
+      "similarity": "57.1",
+      "product_count": 34,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Summer",
+      "best_match": "Auromere",
+      "similarity": "50.0",
+      "product_count": 29,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Eclipse",
+      "best_match": "Eco Lips",
+      "similarity": "71.4",
+      "product_count": 24,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Little",
+      "best_match": "Mingle",
+      "similarity": "50.0",
+      "product_count": 23,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Luvin",
+      "best_match": "Grin",
+      "similarity": "40.0",
+      "product_count": 21,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Plantasy",
+      "best_match": "Anna's",
+      "similarity": "50.0",
+      "product_count": 19,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Sow",
+      "best_match": "Sow 'n Sow",
+      "similarity": "42.9",
+      "product_count": 19,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Protein Supplies",
+      "best_match": "Protein Supplies Australia",
+      "similarity": "62.5",
+      "product_count": 14,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Alter",
+      "best_match": "Alter Eco",
+      "similarity": "62.5",
+      "product_count": 13,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Low",
+      "best_match": "Euclove",
+      "similarity": "28.6",
+      "product_count": 13,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Evolution",
+      "best_match": "Natural Evolution",
+      "similarity": "56.3",
+      "product_count": 12,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Jack N",
+      "best_match": "Jack N' Jill",
+      "similarity": "55.6",
+      "product_count": 11,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "My",
+      "best_match": "OMG",
+      "similarity": "33.3",
+      "product_count": 11,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Urban",
+      "best_match": "Urban Greens",
+      "similarity": "45.5",
+      "product_count": 11,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Myles",
+      "best_match": "Alps",
+      "similarity": "40.0",
+      "product_count": 11,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Amazing",
+      "best_match": "Amazing Oils",
+      "similarity": "63.6",
+      "product_count": 9,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Ever",
+      "best_match": "Ever Eco",
+      "similarity": "57.1",
+      "product_count": 9,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Planet",
+      "best_match": "Planet Organic",
+      "similarity": "46.2",
+      "product_count": 9,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Huskee",
+      "best_match": "Auromere",
+      "similarity": "37.5",
+      "product_count": 8,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Koja",
+      "best_match": "DJ&A",
+      "similarity": "50.0",
+      "product_count": 8,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Porter",
+      "best_match": "Yogi Tea",
+      "similarity": "42.9",
+      "product_count": 8,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Stuff",
+      "best_match": "Biotuff",
+      "similarity": "57.1",
+      "product_count": 8,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Noble",
+      "best_match": "Niulife",
+      "similarity": "42.9",
+      "product_count": 7,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Blue",
+      "best_match": "ACURE",
+      "similarity": "40.0",
+      "product_count": 7,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Ecyo",
+      "best_match": "Euclove",
+      "similarity": "42.9",
+      "product_count": 7,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Imuni",
+      "best_match": "Tsuno",
+      "similarity": "40.0",
+      "product_count": 7,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Carob",
+      "best_match": "Famous",
+      "similarity": "33.3",
+      "product_count": 7,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Power",
+      "best_match": "Paleo Hero",
+      "similarity": "44.4",
+      "product_count": 6,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Niugini",
+      "best_match": "Niulife",
+      "similarity": "57.1",
+      "product_count": 6,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Dr",
+      "best_match": "DJ&A",
+      "similarity": "33.3",
+      "product_count": 6,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Lunette",
+      "best_match": "Bennetto",
+      "similarity": "50.0",
+      "product_count": 6,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Grass",
+      "best_match": "Bass",
+      "similarity": "60.0",
+      "product_count": 6,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Nelson",
+      "best_match": "Honeycone",
+      "similarity": "44.4",
+      "product_count": 5,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Love Children",
+      "best_match": "Love My Earth",
+      "similarity": "41.7",
+      "product_count": 4,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Kintra",
+      "best_match": "King Soba",
+      "similarity": "50.0",
+      "product_count": 4,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Creative",
+      "best_match": "Neem Active",
+      "similarity": "60.0",
+      "product_count": 4,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Martin",
+      "best_match": "Grin",
+      "similarity": "50.0",
+      "product_count": 4,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Switch",
+      "best_match": "Switch Nutrition",
+      "similarity": "40.0",
+      "product_count": 4,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Lemon Myrtle",
+      "best_match": "Lemon Myrtle Fragrances",
+      "similarity": "52.4",
+      "product_count": 3,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Pure Food",
+      "best_match": "Dr Superfoods",
+      "similarity": "50.0",
+      "product_count": 3,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Every",
+      "best_match": "Ever Eco",
+      "similarity": "57.1",
+      "product_count": 3,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Enviro",
+      "best_match": "Enviro Products",
+      "similarity": "42.9",
+      "product_count": 3,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Naked",
+      "best_match": "Neem",
+      "similarity": "40.0",
+      "product_count": 3,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Ethical",
+      "best_match": "Ethical Zinc",
+      "similarity": "63.6",
+      "product_count": 3,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Fijikava",
+      "best_match": "YAVA",
+      "similarity": "37.5",
+      "product_count": 3,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Koala",
+      "best_match": "Koala Eco",
+      "similarity": "62.5",
+      "product_count": 3,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Keto",
+      "best_match": "Vego",
+      "similarity": "50.0",
+      "product_count": 3,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Dayly",
+      "best_match": "Happy Way",
+      "similarity": "37.5",
+      "product_count": 3,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Ora",
+      "best_match": "Orgaid",
+      "similarity": "50.0",
+      "product_count": 3,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Bioastin",
+      "best_match": "Vital Zing",
+      "similarity": "44.4",
+      "product_count": 2,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Rosehip",
+      "best_match": "Rose-Hip Vital",
+      "similarity": "58.3",
+      "product_count": 2,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Vanilla",
+      "best_match": "Native Vanilla",
+      "similarity": "53.8",
+      "product_count": 2,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "BioPro",
+      "best_match": "Biotuff",
+      "similarity": "42.9",
+      "product_count": 2,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "2Die4",
+      "best_match": "Dandies",
+      "similarity": "42.9",
+      "product_count": 2,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Stainless",
+      "best_match": "Botanika Blends",
+      "similarity": "42.9",
+      "product_count": 2,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Simply",
+      "best_match": "Simply Clean",
+      "similarity": "54.5",
+      "product_count": 2,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Essential",
+      "best_match": "Essential Oxygen",
+      "similarity": "60.0",
+      "product_count": 2,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Your",
+      "best_match": "ACURE",
+      "similarity": "40.0",
+      "product_count": 2,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Very",
+      "best_match": "Vego",
+      "similarity": "50.0",
+      "product_count": 2,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Australian",
+      "best_match": "Australia's Manuka",
+      "similarity": "62.5",
+      "product_count": 2,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Strap",
+      "best_match": "SugarWrap",
+      "similarity": "44.4",
+      "product_count": 2,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Wheatbags",
+      "best_match": "Wheatbags Love",
+      "similarity": "69.2",
+      "product_count": 2,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Pimp",
+      "best_match": "GIMME",
+      "similarity": "40.0",
+      "product_count": 2,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Nature's",
+      "best_match": "Nature's Help",
+      "similarity": "63.6",
+      "product_count": 2,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Nutry",
+      "best_match": "Nutri-Leaf",
+      "similarity": "44.4",
+      "product_count": 2,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Ocean's",
+      "best_match": "Eucoclean",
+      "similarity": "44.4",
+      "product_count": 2,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Thrive",
+      "best_match": "Thrive Tallow",
+      "similarity": "50.0",
+      "product_count": 2,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Everyday",
+      "best_match": "Ever Eco",
+      "similarity": "50.0",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "2Chic",
+      "best_match": "CLIF",
+      "similarity": "40.0",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Gold",
+      "best_match": "Wild",
+      "similarity": "50.0",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Regular",
+      "best_match": "Ritua",
+      "similarity": "42.9",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Bio",
+      "best_match": "Book",
+      "similarity": "50.0",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Silver",
+      "best_match": "Vitawerx",
+      "similarity": "37.5",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Calming",
+      "best_match": "Vital Zing",
+      "similarity": "55.6",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Yogi",
+      "best_match": "Yogi Tea",
+      "similarity": "57.1",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Baby",
+      "best_match": "Bass",
+      "similarity": "50.0",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Cinnanom",
+      "best_match": "Banana Joe",
+      "similarity": "44.4",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Storage/Rinse",
+      "best_match": "Sol Organics",
+      "similarity": "41.7",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Goldenberries",
+      "best_match": "Cleaner Days",
+      "similarity": "38.5",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Jojoba",
+      "best_match": "The Jojoba Company",
+      "similarity": "37.5",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Deep",
+      "best_match": "Neem",
+      "similarity": "50.0",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "B.Kirkpatrick",
+      "best_match": "Dr. Organic",
+      "similarity": "33.3",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Solutions",
+      "best_match": "Solutions 4 Health",
+      "similarity": "56.3",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Chico",
+      "best_match": "Chai Tea",
+      "similarity": "42.9",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Ancient",
+      "best_match": "Aloe Dent",
+      "similarity": "50.0",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Desert",
+      "best_match": "Aztec Secret",
+      "similarity": "45.5",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "ZUII",
+      "best_match": "Sodii",
+      "similarity": "40.0",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Zuii",
+      "best_match": "Sodii",
+      "similarity": "40.0",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Bug",
+      "best_match": "Bragg",
+      "similarity": "40.0",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Twist",
+      "best_match": "Wild",
+      "similarity": "40.0",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "That",
+      "best_match": "NTS Health",
+      "similarity": "44.4",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Melrose",
+      "best_match": "MACRO MIKE",
+      "similarity": "44.4",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Freshpaper",
+      "best_match": "The Fresh Chai Co.",
+      "similarity": "42.9",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "ETHIQUE",
+      "best_match": "Faith In Nature",
+      "similarity": "38.5",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Nuilife",
+      "best_match": "Niulife",
+      "similarity": "71.4",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Gel",
+      "best_match": "Gem",
+      "similarity": "66.7",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Health",
+      "best_match": "NTS Health",
+      "similarity": "66.7",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "P'ure",
+      "best_match": "ACURE",
+      "similarity": "60.0",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "ALTER",
+      "best_match": "Alter Eco",
+      "similarity": "62.5",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Amala",
+      "best_match": "Amazonia",
+      "similarity": "50.0",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "THE",
+      "best_match": "Tooshies",
+      "similarity": "37.5",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "AMAZING",
+      "best_match": "Amazing Oils",
+      "similarity": "63.6",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Buddha",
+      "best_match": "Buddha Teas",
+      "similarity": "60.0",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Apple",
+      "best_match": "ACURE",
+      "similarity": "40.0",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Funky",
+      "best_match": "Quinby's",
+      "similarity": "42.9",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Lotus",
+      "best_match": "Biotuff",
+      "similarity": "42.9",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Hab",
+      "best_match": "Hab Shifa",
+      "similarity": "37.5",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Hemp",
+      "best_match": "Gem",
+      "similarity": "50.0",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Mindful",
+      "best_match": "Mindful Foods",
+      "similarity": "58.3",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Mt.",
+      "best_match": "OMG",
+      "similarity": "33.3",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Next",
+      "best_match": "Neem",
+      "similarity": "50.0",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "Purely",
+      "best_match": "Berkelo",
+      "similarity": "42.9",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    },
+    {
+      "bc_brand": "SALT",
+      "best_match": "NTS Health",
+      "similarity": "44.4",
+      "product_count": 1,
+      "status": "NO_SIMILAR_BRAND"
+    }
+  ]
+}

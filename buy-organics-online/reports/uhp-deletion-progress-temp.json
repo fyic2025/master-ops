@@ -1,0 +1,4210 @@
+{
+  "timestamp": "2025-11-25T03:21:26.746Z",
+  "total_products": 627,
+  "deleted_from_bc": 600,
+  "failed_bc": 0,
+  "deleted_from_supabase": 0,
+  "redirects_created": 0,
+  "products": [
+    {
+      "bc_id": 731,
+      "sku": "UN - BS22",
+      "name": "Bioastin Astaxanthin 12mg 50 gel capsules",
+      "brand": "Bioastin",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 1263,
+      "sku": "UN - EH12",
+      "name": "Everyday Unscented Body Lotion 950ml",
+      "brand": "Everyday",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 1325,
+      "sku": "UN - GK06",
+      "name": "2Chic Brazilian Keratin & Argan Oil Hair & Body Lotion 53ml",
+      "brand": "2Chic",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 1395,
+      "sku": "UN - GH21",
+      "name": "Gold Mine Kelp Noodles 454g",
+      "brand": "Gold",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 1499,
+      "sku": "UN - JJ21",
+      "name": "Jack N' Jill Bunny Toothbrush 1 Unit",
+      "brand": "Jack N",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 1618,
+      "sku": "UN - LM03",
+      "name": "Lemon Myrtle Fragrances Lemon Myrtle Conditioner 200ml",
+      "brand": "Lemon Myrtle",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 1619,
+      "sku": "UN - LM02",
+      "name": "Lemon Myrtle Fragrances Lemon Myrtle Shampoo 200ml",
+      "brand": "Lemon Myrtle",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 1719,
+      "sku": "UN - NT05",
+      "name": "Regular Ultra Wings Pads 14 Pads By Natracare",
+      "brand": "Regular",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 1888,
+      "sku": "UN - BU04",
+      "name": "Bio Spark Vitamin C Powder 200g By Nts Health",
+      "brand": "Bio",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 2176,
+      "sku": "UN - CP14",
+      "name": "Power Super Foods Cacao Powder Certified Organic Raw 1kg",
+      "brand": "Power",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 2177,
+      "sku": "UN - CP15",
+      "name": "Power Super Foods Cacao Butter Chunks 1 kg",
+      "brand": "Power",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 2184,
+      "sku": "UN - BP21",
+      "name": "Power Super Foods Maqui Powder 50g",
+      "brand": "Power",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 2244,
+      "sku": "UN - PF60",
+      "name": "Pure Food Essentials Buckwheat Flour 500g",
+      "brand": "Pure Food",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 2253,
+      "sku": "UN - PF02",
+      "name": "Pure Food Essentials Chilli Powder 80g",
+      "brand": "Pure Food",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 2284,
+      "sku": "UN - RV21",
+      "name": "Rosehip Plus Rosehip Oil 30ml",
+      "brand": "Rosehip",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 2285,
+      "sku": "UN - RV22",
+      "name": "Rosehip Plus Rosehip Oil 50ml",
+      "brand": "Rosehip",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 2299,
+      "sku": "UN - SQ01",
+      "name": "Silver Gel 60ml By Sakura Health Colloidal",
+      "brand": "Silver",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 2543,
+      "sku": "UN - YT41",
+      "name": "Calming Tea Bags 16 Bags By Yogi Tea - ON SALE BB 11/09/25",
+      "brand": "Calming",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 2562,
+      "sku": "UN - YT68",
+      "name": "Yogi Tea Berry Detox Tea Bags 16 Bags",
+      "brand": "Yogi",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 5892,
+      "sku": "UN - AL56",
+      "name": "Love Children's Bracelet/Anklet Honey By Amber",
+      "brand": "Love Children",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 5893,
+      "sku": "UN - AL57",
+      "name": "Love Children's Bracelet/Anklet Mixed By Amber",
+      "brand": "Love Children",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 5894,
+      "sku": "UN - AL58",
+      "name": "Love Children's Bracelet/Anklet Olive By Amber",
+      "brand": "Love Children",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 5895,
+      "sku": "UN - AL59",
+      "name": "Love Children's Bracelet/Anklet Rainbow By Amber",
+      "brand": "Love Children",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 6172,
+      "sku": "UN - PT91",
+      "name": "Vanilla Sprouted Brown Rice Protein 500g Protein Supplies Australia",
+      "brand": "Vanilla",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 6193,
+      "sku": "UN - SP08",
+      "name": "Baby Cleansing Pads 60 By Simply Gentle",
+      "brand": "Baby",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 6362,
+      "sku": "UN - PT86",
+      "name": "BioPro Chocolate Hazelnut Brown Rice Protein 1kg by Protein Supplies Australia",
+      "brand": "BioPro",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 6363,
+      "sku": "UN - PT92",
+      "name": "BioPro Vanilla Cinnamon Brown Rice Protein 1kg by Protein Supplies Australia",
+      "brand": "BioPro",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 7861,
+      "sku": "UN - RE25",
+      "name": "Cinnanom Toothpaste 113gr By Redmond Earthpaste",
+      "brand": "Cinnanom",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 7705,
+      "sku": "UN - JJ34",
+      "name": "Storage/Rinse Cup Bunny Jack N' Jill",
+      "brand": "Storage/Rinse",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 7819,
+      "sku": "UN - JJ38",
+      "name": "Jack N' Jill Dinosaur Toothbrush",
+      "brand": "Jack N",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 7838,
+      "sku": "UN - BP05",
+      "name": "Goldenberries 125gr By Power Super Foods",
+      "brand": "Goldenberries",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 7880,
+      "sku": "UN - JJ37",
+      "name": "Jack N' Jill Koala Toothbrush",
+      "brand": "Jack N",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 7895,
+      "sku": "UN - PT70",
+      "name": "Vanilla Bean WPI 3kg Protein Supplies Australia",
+      "brand": "Vanilla",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 8215,
+      "sku": "UN - JJ39",
+      "name": "Jack N' Jill Storage/Rinse Cup Dinosaur",
+      "brand": "Jack N",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 8794,
+      "sku": "UN - DF12",
+      "name": "2Die4 Live Foods Activated Mixed Nuts 300g",
+      "brand": "2Die4",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 9302,
+      "sku": "UN - NG03",
+      "name": "Niugini Organics Virgin Coconut Oil 320ml",
+      "brand": "Niugini",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 9669,
+      "sku": "UN - GP65C",
+      "name": "The Ginger People Ginger Syrup 237ml",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 9807,
+      "sku": "UN - BS24",
+      "name": "Bioastin Hawaiian Astaxanthin Vegan 12mg 50 capsules",
+      "brand": "Bioastin",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 9824,
+      "sku": "UN - DU06",
+      "name": "Dr Tung's Refill Heads 2",
+      "brand": "Dr",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 9887,
+      "sku": "UN - EV19",
+      "name": "Every Bit Organic Raw Tamanu Oil 50ml",
+      "brand": "Every",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 10450,
+      "sku": "UN - JC08",
+      "name": "Jojoba Company Jojoba Oil + Rosehip Oil 30ml",
+      "brand": "Jojoba",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 10855,
+      "sku": "UN - FC36",
+      "name": "The Natural Family Co Bio Toothbrush (Twin Pack) Pirate Black & Monsoon Mist",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 10702,
+      "sku": "UN - DF42",
+      "name": "2Die4 Live Foods Activated Organic Muesli 1kg",
+      "brand": "2Die4",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 10853,
+      "sku": "UN - FC38",
+      "name": "The Natural Family Co Toothbrush Twin Pack River Mint & Monsoon Mist",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 10854,
+      "sku": "UN - FC35",
+      "name": "The Natural Family Co Bio Toothbrush (Twin Pack) Pirate Black & Ivory Desert",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 10856,
+      "sku": "UN - FC37",
+      "name": "The Natural Family Co Bio Toothbrush (Twin Pack) River Mint & Ivory Desert",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 10857,
+      "sku": "UN - FC34",
+      "name": "The Natural Family Co Bio Toothbrush & Stand Soft River Mint",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 10858,
+      "sku": "UN - FC33",
+      "name": "The Natural Family Co Bio Toothbrush & Stand Soft Pirate Black",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 10859,
+      "sku": "UN - FC32",
+      "name": "The Natural Family Co Bio Toothbrush & Stand Soft Monsoon Mist",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 10871,
+      "sku": "UN - FC31",
+      "name": "The Natural Family Co Bio Toothbrush & Stand Soft Ivory Desert",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 10890,
+      "sku": "UN - MM25",
+      "name": "My Magic Mud Spearmint Toothpaste 113g",
+      "brand": "My",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 10902,
+      "sku": "UN - LL03",
+      "name": "Luvin Life Magnesium Flakes 1kg",
+      "brand": "Luvin",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 10903,
+      "sku": "UN - LL02",
+      "name": "Luvin Life Epsom Salts 1.25kg",
+      "brand": "Luvin",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 10904,
+      "sku": "UN - LL01",
+      "name": "Luvin Life Bi Carb Soda 500g",
+      "brand": "Luvin",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 11000,
+      "sku": "UN - DC203",
+      "name": "Deep Pore Charcoal Mask Skin Clear Organic Tea Tree 100ml Dr Organic (Green)",
+      "brand": "Deep",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 11116,
+      "sku": "UN - CH152",
+      "name": "Stainless Steel Bottle Matte Black 1L Cheeki",
+      "brand": "Stainless",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 11118,
+      "sku": "UN - CH154",
+      "name": "Stainless Steel Bottle Silver 1L Cheeki",
+      "brand": "Stainless",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 11151,
+      "sku": "UN - MM42",
+      "name": "My Magic Mud Oral Rinse Alcohol Free Classic Mint 420ml",
+      "brand": "My",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 11178,
+      "sku": "UN - LL05",
+      "name": "Luvin Life Himalayan Salt Fine 200g",
+      "brand": "Luvin",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 11179,
+      "sku": "UN - LL06",
+      "name": "Luvin Life Himalayan Salt Fine 500g",
+      "brand": "Luvin",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 11181,
+      "sku": "UN - LL08",
+      "name": "Luvin Life Himalayan Salt Coarse 200g",
+      "brand": "Luvin",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 11182,
+      "sku": "UN - LL09",
+      "name": "Luvin Life Himalayan Salt Coarse 500g",
+      "brand": "Luvin",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 11617,
+      "sku": "UN - GF11",
+      "name": "The Gluten Free Food Co Grain Free Flour Blend Mix 400g",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 11618,
+      "sku": "UN - GF12",
+      "name": "The Gluten Free Food Co Wholemeal Flour Blend Mix 400g",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 11619,
+      "sku": "UN - GF13",
+      "name": "The Gluten Free Food Co Quick Bread Mix 480g",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 11620,
+      "sku": "UN - GF14",
+      "name": "The Gluten Free Food Co Quick Pizza Base Mix 350g",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 11621,
+      "sku": "UN - GF15",
+      "name": "The Gluten Free Food Co Soft & Flexible Wrap Mix 350g",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 11625,
+      "sku": "UN - GF31",
+      "name": "The Gluten Free Food Co Banana Bread Mix 400g",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 11626,
+      "sku": "UN - GF32",
+      "name": "The Gluten Free Food Co Chocolate Cake Mix 500g",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 11627,
+      "sku": "UN - GF33",
+      "name": "The Gluten Free Food Co Quick & Easy Cupcake Mix 500g",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 11630,
+      "sku": "UN - GF41",
+      "name": "The Gluten Free Food Co Mac N Cheez Original Cheez 200g",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 11631,
+      "sku": "UN - GF42",
+      "name": "The Gluten Free Food Co Mac N Cheez Cheez N Chive 200g",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 11632,
+      "sku": "UN - GF43",
+      "name": "The Gluten Free Food Co Mac N Cheez Chilli Cheez 200g",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 11633,
+      "sku": "UN - GF44",
+      "name": "The Gluten Free Food Co Mac N Cheez Porcini Cheez 200g",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 11803,
+      "sku": "UN - MM31",
+      "name": "My Magic Mud Polishing Tooth Powder Peppermint 40g",
+      "brand": "My",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 11804,
+      "sku": "UN - MM32",
+      "name": "My Magic Mud Tooth Powder Spearmint 40g",
+      "brand": "My",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 11900,
+      "sku": "UN - PC49",
+      "name": "B.Kirkpatrick & A.Johnstone Book Healthy Hormones",
+      "brand": "B.Kirkpatrick",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 11922,
+      "sku": "UN - PM61",
+      "name": "Ever Eco Bamboo Cutlery Set",
+      "brand": "Ever",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 11961,
+      "sku": "UN - SM07",
+      "name": "Solutions 4 Health Oregano Oil 12 Caps",
+      "brand": "Solutions",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 11962,
+      "sku": "UN - SP09",
+      "name": "Simply Gentle 3 In 1 Cosmetic Wipe 25",
+      "brand": "Simply",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 11963,
+      "sku": "UN - SP10",
+      "name": "Simply Gentle Cotton Cloths 30",
+      "brand": "Simply",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 19237,
+      "sku": "UN - CB11",
+      "name": "Chico Bag Reusable Shop Bag Original x 10",
+      "brand": "Chico",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 19353,
+      "sku": "UN - JK02",
+      "name": "Noble Jerky Vegan Jerky Chipotle 70g",
+      "brand": "Noble",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 19354,
+      "sku": "UN - JK03",
+      "name": "Noble Jerky Vegan Jerky Sweet Bbq 70g",
+      "brand": "Noble",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 19797,
+      "sku": "UN - ANS02",
+      "name": "The Australian Natural Soap Co Solid Shampoo Bar Dry Hair 100g",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 19798,
+      "sku": "UN - ANS03",
+      "name": "The Australian Natural Soap Co Solid Shampoo Bar Oily Hair 100g",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 19829,
+      "sku": "UN - ANS12",
+      "name": "The Australian Natural Soap Co Activated Charcoal Unscented 100g",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 19835,
+      "sku": "UN - ANS24",
+      "name": "The Australian Natural Soap Co Dog Shampoo 100g",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 19846,
+      "sku": "UN - AT30",
+      "name": "Ancient Minerals Inflatable Magnesium Footbath Kit With Magnesium Bath Flakes",
+      "brand": "Ancient",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 19997,
+      "sku": "UN - LZ36",
+      "name": "Little Zebra Chocolates Carob Buds Coconut 85g",
+      "brand": "Little",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 20059,
+      "sku": "UN - ANS41",
+      "name": "The Australian Natural Soap Co Beard & Shave Oil 25ml",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 20062,
+      "sku": "UN - ANS51",
+      "name": "The Australian Natural Soap Co Dish and Laundry Soap Bar 200g",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 20064,
+      "sku": "UN - DCF01",
+      "name": "Desert Island Confectionery Kresho Bar Chocolate Covered Almond Nougat 45g x 24",
+      "brand": "Desert",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 20135,
+      "sku": "UN - ZU03",
+      "name": "ZUII ORGANIC Antibacterial Foam Hand Wash With Ionic Silver 200ml",
+      "brand": "ZUII",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 20136,
+      "sku": "UN - ZU02",
+      "name": "Zuii Organic Ionic Silver Alcohol Sanitising Gel 90ml",
+      "brand": "Zuii",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 20151,
+      "sku": "UN - LUX01",
+      "name": "Planet Luxe Laundry Liquid Lemon Myrtle Blend 1L",
+      "brand": "Planet",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 20152,
+      "sku": "UN - LUX02",
+      "name": "Planet Luxe Floor Cleaner Rose Geranium Blend 1L",
+      "brand": "Planet",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 20155,
+      "sku": "UN - LUX05",
+      "name": "Planet Luxe House Cleaner Lemon Myrtle Blend 500ml",
+      "brand": "Planet",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 20156,
+      "sku": "UN - LUX06",
+      "name": "Planet Luxe Dish Wash Lemon Myrtle Blend 500ml",
+      "brand": "Planet",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 20598,
+      "sku": "UN - LUX07",
+      "name": "Planet Luxe Freshen Up Spray Lavender Blend 200ml",
+      "brand": "Planet",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 23675,
+      "sku": "UN - GF61",
+      "name": "Plantasy Foods Cheez Sprinkles 130g",
+      "brand": "Plantasy",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 23676,
+      "sku": "UN - GF62",
+      "name": "Plantasy Foods Creamy Cheez Sauce Mix 150g",
+      "brand": "Plantasy",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 23677,
+      "sku": "UN - GF63",
+      "name": "Plantasy Foods Omelette and Fritter Mix (Egg Free) 150g",
+      "brand": "Plantasy",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 23678,
+      "sku": "UN - GF64",
+      "name": "Plantasy Foods Vegetable Gravy Mix 150g",
+      "brand": "Plantasy",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 23754,
+      "sku": "UN - BD42",
+      "name": "Blue Dinosaur Bite Chocolate Brownie Box Of 18 18 x 30g",
+      "brand": "Blue",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 23755,
+      "sku": "UN - BD43",
+      "name": "Blue Dinosaur Bite White Chocolate Box Of 18 18 x 30g",
+      "brand": "Blue",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 23761,
+      "sku": "UN - BT101",
+      "name": "Botanika Blends Plant Protein Lemon Cheesecake 500g",
+      "brand": "Botanika",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 23762,
+      "sku": "UN - BT102",
+      "name": "Botanika Blends Plant Protein Lemon Cheesecake 1kg",
+      "brand": "Botanika",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 23789,
+      "sku": "UN - ER13",
+      "name": "Enviro Products Drink Bottle Eastar BPA Free Matte Black 2.2L",
+      "brand": "Enviro",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 23796,
+      "sku": "UN - ETQ07",
+      "name": "Ethique Solid Shampoo & Shaving Bar Tip to Toe 110g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 23799,
+      "sku": "UN - ETQ13",
+      "name": "Ethique Solid Conditioner Bar Tone It Down Purple 60g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 25721,
+      "sku": "UN - GF45",
+      "name": "Plantasy Foods Mac N Cheez Mac N Go 80g",
+      "brand": "Plantasy",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 28107,
+      "sku": "UN - ETQ62",
+      "name": "Ethique Solid Crème Bodywash Bar Sweet Orange & Vanilla 110g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 28108,
+      "sku": "UN - ETQ61",
+      "name": "Ethique Solid Body Polish Bar Lime & Ginger 110g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 28117,
+      "sku": "UN - ETQ111",
+      "name": "Ethique Dogs Solid Shampoo Bow Wow Bar 110g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 28118,
+      "sku": "UN - ETQ112",
+      "name": "Ethique Dogs Solid Shampoo Shampooch Sensitive 110g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 28119,
+      "sku": "UN - ETQ113",
+      "name": "Ethique Dogs Solid Conditioner Pawfector 60g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 28120,
+      "sku": "UN - ETQ133",
+      "name": "Ethique Bamboo & Cornstarch Shower Container Aqua 1",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 28121,
+      "sku": "UN - ETQ131",
+      "name": "Ethique Bamboo & Cornstarch Shower Container Green 1",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 28171,
+      "sku": "UN - LT40",
+      "name": "Little Mashies Reusable Bowl Cover Extra Large 28cm 1",
+      "brand": "Little",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 28172,
+      "sku": "UN - LT41",
+      "name": "Little Mashies Reusable Bowl Cover XXL 31cm 1",
+      "brand": "Little",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 28204,
+      "sku": "UN - MF56",
+      "name": "The Monday Food Co Keto Granola Peanut Butter Chocolate Chip 800g",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 28208,
+      "sku": "UN - MM71",
+      "name": "My Magic Mud Silver Charcoal Toothpaste With Coconut Oil Peppermint 113g",
+      "brand": "My",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 28209,
+      "sku": "UN - MM72",
+      "name": "My Magic Mud Silver Charcoal Toothpaste With Coconut Oil Spearmint 113g",
+      "brand": "My",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 28219,
+      "sku": "UN - GF72",
+      "name": "Plantasy Foods The Good Soup Cheezy Broccoli 10x 30g",
+      "brand": "Plantasy",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 28221,
+      "sku": "UN - GF74",
+      "name": "Plantasy Foods The Good Soup Creamy Tomato With Basil 10x 30g",
+      "brand": "Plantasy",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 28223,
+      "sku": "UN - GF76",
+      "name": "Plantasy Foods The Good Soup Laksa Kaffir Lime & Coconut 10x 30g",
+      "brand": "Plantasy",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 28224,
+      "sku": "UN - GF77",
+      "name": "Plantasy Foods The Good Soup Wild Mushroom 10x 30g",
+      "brand": "Plantasy",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 29128,
+      "sku": "UN - BG58",
+      "name": "Bug Grrr Off Eucyl Hand Sanitiser Gel With Eucalyptus 250ml",
+      "brand": "Bug",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 29163,
+      "sku": "UN - TWT04",
+      "name": "Twist Scour Pads Plant Based Scour Pads 2",
+      "brand": "Twist",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 29176,
+      "sku": "UN - DU10",
+      "name": "Dr Tung's Toothbrush Protection Kids 2",
+      "brand": "Dr",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 29183,
+      "sku": "UN - EVB01",
+      "name": "Evolution Botanicals Cordyceps Extract Energy & Performance Organic 10:1 100g",
+      "brand": "Evolution",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 29184,
+      "sku": "UN - EVB02",
+      "name": "Evolution Botanicals Ayurvedic Shilajit Himalayan Mineral Complex 120g",
+      "brand": "Evolution",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 29185,
+      "sku": "UN - EVB03",
+      "name": "Evolution Botanicals Lion's Mane Extract Cognitive Performance Organic 12:1 100g",
+      "brand": "Evolution",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 29186,
+      "sku": "UN - EVB04",
+      "name": "Evolution Botanicals Reishi Extract Spiritual Potency Organic 16:1 100g",
+      "brand": "Evolution",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 29188,
+      "sku": "UN - EVB06",
+      "name": "Evolution Botanicals Siberian Chaga Extract King Of Mushrooms Organic 11:1 100g",
+      "brand": "Evolution",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 29189,
+      "sku": "UN - EVB07",
+      "name": "Evolution Botanicals Tremella Extract Beauty & Complexion Organic 10:1 120g",
+      "brand": "Evolution",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 30112,
+      "sku": "UN - BT112",
+      "name": "Botanika Blends Vegan Protein Bars Lemon Cheesecake 12 x 40g",
+      "brand": "Botanika",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 31361,
+      "sku": "UN - JK05",
+      "name": "Noble Jerky Vegan Jerky Sticky Hickory 70g",
+      "brand": "Noble",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 31363,
+      "sku": "UN - RD11",
+      "name": "That Red House Chunky Block Dishwashing Soap Lemon Myrtle 140g",
+      "brand": "That",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 31760,
+      "sku": "UN - YR01",
+      "name": "Your Tea Chinese Herbal Blend Tea Bags 1 Week Program Antioxidant 14",
+      "brand": "Your",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 31810,
+      "sku": "UN - YR04",
+      "name": "Your Tea Chinese Herbal Blend Tea Bags 1 Week Program Happy 14",
+      "brand": "Your",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32686,
+      "sku": "UN - BT73",
+      "name": "Botanika Blends Botanika Basics Activated Charcoal 300g",
+      "brand": "Botanika",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32118,
+      "sku": "UN - MEL105",
+      "name": "Melrose Essential Greens Powder Organic 120g",
+      "brand": "Melrose",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32121,
+      "sku": "UN - NAK11",
+      "name": "Naked Paleo Keto Bars Chocolate Chip Cookie Dough 15 x 40g",
+      "brand": "Naked",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32122,
+      "sku": "UN - NAK12",
+      "name": "Naked Paleo Keto Bars Peanut Butter Chocolate 15 x 40g",
+      "brand": "Naked",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32128,
+      "sku": "UN - SOW04",
+      "name": "Sow 'N Sow Gift Of Seeds Chamomile 1",
+      "brand": "Sow",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32130,
+      "sku": "UN - SOW06",
+      "name": "Sow 'N Sow Gift Of Seeds Echinacea 1",
+      "brand": "Sow",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32148,
+      "sku": "UN - SOW10",
+      "name": "Sow 'N Sow Gift Of Seeds Leafy Greens 1",
+      "brand": "Sow",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32154,
+      "sku": "UN - SOW41",
+      "name": "Sow 'N Sow Pop Up Pot Beach 1",
+      "brand": "Sow",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32157,
+      "sku": "UN - SOW44",
+      "name": "Sow 'N Sow Pop Up Pot Plant Party 1",
+      "brand": "Sow",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32890,
+      "sku": "UN - EWS27",
+      "name": "Earthwise Dish Liquid Lemon & Aloe Vera 750ml",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32594,
+      "sku": "UN - ANS05",
+      "name": "The Australia Natural Soap Co Conditioner Bar Normal/Dry 100g",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32595,
+      "sku": "UN - ANS06",
+      "name": "The Australia Natural Soap Co Conditioner Bar Sensitive/Oily 100g",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32598,
+      "sku": "UN - ANS61",
+      "name": "The Australia Natural Soap Co All Natural Soap Flakes 300g",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32599,
+      "sku": "UN - ANS62",
+      "name": "The Australia Natural Soap Co All Natural Soap Flakes 1kg",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32666,
+      "sku": "UN - BT128",
+      "name": "Botanika Blends Vegan Protein Custard Decadent Chocolate 120g",
+      "brand": "Botanika",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32668,
+      "sku": "UN - BT130",
+      "name": "Botanika Blends Nice Cream Vanilla Bean Protein Ice Cream 120g",
+      "brand": "Botanika",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32684,
+      "sku": "UN - BT71",
+      "name": "Botanika Blends Botanika Basics Organic Cacao Powder 300g",
+      "brand": "Botanika",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32685,
+      "sku": "UN - BT72",
+      "name": "Botanika Blends Botanika Basics Organic Chia Seeds 300g",
+      "brand": "Botanika",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32689,
+      "sku": "UN - BT76",
+      "name": "Botanika Blends Botanika Basics Organic Hemp Seeds 300g",
+      "brand": "Botanika",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32690,
+      "sku": "UN - BT77",
+      "name": "Botanika Blends Botanika Basics Organic Maca Powder 300g",
+      "brand": "Botanika",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32692,
+      "sku": "UN - BT80",
+      "name": "Botanika Blends Botanika Brekky Probiotic Porridge Apple Pie 1kg",
+      "brand": "Botanika",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32693,
+      "sku": "UN - BT82",
+      "name": "Botanika Blends Botanika Brekky Probiotic Porridge Cacao Crunch 1kg",
+      "brand": "Botanika",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32694,
+      "sku": "UN - BT84",
+      "name": "Botanika Blends Botanika Brekky Probiotic Porridge Vanilla Dream 1kg",
+      "brand": "Botanika",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32699,
+      "sku": "UN - BT92",
+      "name": "Botanika Blends Botanika Basics Peanut Butter Powder 300g",
+      "brand": "Botanika",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32939,
+      "sku": "UN - FRE01",
+      "name": "Freshpaper Natural Food Saver Sheets Bread & Baked Goods x 4",
+      "brand": "Freshpaper",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32797,
+      "sku": "UN - DS14",
+      "name": "Dr Superfoods Roasted Almonds Amber Chocolate 125g",
+      "brand": "Dr",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32798,
+      "sku": "UN - DS15",
+      "name": "Dr Superfoods Roasted Hazelnuts Amber Chocolate 125g",
+      "brand": "Dr",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32845,
+      "sku": "UN - ETQ10",
+      "name": "Ethique Solid Conditioner Bar Wonderbar Oily or Normal Hair 60g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32847,
+      "sku": "UN - ETQ200",
+      "name": "Ethique Gentle Shampoo Concentrate for TOuchy Scalps Unscented 50g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32848,
+      "sku": "UN - ETQ201",
+      "name": "Ethique Hydrating Shampoo Concentrate for Normal to Dry Hair Bloom 50g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32849,
+      "sku": "UN - ETQ202",
+      "name": "Ethique Balancing Shampoo Concentrate for Oily to Normal Hair Sorbet 50g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32850,
+      "sku": "UN - ETQ210",
+      "name": "Ethique Gentle Conditioner Concentrate for TOuchy Scalps Unscented 25g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32851,
+      "sku": "UN - ETQ211",
+      "name": "Ethique Hydrating Conditioner Concentrate for Normal to Dry Hair Bloom 25g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32852,
+      "sku": "UN - ETQ212",
+      "name": "Ethique Balancing Conditioner Concentrate for Oily to Normal Hair Sorbet 25g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32853,
+      "sku": "UN - ETQ220",
+      "name": "Ethique Gentle Bodywash Concentrate Unscented 50g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32854,
+      "sku": "UN - ETQ221",
+      "name": "Ethique Hydrating Bodywash Concentrate Flourish 50g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32855,
+      "sku": "UN - ETQ222",
+      "name": "ETHIQUE Refreshing Bodywash Concentrate Zest 50g",
+      "brand": "ETHIQUE",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32856,
+      "sku": "UN - ETQ230",
+      "name": "Ethique Gentle Body Lotion Concentrate Unscented 50g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32857,
+      "sku": "UN - ETQ231",
+      "name": "Ethique Hydrating Body Lotion Concentrate Flourish 50g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32858,
+      "sku": "UN - ETQ232",
+      "name": "Ethique Hydrating Body Lotion Concentrate Zest 50g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32859,
+      "sku": "UN - ETQ240",
+      "name": "Ethique Hydrating Handwash Concentrate Flourish 50g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32860,
+      "sku": "UN - ETQ241",
+      "name": "Ethique Invigorating Handwash Concentrate Sorbet 50g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32861,
+      "sku": "UN - ETQ242",
+      "name": "Ethique Refreshing Handwash Concentrate Zest 50g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32862,
+      "sku": "UN - ETQ250",
+      "name": "Ethique Multi purpose Bathroom Spray Concentrate Eucalyptus 25g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32863,
+      "sku": "UN - ETQ251",
+      "name": "Ethique Multi purpose Kitchen Spray Concentrate Sweet Orange 25g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32865,
+      "sku": "UN - ETQ37",
+      "name": "Ethique Solid Face Cleanser Bar Deep Green 100g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32875,
+      "sku": "UN - EWS02",
+      "name": "Earthwise Toilet Cleaner Orange & Eucalyptus 500ml",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32876,
+      "sku": "UN - EWS03",
+      "name": "Earthwise Shower & Bathroom Cleaner Eucalyptus & Lemon 500ml",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32877,
+      "sku": "UN - EWS04",
+      "name": "Earthwise Multi Surface Cleaner Citrus & Mint 500ml",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32878,
+      "sku": "UN - EWS05",
+      "name": "Earthwise Multi Surface Cleaner Tea Tree & Thyme 500ml",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32879,
+      "sku": "UN - EWS06",
+      "name": "Earthwise Kitchen Cleaner Pomegranate 500ml",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32880,
+      "sku": "UN - EWS07",
+      "name": "Earthwise Window & Glass Cleaner 500ml",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32882,
+      "sku": "UN - EWS09",
+      "name": "Earthwise Disinfectant Eucalyptus & Thyme 1L",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32883,
+      "sku": "UN - EWS20",
+      "name": "Earthwise Dishwasher Powder Lemon 1kg",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32884,
+      "sku": "UN - EWS21",
+      "name": "Earthwise Dishwasher Powder Lemon 2kg",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32885,
+      "sku": "UN - EWS22",
+      "name": "Earthwise Dishwasher Tablets Lemon 30",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32886,
+      "sku": "UN - EWS23",
+      "name": "Earthwise Dishwasher Tablets Lemon 50",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32887,
+      "sku": "UN - EWS24",
+      "name": "Earthwise Dishwasher Rinse Aid 250ml",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32888,
+      "sku": "UN - EWS25",
+      "name": "Earthwise Dish Liquid Lemon & Aloe Vera 400ml",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32889,
+      "sku": "UN - EWS26",
+      "name": "Earthwise Dish Liquid Rosehip & Aloe Vera 400ml",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32891,
+      "sku": "UN - EWS28",
+      "name": "Earthwise Dish Liquid Rosehip & Aloe Vera 750 ml",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32892,
+      "sku": "UN - EWS30",
+      "name": "Earthwise Laundry Powder Fragrance Free 1kg",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32893,
+      "sku": "UN - EWS31",
+      "name": "Earthwise Laundry Powder Orange & Eucalyptus 1kg",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32894,
+      "sku": "UN - EWS32",
+      "name": "Earthwise Laundry Powder Lavender 1kg",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32895,
+      "sku": "UN - EWS33",
+      "name": "Earthwise Laundry Powder Fragrance Free 2kg",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32896,
+      "sku": "UN - EWS34",
+      "name": "Earthwise Laundry Powder Orange & Eucalyptus 2kg",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32897,
+      "sku": "UN - EWS35",
+      "name": "Earthwise Laundry Powder Lavender 2kg",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32898,
+      "sku": "UN - EWS40",
+      "name": "Earthwise Laundry Liquid Fragrance Free 1L",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32899,
+      "sku": "UN - EWS41",
+      "name": "Earthwise Laundry Liquid Orange & Eucalyptus 1L",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32901,
+      "sku": "UN - EWS43",
+      "name": "Earthwise Laundry Liquid Fragrance Free 2L",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32902,
+      "sku": "UN - EWS44",
+      "name": "Earthwise Laundry Liquid Orange & Eucalyptus 2L",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32903,
+      "sku": "UN - EWS45",
+      "name": "Earthwise Laundry Liquid Lavender 2L",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32904,
+      "sku": "UN - EWS50",
+      "name": "Earthwise Fabric Stain Remover Lavender & Eucalyptus 500ml",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32905,
+      "sku": "UN - EWS51",
+      "name": "Earthwise Oxygenated Whitener Lavender & Eucalyptus 1kg",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32906,
+      "sku": "UN - EWS52",
+      "name": "Earthwise Wool & Delicates White Lily 1L",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32907,
+      "sku": "UN - EWS53",
+      "name": "Earthwise Fabric Softener Papaya & Aloe Vera 1L",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32971,
+      "sku": "UN - GF103",
+      "name": "Plantasy Foods Plant Based Protein Soy Free 100% Pea Protein Meat Alternative 150g",
+      "brand": "Plantasy",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32972,
+      "sku": "UN - GF111",
+      "name": "Plantasy Foods Nut Roast With Cranberries Includes Baking Pan 300g",
+      "brand": "Plantasy",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32977,
+      "sku": "UN - GF81",
+      "name": "Plantasy Foods Pure Potato Mash Instant Mix 150g",
+      "brand": "Plantasy",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32979,
+      "sku": "UN - GF83",
+      "name": "Plantasy Foods Potato & Spinach Mash Instant Mix 150g",
+      "brand": "Plantasy",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32980,
+      "sku": "UN - GF84",
+      "name": "Plantasy Foods Low Carb Potato Mash Instant Mix 150g",
+      "brand": "Plantasy",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32981,
+      "sku": "UN - GF91",
+      "name": "Plantasy Foods Gluten Free Pasta ABC Alfabeto 200g",
+      "brand": "Plantasy",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32982,
+      "sku": "UN - GF92",
+      "name": "Plantasy Foods Gluten Free Pasta Sea Shells Conchiglie 250g",
+      "brand": "Plantasy",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32983,
+      "sku": "UN - GF93",
+      "name": "Plantasy Foods Gluten Free Pasta Little Stars Stelline 200g",
+      "brand": "Plantasy",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32992,
+      "sku": "UN - GNC01",
+      "name": "The Goodnight Co Pure Essential Oil Calm Blend 10ml",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32993,
+      "sku": "UN - GNC02",
+      "name": "The Goodnight Co Pure Essential Oil Good Morning Blend 10ml",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32994,
+      "sku": "UN - GNC03",
+      "name": "The Goodnight Co Pure Essential Oil Goodnight Blend 10ml",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32998,
+      "sku": "UN - GNC102",
+      "name": "The Goodnight Co Ceramic Diffuser Black Ultrasonic",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 32999,
+      "sku": "UN - GNC20",
+      "name": "The Goodnight Co Essential Oil Roll On Calm Blend 10ml",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33000,
+      "sku": "UN - GNC21",
+      "name": "The Goodnight Co Essential Oil Roll On Good Morning Blend 10ml",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33001,
+      "sku": "UN - GNC22",
+      "name": "The Goodnight Co Essential Oil Roll On Goodnight Blend 10ml",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33003,
+      "sku": "UN - GNC40",
+      "name": "The Goodnight Co Sleep Mist Sweet Dreams 10ml",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33004,
+      "sku": "UN - GNC41",
+      "name": "The Goodnight Co Sleep Mist Sweet Dreams 100ml",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33005,
+      "sku": "UN - GNC50",
+      "name": "The Goodnight Co Homoeopathic Oral Liquid Calm Drops 20ml",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33006,
+      "sku": "UN - GNC51",
+      "name": "The Goodnight Co Homoeopathic Oral Liquid Cold + Flu Drops 20ml",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33007,
+      "sku": "UN - GNC52",
+      "name": "The Goodnight Co Homoeopathic Oral Liquid Deep Sleep Drops 20ml",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33008,
+      "sku": "UN - GNC53",
+      "name": "The Goodnight Co Homoeopathic Oral Liquid Menopause Drops 20ml",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33009,
+      "sku": "UN - GNC54",
+      "name": "The Goodnight Co Homoeopathic Oral Liquid Morning Drops 20ml",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33011,
+      "sku": "UN - GP47C",
+      "name": "The Ginger People Gin Gins Ginger Candy Bag Chewy Original 60g",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33030,
+      "sku": "UN - HEL06",
+      "name": "The Hello Cup Menstrual Cup Black Xs x 1",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33033,
+      "sku": "UN - HK01",
+      "name": "Huskee Reusable Coffee Cup Charcoal 6oz 177ml",
+      "brand": "Huskee",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33034,
+      "sku": "UN - HK02",
+      "name": "Huskee Reusable Coffee Cup Natural 6oz 177ml",
+      "brand": "Huskee",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33035,
+      "sku": "UN - HK03",
+      "name": "Huskee Reusable Coffee Cup Charcoal 8oz 236ml",
+      "brand": "Huskee",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33036,
+      "sku": "UN - HK04",
+      "name": "Huskee Reusable Coffee Cup Natural 8oz 236ml",
+      "brand": "Huskee",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33037,
+      "sku": "UN - HK05",
+      "name": "Huskee Reusable Coffee Cup Charcoal 12oz 354ml",
+      "brand": "Huskee",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33038,
+      "sku": "UN - HK06",
+      "name": "Huskee Reusable Coffee Cup Natural 12oz 354ml",
+      "brand": "Huskee",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33087,
+      "sku": "UN - JC06",
+      "name": "The Jojoba Company Certified Organic Jojoba Oil For Body 200ml",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33090,
+      "sku": "UN - JC13",
+      "name": "The Jojoba Company Certified Organic Jojoba Oil For Body 100ml",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33165,
+      "sku": "UN - KR72",
+      "name": "Kintra Foods Tulsi Sleepy Tea Bags x 25",
+      "brand": "Kintra",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33095,
+      "sku": "UN - JJ26",
+      "name": "Jack N' Jill Toothbrush (Children) Monkey Biodegradable x 1",
+      "brand": "Jack N",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33096,
+      "sku": "UN - JJ27",
+      "name": "Jack N' Jill Toothbrush (Children) Unicorn Biodegradable x 1",
+      "brand": "Jack N",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33100,
+      "sku": "UN - JJ62",
+      "name": "Jack N' Jill Hand Sanitizer & Holder Dino Anti Bacterial 2x 29ml",
+      "brand": "Jack N",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33191,
+      "sku": "UN - LN32",
+      "name": "Lunette Reusable Menstrual Cup Blue Model 2 For Normal to Heavy Flow x 1",
+      "brand": "Lunette",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33163,
+      "sku": "UN - KR70",
+      "name": "Kintra Foods Tulsi Original Tea Bags x 25",
+      "brand": "Kintra",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33164,
+      "sku": "UN - KR71",
+      "name": "Kintra Foods Tulsi Gut Tea Bags x 25",
+      "brand": "Kintra",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33179,
+      "sku": "UN - LL11",
+      "name": "Luvin Life MSM Methyl Sulphonyl Methane 1kg",
+      "brand": "Luvin",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33190,
+      "sku": "UN - LN31",
+      "name": "Lunette Reusable Menstrual Cup Blue Model 1 For Light to Normal Flow x 1",
+      "brand": "Lunette",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33192,
+      "sku": "UN - LN33",
+      "name": "Lunette Reusable Menstrual Cup Orange Colour For Light to Normal Flow x 1",
+      "brand": "Lunette",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33193,
+      "sku": "UN - LN34",
+      "name": "Lunette Reusable Menstrual Cup Orange Model 2 For Normal to Heavy Flow x 1",
+      "brand": "Lunette",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33194,
+      "sku": "UN - LN35",
+      "name": "Lunette Reusable Menstrual Cup Yellow Colour For Light to Normal Flow x 1",
+      "brand": "Lunette",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33195,
+      "sku": "UN - LN36",
+      "name": "Lunette Reusable Menstrual Cup Yellow Model 2 For Normal to Heavy Flow x 1",
+      "brand": "Lunette",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33197,
+      "sku": "UN - LT19",
+      "name": "Little Mashies Straw Cleaning Brushes x 3",
+      "brand": "Little",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33199,
+      "sku": "UN - LT36",
+      "name": "Little Mashies Reusable Bowl Cover Set Pack of 6 x 6",
+      "brand": "Little",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33201,
+      "sku": "UN - LT38",
+      "name": "Little Mashies Reusable Food Silicone Snack Bag Small 500ml 1",
+      "brand": "Little",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33202,
+      "sku": "UN - LUX23",
+      "name": "Planet Luxe Hand Wash Orange Pearl Blend 500ml",
+      "brand": "Planet",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33203,
+      "sku": "UN - LUX24",
+      "name": "Planet Luxe Body Wash Orange Pearl Blend 500ml",
+      "brand": "Planet",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33204,
+      "sku": "UN - LUX40",
+      "name": "Planet Luxe Hand Sanitizer Cedarwood, Ylang Ylang & Clary Sage 50ml",
+      "brand": "Planet",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33205,
+      "sku": "UN - LUX41",
+      "name": "Planet Luxe Hand Sanitizer Lavender, Bergamot & Geranium 50ml",
+      "brand": "Planet",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33275,
+      "sku": "UN - MF41",
+      "name": "The Monday Food Co Paleo Granola Chocolate, Cherry & Hazelnut 800g",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33282,
+      "sku": "UN - MF61",
+      "name": "The Monday Food Co Keto Cake Mix Classic Vanilla Sponge 250g",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33283,
+      "sku": "UN - MF62",
+      "name": "The Monday Food Co Keto Cake Mix Chocolate Torte 250g",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33284,
+      "sku": "UN - MF63",
+      "name": "The Monday Food Co Keto Cake Mix Peanut Butter Chocolate 250g",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33285,
+      "sku": "UN - MF64",
+      "name": "The Monday Food Co Keto Pancake Mix Vanilla Bean 215g",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33286,
+      "sku": "UN - MF68",
+      "name": "The Monday Food Co Keto Brownie Mix Chocolate Hazelnut Brownie 260g",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33287,
+      "sku": "UN - MF69",
+      "name": "The Monday Food Co Keto Cake Mix Lime & Coconut Sponge 250g",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33288,
+      "sku": "UN - MF70",
+      "name": "The Monday Food Co Keto Cake Mix Passionfruit Sponge 250g",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33289,
+      "sku": "UN - MF81",
+      "name": "The Monday Food Co Keto Bread Mix Almond White Bread 300g",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33293,
+      "sku": "UN - MM22",
+      "name": "My Magic Mud Activated Charcoal Toothpaste Cinnamon Clove 113g",
+      "brand": "My",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33294,
+      "sku": "UN - MM23",
+      "name": "My Magic Mud Activated Charcoal Toothpaste Peppermint 113g",
+      "brand": "My",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33295,
+      "sku": "UN - MM24",
+      "name": "My Magic Mud Activated Charcoal Toothpaste Wintergreen 113g",
+      "brand": "My",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33296,
+      "sku": "UN - MM28",
+      "name": "My Magic Mud Whitening Tooth Powder With Charcoal Cinnamon 30g",
+      "brand": "My",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33300,
+      "sku": "UN - MM73",
+      "name": "My Magic Mud Silver Charcoal Toothpaste With Hemp Seed Oil Magical Mint 113g",
+      "brand": "My",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33331,
+      "sku": "UN - NEL01",
+      "name": "Nelson Naturals INC. Crush & Brush Toothpaste Tablets Mint 60g",
+      "brand": "Nelson",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33332,
+      "sku": "UN - NEL02",
+      "name": "Nelson Naturals INC. Crush & Brush Toothpaste Tablets Mint Charcoal 60g",
+      "brand": "Nelson",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33333,
+      "sku": "UN - NEL03",
+      "name": "Nelson Naturals Inc. Activated Charcoal Toothpaste Peppermint 93g",
+      "brand": "Nelson",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33334,
+      "sku": "UN - NEL04",
+      "name": "Nelson Naturals INC. Zero Waste Toothpaste Spearmint 93g",
+      "brand": "Nelson",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33335,
+      "sku": "UN - NEL05",
+      "name": "Nelson Naturals INC. Zero Waste Toothpaste Citrus Spice Blend 93g",
+      "brand": "Nelson",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33380,
+      "sku": "UN - PF23",
+      "name": "Pure Food Essentials Turmeric Plus Dietary Supplement 100ml",
+      "brand": "Pure Food",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33457,
+      "sku": "UN - PM150",
+      "name": "Ever Eco Reusable Silicone Food Pouch 1 x 4L",
+      "brand": "Ever",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33464,
+      "sku": "UN - PM18",
+      "name": "Ever Eco Bubble Tea Straw Kit Straight Stainless Steel + Cleaning Brush x 1",
+      "brand": "Ever",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33466,
+      "sku": "UN - PM47",
+      "name": "Ever Eco Bubble Tea Straw Kit Straight Rose Gold + Cleaning Brush x 1",
+      "brand": "Ever",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33468,
+      "sku": "UN - PM64",
+      "name": "Ever Eco Bamboo Spork x 1",
+      "brand": "Ever",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33469,
+      "sku": "UN - PM65",
+      "name": "Ever Eco Bamboo Cutlery Set With Chopsticks x 1",
+      "brand": "Ever",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33643,
+      "sku": "UN - TWF12",
+      "name": "The Whole Foodies Native Cashews Sea Salt 70g",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33645,
+      "sku": "UN - TWF14",
+      "name": "The Whole Foodies Jumbo Cashews Natural 85g",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33652,
+      "sku": "UN - URB21",
+      "name": "Urban Greens Grow Kit Culinary Flowers 10x 10cm x 1",
+      "brand": "Urban",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33653,
+      "sku": "UN - URB22",
+      "name": "Urban Greens Grow Kit Kitchen Herbs 10x 10cm x 1",
+      "brand": "Urban",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33655,
+      "sku": "UN - URB24",
+      "name": "Urban Greens Grow Kit Summer Saltad 10x 10cm x 1",
+      "brand": "Urban",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33656,
+      "sku": "UN - URB31",
+      "name": "Urban Greens Mini Garden Sprouts Kit Pink Kale 20 X 8 X 7cm x 1",
+      "brand": "Urban",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33657,
+      "sku": "UN - URB32",
+      "name": "Urban Greens Mini Garden Sprouts Kit Sunflower 20 X 8 X 7cm x 1",
+      "brand": "Urban",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33668,
+      "sku": "UN - VV01",
+      "name": "Very Vanilla Vanilla Paste 100% Australian 50g",
+      "brand": "Very",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 33669,
+      "sku": "UN - VV02",
+      "name": "Very Vanilla Vanilla Extract 100% Australian 60ml",
+      "brand": "Very",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 34107,
+      "sku": "UN - EVB08",
+      "name": "Evolution Botanicals 10 Mushroom Formula Immune & Wellbeing 100g",
+      "brand": "Evolution",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 34108,
+      "sku": "UN - EVB10",
+      "name": "Evolution Botanicals Turkey Tail Immune Protection & Vitality 100g",
+      "brand": "Evolution",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 34115,
+      "sku": "UN - GNC104",
+      "name": "The Goodnight Co Portable USB Diffuser White Ultrasonic",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 34212,
+      "sku": "UN - SOW52",
+      "name": "Sow 'N Sow Recycled Gift Tags 10 Pack Echinacea x 10",
+      "brand": "Sow",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 34196,
+      "sku": "UN - SUM61",
+      "name": "Summer Salt Body Dream Eye Mask Rose (Satin & Spandex)",
+      "brand": "Summer",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 34197,
+      "sku": "UN - SUM70",
+      "name": "Summer Salt Body Crystal Soap Amethyst Lavender 155g",
+      "brand": "Summer",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 34199,
+      "sku": "UN - SUM72",
+      "name": "Summer Salt Body Crystal Soap Rose Jasmine 155g",
+      "brand": "Summer",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 34210,
+      "sku": "UN - SOW50",
+      "name": "Sow 'N Sow Recycled Gift Tags 10 Pack Chamomile x 10",
+      "brand": "Sow",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 34211,
+      "sku": "UN - SOW51",
+      "name": "Sow 'N Sow Recycled Gift Tags 10 Pack Culinary Flowers x 10",
+      "brand": "Sow",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 34213,
+      "sku": "UN - SOW53",
+      "name": "Sow 'N Sow Recycled Gift Tags 10 Pack Forget Me Not x 10",
+      "brand": "Sow",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 34214,
+      "sku": "UN - SOW54",
+      "name": "Sow 'N Sow Recycled Gift Tags 10 Pack Herbs x 10",
+      "brand": "Sow",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 34215,
+      "sku": "UN - SOW55",
+      "name": "Sow 'N Sow Recycled Gift Tags 10 Pack Marigold x 10",
+      "brand": "Sow",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 34216,
+      "sku": "UN - SOW56",
+      "name": "Sow 'N Sow Recycled Gift Tags 10 Pack Poppy x 10",
+      "brand": "Sow",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 34217,
+      "sku": "UN - SOW57",
+      "name": "Sow 'N Sow Recycled Gift Tags 10 Pack Secret Garden x 10",
+      "brand": "Sow",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 34218,
+      "sku": "UN - SOW58",
+      "name": "Sow 'N Sow Recycled Gift Tags 10 Pack Sunflower x 10",
+      "brand": "Sow",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 34219,
+      "sku": "UN - SOW59",
+      "name": "Sow 'N Sow Recycled Gift Tags 10 Pack Sweet Pea x 10",
+      "brand": "Sow",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 34220,
+      "sku": "UN - SOW60",
+      "name": "Sow 'N Sow Recycled Gift Tags 10 Pack Wildflowers x 10",
+      "brand": "Sow",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 34221,
+      "sku": "UN - SOW61",
+      "name": "Sow 'N Sow Recycled Gift Tags 10 Pack Wonderland x 10",
+      "brand": "Sow",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53301,
+      "sku": "UN - AML02",
+      "name": "Amala Magic Wet or Dry Cloth 100% Biodegradable x3",
+      "brand": "Amala",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53303,
+      "sku": "UN - ANS71",
+      "name": "THE AUST. NATURAL SOAP CO Trip Around Australia Gift Pack x3",
+      "brand": "THE",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53351,
+      "sku": "UN - BT144",
+      "name": "Botanika Blends Bickie - Protein Cookie Ginger Crunch 12x60g",
+      "brand": "Botanika",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53353,
+      "sku": "UN - BT145",
+      "name": "Botanika Blends Bickie - Protein Cookie Lemon Poppyseed 12x60g",
+      "brand": "Botanika",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53355,
+      "sku": "UN - BT146",
+      "name": "Botanika Blends Bickie - Protein Cookie Choc Chip Peanut Butter & Jelly 12x60g",
+      "brand": "Botanika",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53359,
+      "sku": "UN - BT160",
+      "name": "Botanika Blends Power Potion Pre-Workout Powder Cola 300g",
+      "brand": "Botanika",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53361,
+      "sku": "UN - BT161",
+      "name": "Botanika Blends Power Potion Pre-Workout Powder Strawberry Kiwi 300g",
+      "brand": "Botanika",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53362,
+      "sku": "UN - BT17",
+      "name": "Botanika Blends Plant Protein Fruity Cereal Mylk 500g",
+      "brand": "Botanika",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53363,
+      "sku": "UN - BT18",
+      "name": "Botanika Blends Plant Protein Fruity Cereal Mylk 1kg",
+      "brand": "Botanika",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53364,
+      "sku": "UN - BT19",
+      "name": "Botanika Blends Plant Protein PB&J (Peanut Butter & Jam) 500g",
+      "brand": "Botanika",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53365,
+      "sku": "UN - BT20",
+      "name": "Botanika Blends Plant Protein PB&J (Peanut Butter & Jam) 1kg",
+      "brand": "Botanika",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53366,
+      "sku": "UN - BT110",
+      "name": "Botanika Blends Vegan Protein Bars Apple Pie 12x40g",
+      "brand": "Botanika",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53369,
+      "sku": "UN - BT38",
+      "name": "Botanika Blends Plant Protein Golden Chai Latte 12x40g",
+      "brand": "Botanika",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53371,
+      "sku": "UN - BT39",
+      "name": "Botanika Blends Plant Protein Raspberry Coconut 12x40g",
+      "brand": "Botanika",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53372,
+      "sku": "UN - BT123",
+      "name": "Botanika Blends Marvellous Mug Cakes Choc Chip Banana Bread 100g",
+      "brand": "Botanika",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53373,
+      "sku": "UN - BT124",
+      "name": "Botanika Blends Marvellous Mug Cakes Luscious Lemon Cake 100g",
+      "brand": "Botanika",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53374,
+      "sku": "UN - BT70",
+      "name": "Botanika Blends Basics Organic Acai Powder 300g",
+      "brand": "Botanika",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53378,
+      "sku": "UN - BT81",
+      "name": "Botanika Blends Brekky Probiotic Porridge Cacao Crunch 12x60g",
+      "brand": "Botanika",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53381,
+      "sku": "UN - BT85",
+      "name": "Botanika Blends Plant Protein Apple Pie 12x40g",
+      "brand": "Botanika",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53463,
+      "sku": "UN - DK06",
+      "name": "Apple Green Duck Reusable Shopping Bag String Mixed Design x 10",
+      "brand": "Apple",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53467,
+      "sku": "UN - ECY10",
+      "name": "Ecyo Cleaning Pods Mixed Box 5 x 60ml",
+      "brand": "Ecyo",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53469,
+      "sku": "UN - ECY11",
+      "name": "Ecyo Cleaning Pods Antibacterial 5 x 60ml",
+      "brand": "Ecyo",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53471,
+      "sku": "UN - ECY12",
+      "name": "Ecyo Cleaning Pods Multipurpose 5 x 60ml",
+      "brand": "Ecyo",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53473,
+      "sku": "UN - ECY13",
+      "name": "Ecyo Cleaning Pods Bathroom 5 x 60ml",
+      "brand": "Ecyo",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53475,
+      "sku": "UN - ECY14",
+      "name": "Ecyo Cleaning Pods Kitchen Degreaser 5 x 60ml",
+      "brand": "Ecyo",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53477,
+      "sku": "UN - ECY15",
+      "name": "Ecyo Cleaning Pods Hard Floor 5 x 60ml",
+      "brand": "Ecyo",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53479,
+      "sku": "UN - ECY16",
+      "name": "Ecyo Cleaning Pods Window 5x60ml",
+      "brand": "Ecyo",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53512,
+      "sku": "UN - ER16",
+      "name": "Enviro Products Drink Bottle Eastar BPA Free Blush Frosted 2.2L",
+      "brand": "Enviro",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53513,
+      "sku": "UN - ER17",
+      "name": "Enviro Products Drink Bottle Eastar BPA Free Turquoise Frosted 2.2L",
+      "brand": "Enviro",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53515,
+      "sku": "UN - ETQ16",
+      "name": "Ethique Solid Shampoo Bar Bar Minimum Unscented 110g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53517,
+      "sku": "UN - ETQ17",
+      "name": "Ethique Solid Conditioner Bar In The Buff Unscented 60g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53519,
+      "sku": "UN - ETQ18",
+      "name": "Ethique Solid Shampoo Bar Professor Curl Curly Hair 108g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53521,
+      "sku": "UN - ETQ19",
+      "name": "Ethique Solid Conditioner & Co-Wash Bar Curliosity Curly Hair 110g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53523,
+      "sku": "UN - ETQ402",
+      "name": "Ethique Gift Bundle Tame Those Locks Frizz Wrangler & The Guardian x2",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53525,
+      "sku": "UN - ETQ403",
+      "name": "Ethique Gift Bundle The Adventurer Tip-To-Toe & Flash x2",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53535,
+      "sku": "UN - ETQ505",
+      "name": "Ethique Lip Balm Sugarplum Tinted 9g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53527,
+      "sku": "UN - ETQ501",
+      "name": "Ethique Lip Balm Juicy Pink Grapefruit & Vanilla 9g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53529,
+      "sku": "UN - ETQ502",
+      "name": "Ethique Lip Balm Nectar Unscented 9g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53531,
+      "sku": "UN - ETQ503",
+      "name": "Ethique Lip Balm Pepped Up Peppermint 9g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53533,
+      "sku": "UN - ETQ504",
+      "name": "Ethique Lip Balm So Cocoa Chocolate 9g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53537,
+      "sku": "UN - ETQ510",
+      "name": "Ethique Solid Deodorant Stick Botanica 70g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53539,
+      "sku": "UN - ETQ511",
+      "name": "Ethique Solid Deodorant Stick Rustic 70g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53541,
+      "sku": "UN - ETQ512",
+      "name": "Ethique Solid Deodorant Stick Minimalist Unscented 70g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53543,
+      "sku": "UN - ETQ520",
+      "name": "Ethique Solid Face Serum Tube Saving Face Serum 65g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53545,
+      "sku": "UN - ETQ521",
+      "name": "Ethique Solid Face Cream Tube The Perfector Nourishing 65g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53547,
+      "sku": "UN - ETQ522",
+      "name": "Ethique Solid Face Cream Tube Quench Balancing 65g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53549,
+      "sku": "UN - ETQ530",
+      "name": "Ethique Solid Body Butter Tube Coconut & Lime 100g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53551,
+      "sku": "UN - ETQ531",
+      "name": "Ethique Solid Body Butter Tube Jasmin & Ylang Ylang 100g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53577,
+      "sku": "UN - ETQ60",
+      "name": "Ethique Solid Cream Body Cleanser Lime & Lemongrass 105g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53553,
+      "sku": "UN - ETQ532",
+      "name": "Ethique Solid Body Butter Tube Sweet Orange & Vanilla 100g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53555,
+      "sku": "UN - ETQ533",
+      "name": "Ethique Solid Body Butter Tube Unscented 100g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53557,
+      "sku": "UN - ETQ540",
+      "name": "Little Ethique Solid Massage Bar Tube Love Baby Bar 100g",
+      "brand": "Little",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53559,
+      "sku": "UN - ETQ541",
+      "name": "Little Ethique Solid Calming Bottom Balm Tube Baby Bott Balm 100g",
+      "brand": "Little",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53589,
+      "sku": "UN - ETQ606",
+      "name": "Ethique Discovery Pack  Minis - Invigorating Body Care 45g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53561,
+      "sku": "UN - ETQ560",
+      "name": "Ethique Lipstick Mallow Blush Pink 8g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53563,
+      "sku": "UN - ETQ561",
+      "name": "Ethique Lipstick Honeysuckle Warm Peach 8g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53565,
+      "sku": "UN - ETQ562",
+      "name": "Ethique Lipstick Snapdragon Rosy Mauve 8g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53567,
+      "sku": "UN - ETQ563",
+      "name": "Ethique Lipstick Hibiscus Vibrant Coral 8g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53569,
+      "sku": "UN - ETQ564",
+      "name": "Ethique Lipstick Dahlia Terracotta Brown 8g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53571,
+      "sku": "UN - ETQ565",
+      "name": "Ethique Lipstick Poppy Ruby Red 8g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53573,
+      "sku": "UN - ETQ566",
+      "name": "Ethique Lipstick Tulip Deep Berry 8g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53575,
+      "sku": "UN - ETQ59",
+      "name": "Ethique Solid Cream Body Cleanser Unscented 105g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53579,
+      "sku": "UN - ETQ601",
+      "name": "Ethique Discovery Pack  Minis - For Dry Hair 45g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53581,
+      "sku": "UN - ETQ602",
+      "name": "Ethique Discovery Pack  Minis - For Balanced Hair 45g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53583,
+      "sku": "UN - ETQ603",
+      "name": "Ethique Discovery Pack  Minis - For Oily To Balanced 45g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53585,
+      "sku": "UN - ETQ604",
+      "name": "Ethique Discovery Pack  Minis - For Touchy Scalps 45g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53587,
+      "sku": "UN - ETQ605",
+      "name": "Ethique Discovery Pack  Minis - Luxurious Face Cleansing 45g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53591,
+      "sku": "UN - ETQ607",
+      "name": "Ethique Discovery Pack  Minis - Gentle Unscented 45g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53593,
+      "sku": "UN - ETQ95",
+      "name": "Little Ethique Solid Bath Melts Bath Mylk 60g",
+      "brand": "Little",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53595,
+      "sku": "UN - ETQ96",
+      "name": "Little Ethique Solid Calming Bum Balm Baby Bott Balm 100g",
+      "brand": "Little",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53597,
+      "sku": "UN - EV25",
+      "name": "Every Bit Organic Raw Coconut Oil Certified Organic 325g",
+      "brand": "Every",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53609,
+      "sku": "UN - EV46",
+      "name": "Every Bit Organic Raw Crack'd Whole Peanut Butter 250g",
+      "brand": "Every",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53611,
+      "sku": "UN - EVB09",
+      "name": "Evolution Botanicals Eleuthero Extract - Energy Mood & Focus 120g",
+      "brand": "Evolution",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53615,
+      "sku": "UN - EVB12",
+      "name": "Evolution Botanicals Schisandra Youthfulness & Sexual Vitality 120g",
+      "brand": "Evolution",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53617,
+      "sku": "UN - EVB13",
+      "name": "Evolution Botanicals Ashwagandha Ayurvedic Restorative Tonic 120g",
+      "brand": "Evolution",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53681,
+      "sku": "UN - FJK02",
+      "name": "Fijikava Noble Calm Vegan Capsules 30 Caps",
+      "brand": "Fijikava",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53647,
+      "sku": "UN - EWN30",
+      "name": "Earthwise Nourish Shampoo Balance 320ml",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53649,
+      "sku": "UN - EWN31",
+      "name": "Earthwise Nourish Conditioner Balance 320ml",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53651,
+      "sku": "UN - EWN32",
+      "name": "Earthwise Nourish Shampoo Revitalise 320ml",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53655,
+      "sku": "UN - EWS01",
+      "name": "Earthwise Toilet Cleaner Pine & Tea Tree 500ml",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53657,
+      "sku": "UN - EWS11",
+      "name": "Earthwise Air Freshener Pacific Frangipani 250ml",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53659,
+      "sku": "UN - EWS12",
+      "name": "Earthwise Air Freshener Wild Lavender 250ml",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53661,
+      "sku": "UN - EWS29",
+      "name": "Earthwise Dish Liquid Lemon & Aloe Vera 4L",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53663,
+      "sku": "UN - EWS36",
+      "name": "Earthwise Laundry Powder Fragrance Free 4kg",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53665,
+      "sku": "UN - EWS37",
+      "name": "Earthwise Laundry Powder Orange & Eucalyptus 4kg",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53667,
+      "sku": "UN - EWS46",
+      "name": "Earthwise Laundry Liquid Fragrance Free 4L",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53669,
+      "sku": "UN - EWS47",
+      "name": "Earthwise Laundry Liquid Orange & Eucalyptus 4L",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53671,
+      "sku": "UN - EWS48",
+      "name": "Earthwise Laundry Capsules Orange & Eucalyptus x16",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53673,
+      "sku": "UN - EWS54",
+      "name": "Earthwise Fabric Softener Sensitive White Lily 1L",
+      "brand": "Earthwise",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53679,
+      "sku": "UN - FJK01",
+      "name": "Fijikava Noble Kava Vegan Capsules 30 Caps",
+      "brand": "Fijikava",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53683,
+      "sku": "UN - FJK03",
+      "name": "Fijikava Noble Sleep Vegan Capsules 30 caps",
+      "brand": "Fijikava",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53685,
+      "sku": "UN - FUN02",
+      "name": "Funky Sock Co Bamboo Socks Cactus 2.0 x1",
+      "brand": "Funky",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53689,
+      "sku": "UN - GF95",
+      "name": "Plantasy Foods Gluten Free Pasta Rigatoni 250g",
+      "brand": "Plantasy",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53691,
+      "sku": "UN - GF96",
+      "name": "Plantasy Foods Gluten Free Pasta Macaroni 200g",
+      "brand": "Plantasy",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53703,
+      "sku": "UN - GNC55",
+      "name": "The Goodnight Co. Homeopathic Medicine Oral Liquid Deep Sleep Drops 50ml",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53705,
+      "sku": "UN - GNC60",
+      "name": "The Goodnight Co. Pure Essential Oil Trio Kit 3x10ml",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53709,
+      "sku": "UN - GNC62",
+      "name": "The Goodnight Co. Homeopathic Medicine Oral Liquid Trio Kit 3x20ml",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53743,
+      "sku": "UN - HK07",
+      "name": "Huskee Reusable Coffee Cup Charcoal 16oz 473ml",
+      "brand": "Huskee",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53745,
+      "sku": "UN - HK08",
+      "name": "Huskee Reusable Coffee Cup Natural 16oz 473ml",
+      "brand": "Huskee",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53773,
+      "sku": "UN - IMU01",
+      "name": "Imuni Immune Defence - Quercetin, Vitamin D3 & C, Zinc",
+      "brand": "Imuni",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53775,
+      "sku": "UN - IMU02",
+      "name": "Imuni Vegan Complete 30 Caps",
+      "brand": "Imuni",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53777,
+      "sku": "UN - IMU03",
+      "name": "Imuni Specialised Probiotics+ 30 Caps",
+      "brand": "Imuni",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53779,
+      "sku": "UN - IMU04",
+      "name": "Imuni Specialised Probiotics+ 60 Caps",
+      "brand": "Imuni",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53781,
+      "sku": "UN  - IMU05",
+      "name": "Imuni Sleep + Mind Balance 60 Caps",
+      "brand": "Imuni",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53783,
+      "sku": "UN - IMU06",
+      "name": "Imuni Magnesium Citrate 100g",
+      "brand": "Imuni",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53785,
+      "sku": "UN - IMU07",
+      "name": "Imuni Vital D3 8ml",
+      "brand": "Imuni",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53787,
+      "sku": "UN - JK04",
+      "name": "Noble Jerky Vegan Jerky Teriyaki 70g",
+      "brand": "Noble",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53789,
+      "sku": "UN - JK06",
+      "name": "Noble Jerky Vegan Jerky Smokehouse 70g",
+      "brand": "Noble",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53791,
+      "sku": "UN - JK07",
+      "name": "Noble Jerky Vegan Jerky Sweet Sesame 70g",
+      "brand": "Noble",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53793,
+      "sku": "UN - JK08",
+      "name": "Noble Jerky Vegan Jerky Sriracha 70g",
+      "brand": "Noble",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53805,
+      "sku": "UN - KJ02",
+      "name": "Koja Natural Peanut Butter Bars Peanut Caramel 16x30g",
+      "brand": "Koja",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62805,
+      "sku": "UN - ETQ147",
+      "name": "Ethique Shampoo & Soap Saver Bag x6",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53807,
+      "sku": "UN - KJ20",
+      "name": "Koja Oat Bar Cacao 12x60g",
+      "brand": "Koja",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53809,
+      "sku": "UN - KJ21",
+      "name": "Koja Oat Bar Cinnamon & Raisin 12x60g",
+      "brand": "Koja",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53811,
+      "sku": "UN - KJ22",
+      "name": "Koja Oat Bar Dark Choc Chip 12x60g",
+      "brand": "Koja",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53813,
+      "sku": "UN - KJ23",
+      "name": "Koja Oat Bar Lemon & Coconut 12x60g",
+      "brand": "Koja",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53815,
+      "sku": "UN - KJ24",
+      "name": "Koja Oat Bar Maple 12x60g",
+      "brand": "Koja",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53817,
+      "sku": "UN - KJ25",
+      "name": "Koja Almond Bar Apple Spice 12x45g",
+      "brand": "Koja",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53819,
+      "sku": "UN - KJ26",
+      "name": "Koja Almond Bar Berry & Coconut 12x45g",
+      "brand": "Koja",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53827,
+      "sku": "UN - LCL01",
+      "name": "Low Carb Life Lemonlicious Slice Keto Bake Mix 300g",
+      "brand": "Low",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53829,
+      "sku": "UN - LCL02",
+      "name": "Low Carb Life Peanut Butter Choc Chip Bars Keto Bake Mix 300g",
+      "brand": "Low",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53831,
+      "sku": "UN - LCL03",
+      "name": "Low Carb Life Rich Chocolate Brownies Keto Bake Mix 300g",
+      "brand": "Low",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53833,
+      "sku": "UN - LCL04",
+      "name": "Low Carb Life Low Carb Pastry Mix Keto Bake Mix 300g",
+      "brand": "Low",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53835,
+      "sku": "UN - LCL05",
+      "name": "Low Carb Life Low Carb Quick Mix Bread Keto Bake Mix 400g",
+      "brand": "Low",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53837,
+      "sku": "UN - LCL07",
+      "name": "Low Carb Life Raspberry White Chocolate Slice Keto Bake Mix 300g",
+      "brand": "Low",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53839,
+      "sku": "UN - LCL08",
+      "name": "Low Carb Life Chocolate Mousse Slice Keto Bake Mix 300g",
+      "brand": "Low",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53841,
+      "sku": "UN - LCL09",
+      "name": "Low Carb Life Chocolate Almond Torte Keto Bake Mix 300g",
+      "brand": "Low",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53843,
+      "sku": "UN - LCL10",
+      "name": "Low Carb Life Pancake and Waffle Mix Keto Bake Mix 300g",
+      "brand": "Low",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53845,
+      "sku": "UN - LCL20",
+      "name": "Low Carb Life One Pot Pasta Cheese Supreme 10x90g",
+      "brand": "Low",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53847,
+      "sku": "UN - LCL21",
+      "name": "Low Carb Life One Pot Pasta Creamy Mushroom 10x90g",
+      "brand": "Low",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53849,
+      "sku": "UN - LCL22",
+      "name": "Low Carb Life One Pot Pasta Tomato & Parmesan 10x90g",
+      "brand": "Low",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53851,
+      "sku": "UN - LCL23",
+      "name": "Low Carb Life One Pot Pasta Vegie Bolognese 10x90g",
+      "brand": "Low",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53855,
+      "sku": "UN - LL12",
+      "name": "Luvin Life MSM Methyl Sulphonyl Methane 400g",
+      "brand": "Luvin",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53857,
+      "sku": "UN - LL13",
+      "name": "Luvin Life Epsom Salts Magnesium Sulphate 750g",
+      "brand": "Luvin",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53859,
+      "sku": "UN - LL14",
+      "name": "Luvin Life Magnesium Bath Flakes Pharmaceutical Grade 500g",
+      "brand": "Luvin",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53861,
+      "sku": "UN - LL35",
+      "name": "Luvin Life Crystal Water Bottle Amethyst Gratitude 550ml",
+      "brand": "Luvin",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53863,
+      "sku": "UN - LL36",
+      "name": "Luvin Life Crystal Water Bottle Rose Quartz Love 550ml",
+      "brand": "Luvin",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53865,
+      "sku": "UN - LL45",
+      "name": "Luvin Life Smudge Stick White Sage Mini 12cm x1",
+      "brand": "Luvin",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53867,
+      "sku": "UN - LL46",
+      "name": "Luvin Life Smudge Stick White Sage Mini 12cm x2",
+      "brand": "Luvin",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53869,
+      "sku": "UN - LL47",
+      "name": "Luvin Life Smudge Stick White Sage Small 16cm x1",
+      "brand": "Luvin",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53871,
+      "sku": "UN - LL48",
+      "name": "Luvin Life Smudge Stick White Sage Medium 20cm x1",
+      "brand": "Luvin",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53873,
+      "sku": "UN - LL49",
+      "name": "Luvin Life Smudge Stick White Sage Large 25cm x1",
+      "brand": "Luvin",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53876,
+      "sku": "UN - LL67",
+      "name": "Luvin Life Herbal Foot Patches (10 Patches) 5x2",
+      "brand": "Luvin",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53897,
+      "sku": "UN - LL80",
+      "name": "Luvin Life Vege Capsules Unfilled Size 0 x100",
+      "brand": "Luvin",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53906,
+      "sku": "UN - LM50",
+      "name": "Lemon Myrtle Fragrances Dog Shampoo 500ml",
+      "brand": "Lemon Myrtle",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53909,
+      "sku": "UN - LZ106",
+      "name": "Little Zebra Chocolates Dark Chocolate Mint Supreme 12x85g",
+      "brand": "Little",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53910,
+      "sku": "UN - LZ107",
+      "name": "Little Zebra Chocolates Dark Chocolate Orange Supreme 12x85g",
+      "brand": "Little",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53915,
+      "sku": "UN - LZ109",
+      "name": "Little Zebra Chocolates Dark Chocolate Chilli Supreme 12x85g",
+      "brand": "Little",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53918,
+      "sku": "UN - LZ110",
+      "name": "Little Zebra Chocolates Dark Chocolate Mandarin Supreme 12x85g",
+      "brand": "Little",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53921,
+      "sku": "UN - LZ111",
+      "name": "Little Zebra Chocolates Dark Chocolate Ginger Supreme 12x85g",
+      "brand": "Little",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53924,
+      "sku": "UN - LZ112",
+      "name": "Little Zebra Chocolates Hemp Delight Dark Chocolate Chai 12x85g",
+      "brand": "Little",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53927,
+      "sku": "UN - LZ113",
+      "name": "Little Zebra Chocolates Hemp Delight Dark Chocolate Dark 12x85g",
+      "brand": "Little",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53930,
+      "sku": "UN - LZ114",
+      "name": "Little Zebra Chocolates Hemp Delight Dark Chocolate Mint 12x85g",
+      "brand": "Little",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53933,
+      "sku": "UN - LZ115",
+      "name": "Little Zebra Chocolates Dark Chocolate Dark Supreme 91% 12x85g",
+      "brand": "Little",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53936,
+      "sku": "UN - LZ116",
+      "name": "Little Zebra Chocolates Dark Chocolate Dark Supreme 100% 12x85g",
+      "brand": "Little",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53939,
+      "sku": "UN - LZ117",
+      "name": "Little Zebra Chocolates Keto White Chocolate 12x85g",
+      "brand": "Little",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 53942,
+      "sku": "UN - LZ118",
+      "name": "Little Zebra Chocolates Keto White Chocolate Crunch 12x85g",
+      "brand": "Little",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62806,
+      "sku": "UN - ETQ307",
+      "name": "Ethique Solid Conditioner Mini The Guardian Normal Dry Hair 20 x 15g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54185,
+      "sku": "UN - MC24",
+      "name": "Power Super Foods Gelatinised Maca \"The Origin Series\" 500g",
+      "brand": "Power",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54226,
+      "sku": "UN  - MP30",
+      "name": "Martin & Pleasance Ki Allergy & Hayfever Control 30 Tablets",
+      "brand": "Martin",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54303,
+      "sku": "UN - NAK13",
+      "name": "Naked Paleo Keto Bars Double Choc Brownie 15x40g",
+      "brand": "Naked",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54315,
+      "sku": "UN - NG27",
+      "name": "Niugini Organics Virgin Coconut Oil Soap (unboxed) Lemongrass 24x125g",
+      "brand": "Niugini",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54316,
+      "sku": "UN - NG28",
+      "name": "Niugini Organics Virgin Coconut Oil Soap (unboxed) Patchouli 24x125g",
+      "brand": "Niugini",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54318,
+      "sku": "UN - NG29",
+      "name": "Niugini Organics Virgin Coconut Oil Soap (unboxed) Tea Tree 24x125g",
+      "brand": "Niugini",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54402,
+      "sku": "UN - PGC05",
+      "name": "Porter Green Ciss Silicone Coasters Set Sorrento x 4",
+      "brand": "Porter",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54354,
+      "sku": "UN - PAT21",
+      "name": "Strap Rigid Bamboo Body Tape Black 5cm x 5metre Roll x 3",
+      "brand": "Strap",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54356,
+      "sku": "UN - PAT22",
+      "name": "Strap Rigid Bamboo Body Tape Natural 5cm x 5metre Roll x 3",
+      "brand": "Strap",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54400,
+      "sku": "UN - PGC04",
+      "name": "Porter Green Ciss Silicone Coasters Set Prestwick x 4",
+      "brand": "Porter",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54396,
+      "sku": "UN - PGC01",
+      "name": "Porter Green Ciss Silicone Coasters Set Antibes x 4",
+      "brand": "Porter",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54398,
+      "sku": "UN - PGC02",
+      "name": "Porter Green Ciss Silicone Coasters Set Safi x 4",
+      "brand": "Porter",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54404,
+      "sku": "UN - PGC06",
+      "name": "Porter Green Ciss Silicone Coasters Set Canterbury x 4",
+      "brand": "Porter",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54406,
+      "sku": "UN - PGC07",
+      "name": "Porter Green Ciss Silicone Coasters Set Leith x 4",
+      "brand": "Porter",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54408,
+      "sku": "UN - PGC08",
+      "name": "Porter Green Ciss Silicone Coasters Set Pretoria x 4",
+      "brand": "Porter",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54410,
+      "sku": "UN - PGC09",
+      "name": "Porter Green Ciss Silicone Coasters Set Mansoursa x 4",
+      "brand": "Porter",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54502,
+      "sku": "UN - PM79",
+      "name": "Ever Eco Insulated Tumbler Marigold 592ml",
+      "brand": "Ever",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54521,
+      "sku": "UN - PW05",
+      "name": "Power Super Foods Lucuma Cacao Nibs \"The Origin Series\" 200g",
+      "brand": "Power",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54527,
+      "sku": "UN - PW08",
+      "name": "Power Super Foods Crumbled Tigernuts \"The Origin Series\" 250g",
+      "brand": "Power",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54637,
+      "sku": "UN - URB25",
+      "name": "Urban Greens Grow Kit Dwarf Cosmos 14x14x8.5cm x 1",
+      "brand": "Urban",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54549,
+      "sku": "UN - STF01",
+      "name": "Stuff Face Wash Aloe, Charcoal and Almond Oil 125ml",
+      "brand": "Stuff",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54553,
+      "sku": "UN - STF03",
+      "name": "Stuff Shaving Gel Aloe Vera, Green Tea and Ginseng 100ml",
+      "brand": "Stuff",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54555,
+      "sku": "UN - STF04",
+      "name": "Stuff Daily Face Moisturiser Aloe, Almond Oil and Patchouli Oil 100ml",
+      "brand": "Stuff",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54557,
+      "sku": "UN - STF10",
+      "name": "Stuff Shampoo and Body Wash Cedar and Spice 240ml",
+      "brand": "Stuff",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54559,
+      "sku": "UN - STF11",
+      "name": "Stuff Shampoo and Body Wash Spearmint and Pine 240ml",
+      "brand": "Stuff",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54561,
+      "sku": "UN - STF20",
+      "name": "Stuff Roll-On Deodorant Cedar and Spice 50ml",
+      "brand": "Stuff",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54563,
+      "sku": "UN - STF21",
+      "name": "Stuff Roll-On Deodorant Spearmint and Pine 50ml",
+      "brand": "Stuff",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54565,
+      "sku": "UN - SUM100",
+      "name": "Summer Salt Body Dream Cream Mask Green 50ml",
+      "brand": "Summer",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54567,
+      "sku": "UN - SUM101",
+      "name": "Summer Salt Body Dream Cream Mask Rose 50ml",
+      "brand": "Summer",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54569,
+      "sku": "UN - SUM102",
+      "name": "Summer Salt Body Glitter Face Mask 50ml",
+      "brand": "Summer",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54571,
+      "sku": "UN - SUM103",
+      "name": "Summer Salt Body Face Mask Charcoal Clay 120ml",
+      "brand": "Summer",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54573,
+      "sku": "UN - SUM104",
+      "name": "Summer Salt Body Face Mask Chocolate Clay 120ml",
+      "brand": "Summer",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54575,
+      "sku": "UN - SUM105",
+      "name": "Summer Salt Body Face Mask Green Clay 120ml",
+      "brand": "Summer",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54579,
+      "sku": "UN - SUM120",
+      "name": "Summer Salt Body Vegan Collagen Eye Mask Sets Glitter x5",
+      "brand": "Summer",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54583,
+      "sku": "UN - SUM122",
+      "name": "Summer Salt Body Vegan Collagen Lip Mask Sets Glitter x 5",
+      "brand": "Summer",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54585,
+      "sku": "UN - SUM123",
+      "name": "Summer Salt Body Vegan Collagen Lip Mask Sets Gold x 5",
+      "brand": "Summer",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54597,
+      "sku": "UN - SUM42",
+      "name": "Summer Salt Body Crystal Facial Roller Amethyst x1",
+      "brand": "Summer",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54611,
+      "sku": "UN - SUM71",
+      "name": "Summer Salt Body Crystal Soap Aquamarine Lemongrass 150g",
+      "brand": "Summer",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54612,
+      "sku": "UN - SUM73",
+      "name": "Summer Salt Body Crystal Soap Opal Coconut & Vanilla 150g",
+      "brand": "Summer",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54613,
+      "sku": "UN - SUM74",
+      "name": "Summer Salt Body Crystal Soap Lapis Lazuli Jasmine & Lime 150g",
+      "brand": "Summer",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54641,
+      "sku": "UN - URB51",
+      "name": "Urban Greens Seed Balls for planting Bee Friendly Flowers (24 Per Tin) x 1",
+      "brand": "Urban",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54643,
+      "sku": "UN - URB52",
+      "name": "Urban Greens Seed Balls for planting Cottage Flowers (24 Per Tin) x 1",
+      "brand": "Urban",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54645,
+      "sku": "UN - URB53",
+      "name": "Urban Greens Seed Balls for planting Field of Poppies (24 Per Tin) x 1",
+      "brand": "Urban",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54647,
+      "sku": "UN - URB54",
+      "name": "Urban Greens Seed Balls for planting Kitchen Herbs (24 Per Tin) x 1",
+      "brand": "Urban",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54649,
+      "sku": "UN - URB55",
+      "name": "Urban Greens Seed Balls for planting Leafy Greens (24 Per Tin) x 1",
+      "brand": "Urban",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54663,
+      "sku": "UN - VG26",
+      "name": "Martin & Pleasance Vital Iron Vegecaps 60Tabs",
+      "brand": "Martin",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54665,
+      "sku": "UN - VG27",
+      "name": "Martin & Pleasance Vital Vitamin D Vegecaps 60Tabs",
+      "brand": "Martin",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54667,
+      "sku": "UN - VG28",
+      "name": "Martin & Pleasance Vital Calcium Vegecaps 60Tabs",
+      "brand": "Martin",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54833,
+      "sku": "UN - NG26",
+      "name": "Niugini Organics Virgin Coconut Oil Soap (Unboxed) Lavender 24x125g",
+      "brand": "Niugini",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 54834,
+      "sku": "UN - NG25",
+      "name": "Niugini Organics Virgin Coconut Oil Soap (unboxed) Pure (Unscented) 24 x 125g",
+      "brand": "Niugini",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 61825,
+      "sku": "UN - 118",
+      "name": "Lotus Polenta 500g K",
+      "brand": "Lotus",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62141,
+      "sku": "UN - BD26",
+      "name": "Blue Dinosaur Hand-Baked Bar Cheesecake Base 12 x 45g",
+      "brand": "Blue",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62142,
+      "sku": "UN - BD27",
+      "name": "Blue Dinosaur Hand-Baked Bar Cinnamon Scroll 12 x 45g",
+      "brand": "Blue",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62144,
+      "sku": "UN - BD41",
+      "name": "Blue Dinosaur Hand-Baked Bite Cheesecake Base 18 x 30g",
+      "brand": "Blue",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62145,
+      "sku": "UN - BD50",
+      "name": "Blue Dinosaur Hand-Baked Energy Bar Caramel Choc Chunk 12 x 45g",
+      "brand": "Blue",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62146,
+      "sku": "UN - BD51",
+      "name": "Blue Dinosaur Hand-Baked Energy Bar Mylk Choc Chunk 12 x 45g",
+      "brand": "Blue",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62206,
+      "sku": "UN - BJ71",
+      "name": "Keto Naturals Crispy Cauli Barbecue Bites 8 x 27g",
+      "brand": "Keto",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62207,
+      "sku": "UN - BJ72",
+      "name": "Keto Naturals Crispy Cauli Garlic & Herb Bites 8 x 27g",
+      "brand": "Keto",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62210,
+      "sku": "UN - BJ82",
+      "name": "Keto Naturals Cookies Vanilla 8 x 64g",
+      "brand": "Keto",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62251,
+      "sku": "UN - BT28",
+      "name": "Botanika Blends Plant Protein Caramelised Popcorn 1kg",
+      "brand": "Botanika",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62252,
+      "sku": "UN - BT46",
+      "name": "Botanika Blends Plant Protein Spiced Pumpkin Pie 500g",
+      "brand": "Botanika",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62253,
+      "sku": "UN - BT47",
+      "name": "Botanika Blends Plant Protein Spiced Pumpkin Pie 1kg",
+      "brand": "Botanika",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62364,
+      "sku": "UN - CRF23",
+      "name": "Carob Farm Carob Koala Lamington 50 x 15g",
+      "brand": "Carob",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62365,
+      "sku": "UN - CRF24",
+      "name": "Carob Farm Carob Koala 100's & 1000's 50 x 15g",
+      "brand": "Carob",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62366,
+      "sku": "UN - CRF30",
+      "name": "Carob Farm Carob Block Original 12 x 95g",
+      "brand": "Carob",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62367,
+      "sku": "UN - CRF31",
+      "name": "Carob Farm Carob Block Honeycomb 12 x 95g",
+      "brand": "Carob",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62368,
+      "sku": "UN - CRF32",
+      "name": "Carob Farm Carob Block Salted Caramel 12 x 95g",
+      "brand": "Carob",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62369,
+      "sku": "UN - CRF33",
+      "name": "Carob Farm Carob Block Lamington 12 x 95g",
+      "brand": "Carob",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62370,
+      "sku": "UN - CRF34",
+      "name": "Carob Farm Carob Block 100's & 1000's 12 x 95g",
+      "brand": "Carob",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62382,
+      "sku": "UN - DAY01",
+      "name": "Dayly Gut Health Powder Superfruits 153g",
+      "brand": "Dayly",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62383,
+      "sku": "UN - DAY02",
+      "name": "Dayly Gut Health Powder Natural 153g",
+      "brand": "Dayly",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62384,
+      "sku": "UN - DAY03",
+      "name": "Dayly Gut Health Powder Salted Caramel 153g",
+      "brand": "Dayly",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62467,
+      "sku": "UN - DU20",
+      "name": "Dr Tung's Herbal Tooth Powder Tabs Spearmint 100 Tabs",
+      "brand": "Dr",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62468,
+      "sku": "UN - DU21",
+      "name": "Dr Tung's Herbal Tooth Powder Tabs Mint-Free 100 Tabs",
+      "brand": "Dr",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62500,
+      "sku": "UN - EF61",
+      "name": "Pimp My Snack Super Seeds Clusters 12 x 40g",
+      "brand": "Pimp",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62502,
+      "sku": "UN - EF65",
+      "name": "Pimp My Snack Maple Cinnamon Seeds Clusters 12 x 40g",
+      "brand": "Pimp",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62560,
+      "sku": "UN - ETQ141",
+      "name": "Ethique Storage Tray Shampoo & Conditioner Pink x6",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62561,
+      "sku": "UN - ETQ142",
+      "name": "Ethique Storage Tray Shampoo & Conditioner Aqua x6",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62562,
+      "sku": "UN - ETQ143",
+      "name": "Ethique Storage Tray Shampoo & Conditioner Charcoal x6",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62596,
+      "sku": "UN - EVB60",
+      "name": "Evolution Botanicals Ready Set Kombucha Zesty Lemon & Ginger Sachets 10pk",
+      "brand": "Evolution",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62725,
+      "sku": "UN - GF18",
+      "name": "The Gluten Free Food Co. CASARECCE Gluten Free Pasta 210g",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62765,
+      "sku": "UN - HA15",
+      "name": "Hab Shifa ImmuneQ Junior Orange Flavour Chewable Tablets 60 Tabs",
+      "brand": "Hab",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62802,
+      "sku": "UN - ETQ144",
+      "name": "Ethique Storage Tray Face Cleanser & Bodywash Pink x6",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62803,
+      "sku": "UN - ETQ145",
+      "name": "Ethique Storage Tray Face Cleanser & Bodywash Aqua x6",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62804,
+      "sku": "UN - ETQ146",
+      "name": "Ethique Storage Tray Face Cleanser & Bodywash Charcoal x6",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62807,
+      "sku": "UN - ETQ351",
+      "name": "Ethique Solid Face Cleanser Mini Deep Green Oily Normal 20 x 15g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62809,
+      "sku": "UN - ETQ362",
+      "name": "Little Ethique Kids Solid Conditioner Mini Untangled 20 x 15g",
+      "brand": "Little",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62810,
+      "sku": "UN - ETQ370",
+      "name": "Ethique Dogs Solid Shampoo Mini Bow Wow Bar 20 x 15g",
+      "brand": "Ethique",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62881,
+      "sku": "UN - HM55",
+      "name": "Hemp Foods Australia Protein Seed Mix 5 x 200g",
+      "brand": "Hemp",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62963,
+      "sku": "UN - JJ101",
+      "name": "Jack N' Jill Baby Wash Fragrance Free 3 x 300ml",
+      "brand": "Jack N",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62967,
+      "sku": "UN - JJ105",
+      "name": "Jack N' Jill Baby Lotion Fragrance Free 6 x 100ml",
+      "brand": "Jack N",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62968,
+      "sku": "UN - JJ28",
+      "name": "Jack N' Jill Toothbrush Children Elephant Biodegradable x8",
+      "brand": "Jack N",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 62970,
+      "sku": "UN - JJ44",
+      "name": "Jack N' Jill Tooth Keepers Mixed x8",
+      "brand": "Jack N",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 63003,
+      "sku": "UN - KR49DATE",
+      "name": "Kintra Foods Herbal Tea Bags French Earl Grey 25pk",
+      "brand": "Kintra",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 63032,
+      "sku": "UN - LL90",
+      "name": "Luvin Life Floss Picks Eco-Friendly 12 x 50pcs",
+      "brand": "Luvin",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 63096,
+      "sku": "UN - MDF110",
+      "name": "Mindful Foods Lemon Balm Organic 20g",
+      "brand": "Mindful",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 63168,
+      "sku": "UN - MF134",
+      "name": "The Monday Food Co. Activated Buckwheat Granola Sour Cherry 270g",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 63172,
+      "sku": "UN - MF55",
+      "name": "The Monday Food Co. Keto Gourmet Granola Peanut Butter Chocolate Chip 300g",
+      "brand": "The",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 63219,
+      "sku": "UN - MTL23",
+      "name": "Mt. Elephant Wholefood Blondie Mix Choc Chunk 350g",
+      "brand": "Mt.",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 63230,
+      "sku": "UN - MYG31",
+      "name": "Myles Gray TheOils Room Spray Rose Geranium & Ylang Ylang 200ml",
+      "brand": "Myles",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 63231,
+      "sku": "UN - MYG32",
+      "name": "Myles Gray TheOils Room Spray Lavendar & Chamomile 200ml",
+      "brand": "Myles",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 63232,
+      "sku": "UN - MYG41",
+      "name": "Myles Gray Crystal Infused Reed Diffuser Salted Caramel 200ml",
+      "brand": "Myles",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 63233,
+      "sku": "UN - MYG61",
+      "name": "Myles Gray Crystal Infused Room Spray Salted Caramel 200ml",
+      "brand": "Myles",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 63241,
+      "sku": "UN - MYG62",
+      "name": "Myles Gray Crystal Infused Room Spray Citrus Burst 200ml",
+      "brand": "Myles",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 63242,
+      "sku": "UN - MYG63",
+      "name": "Myles Gray Crystal Infused Room Spray Watermelon 200ml",
+      "brand": "Myles",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 63243,
+      "sku": "UN - MYG65",
+      "name": "Myles Gray Crystal Infused Room Spray Coconut & Clarity 200ml",
+      "brand": "Myles",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 63244,
+      "sku": "UN - MYG66",
+      "name": "Myles Gray Crystal Infused Room Spray Bulgarian Rose 200ml",
+      "brand": "Myles",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 63245,
+      "sku": "UN - MYG67",
+      "name": "Myles Gray Crystal Infused Room Spray Coconut, Pineapple &Vanilla 200ml",
+      "brand": "Myles",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 63246,
+      "sku": "UN - MYG68",
+      "name": "Myles Gray Crystal Infused Room Spray Lychee Guava Sorbet 200ml",
+      "brand": "Myles",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 63247,
+      "sku": "UN - MYG69",
+      "name": "Myles Gray Crystal Infused Room Spray Pride Raspberry Vanilla 200ml",
+      "brand": "Myles",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 63729,
+      "sku": "UN - SUM132",
+      "name": "Summer Salt Body Salt Scrub Coffee 350g",
+      "brand": "Summer",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 63282,
+      "sku": "UN - NTY02",
+      "name": "Nutry Nuts Protein Hazelnut Butter Cups Double Choc 12 x 42g",
+      "brand": "Nutry",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 63281,
+      "sku": "UN - NTY01",
+      "name": "Nutry Nuts Protein Peanut Butter Cups Milk Chocolate 12 x 42g",
+      "brand": "Nutry",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 63315,
+      "sku": "UN - OCH13",
+      "name": "Ocean's Halo Organic Purple Spring Roll Rice Wraps 10 sheets 120g",
+      "brand": "Ocean's",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 63316,
+      "sku": "UN - OCH15",
+      "name": "Ocean's Halo Organic Spring Roll Rice Wraps 10 sheets 120g",
+      "brand": "Ocean's",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 63328,
+      "sku": "UN - ORA14",
+      "name": "Ora Health Bright Mind Complex 60 Caps",
+      "brand": "Ora",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 63331,
+      "sku": "UN - ORA20",
+      "name": "Ora Health Clean Omega D 60 Caps",
+      "brand": "Ora",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 63332,
+      "sku": "UN - ORA22",
+      "name": "Ora Health Curcumin BioComplex 60 Caps",
+      "brand": "Ora",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 63374,
+      "sku": "UN - PET01",
+      "name": "Next Generation Pet Foods Unreal Ear Low Fat Vegetarian Pet Treat ",
+      "brand": "Next",
+      "status": "deleted_from_bc"
+    },
+    {
+      "bc_id": 63442,
+      "sku": "UN - PM253",
+      "name": "Ever Eco Insulated Stainless Steel Bottle Rise Sip Lid 350ml",
+      "brand": "Ever",
+      "status": "deleted_from_bc"
+    }
+  ]
+}
