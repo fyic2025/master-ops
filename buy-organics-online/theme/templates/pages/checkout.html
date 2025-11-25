@@ -89,7 +89,472 @@
         }
     });
 
+    // ===================================================================
+    // ADDRESS VALIDATION: Suburb/Postcode Matching with Autocorrect
+    // ===================================================================
+
+    // Australian Suburb/Postcode validation data (sample - expand as needed)
+    var australianPostcodes = {
+        // Far North Queensland
+        '4873': ['Mossman', 'Mossman Gorge'],
+        '4870': ['Cairns', 'Cairns City', 'Cairns North', 'Parramatta Park', 'Bungalow'],
+        '4871': ['Stratford', 'Freshwater', 'Caravonica'],
+        '4872': ['Smithfield', 'Kamerunga', 'Redlynch'],
+        '4874': ['Daintree', 'Cape Tribulation', 'Diwan'],
+        '4875': ['Thursday Island', 'Horn Island'],
+
+        // Darwin / NT
+        '0800': ['Darwin', 'Darwin City', 'The Gardens'],
+        '0801': ['Fannie Bay', 'Stuart Park', 'Parap', 'Larrakeyah'],
+        '0810': ['Alawa', 'Brinkin', 'Casuarina', 'Coconut Grove'],
+        '0870': ['Alice Springs'],
+        '0872': ['Tennant Creek'],
+
+        // Sydney Metro
+        '2000': ['Sydney', 'Sydney CBD', 'Dawes Point', 'The Rocks'],
+        '2007': ['Ultimo', 'Broadway', 'Chippendale'],
+        '2008': ['Chippendale', 'Darlington'],
+        '2010': ['Surry Hills', 'Darlinghurst'],
+        '2060': ['North Sydney', 'Mc Mahons Point', 'Lavender Bay'],
+        '2750': ['Penrith', 'Penrith South'],
+
+        // Melbourne Metro
+        '3000': ['Melbourne', 'Melbourne CBD'],
+        '3004': ['Melbourne', 'St Kilda Road', 'Domain', 'South Bank'],
+        '3056': ['Brunswick'],
+        '3977': ['Cranbourne', 'Cranbourne North', 'Cranbourne East'],
+
+        // Brisbane Metro
+        '4000': ['Brisbane', 'Brisbane City', 'Spring Hill'],
+        '4101': ['South Brisbane', 'West End'],
+        '4217': ['Surfers Paradise', 'Main Beach', 'Broadbeach'],
+
+        // Adelaide Metro
+        '5000': ['Adelaide', 'Adelaide CBD'],
+        '5006': ['North Haven', 'Outer Harbor', 'Port Adelaide'],
+
+        // Perth Metro
+        '6000': ['Perth', 'Perth CBD'],
+        '6004': ['East Perth'],
+
+        // Canberra
+        '2600': ['Canberra', 'Acton', 'Black Mountain'],
+        '2601': ['Acton', 'Parkes'],
+
+        // Tasmania
+        '7000': ['Hobart', 'Battery Point'],
+        '7004': ['South Hobart', 'Dynnyrne'],
+
+        // Remote WA
+        '6725': ['Broome', 'Cable Beach'],
+        '6798': ['Christmas Island'],
+
+        // Add more as needed from actual data
+    };
+
+    // Reverse lookup: suburb to possible postcodes
+    var suburbToPostcodes = {};
+    Object.keys(australianPostcodes).forEach(function(postcode) {
+        australianPostcodes[postcode].forEach(function(suburb) {
+            var normalized = suburb.toLowerCase().trim();
+            if (!suburbToPostcodes[normalized]) {
+                suburbToPostcodes[normalized] = [];
+            }
+            if (suburbToPostcodes[normalized].indexOf(postcode) === -1) {
+                suburbToPostcodes[normalized].push(postcode);
+            }
+        });
+    });
+
+    // Initialize address validation when checkout loads
+    function initAddressValidation() {
+        // Wait for address fields to be available (React checkout loads dynamically)
+        var observer = new MutationObserver(function(mutations, obs) {
+            // Try multiple possible selectors for address fields
+            var cityField = document.querySelector('input[name="localityName"]') ||
+                           document.querySelector('input[name="city"]') ||
+                           document.querySelector('#addressLine2TextInput') ||
+                           document.querySelector('[data-test="shippingAddress-city"]');
+
+            var postcodeField = document.querySelector('input[name="postCode"]') ||
+                              document.querySelector('input[name="postcode"]') ||
+                              document.querySelector('[data-test="shippingAddress-postcode"]');
+
+            if (cityField && postcodeField) {
+                obs.disconnect(); // Stop observing
+
+                console.log('Address validation fields found:', {
+                    city: cityField.name || cityField.id,
+                    postcode: postcodeField.name || postcodeField.id
+                });
+
+                // Add validation on blur (when user finishes typing)
+                postcodeField.addEventListener('blur', function() {
+                    validateAddress(cityField, postcodeField);
+                });
+
+                cityField.addEventListener('blur', function() {
+                    validateAddress(cityField, postcodeField);
+                });
+
+                // Also validate on change (less intrusive)
+                postcodeField.addEventListener('change', function() {
+                    validateAddress(cityField, postcodeField);
+                });
+
+                cityField.addEventListener('change', function() {
+                    validateAddress(cityField, postcodeField);
+                });
+            }
+        });
+
+        // Start observing document body for changes
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+
+        // Also try immediate initialization in case fields already exist
+        setTimeout(function() {
+            var cityField = document.querySelector('input[name="localityName"]') ||
+                           document.querySelector('input[name="city"]');
+            var postcodeField = document.querySelector('input[name="postCode"]') ||
+                              document.querySelector('input[name="postcode"]');
+
+            if (cityField && postcodeField) {
+                postcodeField.addEventListener('blur', function() {
+                    validateAddress(cityField, postcodeField);
+                });
+                cityField.addEventListener('blur', function() {
+                    validateAddress(cityField, postcodeField);
+                });
+            }
+        }, 2000);
+    }
+
+    // Validate suburb/postcode combination
+    function validateAddress(cityField, postcodeField) {
+        var suburb = cityField.value.trim();
+        var postcode = postcodeField.value.trim();
+
+        // Remove any existing warnings
+        clearAddressWarnings();
+
+        // Basic validation
+        if (!suburb || !postcode) {
+            return; // Don't validate if fields are empty
+        }
+
+        // Validate postcode format (Australian postcodes are 4 digits)
+        var postcodePattern = /^\d{4}$/;
+        if (!postcodePattern.test(postcode)) {
+            if (postcode.length > 0) {
+                showAddressWarning(
+                    'Australian postcodes must be 4 digits.',
+                    postcodeField,
+                    'format-error'
+                );
+            }
+            return;
+        }
+
+        // Check if suburb/postcode combination is valid
+        var normalizedSuburb = suburb.toLowerCase().trim();
+
+        // Check if postcode exists in our database
+        if (!australianPostcodes[postcode]) {
+            // Postcode not in database - could be valid but not in our limited dataset
+            console.log('Postcode not in validation database:', postcode);
+            return; // Don't show warning for postcodes we don't have data for
+        }
+
+        // Check if suburb matches the postcode
+        var validSuburbs = australianPostcodes[postcode];
+        var isValidCombination = validSuburbs.some(function(validSuburb) {
+            return validSuburb.toLowerCase() === normalizedSuburb;
+        });
+
+        if (!isValidCombination) {
+            // Mismatch detected! Show autocorrect suggestions
+            showSuburbPostcodeSuggestions(suburb, postcode, validSuburbs, cityField, postcodeField);
+        }
+    }
+
+    // Show autocorrect suggestions
+    function showSuburbPostcodeSuggestions(enteredSuburb, enteredPostcode, validSuburbs, cityField, postcodeField) {
+        // Create suggestion dropdown
+        var suggestionBox = document.createElement('div');
+        suggestionBox.className = 'address-validation-suggestions';
+        suggestionBox.id = 'address-suggestions-dropdown';
+
+        var html = '<div class="address-validation-header">';
+        html += '<strong>⚠ Suburb/Postcode Mismatch</strong>';
+        html += '</div>';
+        html += '<div class="address-validation-message">';
+        html += 'The suburb "' + enteredSuburb + '" doesn\'t match postcode ' + enteredPostcode + '.';
+        html += '</div>';
+        html += '<div class="address-validation-options">';
+        html += '<p><strong>Did you mean:</strong></p>';
+        html += '<ul class="address-suggestions-list">';
+
+        validSuburbs.forEach(function(suburb) {
+            html += '<li class="address-suggestion-item" data-suburb="' + suburb + '" data-postcode="' + enteredPostcode + '">';
+            html += '📍 <strong>' + suburb + '</strong>, ' + getStateForPostcode(enteredPostcode) + ' ' + enteredPostcode;
+            html += '</li>';
+        });
+
+        html += '</ul>';
+        html += '<p class="address-validation-override">';
+        html += '<small>If your address is correct, you may continue.</small>';
+        html += '</p>';
+        html += '<button type="button" class="address-validation-close">✕ Close</button>';
+        html += '</div>';
+
+        suggestionBox.innerHTML = html;
+
+        // Position near the postcode field
+        var fieldContainer = postcodeField.closest('.form-field') || postcodeField.parentElement;
+        fieldContainer.style.position = 'relative';
+        fieldContainer.appendChild(suggestionBox);
+
+        // Add click handlers for suggestions
+        suggestionBox.querySelectorAll('.address-suggestion-item').forEach(function(item) {
+            item.addEventListener('click', function() {
+                var selectedSuburb = this.getAttribute('data-suburb');
+                var selectedPostcode = this.getAttribute('data-postcode');
+
+                // Update fields
+                cityField.value = selectedSuburb;
+                postcodeField.value = selectedPostcode;
+
+                // Trigger change events for React/BigCommerce validation
+                cityField.dispatchEvent(new Event('input', { bubbles: true }));
+                cityField.dispatchEvent(new Event('change', { bubbles: true }));
+                postcodeField.dispatchEvent(new Event('input', { bubbles: true }));
+                postcodeField.dispatchEvent(new Event('change', { bubbles: true }));
+
+                // Remove suggestion box
+                clearAddressWarnings();
+
+                // Show confirmation
+                showSuccessMessage('✓ Address updated to ' + selectedSuburb + ', ' + selectedPostcode, cityField);
+            });
+        });
+
+        // Close button
+        var closeBtn = suggestionBox.querySelector('.address-validation-close');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', clearAddressWarnings);
+        }
+    }
+
+    // Simple state lookup for display (could be expanded)
+    function getStateForPostcode(postcode) {
+        var firstDigit = postcode[0];
+        var states = {
+            '0': 'NT',
+            '2': 'NSW',
+            '3': 'VIC',
+            '4': 'QLD',
+            '5': 'SA',
+            '6': 'WA',
+            '7': 'TAS'
+        };
+        return states[firstDigit] || 'AU';
+    }
+
+    // Show simple warning message
+    function showAddressWarning(message, fieldElement, className) {
+        var warning = document.createElement('div');
+        warning.className = 'address-validation-warning ' + (className || '');
+        warning.innerHTML = '<span class="warning-icon">⚠</span> ' + message;
+
+        var fieldContainer = fieldElement.closest('.form-field') || fieldElement.parentElement;
+        fieldContainer.appendChild(warning);
+    }
+
+    // Show success message
+    function showSuccessMessage(message, fieldElement) {
+        var success = document.createElement('div');
+        success.className = 'address-validation-success';
+        success.innerHTML = message;
+
+        var fieldContainer = fieldElement.closest('.form-field') || fieldElement.parentElement;
+        fieldContainer.appendChild(success);
+
+        // Auto-remove after 3 seconds
+        setTimeout(function() {
+            if (success.parentElement) {
+                success.remove();
+            }
+        }, 3000);
+    }
+
+    // Clear all address warnings
+    function clearAddressWarnings() {
+        var warnings = document.querySelectorAll('.address-validation-suggestions, .address-validation-warning, .address-validation-success');
+        warnings.forEach(function(warning) {
+            warning.remove();
+        });
+    }
+
+    // Initialize when page loads
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initAddressValidation);
+    } else {
+        initAddressValidation();
+    }
+
 </script>
+
+<style type="text/css">
+    /* Address Validation Styling */
+    .address-validation-suggestions {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 10000;
+        background: #ffffff;
+        border: 2px solid #ff9800;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        margin-top: 8px;
+        padding: 0;
+        animation: slideDown 0.3s ease-out;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .address-validation-header {
+        background: #fff3cd;
+        border-bottom: 1px solid #ffc107;
+        padding: 12px 16px;
+        color: #856404;
+        font-size: 14px;
+    }
+
+    .address-validation-message {
+        padding: 12px 16px;
+        color: #333;
+        font-size: 13px;
+    }
+
+    .address-validation-options {
+        padding: 0 16px 16px 16px;
+    }
+
+    .address-validation-options p {
+        margin: 8px 0;
+        font-weight: bold;
+        font-size: 13px;
+    }
+
+    .address-suggestions-list {
+        list-style: none;
+        padding: 0;
+        margin: 8px 0;
+    }
+
+    .address-suggestion-item {
+        padding: 12px 16px;
+        margin: 4px 0;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 14px;
+    }
+
+    .address-suggestion-item:hover {
+        background: #e8f4f8;
+        border-color: #4CAF50;
+        transform: translateX(4px);
+    }
+
+    .address-suggestion-item strong {
+        color: #2196F3;
+    }
+
+    .address-validation-override {
+        margin: 12px 0 8px 0;
+        font-size: 12px;
+        color: #666;
+        font-style: italic;
+    }
+
+    .address-validation-close {
+        background: #f44336;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 8px 16px;
+        cursor: pointer;
+        font-size: 13px;
+        transition: background 0.2s;
+    }
+
+    .address-validation-close:hover {
+        background: #d32f2f;
+    }
+
+    .address-validation-warning {
+        background: #fff3cd;
+        border: 1px solid #ffc107;
+        border-radius: 4px;
+        padding: 10px 12px;
+        margin: 8px 0;
+        color: #856404;
+        font-size: 13px;
+        animation: slideDown 0.3s ease-out;
+    }
+
+    .address-validation-warning .warning-icon {
+        font-weight: bold;
+        margin-right: 4px;
+    }
+
+    .address-validation-success {
+        background: #d4edda;
+        border: 1px solid #28a745;
+        border-radius: 4px;
+        padding: 10px 12px;
+        margin: 8px 0;
+        color: #155724;
+        font-size: 13px;
+        animation: slideDown 0.3s ease-out;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .address-validation-suggestions {
+            position: fixed;
+            top: auto;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            border-radius: 16px 16px 0 0;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .address-suggestion-item {
+            padding: 14px 16px;
+            font-size: 16px; /* Prevent iOS zoom */
+            min-height: 44px; /* Touch target */
+        }
+    }
+</style>
 {{/partial}}
 
 {{> layout/empty}}

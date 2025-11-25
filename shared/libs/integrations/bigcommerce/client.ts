@@ -32,9 +32,11 @@ import {
   BigCommerceCheckout,
   BigCommercePaymentMethod,
   BigCommerceResponse,
+  BigCommerceStoreLog,
   ProductListOptions,
   OrderListOptions,
   CustomerListOptions,
+  StoreLogOptions,
   ListOptions,
 } from './types'
 
@@ -599,6 +601,43 @@ class BigCommerceConnector extends BaseConnector {
   }
 
   /**
+   * STORE LOGS API
+   */
+  readonly storeLogs = {
+    /**
+     * List store logs with optional filters
+     */
+    list: async (options: StoreLogOptions = {}): Promise<BigCommerceStoreLog[]> => {
+      const response = await this.request<BigCommerceResponse<BigCommerceStoreLog[]>>(
+        'GET',
+        '/store/systemlogs',
+        undefined,
+        options
+      )
+      return response.data || []
+    },
+
+    /**
+     * Get logs with error severity (severity >= 3)
+     */
+    getErrors: async (limit: number = 100): Promise<BigCommerceStoreLog[]> => {
+      const allLogs = await this.storeLogs.list({ limit })
+      // Filter for higher severity (typically 3+ indicates errors)
+      return allLogs.filter(log => log.severity >= 3)
+    },
+
+    /**
+     * Get logs by type
+     */
+    getByType: async (
+      type: StoreLogOptions['type'],
+      limit: number = 100
+    ): Promise<BigCommerceStoreLog[]> => {
+      return this.storeLogs.list({ type, limit })
+    },
+  }
+
+  /**
    * HEALTH CHECK
    * Test connection and basic functionality
    */
@@ -638,8 +677,16 @@ class BigCommerceConnector extends BaseConnector {
   }
 }
 
-// Export singleton instance
-export const bigcommerceClient = new BigCommerceConnector()
-
 // Export class for custom instances
 export { BigCommerceConnector }
+
+// Export singleton instance (lazy initialization to avoid errors when env vars not set)
+let _bigcommerceClient: BigCommerceConnector | null = null
+export const bigcommerceClient = new Proxy({} as BigCommerceConnector, {
+  get(target, prop) {
+    if (!_bigcommerceClient) {
+      _bigcommerceClient = new BigCommerceConnector()
+    }
+    return (_bigcommerceClient as any)[prop]
+  }
+})

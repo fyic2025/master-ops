@@ -615,3 +615,26 @@ export interface CustomerListOptions extends ListOptions {
   registration_ip_address?: string
   authentication_type?: string
 }
+
+// ============================================================================
+// STORE LOGS
+// ============================================================================
+
+export interface BigCommerceStoreLog {
+  id: number
+  type: string
+  module: string
+  severity: number
+  summary: string
+  message: string
+  date_created: string
+  staff_id?: number
+  staff_name?: string
+}
+
+export interface StoreLogOptions extends ListOptions {
+  type?: 'general' | 'payment' | 'shipping' | 'tax' | 'notification' |
+         'emailintegration' | 'ordersettings' | 'design'
+  module?: string
+  severity?: number
+}
