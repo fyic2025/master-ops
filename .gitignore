@@ -140,5 +140,11 @@ $RECYCLE.BIN/
 **/.stencil
 **/secrets.stencil.json
 
-nul
-buy-organics-online/theme/nulMASTER-CREDENTIALS-COMPLETE.env
+# Credentials and Secret Files
+MASTER-CREDENTIALS-COMPLETE.env
+*CREDENTIALS*.env
+*credentials*.json
+credential-test-report-*.json
+*secret*.json
+remove-secrets.sh
+buy-organics-online/security-cleanup.js
