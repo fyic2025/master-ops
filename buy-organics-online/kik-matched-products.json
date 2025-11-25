@@ -1,0 +1,1974 @@
+[
+  {
+    "bc_product": {
+      "product_id": 61947,
+      "sku": "1KIK - TEE-BEET-1000",
+      "name": "Teelixir Certified Organic Mushroom Beet Latte with Chaga 1000g",
+      "inventory_level": 0,
+      "is_visible": false,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - TEE-BEET-1000",
+      "product_name": "Teelixir Mushroom Beet Latte with Chaga 1 Kg",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "e5d5da58-03ef-4266-9c35-98ca0df31e78",
+        "unit_of_measure": null
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34851,
+      "sku": "KIK - 0035NT",
+      "name": "Eco SouLife Cornstarch 140pc Dinner Set Natural",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - BDH-0035NT",
+      "product_name": "Eco SouLife Cornstarch 140pc Dinner Set Natural",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "75faf1ec-0e82-40e4-b2fd-a35873aec8ce",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34853,
+      "sku": "KIK - 2029NT",
+      "name": "Eco SouLife Cornstarch 84pc Dinner Set Natural",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - CS18--2029NT",
+      "product_name": "Eco SouLife Cornstarch 84pc Dinner Set Natural",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "0568e5e3-f266-45dc-99de-497549f675b7",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34854,
+      "sku": "KIK - 2043NT",
+      "name": "Eco SouLife Disposable Set 84 Pc: 12 x 8 Oz Cups, 16 Oz Bowls, 9” Dinner Plates, 7” Side Plates, Wooden Forks, Wooden Spoons, Wooden Knives Natural",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - CS21--2043NT",
+      "product_name": "Eco SouLife Disposable Set 84 Pc: 12 x 8 Oz Cups, 16 Oz Bowls, 9” Dinner Plates, 7” Side Plates, Wooden Forks, Wooden Spoons, Wooden Knives Natural",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "0fd224df-a0ae-48da-9f4d-0e56e258bbc8",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34759,
+      "sku": "KIK - BES20",
+      "name": "Kialla Pure Foods Organic Besan Flour 20kg",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - BES20",
+      "product_name": "Kialla Pure Foods Organic Besan Flour 20kg",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "7917ecfb-8bad-4584-b95b-e4a79ee960a2",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34755,
+      "sku": "KIK - BF20",
+      "name": "Kialla Pure Foods Organic Barley Flour 20kg ",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - BF20",
+      "product_name": "Kialla Pure Foods Organic Barley Flour 20kg",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "74dfa3b8-6c0a-41e7-baff-fd89890a4def",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34757,
+      "sku": "KIK - BWFIM20",
+      "name": "Kialla Pure Foods Organic Buckwheat Flour 20kg",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - BWFIM20",
+      "product_name": "Kialla Pure Foods Organic Buckwheat Flour 20kg",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "52da6dcd-f30a-40a5-9f07-c0228fba0d56",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 199,
+      "sku": "KIK - ECB03-15",
+      "name": "Ecologic Pine & Lemon Eucalyptus Toilet Cleansing Gel 15L Bulk",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - ECB03-15",
+      "product_name": "ECOLogic Pine & Lemon Eucalyptus Toilet Cleaning Gel BULK 15L",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "3452cc1f-57cf-4f2b-84ae-93cca4b51128",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 207,
+      "sku": "KIK - ECK02",
+      "name": "Ecologic Sweet Orange & Clementine Dish Liquid 500ml",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - ECK02",
+      "product_name": "EcoLogic Sweet Orange & Clementine Dishwashing Liquid 500ml",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "5027cd6b-a98a-470e-80d7-40f728d55cb1",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34944,
+      "sku": "KIK - ECL01",
+      "name": "ECOLogic Australian Lavender Laundry Liquid 1L",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - ECL01",
+      "product_name": "ECOLogic Australian Lavender Laundry Liquid 1L",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "7493fd04-e8a1-4b33-afbe-107f10b29c65",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 215,
+      "sku": "KIK - ECL01-15",
+      "name": "Ecologic Australian Lavender Laundry Liquid 15L",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - ECL01-15",
+      "product_name": "ECOLogic Australian Lavender Laundry Liquid BULK 15L",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "8600e91c-7c08-43a4-a770-8d900a9a50f0",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 20003,
+      "sku": "KIK - ECL02-15",
+      "name": "Ecologic Citrus Fusion Laundry Liquid 15L",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - ECL02-15",
+      "product_name": "ECOLogic Citrus Fusion Laundry Liquid BULK 15L",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "fb39c44a-6020-4443-988f-93ab0d845d75",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34862,
+      "sku": "KIK - EXBWAH1",
+      "name": "Exmild Algae Hydrating Body Wash 1L",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - EXBWAH1",
+      "product_name": "Exmild Algae Hydrating Body Wash 1L",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "1f2c2f07-e902-401e-93a5-eb8881f8e4bc",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 55953,
+      "sku": "KIK - EXBWTP5",
+      "name": "Exmild Tea Tree Purifying Body Wash 500ml",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - EXBWTP5",
+      "product_name": "Exmild Tea Tree Purifying Body Wash 500ml",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "9d575314-80e0-4643-b80c-42a8a9961737",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34874,
+      "sku": "KIK - EXHCAH1",
+      "name": "Exmild Algae Hydrating Conditioner 1L",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - EXHCAH1",
+      "product_name": "Exmild Algae Hydrating Conditioner 1L",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "d827c5b5-20c0-4ac2-b60a-14d45488b18b",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34871,
+      "sku": "KIK - EXHCAM5",
+      "name": "Exmild Amino Acid Mild Conditioner 500ml",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - EXHCAM5",
+      "product_name": "Exmild Amino Acid Mild Conditioner 500ml",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "c5ccaffd-4967-4cce-81d3-5c92b36b93fe",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34876,
+      "sku": "KIK - EXHCCV1",
+      "name": "Exmild Citrus Volumising Conditioner 1L",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - EXHCCV1",
+      "product_name": "Exmild Citrus Volumising Conditioner 1L",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "089f28b8-35e3-4de0-9ecc-17007997065a",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34872,
+      "sku": "KIK - EXHCCV5",
+      "name": "Exmild Citrus Volumising Conditioner 500ml",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - EXHCCV5",
+      "product_name": "Exmild Citrus Volumising Conditioner 500ml",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "3fc51c45-865c-48e7-87e0-f5ae172da014",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34877,
+      "sku": "KIK - EXHCRN1",
+      "name": "Exmild Rose Nourishing Conditioner 1L",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - EXHCRN1",
+      "product_name": "Exmild Rose Nourishing Conditioner 1L",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "e93fe972-2c60-4e46-973e-b0fb3b4becb4",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34873,
+      "sku": "KIK - EXHCRN5",
+      "name": "Exmild Rose Nourishing Conditioner 500ml",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - EXHCRN5",
+      "product_name": "Exmild Rose Nourishing Conditioner 500ml",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "486e6350-598f-4a97-a298-c9d2f8c54cd4",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 55955,
+      "sku": "KIK - EXHCTP5",
+      "name": "Exmild Tea Tree Purifying Conditioner 500ml",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - EXHCTP5",
+      "product_name": "Exmild Tea Tree Purifying Conditioner 500ml",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "39507b79-80aa-46cc-a1cb-b2aed57c93ab",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34882,
+      "sku": "KIK - EXHSAH5",
+      "name": "Exmild Algae Hydrating Shampoo 500ml",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - EXHSAH5",
+      "product_name": "Exmild Algae Hydrating Shampoo 500ml",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "399f2e3d-02a5-446e-9562-a6e3174bd5af",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34879,
+      "sku": "KIK - EXHSAM1",
+      "name": "Exmild Amino Acid Mild Shampoo 1L",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - EXHSAM1",
+      "product_name": "Exmild Amino Acid Mild Shampoo 1L",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "3ecfb733-9f2f-4d2c-8283-119539c6f006",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34883,
+      "sku": "KIK - EXHSAM5",
+      "name": "Exmild Amino Acid Mild Shampoo 500ml",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - EXHSAM5",
+      "product_name": "Exmild Amino Acid Mild Shampoo 500ml",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "c4d04780-dc85-4923-ad77-e66c69078426",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34880,
+      "sku": "KIK - EXHSCV1",
+      "name": "Exmild Citrus Volumising Shampoo 1L",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - EXHSCV1",
+      "product_name": "Exmild Citrus Volumising Shampoo 1L",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "793daafb-63ba-438b-a922-5fa9e28d8892",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34884,
+      "sku": "KIK - EXHSCV5",
+      "name": "Exmild Citrus Volumising Shampoo 500ml",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - EXHSCV5",
+      "product_name": "Exmild Citrus Volumising Shampoo 500ml",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "6e552b56-fa9f-4e1d-9e5f-d40965f2cf6a",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34761,
+      "sku": "KIK - HM20",
+      "name": "Kialla Pure Foods Organic Hulled Millet 20kg",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - HM20",
+      "product_name": "Kialla Pure Foods Organic Hulled Millet 20kg",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "dc9276b8-1da6-474b-9d50-41a6fcdcdfd5",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 20796,
+      "sku": "KIK - HOF11",
+      "name": "Ausganica Lemon Myrtle Purifing Shampoo 500ml",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - HOF11",
+      "product_name": "Ausganica Certified Organic Lemon Myrtle Purifying Shampoo 500ml",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "98f48dc4-11c0-4f94-99d9-f6dda9060b52",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 20797,
+      "sku": "KIK - HOF12",
+      "name": "Ausganica Lemon Myrtle Purifying Conditioner 500ml",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - HOF12",
+      "product_name": "Ausganica Certified Organic Lemon Myrtle Purifying Conditioner 500ml",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "688cc012-a1bb-4b8c-9b80-cb40d86a3dd9",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 447,
+      "sku": "KIK - HRR01",
+      "name": "Rose Shampoo By Ausganica 250ml",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - HRR01",
+      "product_name": "Ausganica Certified Organic Rose Shampoo 250ml",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "60185575-07af-4d37-bc30-e40f20c0566e",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34746,
+      "sku": "KIK - KAMSG20",
+      "name": "Kialla Pure Foods Organic Stoneground Wholegrain KAMUT® Flour 20kg",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - KAMSG20",
+      "product_name": "Kialla Pure Foods Organic Stoneground Wholegrain KAMUT® Flour 20kg",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "1770fbdc-9b4b-4050-8409-a63eb62cfff3",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34793,
+      "sku": "KIK - KBW20",
+      "name": "Kialla Pure Foods Organic Kibbled Wheat 20kg",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - KBW20",
+      "product_name": "Kialla Pure Foods Organic Kibbled Wheat 20kg",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "2d4dc9d7-aecc-4383-8fe7-097728bee483",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34781,
+      "sku": "KIK - OG20",
+      "name": "Kialla Pure Foods Organic Oat Groats 20kg",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - OG20",
+      "product_name": "Kialla Pure Foods Organic Oat Groats 20kg",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "1cd36bcd-2eb9-4767-8c73-8a70d86aea81",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34394,
+      "sku": "KIK - one - 11101",
+      "name": "Miessence Balancing Cleanser 100ml",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - one - 13102",
+      "product_name": "Miessence Certified Organic Lemon Toothpaste 100g",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "842e8e91-1fd2-48ee-83fc-b9d553b2af9f",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34395,
+      "sku": "KIK - one - 11102",
+      "name": "Miessence Rejuvenating Cleanser 100ml",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - one - 13102",
+      "product_name": "Miessence Certified Organic Lemon Toothpaste 100g",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "842e8e91-1fd2-48ee-83fc-b9d553b2af9f",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34396,
+      "sku": "KIK - one - 11103",
+      "name": "Miessence Purifying Cleanser100ml",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - one - 13102",
+      "product_name": "Miessence Certified Organic Lemon Toothpaste 100g",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "842e8e91-1fd2-48ee-83fc-b9d553b2af9f",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34397,
+      "sku": "KIK - one - 11104",
+      "name": "Miessence Soothing Cleanser 100ml",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - one - 13102",
+      "product_name": "Miessence Certified Organic Lemon Toothpaste 100g",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "842e8e91-1fd2-48ee-83fc-b9d553b2af9f",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34399,
+      "sku": "KIK - one - 11201",
+      "name": "Miessence Garnet Exfoliant 140g",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - one - 13102",
+      "product_name": "Miessence Certified Organic Lemon Toothpaste 100g",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "842e8e91-1fd2-48ee-83fc-b9d553b2af9f",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34400,
+      "sku": "KIK - one - 11302",
+      "name": "Miessence Rejuvenating Mineral Mask (dry/mature skin) 45g",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - one - 13102",
+      "product_name": "Miessence Certified Organic Lemon Toothpaste 100g",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "842e8e91-1fd2-48ee-83fc-b9d553b2af9f",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34401,
+      "sku": "KIK - one - 11303",
+      "name": "Miessence Purifying Mineral Mask (oily/problem skin) 60g",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - one - 13102",
+      "product_name": "Miessence Certified Organic Lemon Toothpaste 100g",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "842e8e91-1fd2-48ee-83fc-b9d553b2af9f",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34402,
+      "sku": "KIK - one - 11401",
+      "name": "Miessence Balancing Hydrating Serum 100ml",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - one - 13102",
+      "product_name": "Miessence Certified Organic Lemon Toothpaste 100g",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "842e8e91-1fd2-48ee-83fc-b9d553b2af9f",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34403,
+      "sku": "KIK - one - 11402",
+      "name": "Miessence Rejuvenating Hydrating Serum 100ml",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - one - 13102",
+      "product_name": "Miessence Certified Organic Lemon Toothpaste 100g",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "842e8e91-1fd2-48ee-83fc-b9d553b2af9f",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34404,
+      "sku": "KIK - one - 11403",
+      "name": "Miessence Purifying Hydrating Serum 100ml",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - one - 13102",
+      "product_name": "Miessence Certified Organic Lemon Toothpaste 100g",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "842e8e91-1fd2-48ee-83fc-b9d553b2af9f",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34405,
+      "sku": "KIK - one - 11404",
+      "name": "Miessence Soothing Hydrating Serum 100ml",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - one - 13102",
+      "product_name": "Miessence Certified Organic Lemon Toothpaste 100g",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "842e8e91-1fd2-48ee-83fc-b9d553b2af9f",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34407,
+      "sku": "KIK - one - 11501",
+      "name": "Miessence Calming Gel 50ml",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - one - 13102",
+      "product_name": "Miessence Certified Organic Lemon Toothpaste 100g",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "842e8e91-1fd2-48ee-83fc-b9d553b2af9f",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34408,
+      "sku": "KIK - one - 11502",
+      "name": "Miessence Blemish Gel 50ml",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - one - 13102",
+      "product_name": "Miessence Certified Organic Lemon Toothpaste 100g",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "842e8e91-1fd2-48ee-83fc-b9d553b2af9f",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34409,
+      "sku": "KIK - one - 11601",
+      "name": "Miessence Certified Organic Balancing Moisturiser Normal Combination Skin 80g",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - one - 13102",
+      "product_name": "Miessence Certified Organic Lemon Toothpaste 100g",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "842e8e91-1fd2-48ee-83fc-b9d553b2af9f",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34410,
+      "sku": "KIK - one - 11602",
+      "name": "Miessence Rejuvenating Moisturiser 50ml",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - one - 13102",
+      "product_name": "Miessence Certified Organic Lemon Toothpaste 100g",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "842e8e91-1fd2-48ee-83fc-b9d553b2af9f",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34411,
+      "sku": "KIK - one - 11603",
+      "name": "Miessence Purifying Moisturiser 50ml",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - one - 13102",
+      "product_name": "Miessence Certified Organic Lemon Toothpaste 100g",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "842e8e91-1fd2-48ee-83fc-b9d553b2af9f",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34412,
+      "sku": "KIK - one - 11604",
+      "name": "Miessence Soothing Moisturiser 50ml",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - one - 13102",
+      "product_name": "Miessence Certified Organic Lemon Toothpaste 100g",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "842e8e91-1fd2-48ee-83fc-b9d553b2af9f",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34413,
+      "sku": "KIK - one - 11701",
+      "name": "Miessence Rejuvenessence Facial Serum (tired/stressed/ageing skin) 15ml",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - one - 13102",
+      "product_name": "Miessence Certified Organic Lemon Toothpaste 100g",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "842e8e91-1fd2-48ee-83fc-b9d553b2af9f",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34414,
+      "sku": "KIK - one - 11702",
+      "name": "Miessence Firming Eye & Neck Serum 50ml",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - one - 13102",
+      "product_name": "Miessence Certified Organic Lemon Toothpaste 100g",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "842e8e91-1fd2-48ee-83fc-b9d553b2af9f",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34416,
+      "sku": "KIK - one - 12101",
+      "name": "Miessence Desert Flower Shampoo 250ml",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - one - 13102",
+      "product_name": "Miessence Certified Organic Lemon Toothpaste 100g",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "842e8e91-1fd2-48ee-83fc-b9d553b2af9f",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 55942,
+      "sku": "KIK - one - 12301",
+      "name": "Miessence Certified Organic Shine Herbal Hair Conditioner All Hair Types 265g",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - one - 13102",
+      "product_name": "Miessence Certified Organic Lemon Toothpaste 100g",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "842e8e91-1fd2-48ee-83fc-b9d553b2af9f",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 55941,
+      "sku": "KIK - one - 12501",
+      "name": "Miessence Shape Hair Styling Gel - 250ml",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - one - 13102",
+      "product_name": "Miessence Certified Organic Lemon Toothpaste 100g",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "842e8e91-1fd2-48ee-83fc-b9d553b2af9f",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34422,
+      "sku": "KIK - one - 13101",
+      "name": "Miessence Mint Toothpaste 100g",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - one - 13102",
+      "product_name": "Miessence Certified Organic Lemon Toothpaste 100g",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "842e8e91-1fd2-48ee-83fc-b9d553b2af9f",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34427,
+      "sku": "KIK - one - 13201",
+      "name": "Miessence Sunflower Body Wash 250ml",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - one - 13102",
+      "product_name": "Miessence Certified Organic Lemon Toothpaste 100g",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "842e8e91-1fd2-48ee-83fc-b9d553b2af9f",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34430,
+      "sku": "KIK - one - 13301",
+      "name": "Miessence Ancient Spice Roll-on Deodorant 60ml",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - one - 13102",
+      "product_name": "Miessence Certified Organic Lemon Toothpaste 100g",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "842e8e91-1fd2-48ee-83fc-b9d553b2af9f",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34431,
+      "sku": "KIK - one - 13302",
+      "name": "Miessence Tahitian Breeze Roll-on Deodorant 60ml",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - one - 13302",
+      "product_name": "Miessence Certified Organic Tahitian Breeze Rollon Deodorant 60g",
+      "availability": "not_sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": false,
+        "bin_location": null,
+        "product_guid": "bb6de6d5-0451-4e8b-8467-756ea40753be",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34433,
+      "sku": "KIK - one - 13305",
+      "name": "Miessence Milk of Magnesia Ultrasensitive Roll-on Deodorant 60ml",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - one - 13102",
+      "product_name": "Miessence Certified Organic Lemon Toothpaste 100g",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "842e8e91-1fd2-48ee-83fc-b9d553b2af9f",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 264,
+      "sku": "KIK - ORG108-CO",
+      "name": "Biologika Fragrance Free Deodorant Roll On Aco 70ml",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - ORG108-CO",
+      "product_name": "Biologika Fragrance Free Deodorant 70ml",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "2f875c8e-bb53-45ca-8961-2670dd84d893",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 20118,
+      "sku": "KIK - ORG33-15",
+      "name": "Biologika Coconut Conditioner 15L",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - ORG33-15",
+      "product_name": "Biologika Coconut Conditioner Bulk 15L",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "51f74e1c-e5c0-42ae-a68f-35e9f81d1415",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 300,
+      "sku": "KIK - ORG54",
+      "name": "Biologika Lavender Hand Wash 250ml",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - ORG54",
+      "product_name": "Biologika Lavender Hand Wash 250ml",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "46db1173-8521-406e-a60d-b97905447aea",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34754,
+      "sku": "KIK - PB20",
+      "name": "Kialla Pure Foods Organic Pearl Barley 20kg ",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - PB20",
+      "product_name": "Kialla Pure Foods Organic Pearl Barley 20kg",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "6f9ef964-8373-4acc-b396-9e97bac67730",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34705,
+      "sku": "KIK - PB400",
+      "name": "Kialla Pure Foods Organic Pearl Barley 400g",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - PB400",
+      "product_name": "Kialla Pure Foods Organic Pearl Barley 400g",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "db0910e7-b30c-4540-9a49-76815aa6b9d6",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34721,
+      "sku": "KIK - PCB325",
+      "name": "Kialla Pure Foods Organic Pancake Mix Buckwheat 325g",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - PCB325",
+      "product_name": "Kialla Pure Foods Organic Pancake Mix Buckwheat 325g",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "8fa17048-058e-4e0a-a279-90e9dc40ea41",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 35034,
+      "sku": "KIK - PCV325",
+      "name": "Kialla Pure Foods Organic Vegan Pancake Mix Vanilla 325g",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - PCV325",
+      "product_name": "Kialla Pure Foods Organic Vegan Pancake Mix Vanilla 325g",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "9308ee0e-574c-4690-b9db-4d2ef9c66285",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34708,
+      "sku": "KIK - POL400",
+      "name": "Kialla Pure Foods Organic Rustic Polenta 400g",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - POL400",
+      "product_name": "Kialla Pure Foods Organic Rustic Polenta 400g",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "020ed59c-23f4-4b2b-96d4-8ad01a8bdf37",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34786,
+      "sku": "KIK - RBFIM20",
+      "name": "Kialla Pure Foods Organic Brown Rice Flour 20kg",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - RBFIM20",
+      "product_name": "Kialla Pure Foods Organic Brown Rice Flour 20kg",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "fddb96d4-663e-40cd-81aa-6f2228b74a8a",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34712,
+      "sku": "KIK - RBFIM400",
+      "name": "Kialla Pure Foods Organic Brown Rice Flour 400g",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - RBFIM400",
+      "product_name": "Kialla Pure Foods Organic Brown Rice Flour 400g",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "9dfc7e7f-7120-4c55-87d6-dd1498f831df",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34723,
+      "sku": "KIK - ROSIM5",
+      "name": "Kialla Pure Foods Organic Rolled Oats 5kg",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - ROSIM5",
+      "product_name": "Kialla Pure Foods Organic Rolled Oats 5kg",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "0f7ca219-87a3-41ff-ae8b-862e7551fb52",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34745,
+      "sku": "KIK - SPFSGIM20",
+      "name": "Kialla Pure Foods Organic Wholegrain Spelt Flour 20kg",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - SPFSGIM20",
+      "product_name": "Kialla Pure Foods Organic Wholegrain Spelt Flour 20kg",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "709da72a-e6e2-431c-a8fa-22e187f195e6",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34739,
+      "sku": "KIK - SRUB20",
+      "name": "Kialla Pure Foods Organic Unbleached Self Raising Flour 20kg",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - SRUB20",
+      "product_name": "Kialla Pure Foods Organic Unbleached Self Raising Flour 20kg",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "acfb35c7-64d8-469c-bae2-c5d396d70dc0",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34794,
+      "sku": "KIK - WB15",
+      "name": "Kialla Pure Foods Organic Wheat Bran 15kg",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - WB15",
+      "product_name": "Kialla Pure Foods - Organic Wheat Bran 15kg",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "2d0ec89a-0e06-4dbb-8db5-f8bda3e9f6a5",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34792,
+      "sku": "KIK - WT20",
+      "name": "Kialla Pure Foods Organic Wheat Grain 20kg",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - WT20",
+      "product_name": "Kialla Pure Foods Organic Wheat Grain 20kg",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "5b49a906-0de4-4558-a69b-4090738c3fea",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  },
+  {
+    "bc_product": {
+      "product_id": 34734,
+      "sku": "KIK - WT5",
+      "name": "Kialla Pure Foods  Organic Wheat Grain 5kg",
+      "inventory_level": 0,
+      "is_visible": true,
+      "availability": "available"
+    },
+    "unleashed_product": {
+      "supplier_sku": "KIK - WT5",
+      "product_name": "Kialla Pure Foods Organic Wheat Grain 5kg",
+      "availability": "sellable",
+      "stock_level": 0,
+      "metadata": {
+        "is_sellable": true,
+        "bin_location": null,
+        "product_guid": "868cb61f-f15d-4f5e-aaa3-cb234f7c993f",
+        "unit_of_measure": {
+          "Guid": "d9447f0f-7c29-43e0-86d1-cc290e772891",
+          "Name": "EA",
+          "Obsolete": false
+        }
+      }
+    }
+  }
+]

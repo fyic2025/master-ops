@@ -1,0 +1,421 @@
+{
+  "timestamp": "2025-11-25T02:38:28.353Z",
+  "total_deleted": 83,
+  "deleted_products": [
+    {
+      "product_id": 1559,
+      "sku": "GBN - KIKI107",
+      "name": "Dishwasher Powder 2.5kg By Kin Kin Naturals"
+    },
+    {
+      "product_id": 1560,
+      "sku": "GBN - KIKI104",
+      "name": "Oxygen Whitener (Lime & Eucalyptus) 1.2kg By Kin Kin Naturals"
+    },
+    {
+      "product_id": 1561,
+      "sku": "GBN - KIKI106",
+      "name": "Dishwasher Powder 1.1kg By Kin Kin Naturals"
+    },
+    {
+      "product_id": 1564,
+      "sku": "GBN - KIKI108",
+      "name": "Kin Kin Naturals Wool & Delicates Wash 1050ml"
+    },
+    {
+      "product_id": 11751,
+      "sku": "GBN - KIKI114",
+      "name": "Kin Kin Naturals Bulk Dish Tangerine Mandarin 20L"
+    },
+    {
+      "product_id": 20080,
+      "sku": "GBN - KIKI112",
+      "name": "Eucalyptus Laundry Liquid 5L By Kin Kin Naturals"
+    },
+    {
+      "product_id": 20894,
+      "sku": "KIK - HOF00",
+      "name": "Ausganica Travel Kit Hair and Body Lavender 30ml x 4 Pack"
+    },
+    {
+      "product_id": 32647,
+      "sku": "KIK - ORG06",
+      "name": "Biologika Lemon Tea Tree Soap 100g"
+    },
+    {
+      "product_id": 34206,
+      "sku": "KIK - TBS-11",
+      "name": "The Broth Sisters Stock Concentrate Asian Veggie Turmeric 170g"
+    },
+    {
+      "product_id": 34207,
+      "sku": "KIK - TBS-12",
+      "name": "The Broth Sisters Stock Concentrate Superfood Mushroom Lions Mane 170g"
+    },
+    {
+      "product_id": 34309,
+      "sku": "KIK - TBS-20",
+      "name": "The Broth Sisters Turmeric and Ginger Paste 170g"
+    },
+    {
+      "product_id": 34312,
+      "sku": "KIK - TBS-21",
+      "name": "The Broth Sisters Fermented Chilli 170g"
+    },
+    {
+      "product_id": 34352,
+      "sku": "KIK - SC19-0010NT",
+      "name": "Eco SouLife Back to Nature Sugar Cane Straw 50pc"
+    },
+    {
+      "product_id": 34359,
+      "sku": "KIK - PLAD17-100B",
+      "name": "Eco SouLife 100pc Straight PLA Straws Black"
+    },
+    {
+      "product_id": 34366,
+      "sku": "KIK - ECO - BDH-0035NT",
+      "name": "Eco Soulife Cornsatch Natural Coloured Disposable Set 140 piece"
+    },
+    {
+      "product_id": 34368,
+      "sku": "KIK - CS18-2029NT",
+      "name": "Eco Soulife Corn Starch Disposable Set 84 Piece Set"
+    },
+    {
+      "product_id": 34415,
+      "sku": "KIK - one- 11703",
+      "name": "Miessence Ambrosia Essence Skin Perfector 15ml"
+    },
+    {
+      "product_id": 34431,
+      "sku": "KIK - one - 13302",
+      "name": "Miessence Tahitian Breeze Roll-on Deodorant 60ml"
+    },
+    {
+      "product_id": 34674,
+      "sku": "KIK - SGSR700",
+      "name": "Kialla Pure Foods Organic Stoneground Wholegrain Self Raising Flour 700g"
+    },
+    {
+      "product_id": 34675,
+      "sku": "KIK - SPFSGIM700",
+      "name": "Kialla Pure Foods Organic Wholegrain Spelt Flour 700g"
+    },
+    {
+      "product_id": 34678,
+      "sku": "KIK - SOWF700",
+      "name": "Kialla Pure Foods Organic White Sorghum Flour 700g"
+    },
+    {
+      "product_id": 34679,
+      "sku": "KIK - BF700",
+      "name": "Kialla Pure Foods Organic Barley Flour 700g"
+    },
+    {
+      "product_id": 34680,
+      "sku": "KIK - BWFIM400",
+      "name": "Kialla Pure Foods Organic Buckwheat Flour 400g"
+    },
+    {
+      "product_id": 34681,
+      "sku": "KIK - SK300",
+      "name": "Kialla Pure Foods Organic Sunflower Kernels 300g"
+    },
+    {
+      "product_id": 34704,
+      "sku": "KIK - MB400",
+      "name": "Kialla Pure Foods Organic Mung Beans 400g"
+    },
+    {
+      "product_id": 34706,
+      "sku": "KIK - LIN300",
+      "name": "Kialla Pure Foods Organic Linseed 300g"
+    },
+    {
+      "product_id": 34709,
+      "sku": "KIK - BES400",
+      "name": "Kialla Pure Foods Organic Besan Flour 400g"
+    },
+    {
+      "product_id": 34710,
+      "sku": "KIK - MAF400",
+      "name": "Kialla Pure Foods Organic Yellow Maize Flour 400g"
+    },
+    {
+      "product_id": 34711,
+      "sku": "KIK - WB100",
+      "name": "Kialla Pure Foods Organic Wheat Bran 100g"
+    },
+    {
+      "product_id": 34713,
+      "sku": "KIK - CPS400",
+      "name": "Kialla Pure Foods Organic Chick Pea Splits 400g"
+    },
+    {
+      "product_id": 34714,
+      "sku": "KIK - WT400",
+      "name": "Kialla Pure Foods Organic Wheat Grain 400g"
+    },
+    {
+      "product_id": 34715,
+      "sku": "KIK - SB400",
+      "name": "Kialla Pure Foods Organic Soya Beans 400g"
+    },
+    {
+      "product_id": 34716,
+      "sku": "KIK - ROSIM600",
+      "name": "Kialla Pure Foods Organic Rolled Oats 500g"
+    },
+    {
+      "product_id": 34718,
+      "sku": "KIK - PSV600",
+      "name": "Kialla Pure Foods Organic Protein Smoothie Vanilla 600g"
+    },
+    {
+      "product_id": 34727,
+      "sku": "KIK - SGSR5",
+      "name": "Kialla Pure Foods Organic Stoneground Wholegrain Self Raising Flour 5kg"
+    },
+    {
+      "product_id": 34738,
+      "sku": "KIK - SG10",
+      "name": "Kialla Pure Foods Organic Stoneground Wholegrain Plain Flour 10kg"
+    },
+    {
+      "product_id": 34742,
+      "sku": "KIK - SGSR20",
+      "name": "Kialla Pure Foods Organic Stoneground Wholegrain Self Raising Flour 20kg"
+    },
+    {
+      "product_id": 34748,
+      "sku": "KIK - GMC20",
+      "name": "Kialla Pure Foods Organic Ancient Seeds and Grain Mix Concentrate 20kg"
+    },
+    {
+      "product_id": 34749,
+      "sku": "KIK - GMSL20",
+      "name": "Kialla Pure Foods Organic Soy and Linseed Grain Mix Concentrate 20kg"
+    },
+    {
+      "product_id": 34750,
+      "sku": "KIK - BMASG10",
+      "name": "Kialla Pure Foods Organic Ancient Grains & Seed Sourdough Mix 10kg"
+    },
+    {
+      "product_id": 34751,
+      "sku": "KIK - BMKS10",
+      "name": "Kialla Pure Foods Organic KAMUT ® Blend Sourdough Mix 10kg"
+    },
+    {
+      "product_id": 34753,
+      "sku": "KIK - BG20",
+      "name": "Kialla Pure Foods Organic Barley Grain 20kg "
+    },
+    {
+      "product_id": 34756,
+      "sku": "KIK - BWKIM20",
+      "name": "Kialla Pure Foods Organic Buckwheat Kernels 20kg"
+    },
+    {
+      "product_id": 34763,
+      "sku": "KIK - MB20",
+      "name": "Kialla Pure Foods Organic Mung Beans 20kg"
+    },
+    {
+      "product_id": 34766,
+      "sku": "KIK - ROQIM20",
+      "name": "Kialla Pure Foods Organic Quick Oats 20kg"
+    },
+    {
+      "product_id": 34783,
+      "sku": "KIK - QUWIM20",
+      "name": "Kialla Pure Foods Organic White Quinoa Grain 20kg"
+    },
+    {
+      "product_id": 34784,
+      "sku": "KIK - QUFWIM20",
+      "name": "Kialla Pure Foods Organic White Quinoa Flour 20kg"
+    },
+    {
+      "product_id": 34787,
+      "sku": "KIK - SOWF20",
+      "name": "Kialla Pure Foods Organic White Sorghum Flour 20kg"
+    },
+    {
+      "product_id": 34789,
+      "sku": "KIK - SB20",
+      "name": "Kialla Pure Foods Organic Soya Beans 20kg"
+    },
+    {
+      "product_id": 34807,
+      "sku": "KIK - TBS - 22",
+      "name": "The Broth Sisters Umami Paste 170g "
+    },
+    {
+      "product_id": 34842,
+      "sku": "KIK - GF - 20",
+      "name": "GF Oats Traditional Uncontaminated Quick Oats 1kg"
+    },
+    {
+      "product_id": 34846,
+      "sku": "KIK - 13603",
+      "name": "Biody Organic Hand Sanitiser Pump 80ml"
+    },
+    {
+      "product_id": 34969,
+      "sku": "KIK - OTB03",
+      "name": "The Organic Tea Box ANTIOXIDANT - Prickly Pear & Matcha Green Tea"
+    },
+    {
+      "product_id": 34970,
+      "sku": "KIK - OTB04",
+      "name": "The Organic Tea Box BALANCE - Devils Claw & Chai Tea"
+    },
+    {
+      "product_id": 34971,
+      "sku": "KIK - OTB05",
+      "name": "The Organic Tea Box BE AT EASE - Valerian & Lemon Balm"
+    },
+    {
+      "product_id": 34972,
+      "sku": "KIK - OTB01",
+      "name": "The Organic Tea Box CLARITY - Ginkgo & Peppermint"
+    },
+    {
+      "product_id": 34973,
+      "sku": "KIK - OTB02",
+      "name": "The Organic Tea Box IMMUNE BOOST - Kakadu & Ginger, Spearmint"
+    },
+    {
+      "product_id": 34974,
+      "sku": "KIK - OTB06",
+      "name": "The Organic Tea Box NOURISH - Reishi & Lemongrass"
+    },
+    {
+      "product_id": 35025,
+      "sku": "KIK - BMASG450",
+      "name": "Kialla Pure Foods Organic Bread Mix Ancient Seeds & Grains Sourdough 450g"
+    },
+    {
+      "product_id": 35026,
+      "sku": "KIK - BMCS450",
+      "name": "Kialla Pure Foods Organic Bread Mix Classic Sourdough 450g"
+    },
+    {
+      "product_id": 35027,
+      "sku": "KIK - BMSL450",
+      "name": "Kialla Pure Foods Organic Bread Mix Soy & Linseed Sourdough 450g"
+    },
+    {
+      "product_id": 35028,
+      "sku": "KIK - PSVC600",
+      "name": "Kialla Pure Foods Organic Vegan Protein Smoothie Vanilla Coconut 600g"
+    },
+    {
+      "product_id": 35889,
+      "sku": "KIK - CHAGA-001",
+      "name": "Chaga Immuno Elixir Seabuckthorn ORGANIC 500ml"
+    },
+    {
+      "product_id": 35892,
+      "sku": "KIK - CHAGA-003",
+      "name": "Chaga Immuno Elixir Blackcurrant ORGANIC 500ml"
+    },
+    {
+      "product_id": 35893,
+      "sku": "KIK - CHAGA-006",
+      "name": "Chaga Immuno Elixir Rosehip ORGANIC 250ml"
+    },
+    {
+      "product_id": 35894,
+      "sku": "KIK - CHAGA-005",
+      "name": "Chaga Immuno Elixir Rosehip ORGANIC 500ml"
+    },
+    {
+      "product_id": 47904,
+      "sku": "KIK - COOLP-500",
+      "name": "Chiron Cactus & Olive Oil Laundry Powder 500g"
+    },
+    {
+      "product_id": 55938,
+      "sku": "KIK - 15409",
+      "name": "Ultrafoods Protein Strawberry 500g"
+    },
+    {
+      "product_id": 55939,
+      "sku": "KIK - 15412",
+      "name": "Ultrafoods Protein Chocolate 500g"
+    },
+    {
+      "product_id": 55940,
+      "sku": "KIK - 15118",
+      "name": "Ultrafoods New Lifestyle 450g"
+    },
+    {
+      "product_id": 55944,
+      "sku": "KIK - WO20-0014",
+      "name": "Eco SouLife Wooden Fork 20pc"
+    },
+    {
+      "product_id": 55945,
+      "sku": "KIK - SCFS19-0012NT",
+      "name": "Eco SouLife Sugar Cane Straw 2000pc"
+    },
+    {
+      "product_id": 55950,
+      "sku": "KIK - CS21--2043BL",
+      "name": "Eco SouLife Disposable Set 84 Pc"
+    },
+    {
+      "product_id": 55952,
+      "sku": "KIK - EXBWTP1",
+      "name": "Exmild Tea Tree Purifying Body Wash 1L"
+    },
+    {
+      "product_id": 55960,
+      "sku": "KIK - ONOC300",
+      "name": "Organic Overnight Oats Cacao 300g"
+    },
+    {
+      "product_id": 55962,
+      "sku": "KIK - PSC600",
+      "name": "Kialla Pure Foods Organic Protein Smoothie Cacao 600g"
+    },
+    {
+      "product_id": 63637,
+      "sku": "KIK - TEGBBDS",
+      "name": "EucoClean Organic Bed Bug Defence Spray 750ml"
+    },
+    {
+      "product_id": 63644,
+      "sku": "KIK - TRGOPBS",
+      "name": "EucoClean Organic Pet Bedding Sanitiser 750ml"
+    },
+    {
+      "product_id": 63650,
+      "sku": "KIK - TRGOIS",
+      "name": "EucoClean Organic Insect Spray 750ml"
+    },
+    {
+      "product_id": 63655,
+      "sku": "KIK - ECL05-15",
+      "name": "Eucalyptus Wool Mix 15 Ltr Bulk By Ecologic"
+    },
+    {
+      "product_id": 63661,
+      "sku": "KIK - CHAGA-002",
+      "name": "Chaga Immuno Elixir Seabuckthorn ORGANIC 250ml"
+    },
+    {
+      "product_id": 63662,
+      "sku": "KIK - GF-1451-10",
+      "name": "GF Oats Organic Uncontaminated Oats 500g"
+    },
+    {
+      "product_id": 63663,
+      "sku": "KIK - 1467-10",
+      "name": "GF Oats Organic Uncontaminated Oats 1kg"
+    }
+  ]
+}
