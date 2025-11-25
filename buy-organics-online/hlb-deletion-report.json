@@ -1,0 +1,138 @@
+{
+  "timestamp": "2025-11-25T01:20:06.262Z",
+  "summary": {
+    "redirectsCreated": 0,
+    "redirectsFailed": 11,
+    "productsDeleted": 11,
+    "productDeletesFailed": 0
+  },
+  "details": {
+    "redirectsCreated": [],
+    "redirectsFailed": [
+      {
+        "product_id": 63654,
+        "sku": "HLB - KHA",
+        "from": "/king-soba-organic-tom-kha-noodle-cup/",
+        "to": "/noodles/"
+      },
+      {
+        "product_id": 63643,
+        "sku": "HLB - KS5",
+        "from": "/king-soba-brown-rice-ramen-280g/",
+        "to": "/noodles/"
+      },
+      {
+        "product_id": 63636,
+        "sku": "HLB - KS6",
+        "from": "/king-soba-buckwheat-ramen-280g/",
+        "to": "/noodles/"
+      },
+      {
+        "product_id": 63658,
+        "sku": "HLB - LAKSA",
+        "from": "/king-soba-organic-laksa-curry-ramen-noodles/",
+        "to": "/noodles/"
+      },
+      {
+        "product_id": 63656,
+        "sku": "HLB - TAHINI",
+        "from": "/king-soba-organic-coconut-tahini-ramen-noodles/",
+        "to": "/noodles/"
+      },
+      {
+        "product_id": 63657,
+        "sku": "HLB - Tom",
+        "from": "/king-soba-organic-tom-yum-noodle-cup/",
+        "to": "/noodles/"
+      },
+      {
+        "product_id": 63653,
+        "sku": "HLB - YUM",
+        "from": "/king-soba-organic-tom-yum-noodle-cup-80g/",
+        "to": "/noodles/"
+      },
+      {
+        "product_id": 33718,
+        "sku": "HLB - RAW00",
+        "from": "/every-bit-organic-raw-sweet-almond-oil-500ml/",
+        "to": "/plant-animal-oils/"
+      },
+      {
+        "product_id": 34596,
+        "sku": "HLB - RAW24",
+        "from": "/every-bit-organic-raw-rosehip-oil-25ml/",
+        "to": "/plant-animal-oils/"
+      },
+      {
+        "product_id": 32140,
+        "sku": "HLB - RAW84",
+        "from": "/every-bit-organic-raw-refined-coconut-oil-1kg/",
+        "to": "/plant-animal-oils/"
+      },
+      {
+        "product_id": 32143,
+        "sku": "HLB - RS02",
+        "from": "/himalayan-fine-salt-1kg-every-bit-organic-raw/",
+        "to": "/"
+      }
+    ],
+    "productsDeleted": [
+      {
+        "product_id": 63654,
+        "sku": "HLB - KHA",
+        "name": "King Soba Organic Tom Kha Noodle Cup"
+      },
+      {
+        "product_id": 63643,
+        "sku": "HLB - KS5",
+        "name": "King Soba Brown Rice Ramen 280g"
+      },
+      {
+        "product_id": 63636,
+        "sku": "HLB - KS6",
+        "name": "King Soba Buckwheat Ramen 280g"
+      },
+      {
+        "product_id": 63658,
+        "sku": "HLB - LAKSA",
+        "name": "King Soba Organic Laksa Curry Ramen Noodles"
+      },
+      {
+        "product_id": 63656,
+        "sku": "HLB - TAHINI",
+        "name": "King Soba Organic Coconut Tahini Ramen Noodles"
+      },
+      {
+        "product_id": 63657,
+        "sku": "HLB - Tom",
+        "name": "King Soba Organic Tom Yum Noodle Cup"
+      },
+      {
+        "product_id": 63653,
+        "sku": "HLB - YUM",
+        "name": "King Soba Organic Tom Yum Noodle Cup 80g"
+      },
+      {
+        "product_id": 33718,
+        "sku": "HLB - RAW00",
+        "name": "Every Bit Organic Raw Sweet Almond Oil 500ml"
+      },
+      {
+        "product_id": 34596,
+        "sku": "HLB - RAW24",
+        "name": "Every Bit Organic Raw Rosehip Oil 25ml"
+      },
+      {
+        "product_id": 32140,
+        "sku": "HLB - RAW84",
+        "name": "Every Bit Organic Raw Refined Coconut Oil 1kg"
+      },
+      {
+        "product_id": 32143,
+        "sku": "HLB - RS02",
+        "name": "Himalayan Fine Salt 1kg Every Bit Organic Raw"
+      }
+    ],
+    "productDeletesFailed": []
+  }
+}
