@@ -75,8 +75,11 @@ node infra/supabase/vault-helper.js delete <project> <name>
 - `supabase_service_role_key` - BOO Supabase Service Key
 - `supabase_db_password` - BOO Supabase DB Password
 - `bc_store_hash` - BigCommerce Store Hash
-- `bc_client_id` - BigCommerce Client ID
-- `bc_access_token` - BigCommerce Access Token
+- `bc_client_id` - BigCommerce Client ID (Primary)
+- `bc_access_token` - BigCommerce Access Token (Primary)
+- `bc_client_id_2` - BigCommerce Client ID (Alt)
+- `bc_client_secret_2` - BigCommerce Client Secret (Alt)
+- `bc_access_token_2` - BigCommerce Access Token (Alt)
 - `klaviyo_api_key` - Klaviyo API Key
 - `oborne_ftp_host` - Oborne FTP Host
 - `oborne_ftp_user` - Oborne FTP User
