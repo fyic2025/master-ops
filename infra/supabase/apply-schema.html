@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Apply Google Ads Schema</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; }
+    h1 { color: #333; }
+    .step { background: #f5f5f5; padding: 15px; margin: 15px 0; border-radius: 8px; }
+    .step h3 { margin-top: 0; color: #2563eb; }
+    button { background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; }
+    button:hover { background: #1d4ed8; }
+    textarea { width: 100%; height: 300px; font-family: monospace; font-size: 12px; }
+    .success { color: #16a34a; font-weight: bold; }
+    a { color: #2563eb; }
+  </style>
+</head>
+<body>
+  <h1>🔧 Apply Google Ads Schema to BOO Supabase</h1>
+
+  <div class="step">
+    <h3>Step 1: Open Supabase SQL Editor</h3>
+    <p>Click the button below to open the SQL Editor for the BOO Supabase project:</p>
+    <a href="https://supabase.com/dashboard/project/usibnysqelovfuctmkqw/sql/new" target="_blank">
+      <button>Open SQL Editor →</button>
+    </a>
+  </div>
+
+  <div class="step">
+    <h3>Step 2: Copy the Schema SQL</h3>
+    <p>Click to copy the entire schema to your clipboard:</p>
+    <button onclick="copySchema()">Copy Schema SQL</button>
+    <span id="copied" style="display:none; margin-left: 10px;" class="success">✓ Copied!</span>
+
+    <details style="margin-top: 15px;">
+      <summary>Preview SQL (click to expand)</summary>
+      <textarea id="sql" readonly></textarea>
+    </details>
+  </div>
+
+  <div class="step">
+    <h3>Step 3: Paste and Run</h3>
+    <ol>
+      <li>Paste the SQL into the Supabase SQL Editor</li>
+      <li>Click the green <strong>"Run"</strong> button (or press Ctrl+Enter)</li>
+      <li>Wait for it to complete (should take a few seconds)</li>
+    </ol>
+  </div>
+
+  <div class="step">
+    <h3>Step 4: Verify</h3>
+    <p>After running, you should see these tables in the Table Editor:</p>
+    <ul>
+      <li>google_ads_accounts (with 3 default rows for boo, teelixir, redhillfresh)</li>
+      <li>google_ads_campaign_metrics</li>
+      <li>google_ads_keyword_metrics</li>
+      <li>google_ads_search_terms</li>
+      <li>google_ads_opportunities</li>
+      <li>google_ads_alerts</li>
+      <li>google_ads_agent_tasks</li>
+      <li>google_merchant_products</li>
+    </ul>
+  </div>
+
+  <script>
+    // The SQL schema will be embedded here
+    const schema = `-- ============================================
+-- Google Ads Schema for AI Ads Team
+-- ============================================
+-- Stores historical performance data for BOO, Teelixir, and Red Hill Fresh
+-- Supports AI-powered optimization and evening briefings
+-- Created: 2025-11-26
+
+-- ============================================
+-- CORE TABLES
+-- ============================================
+
+-- Account configuration
+CREATE TABLE IF NOT EXISTS google_ads_accounts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    business TEXT NOT NULL CHECK (business IN ('boo', 'teelixir', 'redhillfresh')),
+    customer_id TEXT NOT NULL,
+    merchant_center_id TEXT,
+    display_name TEXT NOT NULL,
+    currency_code TEXT DEFAULT 'AUD',
+    timezone TEXT DEFAULT 'Australia/Melbourne',
+    is_active BOOLEAN DEFAULT true,
+    settings JSONB DEFAULT '{}',
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(business)
+);
+
+-- Campaign performance (daily snapshots)
+CREATE TABLE IF NOT EXISTS google_ads_campaign_metrics (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    account_id UUID REFERENCES google_ads_accounts(id) ON DELETE CASCADE,
+    campaign_id TEXT NOT NULL,
+    campaign_name TEXT,
+    campaign_type TEXT,
+    campaign_status TEXT,
+    date DATE NOT NULL,
+    impressions BIGINT DEFAULT 0,
+    clicks BIGINT DEFAULT 0,
+    cost_micros BIGINT DEFAULT 0,
+    conversions DECIMAL(10,2) DEFAULT 0,
+    conversion_value DECIMAL(10,2) DEFAULT 0,
+    ctr DECIMAL(8,6),
+    avg_cpc_micros BIGINT,
+    roas DECIMAL(10,4),
+    daily_budget_micros BIGINT,
+    budget_utilization_pct DECIMAL(5,2),
+    impression_share DECIMAL(5,4),
+    raw_metrics JSONB,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(account_id, campaign_id, date)
+);
+
+-- Keyword performance (daily snapshots)
+CREATE TABLE IF NOT EXISTS google_ads_keyword_metrics (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    account_id UUID REFERENCES google_ads_accounts(id) ON DELETE CASCADE,
+    campaign_id TEXT NOT NULL,
+    ad_group_id TEXT NOT NULL,
+    keyword_id TEXT NOT NULL,
+    keyword_text TEXT,
+    match_type TEXT,
+    date DATE NOT NULL,
+    impressions BIGINT DEFAULT 0,
+    clicks BIGINT DEFAULT 0,
+    cost_micros BIGINT DEFAULT 0,
+    conversions DECIMAL(10,2) DEFAULT 0,
+    conversion_value DECIMAL(10,2) DEFAULT 0,
+    quality_score INTEGER,
+    expected_ctr TEXT,
+    ad_relevance TEXT,
+    landing_page_experience TEXT,
+    avg_position DECIMAL(4,2),
+    impression_share DECIMAL(5,4),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(account_id, keyword_id, date)
+);
+
+-- Search terms (for negative keyword discovery)
+CREATE TABLE IF NOT EXISTS google_ads_search_terms (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    account_id UUID REFERENCES google_ads_accounts(id) ON DELETE CASCADE,
+    campaign_id TEXT NOT NULL,
+    ad_group_id TEXT NOT NULL,
+    keyword_id TEXT,
+    search_term TEXT NOT NULL,
+    date DATE NOT NULL,
+    impressions BIGINT DEFAULT 0,
+    clicks BIGINT DEFAULT 0,
+    cost_micros BIGINT DEFAULT 0,
+    conversions DECIMAL(10,2) DEFAULT 0,
+    conversion_value DECIMAL(10,2) DEFAULT 0,
+    relevance_score DECIMAL(3,2),
+    suggested_action TEXT,
+    analyzed_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(account_id, ad_group_id, search_term, date)
+);
+
+-- Google Merchant Center product status
+CREATE TABLE IF NOT EXISTS google_merchant_products (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    account_id UUID REFERENCES google_ads_accounts(id) ON DELETE CASCADE,
+    product_id TEXT NOT NULL,
+    offer_id TEXT,
+    title TEXT,
+    approval_status TEXT,
+    destination_statuses JSONB,
+    item_issues JSONB,
+    impressions_30d BIGINT DEFAULT 0,
+    clicks_30d BIGINT DEFAULT 0,
+    price_micros BIGINT,
+    currency_code TEXT DEFAULT 'AUD',
+    availability TEXT,
+    brand TEXT,
+    category TEXT,
+    last_synced_at TIMESTAMPTZ DEFAULT NOW(),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(account_id, product_id)
+);
+
+-- ============================================
+-- AI SYSTEM TABLES
+-- ============================================
+
+-- Optimization opportunities discovered by AI
+CREATE TABLE IF NOT EXISTS google_ads_opportunities (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    account_id UUID REFERENCES google_ads_accounts(id) ON DELETE CASCADE,
+    opportunity_type TEXT NOT NULL,
+    priority TEXT DEFAULT 'medium' CHECK (priority IN ('critical', 'high', 'medium', 'low')),
+    status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected', 'implemented', 'expired')),
+    campaign_id TEXT,
+    ad_group_id TEXT,
+    keyword_id TEXT,
+    search_term TEXT,
+    title TEXT NOT NULL,
+    description TEXT,
+    rationale TEXT,
+    estimated_impact JSONB,
+    action_type TEXT,
+    action_payload JSONB,
+    reviewed_by TEXT,
+    reviewed_at TIMESTAMPTZ,
+    implementation_notes TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    expires_at TIMESTAMPTZ DEFAULT (NOW() + INTERVAL '7 days')
+);
+
+-- Alerts for anomalies and issues
+CREATE TABLE IF NOT EXISTS google_ads_alerts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    account_id UUID REFERENCES google_ads_accounts(id) ON DELETE CASCADE,
+    alert_type TEXT NOT NULL,
+    severity TEXT DEFAULT 'warning' CHECK (severity IN ('info', 'warning', 'critical')),
+    status TEXT DEFAULT 'active' CHECK (status IN ('active', 'acknowledged', 'resolved')),
+    campaign_id TEXT,
+    campaign_name TEXT,
+    metric_name TEXT,
+    current_value DECIMAL(12,2),
+    expected_value DECIMAL(12,2),
+    threshold_value DECIMAL(12,2),
+    title TEXT NOT NULL,
+    message TEXT,
+    acknowledged_at TIMESTAMPTZ,
+    acknowledged_by TEXT,
+    resolved_at TIMESTAMPTZ,
+    resolution_notes TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Agent tasks spawned from conversations
+CREATE TABLE IF NOT EXISTS google_ads_agent_tasks (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    account_id UUID REFERENCES google_ads_accounts(id) ON DELETE CASCADE,
+    spawned_from TEXT,
+    agent_type TEXT NOT NULL,
+    objective TEXT NOT NULL,
+    parameters JSONB,
+    status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'running', 'completed', 'failed', 'cancelled')),
+    started_at TIMESTAMPTZ,
+    completed_at TIMESTAMPTZ,
+    findings JSONB,
+    actions_taken JSONB,
+    opportunities_created INTEGER DEFAULT 0,
+    reported_back BOOLEAN DEFAULT false,
+    report_summary TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Sync log for data freshness tracking
+CREATE TABLE IF NOT EXISTS google_ads_sync_log (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    account_id UUID REFERENCES google_ads_accounts(id) ON DELETE CASCADE,
+    sync_type TEXT NOT NULL,
+    date_range_start DATE,
+    date_range_end DATE,
+    status TEXT DEFAULT 'running' CHECK (status IN ('running', 'success', 'failed', 'partial')),
+    started_at TIMESTAMPTZ DEFAULT NOW(),
+    completed_at TIMESTAMPTZ,
+    records_fetched INTEGER DEFAULT 0,
+    records_inserted INTEGER DEFAULT 0,
+    records_updated INTEGER DEFAULT 0,
+    error_message TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Change log for rollback capability
+CREATE TABLE IF NOT EXISTS google_ads_change_log (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    account_id UUID REFERENCES google_ads_accounts(id) ON DELETE CASCADE,
+    entity_type TEXT NOT NULL,
+    entity_id TEXT NOT NULL,
+    change_type TEXT NOT NULL,
+    previous_value JSONB,
+    new_value JSONB,
+    triggered_by TEXT,
+    opportunity_id UUID REFERENCES google_ads_opportunities(id),
+    applied_at TIMESTAMPTZ DEFAULT NOW(),
+    rolled_back BOOLEAN DEFAULT false,
+    rolled_back_at TIMESTAMPTZ,
+    rollback_reason TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================
+-- INDEXES
+-- ============================================
+
+CREATE INDEX IF NOT EXISTS idx_campaign_metrics_account_date ON google_ads_campaign_metrics(account_id, date DESC);
+CREATE INDEX IF NOT EXISTS idx_campaign_metrics_campaign_date ON google_ads_campaign_metrics(campaign_id, date DESC);
+CREATE INDEX IF NOT EXISTS idx_campaign_metrics_type ON google_ads_campaign_metrics(campaign_type);
+CREATE INDEX IF NOT EXISTS idx_keyword_metrics_account_date ON google_ads_keyword_metrics(account_id, date DESC);
+CREATE INDEX IF NOT EXISTS idx_keyword_metrics_quality ON google_ads_keyword_metrics(quality_score) WHERE quality_score IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_keyword_metrics_keyword ON google_ads_keyword_metrics(keyword_id, date DESC);
+CREATE INDEX IF NOT EXISTS idx_search_terms_account_date ON google_ads_search_terms(account_id, date DESC);
+CREATE INDEX IF NOT EXISTS idx_search_terms_action ON google_ads_search_terms(suggested_action) WHERE suggested_action IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_search_terms_term ON google_ads_search_terms(search_term);
+CREATE INDEX IF NOT EXISTS idx_merchant_products_status ON google_merchant_products(approval_status);
+CREATE INDEX IF NOT EXISTS idx_merchant_products_issues ON google_merchant_products(account_id) WHERE item_issues IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_opportunities_status_priority ON google_ads_opportunities(account_id, status, priority);
+CREATE INDEX IF NOT EXISTS idx_opportunities_expires ON google_ads_opportunities(expires_at) WHERE status = 'pending';
+CREATE INDEX IF NOT EXISTS idx_alerts_active ON google_ads_alerts(account_id, status, severity);
+CREATE INDEX IF NOT EXISTS idx_alerts_created ON google_ads_alerts(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_agent_tasks_status ON google_ads_agent_tasks(status);
+CREATE INDEX IF NOT EXISTS idx_agent_tasks_unreported ON google_ads_agent_tasks(account_id) WHERE reported_back = false AND status = 'completed';
+CREATE INDEX IF NOT EXISTS idx_sync_log_account_type ON google_ads_sync_log(account_id, sync_type, started_at DESC);
+
+-- ============================================
+-- VIEWS
+-- ============================================
+
+CREATE OR REPLACE VIEW v_google_ads_business_comparison AS
+SELECT
+    a.business,
+    a.display_name,
+    cm.date,
+    SUM(cm.impressions) as impressions,
+    SUM(cm.clicks) as clicks,
+    SUM(cm.cost_micros) / 1000000.0 as spend,
+    SUM(cm.conversions) as conversions,
+    SUM(cm.conversion_value) as revenue,
+    CASE WHEN SUM(cm.cost_micros) > 0 THEN SUM(cm.conversion_value) / (SUM(cm.cost_micros) / 1000000.0) ELSE 0 END as roas,
+    CASE WHEN SUM(cm.impressions) > 0 THEN SUM(cm.clicks)::DECIMAL / SUM(cm.impressions) ELSE 0 END as ctr
+FROM google_ads_accounts a
+LEFT JOIN google_ads_campaign_metrics cm ON cm.account_id = a.id
+WHERE a.is_active = true AND cm.date >= CURRENT_DATE - INTERVAL '30 days'
+GROUP BY a.business, a.display_name, cm.date
+ORDER BY cm.date DESC, a.business;
+
+CREATE OR REPLACE VIEW v_google_ads_daily_totals AS
+SELECT
+    a.business,
+    cm.date,
+    SUM(cm.impressions) as impressions,
+    SUM(cm.clicks) as clicks,
+    SUM(cm.cost_micros) / 1000000.0 as spend,
+    SUM(cm.conversions) as conversions,
+    SUM(cm.conversion_value) as revenue,
+    CASE WHEN SUM(cm.cost_micros) > 0 THEN SUM(cm.conversion_value) / (SUM(cm.cost_micros) / 1000000.0) ELSE 0 END as roas
+FROM google_ads_accounts a
+JOIN google_ads_campaign_metrics cm ON cm.account_id = a.id
+GROUP BY a.business, cm.date
+ORDER BY cm.date DESC, a.business;
+
+CREATE OR REPLACE VIEW v_google_ads_pending_opportunities AS
+SELECT
+    a.business,
+    o.opportunity_type,
+    o.priority,
+    COUNT(*) as opportunity_count,
+    SUM(COALESCE((o.estimated_impact->>'revenue_delta')::DECIMAL, 0)) as total_potential_revenue
+FROM google_ads_opportunities o
+JOIN google_ads_accounts a ON a.id = o.account_id
+WHERE o.status = 'pending' AND (o.expires_at IS NULL OR o.expires_at > NOW())
+GROUP BY a.business, o.opportunity_type, o.priority
+ORDER BY a.business,
+    CASE o.priority WHEN 'critical' THEN 1 WHEN 'high' THEN 2 WHEN 'medium' THEN 3 ELSE 4 END,
+    total_potential_revenue DESC;
+
+CREATE OR REPLACE VIEW v_google_ads_active_alerts AS
+SELECT
+    a.business,
+    al.alert_type,
+    al.severity,
+    al.title,
+    al.message,
+    al.campaign_name,
+    al.metric_name,
+    al.current_value,
+    al.expected_value,
+    al.created_at
+FROM google_ads_alerts al
+JOIN google_ads_accounts a ON a.id = al.account_id
+WHERE al.status = 'active'
+ORDER BY CASE al.severity WHEN 'critical' THEN 1 WHEN 'warning' THEN 2 ELSE 3 END, al.created_at DESC;
+
+CREATE OR REPLACE VIEW v_google_ads_search_terms_attention AS
+SELECT
+    a.business,
+    st.search_term,
+    st.campaign_id,
+    SUM(st.clicks) as total_clicks,
+    SUM(st.cost_micros) / 1000000.0 as total_spend,
+    SUM(st.conversions) as total_conversions,
+    st.suggested_action,
+    MAX(st.date) as last_seen
+FROM google_ads_search_terms st
+JOIN google_ads_accounts a ON a.id = st.account_id
+WHERE st.date >= CURRENT_DATE - INTERVAL '30 days'
+GROUP BY a.business, st.search_term, st.campaign_id, st.suggested_action
+HAVING SUM(st.clicks) >= 10 AND SUM(st.conversions) = 0 AND SUM(st.cost_micros) >= 10000000
+ORDER BY total_spend DESC;
+
+-- ============================================
+-- FUNCTIONS
+-- ============================================
+
+CREATE OR REPLACE FUNCTION get_google_ads_account(p_business TEXT)
+RETURNS google_ads_accounts AS $$
+    SELECT * FROM google_ads_accounts WHERE business = p_business AND is_active = true LIMIT 1;
+$$ LANGUAGE sql;
+
+CREATE OR REPLACE FUNCTION get_google_ads_yesterday_summary()
+RETURNS TABLE (
+    business TEXT,
+    display_name TEXT,
+    spend DECIMAL,
+    conversions DECIMAL,
+    revenue DECIMAL,
+    roas DECIMAL,
+    spend_change_pct DECIMAL,
+    roas_change_pct DECIMAL
+) AS $$
+    WITH yesterday AS (
+        SELECT a.business, a.display_name,
+            SUM(cm.cost_micros) / 1000000.0 as spend,
+            SUM(cm.conversions) as conversions,
+            SUM(cm.conversion_value) as revenue
+        FROM google_ads_accounts a
+        JOIN google_ads_campaign_metrics cm ON cm.account_id = a.id
+        WHERE cm.date = CURRENT_DATE - 1 AND a.is_active = true
+        GROUP BY a.business, a.display_name
+    ),
+    day_before AS (
+        SELECT a.business,
+            SUM(cm.cost_micros) / 1000000.0 as spend,
+            SUM(cm.conversion_value) as revenue
+        FROM google_ads_accounts a
+        JOIN google_ads_campaign_metrics cm ON cm.account_id = a.id
+        WHERE cm.date = CURRENT_DATE - 2 AND a.is_active = true
+        GROUP BY a.business
+    )
+    SELECT
+        y.business,
+        y.display_name,
+        y.spend,
+        y.conversions,
+        y.revenue,
+        CASE WHEN y.spend > 0 THEN y.revenue / y.spend ELSE 0 END as roas,
+        CASE WHEN db.spend > 0 THEN ((y.spend - db.spend) / db.spend) * 100 ELSE 0 END as spend_change_pct,
+        CASE WHEN db.revenue > 0 AND db.spend > 0
+            THEN (((y.revenue / NULLIF(y.spend, 0)) - (db.revenue / db.spend)) / (db.revenue / db.spend)) * 100
+            ELSE 0 END as roas_change_pct
+    FROM yesterday y
+    LEFT JOIN day_before db ON db.business = y.business
+    ORDER BY y.business;
+$$ LANGUAGE sql;
+
+-- Insert default accounts
+INSERT INTO google_ads_accounts (business, customer_id, display_name, currency_code, timezone)
+VALUES
+    ('boo', '5275169559', 'Buy Organics Online', 'AUD', 'Australia/Melbourne'),
+    ('teelixir', '', 'Teelixir', 'AUD', 'Australia/Melbourne'),
+    ('redhillfresh', '', 'Red Hill Fresh', 'AUD', 'Australia/Melbourne')
+ON CONFLICT (business) DO UPDATE SET
+    customer_id = EXCLUDED.customer_id
+WHERE google_ads_accounts.customer_id = '';
+
+-- Update BOO with merchant center ID
+UPDATE google_ads_accounts
+SET merchant_center_id = '10043678'
+WHERE business = 'boo' AND merchant_center_id IS NULL;
+
+COMMENT ON TABLE google_ads_accounts IS 'Google Ads account configuration for each business';
+COMMENT ON TABLE google_ads_campaign_metrics IS 'Daily campaign performance snapshots';
+COMMENT ON TABLE google_ads_keyword_metrics IS 'Daily keyword performance with quality scores';
+COMMENT ON TABLE google_ads_search_terms IS 'Search term report data for negative keyword discovery';
+COMMENT ON TABLE google_merchant_products IS 'Google Merchant Center product status and issues';
+COMMENT ON TABLE google_ads_opportunities IS 'AI-discovered optimization opportunities';
+COMMENT ON TABLE google_ads_alerts IS 'Anomaly alerts and notifications';
+COMMENT ON TABLE google_ads_agent_tasks IS 'Tasks spawned from evening briefings';
+COMMENT ON TABLE google_ads_sync_log IS 'Data sync history for freshness tracking';
+COMMENT ON TABLE google_ads_change_log IS 'Audit trail for all changes made';
+`;
+
+    document.getElementById('sql').value = schema;
+
+    function copySchema() {
+      navigator.clipboard.writeText(schema).then(() => {
+        const copied = document.getElementById('copied');
+        copied.style.display = 'inline';
+        setTimeout(() => copied.style.display = 'none', 2000);
+      });
+    }
+
+    // Make copySchema available globally
+    window.copySchema = copySchema;
+  </script>
+</body>
+</html>

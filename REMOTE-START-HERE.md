@@ -55,6 +55,9 @@ git branch -r | grep "origin/claude/"
 - Klaviyo
 - LiveChat (full API access)
 - Supplier feeds: Oborne FTP, UHP, Kadac
+- **Google Ads** (Customer ID: 527-516-9559) ⏳ Developer token pending
+- **Google Merchant Center** (ID: 10043678)
+- **Google Search Console** (via global)
 
 ### Elevate Wholesale
 - Shopify
@@ -76,6 +79,8 @@ git branch -r | grep "origin/claude/"
 - Smartlead Email
 - Gmail (jayson@teelixir.com)
 - AWS (read-only)
+- **Google OAuth** (Client ID/Secret for all Google APIs)
+- **Google Search Console** (jayson@fyic.com.au)
 
 ---
 
@@ -84,6 +89,43 @@ git branch -r | grep "origin/claude/"
 | Credential | Needed For |
 |------------|------------|
 | `boo/sales_imap_pass` | Email sync for customer interactions |
+| `global/google_ads_developer_token` | Google Ads API access (approval pending) |
+
+---
+
+## 🤖 PPC - AI Google Ads Team
+
+**Project Label: PPC** - Reference this in remote sessions to continue work on Google Ads/Merchant Center.
+
+Full Google Ads automation system for BOO (Teelixir/RHF later).
+
+**Plan file:** `~/.claude/plans/vast-zooming-llama.md`
+
+### Current Status (2025-11-27)
+- ✅ GMC connected - 3,223 products synced to Supabase
+- ✅ Database schema applied (10 tables)
+- ⚠️ 2,047 products disapproved (robots.txt blocking crawl)
+- ⏳ Google Ads Developer Token - pending approval
+
+### Quick Check
+```bash
+# Check Google Ads credentials status
+node shared/libs/load-vault-credentials.js google-ads boo
+
+# Load all credentials into environment
+node shared/libs/load-vault-credentials.js boo
+```
+
+### Slash Commands (once dev token approved)
+- `/ads-briefing` - Evening performance summary
+- `/ads-sync` - Sync data from Google Ads
+- `/ads-opportunities` - Review optimization opportunities
+
+### Key Files
+- `shared/libs/integrations/google-ads/` - API connector
+- `shared/libs/integrations/google-merchant/` - Merchant Center connector
+- `.claude/skills/google-ads-manager/` - AI skill definition
+- `infra/supabase/migrations/20251126_google_ads_schema.sql` - Database schema
 
 ---
 
