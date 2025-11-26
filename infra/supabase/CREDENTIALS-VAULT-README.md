@@ -70,7 +70,7 @@ node infra/supabase/vault-helper.js delete <project> <name>
 - `aws_access_key_id` - AWS Access Key ID
 - `aws_secret_access_key` - AWS Secret Access Key
 
-### BOO (Buy Organics Online)
+### BOO (Buy Organics Online) - 20 credentials
 - `supabase_url` - BOO Supabase URL
 - `supabase_service_role_key` - BOO Supabase Service Key
 - `supabase_db_password` - BOO Supabase DB Password
@@ -81,6 +81,10 @@ node infra/supabase/vault-helper.js delete <project> <name>
 - `bc_client_secret_2` - BigCommerce Client Secret (Alt)
 - `bc_access_token_2` - BigCommerce Access Token (Alt)
 - `klaviyo_api_key` - Klaviyo API Key
+- `livechat_account_id` - LiveChat Account ID
+- `livechat_entity_id` - LiveChat Entity ID
+- `livechat_pat` - LiveChat Personal Access Token
+- `livechat_pat_base64` - LiveChat PAT Base64 Encoded
 - `oborne_ftp_host` - Oborne FTP Host
 - `oborne_ftp_user` - Oborne FTP User
 - `oborne_ftp_password` - Oborne FTP Password
@@ -105,10 +109,13 @@ node infra/supabase/vault-helper.js delete <project> <name>
 - `xero_client_id` - Xero Client ID
 - `xero_client_secret` - Xero Client Secret
 
-### Red Hill Fresh
+### Red Hill Fresh - 6 credentials
 - `wp_url` - WordPress URL
+- `wp_username` - WordPress Username
 - `wp_password` - WordPress Password
 - `wp_app_password` - WordPress App Password
+- `wc_consumer_key` - WooCommerce Consumer Key
+- `wc_consumer_secret` - WooCommerce Consumer Secret
 
 ---
 
