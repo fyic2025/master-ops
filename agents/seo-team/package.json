@@ -1,0 +1,28 @@
+{
+  "name": "boo-seo-team",
+  "version": "1.0.0",
+  "description": "AI-powered SEO optimization team for Buy Organics Online",
+  "main": "index.js",
+  "scripts": {
+    "daily": "node agents/coordinator.js daily",
+    "weekly": "node agents/coordinator.js weekly",
+    "report": "node agents/coordinator.js report",
+    "health": "node agents/coordinator.js health",
+    "classify": "node agents/classification.js",
+    "format": "node agents/content-format.js",
+    "gsc": "node agents/gsc-data.js",
+    "keywords": "node agents/keyword-research.js",
+    "claims": "node agents/health-claims.js",
+    "generate": "node agents/content-generation.js"
+  },
+  "dependencies": {
+    "openai": "^4.28.0",
+    "@supabase/supabase-js": "^2.39.0",
+    "googleapis": "^130.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "author": "Master Operations",
+  "license": "UNLICENSED"
+}

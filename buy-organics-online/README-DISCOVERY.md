@@ -152,7 +152,7 @@ Format: Excel attachments
 Host: newsync6.cxf17nwudeto.ap-southeast-2.rds.amazonaws.com
 Database: new_fyic_db
 User: admin
-Pass: Welcome1A20301qaz (from .env)
+Pass: poVQq7tNNtbbDlkn (from .env)
 Pass: 8ADDBiOyJVz^!l*S (admin user)
 ```
 

@@ -76,10 +76,41 @@ async function getCredential(project, name) {
 }
 
 async function listCredentials(project = null) {
-  const result = await callRpc('list_credentials', {
-    p_project: project
+  // Query table directly since RPC function may not exist
+  return new Promise((resolve, reject) => {
+    let path = '/rest/v1/secure_credentials?select=project,name,description';
+    if (project) {
+      path += `&project=eq.${project}`;
+    }
+
+    const options = {
+      hostname: SUPABASE_HOST,
+      port: 443,
+      path: path,
+      method: 'GET',
+      headers: {
+        'apikey': SUPABASE_SERVICE_KEY,
+        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
+      }
+    };
+
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        try {
+          const rows = JSON.parse(data);
+          // Map to expected format
+          resolve(rows.map(r => ({ project: r.project, credential_name: r.name, description: r.description })));
+        } catch (e) {
+          resolve([]);
+        }
+      });
+    });
+
+    req.on('error', reject);
+    req.end();
   });
-  return result;
 }
 
 async function deleteCredential(project, name) {

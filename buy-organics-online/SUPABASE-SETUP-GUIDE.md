@@ -51,7 +51,7 @@ If you have PostgreSQL's `psql` client installed:
 cd C:\Users\jayso\master-ops\buy-organics-online
 
 # Apply schema using psql
-psql "postgresql://postgres.usibnysqelovfuctmkqw:Welcome1A20301qaz@aws-0-ap-southeast-2.pooler.supabase.com:6543/postgres" -f supabase-schema.sql
+psql "postgresql://postgres.usibnysqelovfuctmkqw:poVQq7tNNtbbDlkn@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres" -f supabase-schema.sql
 ```
 
 Or use the connection string from .env:

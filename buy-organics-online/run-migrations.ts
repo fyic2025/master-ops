@@ -12,12 +12,13 @@ const SUPABASE_SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3Mi
 // Use PostgreSQL connection via Supabase client
 const { Pool } = require('pg')
 
-// Build database connection string
-// Format: postgresql://postgres.[project-id]:[password]@aws-0-ap-southeast-2.pooler.supabase.com:6543/postgres
-const connectionString = `postgresql://postgres.usibnysqelovfuctmkqw:${encodeURIComponent('Welcome1A20301qaz')}@aws-0-ap-southeast-2.pooler.supabase.com:6543/postgres`
-
+// Connection parameters for Supabase Pooler (transaction mode port 6543)
 const pool = new Pool({
-  connectionString,
+  host: 'aws-0-ap-southeast-1.pooler.supabase.com',
+  port: 6543,
+  database: 'postgres',
+  user: 'postgres.usibnysqelovfuctmkqw',
+  password: 'poVQq7tNNtbbDlkn',
   ssl: {
     rejectUnauthorized: false
   }
@@ -56,7 +57,8 @@ async function main() {
     '001_create_ecommerce_products.sql',
     '002_create_supplier_products.sql',
     '003_create_product_supplier_links.sql',
-    '004_create_helper_tables.sql'
+    '004_create_helper_tables.sql',
+    '005_create_enriched_products.sql'
   ]
 
   let success = 0
