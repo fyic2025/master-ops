@@ -1,0 +1,143 @@
+{
+  "description": "Performance thresholds for BOO optimization team",
+  "version": "1.0.0",
+  "lighthouseScores": {
+    "performance": {
+      "target": 100,
+      "warning": 95,
+      "critical": 85,
+      "description": "Lighthouse Performance score"
+    },
+    "accessibility": {
+      "target": 100,
+      "warning": 95,
+      "critical": 85,
+      "description": "Lighthouse Accessibility score"
+    },
+    "bestPractices": {
+      "target": 100,
+      "warning": 95,
+      "critical": 85,
+      "description": "Lighthouse Best Practices score"
+    },
+    "seo": {
+      "target": 100,
+      "warning": 95,
+      "critical": 85,
+      "description": "Lighthouse SEO score"
+    }
+  },
+  "coreWebVitals": {
+    "lcp": {
+      "good": 2500,
+      "needsImprovement": 4000,
+      "unit": "ms",
+      "description": "Largest Contentful Paint"
+    },
+    "fid": {
+      "good": 100,
+      "needsImprovement": 300,
+      "unit": "ms",
+      "description": "First Input Delay"
+    },
+    "inp": {
+      "good": 200,
+      "needsImprovement": 500,
+      "unit": "ms",
+      "description": "Interaction to Next Paint"
+    },
+    "cls": {
+      "good": 0.1,
+      "needsImprovement": 0.25,
+      "unit": "score",
+      "description": "Cumulative Layout Shift"
+    },
+    "ttfb": {
+      "good": 800,
+      "needsImprovement": 1800,
+      "unit": "ms",
+      "description": "Time to First Byte"
+    },
+    "fcp": {
+      "good": 1800,
+      "needsImprovement": 3000,
+      "unit": "ms",
+      "description": "First Contentful Paint"
+    },
+    "tbt": {
+      "good": 200,
+      "needsImprovement": 600,
+      "unit": "ms",
+      "description": "Total Blocking Time"
+    },
+    "si": {
+      "good": 3400,
+      "needsImprovement": 5800,
+      "unit": "ms",
+      "description": "Speed Index"
+    }
+  },
+  "regressionDetection": {
+    "scoreDropThreshold": 5,
+    "metricDegradationPercent": 20,
+    "consecutiveFailures": 2,
+    "description": "Thresholds for detecting performance regressions"
+  },
+  "resourceBudgets": {
+    "totalPageWeight": {
+      "target": 2000,
+      "warning": 3000,
+      "critical": 5000,
+      "unit": "KB"
+    },
+    "javascript": {
+      "target": 300,
+      "warning": 500,
+      "critical": 800,
+      "unit": "KB"
+    },
+    "css": {
+      "target": 100,
+      "warning": 200,
+      "critical": 400,
+      "unit": "KB"
+    },
+    "images": {
+      "target": 1000,
+      "warning": 2000,
+      "critical": 3000,
+      "unit": "KB"
+    },
+    "fonts": {
+      "target": 100,
+      "warning": 200,
+      "critical": 300,
+      "unit": "KB"
+    },
+    "thirdParty": {
+      "target": 200,
+      "warning": 400,
+      "critical": 600,
+      "unit": "KB"
+    }
+  },
+  "alertPriority": {
+    "critical": {
+      "scoreBelow": 85,
+      "cwvFailed": true,
+      "regressionPercent": 30
+    },
+    "high": {
+      "scoreBelow": 90,
+      "regressionPercent": 20
+    },
+    "medium": {
+      "scoreBelow": 95,
+      "regressionPercent": 10
+    },
+    "low": {
+      "scoreBelow": 100,
+      "regressionPercent": 5
+    }
+  }
+}

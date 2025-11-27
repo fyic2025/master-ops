@@ -1,0 +1,101 @@
+{
+  "description": "Audit and monitoring schedules for BOO optimization team",
+  "version": "1.0.0",
+  "timezone": "Australia/Melbourne",
+  "schedules": {
+    "dailyAudit": {
+      "name": "Daily Performance Audit",
+      "description": "Run Lighthouse audits on critical and high-priority pages",
+      "cron": "0 6 * * *",
+      "humanReadable": "Every day at 6:00 AM",
+      "enabled": true,
+      "workflow": "daily-audit",
+      "pageSet": "defaultAuditSet",
+      "devices": ["desktop", "mobile"],
+      "generateReport": true,
+      "compareWith": ["previousDay", "previousWeek"]
+    },
+    "weeklyFullAudit": {
+      "name": "Weekly Full Audit",
+      "description": "Comprehensive audit of all pages",
+      "cron": "0 5 * * 1",
+      "humanReadable": "Every Monday at 5:00 AM",
+      "enabled": true,
+      "workflow": "full-audit",
+      "pageSet": "fullAuditSet",
+      "devices": ["desktop", "mobile"],
+      "generateReport": true,
+      "compareWith": ["previousWeek", "previousMonth"]
+    },
+    "hourlySpotCheck": {
+      "name": "Hourly Spot Check",
+      "description": "Quick check of homepage performance",
+      "cron": "0 * * * *",
+      "humanReadable": "Every hour",
+      "enabled": false,
+      "workflow": "spot-check",
+      "pageSet": ["homepage"],
+      "devices": ["mobile"],
+      "generateReport": false,
+      "compareWith": ["previousHour"]
+    },
+    "monthlyTrendReport": {
+      "name": "Monthly Trend Report",
+      "description": "Generate comprehensive monthly performance report",
+      "cron": "0 7 1 * *",
+      "humanReadable": "First day of each month at 7:00 AM",
+      "enabled": true,
+      "workflow": "trend-report",
+      "pageSet": "fullAuditSet",
+      "generateReport": true,
+      "compareWith": ["previousMonth", "baseline"]
+    }
+  },
+  "workflows": {
+    "daily-audit": {
+      "steps": [
+        {"agent": "lighthouseAudit", "action": "runAudit", "params": {"devices": ["desktop", "mobile"]}},
+        {"agent": "performanceMonitor", "action": "compare", "params": {"periods": ["day", "week"]}},
+        {"agent": "autoFixer", "action": "analyze", "params": {"generateRecommendations": true}},
+        {"agent": "reportGenerator", "action": "generate", "params": {"format": "markdown"}},
+        {"agent": "coordinator", "action": "checkAlerts", "params": {"notifyOnCritical": true}}
+      ]
+    },
+    "full-audit": {
+      "steps": [
+        {"agent": "lighthouseAudit", "action": "runAudit", "params": {"devices": ["desktop", "mobile"], "allPages": true}},
+        {"agent": "performanceMonitor", "action": "compare", "params": {"periods": ["week", "month"]}},
+        {"agent": "autoFixer", "action": "analyze", "params": {"generateRecommendations": true, "deepAnalysis": true}},
+        {"agent": "reportGenerator", "action": "generate", "params": {"format": "markdown", "includeAll": true}},
+        {"agent": "coordinator", "action": "checkAlerts", "params": {"notifyOnCritical": true}}
+      ]
+    },
+    "spot-check": {
+      "steps": [
+        {"agent": "lighthouseAudit", "action": "runAudit", "params": {"quick": true}},
+        {"agent": "performanceMonitor", "action": "quickCompare", "params": {}},
+        {"agent": "coordinator", "action": "checkAlerts", "params": {"criticalOnly": true}}
+      ]
+    },
+    "trend-report": {
+      "steps": [
+        {"agent": "performanceMonitor", "action": "generateTrends", "params": {"days": 30}},
+        {"agent": "reportGenerator", "action": "generate", "params": {"format": "markdown", "type": "monthly"}}
+      ]
+    },
+    "fix-cycle": {
+      "steps": [
+        {"agent": "lighthouseAudit", "action": "runAudit", "params": {}},
+        {"agent": "autoFixer", "action": "analyze", "params": {}},
+        {"agent": "autoFixer", "action": "generateFixes", "params": {}},
+        {"agent": "coordinator", "action": "presentFixes", "params": {"requireApproval": true}}
+      ]
+    }
+  },
+  "alertSchedule": {
+    "criticalAlerts": "immediate",
+    "highAlerts": "hourly",
+    "mediumAlerts": "daily",
+    "lowAlerts": "weekly"
+  }
+}

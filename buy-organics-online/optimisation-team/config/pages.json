@@ -1,0 +1,123 @@
+{
+  "description": "Pages to audit for BOO website optimization",
+  "version": "1.0.0",
+  "baseUrl": "https://www.buyorganicsonline.com.au",
+  "pages": [
+    {
+      "id": "homepage",
+      "path": "/",
+      "name": "Homepage",
+      "priority": "critical",
+      "frequency": "daily",
+      "description": "Main landing page - highest traffic"
+    },
+    {
+      "id": "category-superfoods",
+      "path": "/superfoods/",
+      "name": "Superfoods Category",
+      "priority": "high",
+      "frequency": "daily",
+      "description": "Top category page"
+    },
+    {
+      "id": "category-organic-food",
+      "path": "/organic-food/",
+      "name": "Organic Food Category",
+      "priority": "high",
+      "frequency": "daily",
+      "description": "Major category page"
+    },
+    {
+      "id": "category-natural-health",
+      "path": "/natural-health/",
+      "name": "Natural Health Category",
+      "priority": "high",
+      "frequency": "daily",
+      "description": "Health products category"
+    },
+    {
+      "id": "category-beauty",
+      "path": "/natural-beauty/",
+      "name": "Natural Beauty Category",
+      "priority": "medium",
+      "frequency": "weekly",
+      "description": "Beauty products category"
+    },
+    {
+      "id": "product-sample",
+      "path": "/organic-raw-cacao-powder/",
+      "name": "Sample Product Page",
+      "priority": "high",
+      "frequency": "daily",
+      "description": "Representative product page for PDP testing"
+    },
+    {
+      "id": "cart",
+      "path": "/cart.php",
+      "name": "Shopping Cart",
+      "priority": "critical",
+      "frequency": "daily",
+      "description": "Cart page - critical for conversions"
+    },
+    {
+      "id": "checkout",
+      "path": "/checkout",
+      "name": "Checkout",
+      "priority": "critical",
+      "frequency": "daily",
+      "description": "Checkout flow - critical for conversions"
+    },
+    {
+      "id": "search",
+      "path": "/search.php?search_query=organic",
+      "name": "Search Results",
+      "priority": "medium",
+      "frequency": "weekly",
+      "description": "Search results page"
+    },
+    {
+      "id": "brands",
+      "path": "/brands/",
+      "name": "Brands Page",
+      "priority": "medium",
+      "frequency": "weekly",
+      "description": "All brands listing"
+    },
+    {
+      "id": "about",
+      "path": "/about-us/",
+      "name": "About Us",
+      "priority": "low",
+      "frequency": "monthly",
+      "description": "About page"
+    },
+    {
+      "id": "contact",
+      "path": "/contact-us/",
+      "name": "Contact Us",
+      "priority": "low",
+      "frequency": "monthly",
+      "description": "Contact page"
+    }
+  ],
+  "pageGroups": {
+    "critical": {
+      "description": "Pages critical for business - audit daily",
+      "pages": ["homepage", "cart", "checkout"]
+    },
+    "high": {
+      "description": "High-traffic pages - audit daily",
+      "pages": ["category-superfoods", "category-organic-food", "category-natural-health", "product-sample"]
+    },
+    "medium": {
+      "description": "Medium importance - audit weekly",
+      "pages": ["category-beauty", "search", "brands"]
+    },
+    "low": {
+      "description": "Low traffic pages - audit monthly",
+      "pages": ["about", "contact"]
+    }
+  },
+  "defaultAuditSet": ["homepage", "category-superfoods", "product-sample", "cart"],
+  "fullAuditSet": "all"
+}
