@@ -148,3 +148,7 @@ credential-test-report-*.json
 *secret*.json
 remove-secrets.sh
 buy-organics-online/security-cleanup.js
+
+# Encrypted Vault - SAFE to commit (password protected)
+# This line explicitly ALLOWS the encrypted vault to be tracked
+!credentials.vault.enc
