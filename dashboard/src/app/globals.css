@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* Status indicators */
+.status-healthy { @apply bg-green-500; }
+.status-warning { @apply bg-yellow-500; }
+.status-error { @apply bg-red-500; }
+.status-unknown { @apply bg-gray-500; }
+
+/* Business brand colors */
+.brand-boo { @apply bg-brand-boo; }
+.brand-teelixir { @apply bg-brand-teelixir; }
+.brand-elevate { @apply bg-brand-elevate; }
+.brand-rhf { @apply bg-brand-rhf; }
