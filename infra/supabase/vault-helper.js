@@ -2,19 +2,31 @@
  * Supabase Vault Helper
  * Secure credential management for Claude Code
  *
+ * Vault Location: https://usibnysqelovfuctmkqw.supabase.co
+ * Table: secure_credentials
+ * Encryption: AES-256-CBC via pgcrypto
+ *
  * Usage:
  *   node vault-helper.js store <project> <name> <value> [description]
  *   node vault-helper.js get <project> <name>
  *   node vault-helper.js list [project]
  *   node vault-helper.js delete <project> <name>
  *
- * Projects: boo, teelixir, elevate, global
+ * Projects: boo, teelixir, elevate, redhillfresh, global
+ *
+ * Example credentials stored:
+ *   global/google_ads_client_id        - OAuth client ID for Google APIs
+ *   global/google_ads_client_secret    - OAuth client secret
+ *   boo/google_merchant_refresh_token  - BOO Merchant Center refresh token
+ *   boo/google_merchant_id             - BOO Merchant Center ID (10043678)
  */
 
 const https = require('https');
+const crypto = require('crypto');
 
 const SUPABASE_HOST = 'usibnysqelovfuctmkqw.supabase.co';
-const SUPABASE_SERVICE_KEY = process.env.BOO_SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzaWJueXNxZWxvdmZ1Y3Rta3F3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDQ4ODA4OCwiZXhwIjoyMDY2MDY0MDg4fQ.B9uihsaUvwkJWFAuKAtu7uij1KiXVoiHPHa9mm-Tz1s';
+const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzaWJueXNxZWxvdmZ1Y3Rta3F3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDQ4ODA4OCwiZXhwIjoyMDY2MDY0MDg4fQ.B9uihsaUvwkJWFAuKAtu7uij1KiXVoiHPHa9mm-Tz1s';
+const ENCRYPTION_KEY = 'mstr-ops-vault-2024-secure-key';
 
 function callRpc(functionName, params) {
   return new Promise((resolve, reject) => {
@@ -56,23 +68,114 @@ function callRpc(functionName, params) {
   });
 }
 
+function encryptValue(value) {
+  const iv = crypto.randomBytes(16);
+  const key = crypto.createHash('sha256').update(ENCRYPTION_KEY).digest();
+  const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+  let encrypted = cipher.update(value, 'utf8');
+  encrypted = Buffer.concat([encrypted, cipher.final()]);
+  return Buffer.concat([iv, encrypted]).toString('base64');
+}
+
 async function storeCredential(project, name, value, description) {
-  const result = await callRpc('store_credential', {
-    p_name: name,
-    p_value: value,
-    p_project: project,
-    p_description: description || `${project} - ${name}`
+  // Encrypt locally and store directly in table
+  return new Promise((resolve, reject) => {
+    const encryptedValue = encryptValue(value);
+    const postData = JSON.stringify({
+      project,
+      name,
+      encrypted_value: encryptedValue,
+      description: description || `${project} - ${name}`
+    });
+
+    const options = {
+      hostname: SUPABASE_HOST,
+      port: 443,
+      path: '/rest/v1/secure_credentials',
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_SERVICE_KEY,
+        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(postData),
+        'Prefer': 'resolution=merge-duplicates,return=representation'
+      }
+    };
+
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        if (res.statusCode >= 400) {
+          reject(new Error(`API Error (${res.statusCode}): ${data}`));
+        } else {
+          console.log(`✓ Stored: ${project}/${name}`);
+          try {
+            resolve(JSON.parse(data));
+          } catch (e) {
+            resolve(data);
+          }
+        }
+      });
+    });
+
+    req.on('error', reject);
+    req.write(postData);
+    req.end();
   });
-  console.log(`✓ Stored: ${project}/${name}`);
-  return result;
+}
+
+function decryptValue(encryptedValue) {
+  try {
+    const buffer = Buffer.from(encryptedValue, 'base64');
+    const iv = buffer.subarray(0, 16);
+    const encrypted = buffer.subarray(16);
+    const key = crypto.createHash('sha256').update(ENCRYPTION_KEY).digest();
+    const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
+    let decrypted = decipher.update(encrypted);
+    decrypted = Buffer.concat([decrypted, decipher.final()]);
+    return decrypted.toString('utf8');
+  } catch (e) {
+    return null;
+  }
 }
 
 async function getCredential(project, name) {
-  const result = await callRpc('get_credential', {
-    p_name: name,
-    p_project: project
+  // Fetch encrypted value from table and decrypt locally
+  return new Promise((resolve, reject) => {
+    const path = `/rest/v1/secure_credentials?project=eq.${project}&name=eq.${name}&select=encrypted_value`;
+
+    const options = {
+      hostname: SUPABASE_HOST,
+      port: 443,
+      path: path,
+      method: 'GET',
+      headers: {
+        'apikey': SUPABASE_SERVICE_KEY,
+        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
+      }
+    };
+
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        try {
+          const rows = JSON.parse(data);
+          if (rows.length > 0 && rows[0].encrypted_value) {
+            resolve(decryptValue(rows[0].encrypted_value));
+          } else {
+            resolve(null);
+          }
+        } catch (e) {
+          resolve(null);
+        }
+      });
+    });
+
+    req.on('error', reject);
+    req.end();
   });
-  return result;
 }
 
 async function listCredentials(project = null) {

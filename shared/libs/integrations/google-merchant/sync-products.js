@@ -3,25 +3,45 @@
  *
  * Fetches product statuses from GMC and stores in google_merchant_products table
  *
+ * Credentials are fetched from Supabase Vault (secure_credentials table)
+ * Vault location: https://usibnysqelovfuctmkqw.supabase.co
+ *
+ * Required vault credentials:
+ *   - global/google_ads_client_id
+ *   - global/google_ads_client_secret
+ *   - boo/google_merchant_refresh_token
+ *   - boo/google_merchant_id
+ *
  * Usage: node sync-products.js
  */
 
 const https = require('https');
 const path = require('path');
 
-// Load environment variables
+// Load environment variables (fallback only)
 require('dotenv').config({ path: path.join(__dirname, '../../../../.env') });
 
-// Use the vault Supabase project (has the Google Ads schema)
-const SUPABASE_URL = 'https://usibnysqelovfuctmkqw.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzaWJueXNxZWxvdmZ1Y3Rta3F3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDQ4ODA4OCwiZXhwIjoyMDY2MDY0MDg4fQ.B9uihsaUvwkJWFAuKAtu7uij1KiXVoiHPHa9mm-Tz1s';
+// ============================================
+// VAULT CONFIGURATION
+// ============================================
+// Credentials are stored in Supabase Vault with pgcrypto encryption
+// Vault Project: usibnysqelovfuctmkqw (BOO Supabase)
+// See: infra/supabase/vault-setup.sql for schema
+// See: infra/supabase/vault-helper.js for CLI access
 
-// Google credentials from .env
+const VAULT_ENCRYPTION_KEY = 'mstr-ops-vault-2024-secure-key';
+const SUPABASE_ACCESS_TOKEN = 'sbp_b3c8e4797261a1dd37e4e85bdc00917cdb98d1f5';
+
+// Data storage Supabase (where google_merchant_products table lives)
+const DATA_SUPABASE_URL = 'https://qcvfxxsnqvdfmpbcgdni.supabase.co';
+const DATA_SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjdmZ4eHNucXZkZm1wYmNnZG5pIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0ODU2NzIyNywiZXhwIjoyMDY0MTQzMjI3fQ.JLTj1pOvZLoWUKfCV5NtctNI-lkEBhCzF7C9Axm6nf8';
+
+// Credentials object - populated from vault at runtime
 const CREDENTIALS = {
-  clientId: process.env.GOOGLE_ADS_CLIENT_ID,
-  clientSecret: process.env.GOOGLE_ADS_CLIENT_SECRET,
-  refreshToken: process.env.GOOGLE_ADS_BOO_REFRESH_TOKEN,
-  merchantId: process.env.GMC_BOO_MERCHANT_ID,
+  clientId: null,
+  clientSecret: null,
+  refreshToken: null,
+  merchantId: null,
 };
 
 let accessToken = null;
@@ -141,19 +161,80 @@ async function getAllProductStatuses() {
 }
 
 // ============================================
-// SUPABASE
+// VAULT FUNCTIONS
+// ============================================
+// Credentials are encrypted with pgcrypto in Supabase
+// We use an RPC call to decrypt server-side
+
+async function loadCredentialsFromVault() {
+  console.log('  Loading credentials from vault...');
+
+  // Fetch all needed credentials in one query with server-side decryption
+  const query = `
+    SELECT project, name,
+           convert_from(extensions.decrypt(decode(encrypted_value, 'base64'), '${VAULT_ENCRYPTION_KEY}'::bytea, 'aes'), 'UTF8') as value
+    FROM secure_credentials
+    WHERE (project = 'global' AND name IN ('google_ads_client_id', 'google_ads_client_secret'))
+       OR (project = 'boo' AND name IN ('google_merchant_refresh_token', 'google_merchant_id'))
+  `;
+
+  // Use Supabase Management API to run the query
+  const postData = JSON.stringify({ query });
+
+  const response = await httpsRequest({
+    hostname: 'api.supabase.com',
+    path: '/v1/projects/usibnysqelovfuctmkqw/database/query',
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${SUPABASE_ACCESS_TOKEN}`,
+      'Content-Type': 'application/json',
+      'Content-Length': Buffer.byteLength(postData),
+    },
+  }, postData);
+
+  const rows = JSON.parse(response.data || '[]');
+
+  // Map results to credentials
+  for (const row of rows) {
+    if (row.project === 'global' && row.name === 'google_ads_client_id') {
+      CREDENTIALS.clientId = row.value;
+    } else if (row.project === 'global' && row.name === 'google_ads_client_secret') {
+      CREDENTIALS.clientSecret = row.value;
+    } else if (row.project === 'boo' && row.name === 'google_merchant_refresh_token') {
+      CREDENTIALS.refreshToken = row.value;
+    } else if (row.project === 'boo' && row.name === 'google_merchant_id') {
+      CREDENTIALS.merchantId = row.value;
+    }
+  }
+
+  // Validate all credentials loaded
+  const missing = [];
+  if (!CREDENTIALS.clientId) missing.push('global/google_ads_client_id');
+  if (!CREDENTIALS.clientSecret) missing.push('global/google_ads_client_secret');
+  if (!CREDENTIALS.refreshToken) missing.push('boo/google_merchant_refresh_token');
+  if (!CREDENTIALS.merchantId) missing.push('boo/google_merchant_id');
+
+  if (missing.length > 0) {
+    throw new Error(`Missing vault credentials: ${missing.join(', ')}`);
+  }
+
+  console.log('  ✓ All credentials loaded from vault');
+}
+
+// ============================================
+// SUPABASE DATA FUNCTIONS
 // ============================================
 
 async function supabaseRequest(method, path, body = null) {
-  const url = new URL(SUPABASE_URL + path);
+  const url = new URL(DATA_SUPABASE_URL + path);
 
   const options = {
     hostname: url.hostname,
     path: url.pathname + url.search,
     method,
     headers: {
-      'apikey': SUPABASE_KEY,
-      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'apikey': DATA_SUPABASE_KEY,
+      'Authorization': `Bearer ${DATA_SUPABASE_KEY}`,
       'Content-Type': 'application/json',
       'Prefer': 'return=representation',
     },
@@ -229,15 +310,15 @@ async function upsertProducts(accountId, products) {
 
     try {
       // Use upsert with on_conflict
-      const url = new URL(SUPABASE_URL + '/rest/v1/google_merchant_products');
+      const url = new URL(DATA_SUPABASE_URL + '/rest/v1/google_merchant_products');
 
       const options = {
         hostname: url.hostname,
         path: url.pathname,
         method: 'POST',
         headers: {
-          'apikey': SUPABASE_KEY,
-          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'apikey': DATA_SUPABASE_KEY,
+          'Authorization': `Bearer ${DATA_SUPABASE_KEY}`,
           'Content-Type': 'application/json',
           'Prefer': 'resolution=merge-duplicates,return=representation',
         },
@@ -279,14 +360,12 @@ async function main() {
   console.log('Google Merchant Center → Supabase Sync');
   console.log('========================================\n');
 
-  // Validate credentials
-  if (!CREDENTIALS.merchantId || !CREDENTIALS.refreshToken) {
-    console.error('ERROR: Missing Google credentials in .env');
-    process.exit(1);
-  }
-
-  if (!SUPABASE_KEY) {
-    console.error('ERROR: Missing SUPABASE_SERVICE_ROLE_KEY in .env');
+  // Step 0: Load credentials from vault
+  console.log('0. Loading credentials from vault...');
+  try {
+    await loadCredentialsFromVault();
+  } catch (err) {
+    console.error('   Failed to load credentials:', err.message);
     process.exit(1);
   }
 
