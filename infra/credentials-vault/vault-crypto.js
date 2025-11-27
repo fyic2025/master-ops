@@ -91,22 +91,43 @@ function decrypt(encryptedData, password) {
 
 /**
  * Encrypt credentials object to vault file
+ * @param {Object} credentials - The credentials to encrypt
+ * @param {string} password - The master password
+ * @param {string} vaultPath - Path to vault file
+ * @param {Object} options - Optional settings (e.g., { totpSecret: '...' })
  */
-function encryptToVault(credentials, password, vaultPath) {
+function encryptToVault(credentials, password, vaultPath, options = {}) {
   const json = JSON.stringify(credentials, null, 2);
   const encrypted = encrypt(json, password);
 
-  // Add header for identification
-  const vaultContent = [
+  // Preserve existing 2FA config if not specified
+  let totpSecret = options.totpSecret;
+  if (totpSecret === undefined && fs.existsSync(vaultPath)) {
+    const existing = getVaultMetadata(vaultPath);
+    totpSecret = existing.totpSecret;
+  }
+
+  // Build header
+  const headerLines = [
     '# Master-Ops Encrypted Credentials Vault',
     '# This file is safe to commit to git - it requires your master password to decrypt',
     '# DO NOT share your master password',
     `# Created: ${new Date().toISOString()}`,
     '# Algorithm: AES-256-GCM with PBKDF2 key derivation',
-    '',
-    encrypted
-  ].join('\n');
+  ];
 
+  // Add 2FA config if enabled
+  if (totpSecret) {
+    headerLines.push(`# 2FA: enabled`);
+    headerLines.push(`# TOTP-Secret: ${totpSecret}`);
+  } else {
+    headerLines.push('# 2FA: disabled');
+  }
+
+  headerLines.push('');
+  headerLines.push(encrypted);
+
+  const vaultContent = headerLines.join('\n');
   fs.writeFileSync(vaultPath, vaultContent, 'utf8');
   return true;
 }
@@ -138,6 +159,44 @@ function decryptFromVault(password, vaultPath) {
  */
 function vaultExists(vaultPath) {
   return fs.existsSync(vaultPath);
+}
+
+/**
+ * Get vault metadata (2FA config, etc.) from header
+ */
+function getVaultMetadata(vaultPath) {
+  if (!fs.existsSync(vaultPath)) {
+    return { twoFactorEnabled: false, totpSecret: null };
+  }
+
+  const content = fs.readFileSync(vaultPath, 'utf8');
+  const lines = content.split('\n');
+
+  let twoFactorEnabled = false;
+  let totpSecret = null;
+
+  for (const line of lines) {
+    if (line.startsWith('# 2FA: enabled')) {
+      twoFactorEnabled = true;
+    } else if (line.startsWith('# TOTP-Secret: ')) {
+      totpSecret = line.replace('# TOTP-Secret: ', '').trim();
+    }
+  }
+
+  return { twoFactorEnabled, totpSecret };
+}
+
+/**
+ * Update vault 2FA settings
+ */
+function setVault2FA(vaultPath, password, totpSecret) {
+  // First decrypt existing credentials
+  const credentials = decryptFromVault(password, vaultPath);
+
+  // Re-encrypt with new 2FA setting
+  encryptToVault(credentials, password, vaultPath, { totpSecret });
+
+  return true;
 }
 
 /**
@@ -191,6 +250,8 @@ module.exports = {
   encryptToVault,
   decryptFromVault,
   vaultExists,
+  getVaultMetadata,
+  setVault2FA,
   exportToEnv,
   loadToEnvironment,
   ALGORITHM,

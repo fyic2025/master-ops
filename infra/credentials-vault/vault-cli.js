@@ -24,9 +24,19 @@ const {
   encryptToVault,
   decryptFromVault,
   vaultExists,
+  getVaultMetadata,
+  setVault2FA,
   exportToEnv,
   loadToEnvironment
 } = require('./vault-crypto');
+
+const {
+  generateSecret,
+  generateTOTP,
+  verifyTOTP,
+  generateOTPAuthURI,
+  getSecondsRemaining
+} = require('./totp');
 
 // Paths
 const ROOT_DIR = path.resolve(__dirname, '../..');
@@ -148,6 +158,32 @@ async function promptInput(prompt) {
 }
 
 /**
+ * Verify 2FA code if enabled on vault
+ * Returns true if 2FA is not enabled or code is valid
+ */
+async function verify2FAIfEnabled() {
+  const metadata = getVaultMetadata(VAULT_PATH);
+
+  if (!metadata.twoFactorEnabled || !metadata.totpSecret) {
+    return true; // 2FA not enabled, skip
+  }
+
+  const code = await promptInput('Enter 6-digit code from Google Authenticator: ');
+
+  if (!code || code.length !== 6 || !/^\d+$/.test(code)) {
+    logError('Invalid code format. Must be 6 digits.');
+    return false;
+  }
+
+  if (!verifyTOTP(metadata.totpSecret, code)) {
+    logError('Invalid 2FA code. Please try again.');
+    return false;
+  }
+
+  return true;
+}
+
+/**
  * Parse .env file to object
  */
 function parseEnvFile(envPath) {
@@ -249,6 +285,11 @@ async function unlockVault() {
     return;
   }
 
+  // Check 2FA first
+  if (!await verify2FAIfEnabled()) {
+    return;
+  }
+
   const password = await promptPassword();
 
   try {
@@ -278,6 +319,11 @@ async function lockVault() {
 
   if (!fs.existsSync(ENV_PATH)) {
     logError('No .env file found. Nothing to lock.');
+    return;
+  }
+
+  // Check 2FA first if vault exists
+  if (vaultExists(VAULT_PATH) && !await verify2FAIfEnabled()) {
     return;
   }
 
@@ -323,6 +369,11 @@ async function showCredentials() {
     return;
   }
 
+  // Check 2FA first
+  if (!await verify2FAIfEnabled()) {
+    return;
+  }
+
   const password = await promptPassword();
 
   try {
@@ -362,6 +413,11 @@ async function addCredential(keyValue) {
 
   log(`\n=== Add Credential: ${key} ===\n`, 'cyan');
 
+  // Check 2FA first if vault exists
+  if (vaultExists(VAULT_PATH) && !await verify2FAIfEnabled()) {
+    return;
+  }
+
   const password = await promptPassword();
 
   try {
@@ -395,6 +451,11 @@ async function removeCredential(key) {
 
   if (!vaultExists(VAULT_PATH)) {
     logError('No vault found.');
+    return;
+  }
+
+  // Check 2FA first
+  if (!await verify2FAIfEnabled()) {
     return;
   }
 
@@ -467,6 +528,15 @@ async function verifyVault() {
     return;
   }
 
+  // Show 2FA status
+  const metadata = getVaultMetadata(VAULT_PATH);
+  log(`2FA Status: ${metadata.twoFactorEnabled ? 'Enabled' : 'Disabled'}`, metadata.twoFactorEnabled ? 'green' : 'dim');
+
+  // Check 2FA first
+  if (!await verify2FAIfEnabled()) {
+    return;
+  }
+
   const password = await promptPassword();
 
   try {
@@ -486,6 +556,130 @@ async function verifyVault() {
 
   } catch (error) {
     logError(error.message);
+  }
+}
+
+/**
+ * Setup 2FA (Google Authenticator)
+ */
+async function setup2FA() {
+  log('\n=== Setup 2FA (Google Authenticator) ===\n', 'cyan');
+
+  if (!vaultExists(VAULT_PATH)) {
+    logError('No vault found. Create one with: node vault-cli.js init');
+    return;
+  }
+
+  const metadata = getVaultMetadata(VAULT_PATH);
+  if (metadata.twoFactorEnabled) {
+    logWarning('2FA is already enabled on this vault.');
+    const confirm = await promptInput('Do you want to reset 2FA? This will invalidate your current authenticator. (yes/no): ');
+    if (confirm.toLowerCase() !== 'yes') {
+      log('Aborted.', 'dim');
+      return;
+    }
+  }
+
+  log('First, verify your password to enable 2FA.\n', 'dim');
+  const password = await promptPassword();
+
+  // Verify password works
+  try {
+    decryptFromVault(password, VAULT_PATH);
+  } catch (error) {
+    logError('Invalid password.');
+    return;
+  }
+
+  // Generate new TOTP secret
+  const secret = generateSecret();
+  const uri = generateOTPAuthURI(secret, 'MasterOps-Vault', 'MasterOps');
+
+  log('\n┌─────────────────────────────────────────────────────────┐', 'cyan');
+  log('│            Setup Google Authenticator                   │', 'cyan');
+  log('├─────────────────────────────────────────────────────────┤', 'cyan');
+  log('│                                                         │', 'cyan');
+  log('│  1. Open Google Authenticator on your phone             │', 'cyan');
+  log('│  2. Tap the + button to add a new account               │', 'cyan');
+  log('│  3. Select "Enter a setup key"                          │', 'cyan');
+  log('│  4. Enter these details:                                │', 'cyan');
+  log('│                                                         │', 'cyan');
+  log(`│     Account name: ${colors.yellow}MasterOps-Vault${colors.cyan}                     │`, 'cyan');
+  log(`│     Your key:     ${colors.yellow}${secret}${colors.cyan}     │`, 'cyan');
+  log('│     Type of key:  Time-based                            │', 'cyan');
+  log('│                                                         │', 'cyan');
+  log('└─────────────────────────────────────────────────────────┘', 'cyan');
+
+  log('\n  Or scan this URI with a QR code scanner:\n', 'dim');
+  log(`  ${colors.dim}${uri}${colors.reset}\n`);
+
+  // Verify the user can generate a code
+  log('Now verify 2FA is working by entering a code from the app.\n', 'yellow');
+  const code = await promptInput('Enter 6-digit code: ');
+
+  if (!verifyTOTP(secret, code)) {
+    logError('Invalid code. 2FA setup aborted. Please try again.');
+    return;
+  }
+
+  // Save the TOTP secret to the vault
+  try {
+    setVault2FA(VAULT_PATH, password, secret);
+    logSuccess('\n2FA enabled successfully!');
+    log('From now on, you will need your password AND a code from Google Authenticator.', 'dim');
+    log('\nIMPORTANT: Save your setup key somewhere safe in case you lose your phone!', 'yellow');
+    log(`Setup key: ${secret}`, 'dim');
+  } catch (error) {
+    logError(`Failed to enable 2FA: ${error.message}`);
+  }
+}
+
+/**
+ * Disable 2FA
+ */
+async function disable2FA() {
+  log('\n=== Disable 2FA ===\n', 'cyan');
+
+  if (!vaultExists(VAULT_PATH)) {
+    logError('No vault found.');
+    return;
+  }
+
+  const metadata = getVaultMetadata(VAULT_PATH);
+  if (!metadata.twoFactorEnabled) {
+    log('2FA is not enabled on this vault.', 'dim');
+    return;
+  }
+
+  log('To disable 2FA, you need to verify your identity.\n', 'dim');
+
+  // Verify 2FA code first
+  if (!await verify2FAIfEnabled()) {
+    return;
+  }
+
+  // Then verify password
+  const password = await promptPassword();
+
+  try {
+    decryptFromVault(password, VAULT_PATH);
+  } catch (error) {
+    logError('Invalid password.');
+    return;
+  }
+
+  const confirm = await promptInput('\nAre you sure you want to disable 2FA? (yes/no): ');
+  if (confirm.toLowerCase() !== 'yes') {
+    log('Aborted.', 'dim');
+    return;
+  }
+
+  try {
+    setVault2FA(VAULT_PATH, password, null);
+    logSuccess('\n2FA has been disabled.');
+    log('Your vault is now protected by password only.', 'dim');
+  } catch (error) {
+    logError(`Failed to disable 2FA: ${error.message}`);
   }
 }
 
@@ -540,6 +734,8 @@ ${colors.yellow}Commands:${colors.reset}
   ${colors.green}remove KEY${colors.reset}        Remove a credential
   ${colors.green}change-password${colors.reset}   Change the master password
   ${colors.green}verify${colors.reset}            Verify vault can be decrypted
+  ${colors.green}setup-2fa${colors.reset}         Enable Google Authenticator 2FA
+  ${colors.green}disable-2fa${colors.reset}       Disable 2FA
   ${colors.green}run CMD [ARGS]${colors.reset}    Run command with vault credentials in environment
 
 ${colors.yellow}Examples:${colors.reset}
@@ -605,6 +801,13 @@ async function main() {
         break;
       case 'verify':
         await verifyVault();
+        break;
+      case 'setup-2fa':
+      case '2fa':
+        await setup2FA();
+        break;
+      case 'disable-2fa':
+        await disable2FA();
         break;
       case 'run':
         await runWithCredentials(args.slice(1));
