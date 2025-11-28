@@ -233,6 +233,62 @@ const CONTACT_PROPERTIES: PropertyDefinition[] = [
       { label: 'Invited', value: 'invited', displayOrder: 2 },
     ],
   },
+
+  // ==========================================================================
+  // ELEVATE WHOLESALE OUTBOUND PROSPECTING PROPERTIES
+  // ==========================================================================
+  {
+    name: 'outreach_status',
+    label: 'Outreach Status',
+    type: 'enumeration',
+    fieldType: 'select',
+    groupName: 'contactinformation',
+    description: 'Status in outbound prospecting flow',
+    options: [
+      { label: 'Pending', value: 'pending', displayOrder: 0 },
+      { label: 'Queued', value: 'queued', displayOrder: 1 },
+      { label: 'Sent', value: 'sent', displayOrder: 2 },
+      { label: 'Active', value: 'active', displayOrder: 3 },
+      { label: 'Expired', value: 'expired', displayOrder: 4 },
+      { label: 'Skipped', value: 'skipped', displayOrder: 5 },
+    ],
+  },
+  {
+    name: 'lead_category',
+    label: 'Lead Category',
+    type: 'enumeration',
+    fieldType: 'select',
+    groupName: 'contactinformation',
+    description: 'Lead segmentation for prospecting (beauty or fitness)',
+    options: [
+      { label: 'Beauty', value: 'beauty', displayOrder: 0 },
+      { label: 'Fitness', value: 'fitness', displayOrder: 1 },
+    ],
+  },
+  {
+    name: 'outreach_start_date',
+    label: 'Outreach Start Date',
+    type: 'date',
+    fieldType: 'date',
+    groupName: 'contactinformation',
+    description: 'Date Shopify account was created for prospecting',
+  },
+  {
+    name: 'outreach_end_date',
+    label: 'Outreach End Date',
+    type: 'date',
+    fieldType: 'date',
+    groupName: 'contactinformation',
+    description: 'Date trial access expires (30 days from start)',
+  },
+  {
+    name: 'outreach_welcome_sent_at',
+    label: 'Outreach Welcome Email Sent',
+    type: 'datetime',
+    fieldType: 'date',
+    groupName: 'contactinformation',
+    description: 'Timestamp when welcome email was sent',
+  },
 ]
 
 // =============================================================================

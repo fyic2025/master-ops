@@ -148,3 +148,4 @@ credential-test-report-*.json
 *secret*.json
 remove-secrets.sh
 buy-organics-online/security-cleanup.js
+.claude/settings.local.json

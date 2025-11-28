@@ -1,0 +1,92 @@
+---
+product:
+    videos:
+        limit: {{theme_settings.productpage_videos_count}}
+    reviews:
+        limit: {{theme_settings.productpage_reviews_count}}
+    related_products:
+        limit: {{theme_settings.productpage_related_products_count}}
+    similar_by_views:
+        limit: {{theme_settings.productpage_similar_by_views_count}}
+---
+{{inject "productId" product.id}}
+{{inject "zoomSize" theme_settings.zoom_size}}
+{{inject "productSize" theme_settings.product_size}}
+
+{{#partial "page"}}
+
+    {{> components/common/breadcrumbs breadcrumbs=breadcrumbs}}
+    <div class="BreadName" style="display:none;">{{customer.customer_group_name}}</div>
+    {{#each product.shipping_messages}}
+        {{> components/common/alert-info message}}
+    {{/each}}
+    
+     {{
+    itemscope itemtype="http://schema.org/Product"
+    }}
+   
+     <div >
+        {{> components/products/product-view settings=../settings schema=true  }}
+
+        {{{region name="product_below_content"}}}
+
+        {{#if product.videos.list.length}}
+            {{> components/products/videos product.videos}}
+        {{/if}}
+
+        {{#all settings.show_product_reviews theme_settings.show_product_reviews (if theme_settings.show_product_details_tabs '!==' true)}}
+            {{> components/products/reviews reviews=product.reviews product=product urls=urls}}
+        {{/all}}
+        
+         <div {{#if schema}} itemprop="description"{{/if}}>
+              {{> components/products/tabs}}
+         </div>
+        
+    </div>
+{{/partial}}
+{{> layout/base}}
+
+    <!-- Klaviyo Viewed Product Tracking Code -->
+
+<script type="text/javascript"> 
+var _learnq = _learnq || []; 
+
+ var item = {
+   Name: "{{product.title}}", 
+   ProductID: "{{product.id}}",
+   ImageURL: "{{getImage product.main_image 'product_size' (cdn theme_settings.default_image_product)}}", 
+   URL: "{{product.url}}",
+   Brand: "{{product.brand.name}}", 
+   Price: "{{product.price.without_tax.value}}",
+   CompareAtPrice: "{{product.price.rrp_without_tax.value}}"
+  };
+
+_learnq.push(['track', 'Viewed Product', item]); 
+
+_learnq.push(['trackViewedItem', {
+   Title: item.Name, 
+   ItemId: item.ProductID,
+   ImageUrl: item.ImageURL, 
+   Url: item.URL,
+
+   Metadata: { 
+     Brand: item.Brand,
+     Price: item.Price, 
+     CompareAtPrice: item.CompareAtPrice
+ } 
+ }]);
+</script>
+
+    <!-- Klaviyo Added to Cart Trigger -->
+
+<script text="text/javascript">
+	var _learnq = _learnq || [];
+	document.getElementById("form-action-addToCart").addEventListener('click',function (){
+ 		_learnq.push(['track', 'Added to Cart', item]);
+	});
+</script><script text="text/javascript">
+	var _learnq = _learnq || [];
+	document.getElementById("form-action-addToCart").addEventListener('click',function (){
+ 		_learnq.push(['track', 'Added to Cart', item]);
+	});
+</script>

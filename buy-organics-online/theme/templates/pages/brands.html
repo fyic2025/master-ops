@@ -10,101 +10,23 @@ brands:
     <h1 class="page-heading">{{lang 'brand.label'}}</h1>
     {{{region name="brands_below_header"}}}
     <div class="brand_search">
-    	<input id="brand_search" class="searchInput transition form-input" placeholder="Search Brand" value="">
+        <input id="brand_search" class="searchInput transition form-input" placeholder="Search Brand" value="" autocomplete="off">
+        <ul id="brand_suggestions" class="brand-autocomplete"></ul>
     </div>
     <div class="filter_list">
         <div class="pagination">
-            <ul class="pagination-list" id="filterID">
-                
-            </ul>
+            <ul class="pagination-list" id="filterID"></ul>
         </div>
-    	<div class="clr"></div>
+        <div class="clr"></div>
     </div>
-    <ul class="brandGrid">
-        {{#each brands}}
-            <li class="brand">
-                <article class="card {{#if alternate}}card--alternate{{/if}}">
-                    <figure class="card-figure">
-                        <a href="{{url}}">
-                            <div class="card-img-container">
-                                {{> components/common/responsive-img
-                                    image=image
-                                    class="card-image"
-                                    fallback_size=../theme_settings.brand_size
-                                    lazyload=../theme_settings.lazyload_mode
-                                    default_image=../theme_settings.default_image_brand
-                                }}
-                            </div>
-                        </a>
-                    </figure>
-                    <div class="card-body">
-                        <h4 class="card-title">
-                            <a href="{{url}}">{{name}}</a>
-                        </h4>
-                    </div>
-                </article>
-            </li>
-        {{/each}}
-    </ul>
-    <div style="display:none">
-    {{!> components/common/paginator pagination.brands}}
-    <ul class="pagination-list">
-        {{!--
-        <li class="pagination-item ">
-            <a class="pagination-link" href="/brands?page=1" data-faceted-search-facet="" aria-label="Page 1 of 5">1</a>
-        </li>
-        --}}
-        <li class="pagination-item ">
-            <a class="pagination-link" href="/brands?page=2" data-faceted-search-facet="" aria-label="Page 2 of 5">2</a>
-        </li>
-        <li class="pagination-item ">
-            <a class="pagination-link" href="/brands?page=3" data-faceted-search-facet="" aria-label="Page 3 of 5">3</a>
-        </li>
-        <li class="pagination-item ">
-            <a class="pagination-link" href="/brands?page=4" data-faceted-search-facet="" aria-label="Page 4 of 5">4</a>
-        </li>
-        <li class="pagination-item pagination-item--current">
-            <a class="pagination-link" href="/brands?page=5" data-faceted-search-facet="" aria-label="Page 5 of 5">5</a>
-        </li>
-        <li class="pagination-item ">
-            <a class="pagination-link" href="/brands?page=6" data-faceted-search-facet="" aria-label="Page 6 of 5">6</a>
-        </li>
-        <li class="pagination-item ">
-            <a class="pagination-link" href="/brands?page=7" data-faceted-search-facet="" aria-label="Page 7 of 5">7</a>
-        </li>
-        <li class="pagination-item ">
-            <a class="pagination-link" href="/brands?page=8" data-faceted-search-facet="" aria-label="Page 8 of 5">8</a>
-        </li>
-        <li class="pagination-item ">
-            <a class="pagination-link" href="/brands?page=9" data-faceted-search-facet="" aria-label="Page 9 of 5">9</a>
-        </li>
-        <li class="pagination-item">
-            <a class="pagination-link" href="/brands?page=10" data-faceted-search-facet="" aria-label="Page 10 of 5">10</a>
-        </li>
-        <li class="pagination-item ">
-            <a class="pagination-link" href="/brands?page=11" data-faceted-search-facet="" aria-label="Page 11 of 5">11</a>
-        </li>
-        <li class="pagination-item ">
-            <a class="pagination-link" href="/brands?page=12" data-faceted-search-facet="" aria-label="Page 12 of 5">12</a>
-        </li>
-        <li class="pagination-item ">
-            <a class="pagination-link" href="/brands?page=13" data-faceted-search-facet="" aria-label="Page 13 of 5">13</a>
-        </li>
-        <li class="pagination-item ">
-            <a class="pagination-link" href="/brands?page=14" data-faceted-search-facet="" aria-label="Page 14 of 5">14</a>
-        </li>
-        <li class="pagination-item">
-            <a class="pagination-link" href="/brands?page=15" data-faceted-search-facet="" aria-label="Page 15 of 5">15</a>
-        </li>
-        <li class="pagination-item">
-            <a class="pagination-link" href="/brands?page=16" data-faceted-search-facet="" aria-label="Page 16 of 5">16</a>
-        </li>
+    {{!-- Brand grid starts empty - populated by JS to prevent loading all 360 images --}}
+    <ul class="brandGrid" id="brandGridDisplay"></ul>
 
-    </ul>
-    </div>
-	<ul class="brand_list" style="display:none">
+    {{!-- All brands data from shop_by_brand (not paginated, complete list) --}}
+    {{!-- Images fetched via single GraphQL request for performance --}}
+    <ul class="brand_list" id="brandDataSource" style="display:none !important;">
         {{#each shop_by_brand}}
-        <li><a href="{{url}}">{{name}}</a> </li>
+        <li data-url="{{url}}" data-name="{{name}}">{{name}}</li>
         {{/each}}
     </ul>
     {{{region name="brands_below_content"}}}
@@ -112,188 +34,273 @@ brands:
 
 <style type="text/css">
 .brand_search {
-	width: 300px;
-	margin: 0 auto 40px;
+    width: 300px;
+    margin: 0 auto 40px;
+    position: relative;
 }
-#ui-id-1 {
-	width: 300px !important;
-	list-style: none;
-	border: 1px solid #CCC;
-	margin-top: -2px;
+.brand-autocomplete {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-top: none;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: 200px;
+    overflow-y: auto;
+    display: none;
+    z-index: 1000;
 }
-.ui-menu-item a {
-	padding: 5px 10px;
-	display: block;
-	background-color: #FFF;
-	text-decoration: none;
+.brand-autocomplete.show { display: block; }
+.brand-autocomplete li a {
+    display: block;
+    padding: 8px 12px;
+    text-decoration: none;
+    color: #333;
 }
-.ui-menu-item a:hover {
-	background-color: #CCC;
-	color: #000;
+.brand-autocomplete li a:hover,
+.brand-autocomplete li.active a {
+    background: #f0f0f0;
 }
-.filter_list {
-	text-align: center;
-}
-.filter_list .pagination {
-	float: none;
-}
-.filter_list .pagination-link {
-	border: 1px solid #CCC;
-	width: 30px;
-}
+.filter_list { text-align: center; }
+.filter_list .pagination { float: none; }
+.filter_list .pagination-link { border: 1px solid #CCC; width: 30px; }
 .pagination-item .pagination-link:hover,
-.pagination-item .pagination-link.active {
-	background-color: #CCC;
-}
+.pagination-item .pagination-link.active { background-color: #CCC; }
 #brand_search {
-	border: 1px solid #66a647 !important;
-	border-radius: 50px !important;
-	padding: 15px 20px 15px 20px;
-	font-size: inherit;
-	height: auto;
+    border: 1px solid #66a647 !important;
+    border-radius: 50px !important;
+    padding: 15px 20px;
+    font-size: inherit;
+    height: auto;
+    width: 100%;
+    box-sizing: border-box;
 }
-.brand .card-img-container::after {
-	padding-bottom: 100%;
-}
+.brand .card-img-container::after { padding-bottom: 100%; }
+#brandDataSource { position: absolute; left: -9999px; height: 0; overflow: hidden; }
 </style>
-{{!-- jQuery and jQuery UI are already bundled in theme-bundle.main.js --}}
+
 <script type="text/javascript">
+(function() {
+    var defaultImage = '{{cdn "img/BrandDefault.gif"}}';
+    var allBrands = [];
+    var letters = {};
+    var sortedLetters = [];
+    var imageMap = {};
 
-$(document).ready(function(e) {
-	var $pagiNation = $('a.pagination-link');
-	$.each($pagiNation, function(){
-		var getUrl = $(this).attr('href');
-		
-		var ajax_load = '';
-        var loadTask = getUrl;
-        loadTask = loadTask.replace('http:','');
-        
-		$.ajax({url: loadTask, async: true, success: function(data){
-			$(data).find(".brand").hide();
-			$(data).find(".brand").appendTo(".brandGrid");
-			
-			$('.brandGrid .card-title').each(function() {
-				var getLetter = $(this).text();
-					getLetter = $.trim(getLetter).charAt(0).toUpperCase();
+    // Extract ALL brands from shop_by_brand first (complete list)
+    function extractBrandData() {
+        var dataElements = document.querySelectorAll('#brandDataSource li');
+        for (var j = 0; j < dataElements.length; j++) {
+            var el = dataElements[j];
+            var name = el.getAttribute('data-name') || '';
+            var letter = name.charAt(0).toUpperCase();
+            if (/[0-9]/.test(letter)) letter = '#';
 
-				/*if(!$('li[data-letter="'+getLetter+'"]').length){
-				var lisAdd = $('<li class="pagination-item" data-letter="'+getLetter+'"><a class="pagination-link" href="javascript:void(0)" data-filter="'+getLetter+'">'+getLetter+'</a></li>');
-				}
-				$('.filter_list ul').append(lisAdd);*/
-				$(this).closest('li.brand').attr({'data-filter-letter':getLetter}).hide();
-				$('.brand[data-filter-letter="A"]').show();
-				$('.pagination-item[data-letter="A"]').addClass('active');
-				$('.pagination-item[data-letter="A"] a').addClass('active');
-			});
-		}});
+            allBrands.push({
+                name: name,
+                url: el.getAttribute('data-url'),
+                image: defaultImage,
+                letter: letter
+            });
+            letters[letter] = true;
+        }
 
-	});
-	$('.brand_list li a').each(function() {
-		var getLetter = $(this).text();
-			getLetter = $.trim(getLetter).charAt(0).toUpperCase();
-		$(this).parent().attr({'data-sort':getLetter});
-	});
-	var elems = $('.brand_list li');
-	elems.sort(function(a, b) {
-		return a.getAttribute('data-sort') > b.getAttribute('data-sort');
-	}).appendTo(elems.parent());
-	
-	$('.brand_list li a').each(function() {
-		var getLetter = $(this).text();
-			getLetter = $.trim(getLetter).charAt(0).toUpperCase();
-		if(!$('li[data-letter="'+getLetter+'"]').length){
-		var lisAdd = $('<li class="pagination-item" data-letter="'+getLetter+'"><a class="pagination-link" href="javascript:void(0)" data-filter="'+getLetter+'">'+getLetter+'</a></li>');
-		}
-		$('.filter_list ul').append(lisAdd);
-	});
-	
-	function sortList() {
-	  var list, i, switching, b, shouldSwitch;
-	  list = document.getElementById("filterID");
-	  switching = true;
-	  /*Make a loop that will continue until
-	  no switching has been done:*/
-	  while (switching) {
-		//start by saying: no switching is done:
-		switching = false;
-		b = list.getElementsByTagName("LI");
-		//Loop through all list-items:
-		for (i = 0; i < (b.length - 1); i++) {
-		  //start by saying there should be no switching:
-		  shouldSwitch = false;
-		  /*check if the next item should
-		  switch place with the current item:*/
-		  if (b[i].innerHTML.toLowerCase() > b[i + 1].innerHTML.toLowerCase()) {
-			/*if next item is alphabetically
-			lower than current item, mark as a switch
-			and break the loop:*/
-			shouldSwitch= true;
-			break;
-		  }
-		}
-		if (shouldSwitch) {
-		  /*If a switch has been marked, make the switch
-		  and mark the switch as done:*/
-		  b[i].parentNode.insertBefore(b[i + 1], b[i]);
-		  switching = true;
-		}
-	  }
-	}
-	sortList();
+        sortedLetters = Object.keys(letters).sort(function(a, b) {
+            if (a === '#') return -1;
+            if (b === '#') return 1;
+            return a.localeCompare(b);
+        });
+    }
 
-	$(document).on('click','a.pagination-link', function(){
-		var getId = $(this).attr('data-filter');
-		$('.filter_list a.pagination-link').removeClass('active');
-		$('.filter_list .pagination-item').removeClass('active');
-		$(this).addClass('active');
-		$(this).parent().addClass('active');
-		$('ul.brandGrid li.brand').slideUp()
-		$('ul.brandGrid li.brand[data-filter-letter="'+getId+'"]').slideDown();
-	})
-});
+    // Fetch all brand images via GraphQL with pagination (~8 requests instead of 368)
+    function fetchBrandImages(cursor) {
+        var query = cursor
+            ? 'query { site { brands(first: 50, after: "' + cursor + '") { pageInfo { hasNextPage endCursor } edges { node { name defaultImage { url(width: 190) } } } } } }'
+            : 'query { site { brands(first: 50) { pageInfo { hasNextPage endCursor } edges { node { name defaultImage { url(width: 190) } } } } } }';
 
-  $( function() {
-	  var autocomplArrayi = [];
+        fetch('/graphql', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer {{settings.storefront_api.token}}'
+            },
+            body: JSON.stringify({ query: query })
+        })
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
+            if (data && data.data && data.data.site && data.data.site.brands) {
+                var brands = data.data.site.brands;
+                var edges = brands.edges;
 
-	var index = 1;
-	$('.brand_list li a').each(function() {
-		var addClas = 'prorow_'+index;
-		$(this).addClass(addClas);
-		var getProCode = $('.brand_list li a.prorow_'+index).attr('href');
-		var getProName = $('.brand_list li a.prorow_'+index).text();
-		
-		item = {}
-		item['value'] = getProCode;
-		item['label'] = getProName;
-		autocomplArrayi.push(item);
-		
-		index++;
-	});
-	  
-	var projects = autocomplArrayi;
+                // Add images to map
+                for (var i = 0; i < edges.length; i++) {
+                    var node = edges[i].node;
+                    if (node.defaultImage && node.defaultImage.url) {
+                        imageMap[node.name.toLowerCase()] = node.defaultImage.url;
+                    }
+                }
 
-	$( "#brand_search" ).autocomplete({
-      minLength: 0,
-      source: projects,
-      focus: function( event, ui ) {
-        //$( "#project" ).val( ui.item.label );
-        return false;
-      },
-      select: function( event, ui ) {
-        //$( "#project" ).val( ui.item.label );
-        //$( "#project-id" ).val( ui.item.value );
- 
-        return false;
-      }
-    })
-    .autocomplete( "instance" )._renderItem = function( ul, item ) {
-      return $( "<li>" )
-        .append( "<div><a href='"+item.value+"'>" + item.label + "</a><div class='clr'></div></div>" )
-        .appendTo( ul );
-    };
-	
-	
-});
+                // Update allBrands with fetched images so far
+                for (var k = 0; k < allBrands.length; k++) {
+                    var nameLower = allBrands[k].name.toLowerCase();
+                    if (imageMap[nameLower]) {
+                        allBrands[k].image = imageMap[nameLower];
+                    }
+                }
+
+                // Re-render current letter with images
+                var activeLink = document.querySelector('.filter_list a.pagination-link.active');
+                if (activeLink) {
+                    renderBrands(activeLink.getAttribute('data-filter'));
+                }
+
+                // Fetch next page if available
+                if (brands.pageInfo && brands.pageInfo.hasNextPage && brands.pageInfo.endCursor) {
+                    fetchBrandImages(brands.pageInfo.endCursor);
+                }
+            }
+        })
+        .catch(function(err) {
+            console.log('GraphQL brand images fetch error:', err.message);
+        });
+    }
+
+    function renderBrands(targetLetter) {
+        var grid = document.getElementById('brandGridDisplay');
+        grid.innerHTML = '';
+
+        for (var m = 0; m < allBrands.length; m++) {
+            var brand = allBrands[m];
+            if (brand.letter === targetLetter) {
+                var li = document.createElement('li');
+                li.className = 'brand';
+                li.innerHTML = '<article class="card">' +
+                    '<figure class="card-figure">' +
+                    '<a href="' + brand.url + '">' +
+                    '<div class="card-img-container">' +
+                    '<img class="card-image" src="' + brand.image + '" alt="' + brand.name + '" loading="lazy">' +
+                    '</div>' +
+                    '</a>' +
+                    '</figure>' +
+                    '<div class="card-body">' +
+                    '<h4 class="card-title"><a href="' + brand.url + '">' + brand.name + '</a></h4>' +
+                    '</div>' +
+                    '</article>';
+                grid.appendChild(li);
+            }
+        }
+    }
+
+    function initBrands() {
+        extractBrandData();
+
+        // Build letter filter
+        var filterList = document.getElementById('filterID');
+        for (var k = 0; k < sortedLetters.length; k++) {
+            var letter = sortedLetters[k];
+            var activeClass = (k === 0) ? ' active' : '';
+            var li = document.createElement('li');
+            li.className = 'pagination-item' + activeClass;
+            li.innerHTML = '<a class="pagination-link' + activeClass + '" href="javascript:void(0)" data-filter="' + letter + '">' + letter + '</a>';
+            filterList.appendChild(li);
+        }
+
+        // Initial render with placeholder images
+        if (sortedLetters.length > 0) {
+            renderBrands(sortedLetters[0]);
+        }
+
+        // Start fetching brand images immediately via GraphQL
+        fetchBrandImages(null);
+
+        // Letter filter click
+        filterList.addEventListener('click', function(e) {
+            var link = e.target.closest('a.pagination-link');
+            if (!link) return;
+
+            var letter = link.getAttribute('data-filter');
+            var allLinks = document.querySelectorAll('.filter_list a.pagination-link, .filter_list .pagination-item');
+            for (var n = 0; n < allLinks.length; n++) {
+                allLinks[n].classList.remove('active');
+            }
+            link.classList.add('active');
+            link.parentElement.classList.add('active');
+            renderBrands(letter);
+        });
+
+        // === AUTOCOMPLETE ===
+        var input = document.getElementById('brand_search');
+        var suggestions = document.getElementById('brand_suggestions');
+        var activeIndex = -1;
+
+        function showSuggestions(matches) {
+            suggestions.innerHTML = '';
+            if (matches.length === 0) {
+                suggestions.classList.remove('show');
+                return;
+            }
+            for (var p = 0; p < matches.length && p < 10; p++) {
+                var li = document.createElement('li');
+                li.innerHTML = '<a href="' + matches[p].url + '">' + matches[p].name + '</a>';
+                suggestions.appendChild(li);
+            }
+            suggestions.classList.add('show');
+            activeIndex = -1;
+        }
+
+        input.addEventListener('input', function() {
+            var val = this.value.toLowerCase();
+            if (val.length < 1) {
+                suggestions.classList.remove('show');
+                return;
+            }
+            var matches = [];
+            for (var q = 0; q < allBrands.length; q++) {
+                if (allBrands[q].name.toLowerCase().indexOf(val) !== -1) {
+                    matches.push(allBrands[q]);
+                }
+            }
+            showSuggestions(matches);
+        });
+
+        input.addEventListener('keydown', function(e) {
+            var items = suggestions.querySelectorAll('li');
+            if (e.keyCode === 40) { // Down
+                activeIndex = Math.min(activeIndex + 1, items.length - 1);
+                for (var r = 0; r < items.length; r++) items[r].classList.remove('active');
+                if (items[activeIndex]) items[activeIndex].classList.add('active');
+                e.preventDefault();
+            } else if (e.keyCode === 38) { // Up
+                activeIndex = Math.max(activeIndex - 1, 0);
+                for (var s = 0; s < items.length; s++) items[s].classList.remove('active');
+                if (items[activeIndex]) items[activeIndex].classList.add('active');
+                e.preventDefault();
+            } else if (e.keyCode === 13 && activeIndex >= 0) { // Enter
+                var activeLink = items[activeIndex] ? items[activeIndex].querySelector('a') : null;
+                if (activeLink) window.location.href = activeLink.href;
+                e.preventDefault();
+            } else if (e.keyCode === 27) { // Escape
+                suggestions.classList.remove('show');
+            }
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.brand_search')) {
+                suggestions.classList.remove('show');
+            }
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initBrands);
+    } else {
+        initBrands();
+    }
+})();
 </script>
 
 {{/partial}}

@@ -161,64 +161,31 @@ async function getAllProductStatuses() {
 }
 
 // ============================================
-// VAULT FUNCTIONS
+// CREDENTIAL LOADING
 // ============================================
-// Credentials are encrypted with pgcrypto in Supabase
-// We use an RPC call to decrypt server-side
+// Load credentials from .env file (same as test-connection.js)
 
 async function loadCredentialsFromVault() {
-  console.log('  Loading credentials from vault...');
+  console.log('  Loading credentials from .env...');
 
-  // Fetch all needed credentials in one query with server-side decryption
-  const query = `
-    SELECT project, name,
-           convert_from(extensions.decrypt(decode(encrypted_value, 'base64'), '${VAULT_ENCRYPTION_KEY}'::bytea, 'aes'), 'UTF8') as value
-    FROM secure_credentials
-    WHERE (project = 'global' AND name IN ('google_ads_client_id', 'google_ads_client_secret'))
-       OR (project = 'boo' AND name IN ('google_merchant_refresh_token', 'google_merchant_id'))
-  `;
-
-  // Use Supabase Management API to run the query
-  const postData = JSON.stringify({ query });
-
-  const response = await httpsRequest({
-    hostname: 'api.supabase.com',
-    path: '/v1/projects/usibnysqelovfuctmkqw/database/query',
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${SUPABASE_ACCESS_TOKEN}`,
-      'Content-Type': 'application/json',
-      'Content-Length': Buffer.byteLength(postData),
-    },
-  }, postData);
-
-  const rows = JSON.parse(response.data || '[]');
-
-  // Map results to credentials
-  for (const row of rows) {
-    if (row.project === 'global' && row.name === 'google_ads_client_id') {
-      CREDENTIALS.clientId = row.value;
-    } else if (row.project === 'global' && row.name === 'google_ads_client_secret') {
-      CREDENTIALS.clientSecret = row.value;
-    } else if (row.project === 'boo' && row.name === 'google_merchant_refresh_token') {
-      CREDENTIALS.refreshToken = row.value;
-    } else if (row.project === 'boo' && row.name === 'google_merchant_id') {
-      CREDENTIALS.merchantId = row.value;
-    }
-  }
+  // Load from environment variables
+  CREDENTIALS.clientId = process.env.GOOGLE_ADS_CLIENT_ID;
+  CREDENTIALS.clientSecret = process.env.GOOGLE_ADS_CLIENT_SECRET;
+  CREDENTIALS.refreshToken = process.env.GOOGLE_ADS_BOO_REFRESH_TOKEN;
+  CREDENTIALS.merchantId = process.env.GMC_BOO_MERCHANT_ID;
 
   // Validate all credentials loaded
   const missing = [];
-  if (!CREDENTIALS.clientId) missing.push('global/google_ads_client_id');
-  if (!CREDENTIALS.clientSecret) missing.push('global/google_ads_client_secret');
-  if (!CREDENTIALS.refreshToken) missing.push('boo/google_merchant_refresh_token');
-  if (!CREDENTIALS.merchantId) missing.push('boo/google_merchant_id');
+  if (!CREDENTIALS.clientId) missing.push('GOOGLE_ADS_CLIENT_ID');
+  if (!CREDENTIALS.clientSecret) missing.push('GOOGLE_ADS_CLIENT_SECRET');
+  if (!CREDENTIALS.refreshToken) missing.push('GOOGLE_ADS_BOO_REFRESH_TOKEN');
+  if (!CREDENTIALS.merchantId) missing.push('GMC_BOO_MERCHANT_ID');
 
   if (missing.length > 0) {
-    throw new Error(`Missing vault credentials: ${missing.join(', ')}`);
+    throw new Error(`Missing .env credentials: ${missing.join(', ')}`);
   }
 
-  console.log('  ✓ All credentials loaded from vault');
+  console.log('  ✓ All credentials loaded from .env');
 }
 
 // ============================================

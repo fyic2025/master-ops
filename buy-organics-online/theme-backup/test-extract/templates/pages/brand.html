@@ -1,0 +1,73 @@
+---
+brand:
+    products:
+        limit: {{theme_settings.brandpage_products_per_page}}
+---
+{{inject "brandProductsPerPage" theme_settings.brandpage_products_per_page}}
+{{#partial "head"}}
+    {{#if pagination.brand.previous}}
+        <link rel="prev" href="{{pagination.brand.previous}}">
+    {{/if}}
+    {{#if pagination.brand.next}}
+        <link rel="next" href="{{pagination.brand.next}}">
+    {{/if}}
+{{/partial}}
+
+{{#partial "page"}}
+{{> components/common/breadcrumbs breadcrumbs=breadcrumbs}}
+<!--{{#if brand.image}}
+    <div class="brand-image-container">
+        {{> components/common/responsive-img
+            image=brand.image
+            fallback_size=theme_settings.thumb_size
+            lazyload='disabled'
+        }}
+    </div>
+{{/if}}-->
+<h1 class="page-heading">{{brand.name}}</h1>
+
+{{{region name="brand_below_header"}}}
+<div class="page">
+	{{#if brand.products}}
+        <main class="page-content brand-page" id="product-listing-container">
+            {{#if banners.top}}
+                <div class="banners" data-banner-location="top">
+                    {{#each (limit banners.top_metadata 1)}}
+                    <div class="banner" data-event-type="promotion" data-entity-id="{{this.id}}" data-name="{{this.banner-name}}" data-position="{{this.location}}" data-banner-id="{{this.banner-name}}">
+                        <div data-event-type="promotion-click"> 
+                            {{{this.content}}}
+                        </div>
+                    </div>
+                    {{/each}}
+                </div>
+                {{/if}}
+            
+            
+            {{#if brand.products}}
+                {{> components/brand/product-listing}}
+            {{else}}
+                <p>{{lang 'brands.no_products'}}</p>
+            {{/if}}
+            {{{region name="brand_below_content"}}}
+        </main>
+        <aside class="page-sidebar" id="faceted-search-container">
+            {{> components/brand/sidebar}}
+        </aside>
+    {{else}}
+    	<aside class="page-sidebar" id="faceted-search-container">
+            {{> components/brand/sidebar}}
+        </aside>
+    
+        <main class="page-content" id="product-listing-container">
+            {{#if brand.products}}
+                {{> components/brand/product-listing}}
+            {{else}}
+                <p>{{lang 'brands.no_products'}}</p>
+            {{/if}}
+            {{{region name="brand_below_content"}}}
+        </main>
+    {{/if}}
+</div>
+
+{{/partial}}
+{{> layout/base}}

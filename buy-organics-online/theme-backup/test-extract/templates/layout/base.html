@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html class="no-js" lang="{{ locale_name }}">
+    <head>
+        <title>{{ head.title }}</title>
+        {{{ resourceHints }}}
+        {{{ head.meta_tags }}}
+        {{{ head.config }}}
+        {{#block "head"}} {{/block}}
+
+        <link href="{{{ head.favicon }}}" rel="shortcut icon">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        {{!-- Resource hints for faster external script loading --}}
+        <link rel="dns-prefetch" href="//searchserverapi.com">
+        <link rel="dns-prefetch" href="//widget.reviews.io">
+        <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+        <link rel="dns-prefetch" href="//code.jquery.com">
+        <link rel="dns-prefetch" href="https://www.paypal.com">
+        <link rel="preconnect" href="https://d1azc1qln24ryf.cloudfront.net" crossorigin>
+
+        <script nonce="{{nonce}}">
+            {{!-- Change document class from no-js to js so we can detect this in css --}}
+            document.documentElement.className = document.documentElement.className.replace('no-js', 'js');
+        </script>
+
+        {{> components/common/polyfill-script }}
+        <script nonce="{{nonce}}">window.consentManagerTranslations = `{{{langJson 'consent_manager'}}}`;</script>
+
+        {{!-- Load Lazysizes script ASAP so images will appear --}}
+        <script nonce="{{nonce}}">
+            {{!-- Only load visible elements until the onload event fires, after which preload nearby elements. --}}
+            window.lazySizesConfig = window.lazySizesConfig || {};
+            window.lazySizesConfig.loadMode = 1;
+        </script>
+        <script nonce="{{nonce}}" async src="{{cdn 'assets/dist/theme-bundle.head_async.js' resourceHint='preload' as='script'}}"></script>
+        
+        {{getFontsCollection font-display='block'}}
+        
+        <script nonce="{{nonce}}" async src="{{cdn 'assets/dist/theme-bundle.font.js' resourceHint='preload' as='script'}}"></script>
+
+        {{{stylesheet '/assets/css/theme.css'}}}
+
+        {{{head.scripts}}}
+
+        {{~inject 'zoomSize' theme_settings.zoom_size}}
+        {{~inject 'productSize' theme_settings.product_size}}
+        {{~inject 'genericError' (lang 'common.generic_error')}}
+        {{~inject 'urls' urls}}
+        {{~inject 'secureBaseUrl' settings.secure_base_url}}
+        {{~inject 'cartId' cart_id}}
+        {{~inject 'template' template}}
+        {{~inject 'validationDictionaryJSON' (langJson 'validation_messages')}}
+        {{~inject 'validationFallbackDictionaryJSON' (langJson 'validation_fallback_messages')}}
+        {{~inject 'validationDefaultDictionaryJSON' (langJson 'validation_default_messages')}}
+        {{~inject 'carouselArrowAndDotAriaLabel' (lang 'carousel.arrow_and_dot_aria_label')}}
+        {{~inject 'carouselActiveDotAriaLabel' (lang 'carousel.active_dot_aria_label')}}
+        {{~inject 'carouselContentAnnounceMessage' (lang 'carousel.content_announce_message')}}
+        {{~inject 'giftWrappingRemoveMessage' (lang 'cart.gift_wrapping.remove_confirm')}}
+    </head>
+    <body>
+        <svg data-src="{{cdn 'img/icon-sprite.svg'}}" class="icons-svg-sprite"></svg>
+
+        {{> components/common/header }}
+        {{> components/common/body }}
+        {{> components/common/footer }}
+
+        <script nonce="{{nonce}}">window.__webpack_public_path__ = "{{cdn 'assets/dist/'}}";</script>
+        <script nonce="{{nonce}}">
+            {{!-- Exported in app.js --}}
+            function onThemeBundleMain() {
+                window.stencilBootstrap("{{page_type}}", {{jsContext}}).load();
+
+                function browserSupportsFormData() {
+                    return typeof FormData !== 'undefined' 
+                        && !!FormData.prototype.keys;
+                }
+                function loadFormDataPolyfillScript(src) {
+                    var formDataPolyfillScript = document.createElement('script');
+                    formDataPolyfillScript.src = src;
+                    formDataPolyfillScript.onerror = function () {
+                        console.error('Failed to load formData polyfill script ' + src);
+                    };
+                    document.body.appendChild(formDataPolyfillScript);
+                }
+
+                if (!browserSupportsFormData()) {
+                    loadFormDataPolyfillScript('{{cdn 'assets/dist/theme-bundle.polyfill_form_data.js'}}');
+                }
+            }
+        </script>
+        <script id="theme-bundle-main" nonce="{{nonce}}" async defer src="{{cdn 'assets/dist/theme-bundle.main.js' resourceHint='preload' as='script'}}"></script>
+        <script nonce="{{nonce}}">
+            const scriptElement = document.getElementById('theme-bundle-main');
+
+            if (scriptElement) {
+                addEventListener('load', onThemeBundleMain);
+            } else {
+                console.error('Could not find script element with id "theme-bundle-main"');
+            }
+        </script>
+
+        {{!-- Performance: Defer non-critical 3rd party scripts --}}
+        <script nonce="{{nonce}}">
+        (function() {
+            // Defer Reviews, SearchServer, and PayPal widgets until after page load
+            function loadDeferredScripts() {
+                // 1. Reviews.io widgets (saves ~230ms on product pages)
+                var reviewsIOBadge = document.createElement('script');
+                reviewsIOBadge.src = 'https://widget.reviews.io/badge-modern/dist.js';
+                reviewsIOBadge.async = true;
+                document.body.appendChild(reviewsIOBadge);
+                
+                // 2. SearchServer widget (saves ~160ms)
+                var searchScript = document.createElement('script');
+                searchScript.src = 'https://searchserverapi.com/widgets/bigcommerce/init.js?api_key=5U6E5F5m3h';
+                searchScript.async = true;
+                document.body.appendChild(searchScript);
+
+                // Note: PayPal SDK removed - BigCommerce auto-loads it for Pay Later
+            }
+            
+            // Load after page is fully loaded and idle
+            if ('requestIdleCallback' in window) {
+                window.addEventListener('load', function() {
+                    requestIdleCallback(loadDeferredScripts, { timeout: 2000 });
+                });
+            } else {
+                // Fallback for browsers without requestIdleCallback
+                window.addEventListener('load', function() {
+                    setTimeout(loadDeferredScripts, 1000);
+                });
+            }
+        })();
+        </script>
+
+        {{!-- Restrict shipping countries to Australia only --}}
+        <script nonce="{{nonce}}">
+        (function() {
+            function restrictToAustraliaOnly() {
+                // Cart page shipping estimator
+                var shippingCountrySelect = document.getElementById('shipping-country');
+                if (shippingCountrySelect) {
+                    filterCountryOptions(shippingCountrySelect);
+                }
+                
+                // Watch for dynamically loaded checkout iframe country selects
+                var checkoutObserver = new MutationObserver(function(mutations) {
+                    document.querySelectorAll('select[name*="country"], select[name*="Country"], #countryCodeInput').forEach(function(select) {
+                        filterCountryOptions(select);
+                    });
+                });
+                
+                // Observe the entire document for changes
+                checkoutObserver.observe(document.body, {
+                    childList: true,
+                    subtree: true
+                });
+            }
+            
+            function filterCountryOptions(selectElement) {
+                if (!selectElement || selectElement.dataset.australiaFiltered) return;
+                
+                var options = selectElement.options;
+                var australiaOption = null;
+                
+                // Find Australia option and remove others
+                for (var i = options.length - 1; i >= 0; i--) {
+                    var optionText = options[i].text.toLowerCase();
+                    var optionValue = options[i].value.toLowerCase();
+                    
+                    if (optionText.includes('australia') || optionValue.includes('australia') || optionValue === '13') {
+                        australiaOption = options[i];
+                    } else if (options[i].value !== '' && options[i].value !== '0') {
+                        // Keep first empty/placeholder option, remove others
+                        options[i].remove();
+                    }
+                }
+                
+                // Set Australia as selected
+                if (australiaOption) {
+                    australiaOption.selected = true;
+                    selectElement.value = australiaOption.value;
+                    
+                    // Trigger change event
+                    var event = new Event('change', { bubbles: true });
+                    selectElement.dispatchEvent(event);
+                }
+                
+                // Mark as filtered
+                selectElement.dataset.australiaFiltered = 'true';
+            }
+            
+            // Run on page load
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', restrictToAustraliaOnly);
+            } else {
+                restrictToAustraliaOnly();
+            }
+            
+            // Also run after a short delay to catch late-loading elements
+            setTimeout(restrictToAustraliaOnly, 1000);
+            setTimeout(restrictToAustraliaOnly, 3000);
+        })();
+        </script>
+
+        {{{footer.scripts}}}
+    </body>
+</html> 

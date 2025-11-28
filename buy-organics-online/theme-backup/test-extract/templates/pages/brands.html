@@ -1,0 +1,309 @@
+---
+brands:
+---
+
+{{#partial "page"}}
+
+{{> components/common/breadcrumbs breadcrumbs=breadcrumbs}}
+
+<main class="page">
+    <h1 class="page-heading">{{lang 'brand.label'}}</h1>
+    {{{region name="brands_below_header"}}}
+    <div class="brand_search">
+    	<input id="brand_search" class="searchInput transition form-input" placeholder="Search Brand" value="">
+    </div>
+    <div class="filter_list">
+        <div class="pagination">
+            <ul class="pagination-list" id="filterID">
+                
+            </ul>
+        </div>
+    	<div class="clr"></div>
+    </div>
+    <ul class="brandGrid">
+        {{#each brands}}
+            <li class="brand">
+                <article class="card {{#if alternate}}card--alternate{{/if}}">
+                    <figure class="card-figure">
+                        <a href="{{url}}">
+                            <div class="card-img-container">
+                                {{> components/common/responsive-img
+                                    image=image
+                                    class="card-image"
+                                    fallback_size=../theme_settings.brand_size
+                                    lazyload=../theme_settings.lazyload_mode
+                                    default_image=../theme_settings.default_image_brand
+                                }}
+                            </div>
+                        </a>
+                    </figure>
+                    <div class="card-body">
+                        <h4 class="card-title">
+                            <a href="{{url}}">{{name}}</a>
+                        </h4>
+                    </div>
+                </article>
+            </li>
+        {{/each}}
+    </ul>
+    <div style="display:none">
+    {{!> components/common/paginator pagination.brands}}
+    <ul class="pagination-list">
+        {{!--
+        <li class="pagination-item ">
+            <a class="pagination-link" href="/brands?page=1" data-faceted-search-facet="" aria-label="Page 1 of 5">1</a>
+        </li>
+        --}}
+        <li class="pagination-item ">
+            <a class="pagination-link" href="/brands?page=2" data-faceted-search-facet="" aria-label="Page 2 of 5">2</a>
+        </li>
+        <li class="pagination-item ">
+            <a class="pagination-link" href="/brands?page=3" data-faceted-search-facet="" aria-label="Page 3 of 5">3</a>
+        </li>
+        <li class="pagination-item ">
+            <a class="pagination-link" href="/brands?page=4" data-faceted-search-facet="" aria-label="Page 4 of 5">4</a>
+        </li>
+        <li class="pagination-item pagination-item--current">
+            <a class="pagination-link" href="/brands?page=5" data-faceted-search-facet="" aria-label="Page 5 of 5">5</a>
+        </li>
+        <li class="pagination-item ">
+            <a class="pagination-link" href="/brands?page=6" data-faceted-search-facet="" aria-label="Page 6 of 5">6</a>
+        </li>
+        <li class="pagination-item ">
+            <a class="pagination-link" href="/brands?page=7" data-faceted-search-facet="" aria-label="Page 7 of 5">7</a>
+        </li>
+        <li class="pagination-item ">
+            <a class="pagination-link" href="/brands?page=8" data-faceted-search-facet="" aria-label="Page 8 of 5">8</a>
+        </li>
+        <li class="pagination-item ">
+            <a class="pagination-link" href="/brands?page=9" data-faceted-search-facet="" aria-label="Page 9 of 5">9</a>
+        </li>
+        <li class="pagination-item">
+            <a class="pagination-link" href="/brands?page=10" data-faceted-search-facet="" aria-label="Page 10 of 5">10</a>
+        </li>
+        <li class="pagination-item ">
+            <a class="pagination-link" href="/brands?page=11" data-faceted-search-facet="" aria-label="Page 11 of 5">11</a>
+        </li>
+        <li class="pagination-item ">
+            <a class="pagination-link" href="/brands?page=12" data-faceted-search-facet="" aria-label="Page 12 of 5">12</a>
+        </li>
+        <li class="pagination-item ">
+            <a class="pagination-link" href="/brands?page=13" data-faceted-search-facet="" aria-label="Page 13 of 5">13</a>
+        </li>
+        <li class="pagination-item ">
+            <a class="pagination-link" href="/brands?page=14" data-faceted-search-facet="" aria-label="Page 14 of 5">14</a>
+        </li>
+        <li class="pagination-item">
+            <a class="pagination-link" href="/brands?page=15" data-faceted-search-facet="" aria-label="Page 15 of 5">15</a>
+        </li>
+        <li class="pagination-item">
+            <a class="pagination-link" href="/brands?page=16" data-faceted-search-facet="" aria-label="Page 16 of 5">16</a>
+        </li>
+
+    </ul>
+    </div>
+	<ul class="brand_list" style="display:none">
+        {{#each shop_by_brand}}
+        <li><a href="{{url}}">{{name}}</a> </li>
+        {{/each}}
+    </ul>
+    {{{region name="brands_below_content"}}}
+</main>
+
+<style type="text/css">
+.brand_search {
+	width: 300px;
+	margin: 0 auto 40px;
+}
+#ui-id-1 {
+	width: 300px !important;
+	list-style: none;
+	border: 1px solid #CCC;
+	margin-top: -2px;
+}
+.ui-menu-item a {
+	padding: 5px 10px;
+	display: block;
+	background-color: #FFF;
+	text-decoration: none;
+}
+.ui-menu-item a:hover {
+	background-color: #CCC;
+	color: #000;
+}
+.filter_list {
+	text-align: center;
+}
+.filter_list .pagination {
+	float: none;
+}
+.filter_list .pagination-link {
+	border: 1px solid #CCC;
+	width: 30px;
+}
+.pagination-item .pagination-link:hover,
+.pagination-item .pagination-link.active {
+	background-color: #CCC;
+}
+#brand_search {
+	border: 1px solid #66a647 !important;
+	border-radius: 50px !important;
+	padding: 15px 20px 15px 20px;
+	font-size: inherit;
+	height: auto;
+}
+.brand .card-img-container::after {
+	padding-bottom: 100%;
+}
+</style>
+<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script> 
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script type="text/javascript">
+
+$(document).ready(function(e) {
+	//$('.pagination-item.pagination-item--current').remove();
+	//$('.pagination-item.pagination-item--next').remove();
+	//alert($('a.pagination-link').length)
+	var $pagiNation = $('a.pagination-link');
+	$.each($pagiNation, function(){
+		var getUrl = $(this).attr('href');
+		console.log(getUrl)
+		
+		var ajax_load = '';
+        var loadTask = getUrl;
+        loadTask = loadTask.replace('http:','');
+        
+		$.ajax({url: loadTask, async: true, success: function(data){
+			$(data).find(".brand").hide();
+			$(data).find(".brand").appendTo(".brandGrid");
+			
+			$('.brandGrid .card-title').each(function() {
+				var getLetter = $(this).text();
+					getLetter = $.trim(getLetter).charAt(0).toUpperCase();
+
+				/*if(!$('li[data-letter="'+getLetter+'"]').length){
+				var lisAdd = $('<li class="pagination-item" data-letter="'+getLetter+'"><a class="pagination-link" href="javascript:void(0)" data-filter="'+getLetter+'">'+getLetter+'</a></li>');
+				}
+				$('.filter_list ul').append(lisAdd);*/
+				$(this).closest('li.brand').attr({'data-filter-letter':getLetter}).hide();
+				$('.brand[data-filter-letter="A"]').show();
+				$('.pagination-item[data-letter="A"]').addClass('active');
+				$('.pagination-item[data-letter="A"] a').addClass('active');
+			});
+		}});
+
+	});
+	$('.brand_list li a').each(function() {
+		var getLetter = $(this).text();
+			getLetter = $.trim(getLetter).charAt(0).toUpperCase();
+		$(this).parent().attr({'data-sort':getLetter});
+	});
+	var elems = $('.brand_list li');
+	elems.sort(function(a, b) {
+		return a.getAttribute('data-sort') > b.getAttribute('data-sort');
+	}).appendTo(elems.parent());
+	
+	$('.brand_list li a').each(function() {
+		var getLetter = $(this).text();
+			getLetter = $.trim(getLetter).charAt(0).toUpperCase();
+		//var letrUnq = $.unique(getLetter)
+		//console.log('hello'+letrUnq)
+		if(!$('li[data-letter="'+getLetter+'"]').length){
+		var lisAdd = $('<li class="pagination-item" data-letter="'+getLetter+'"><a class="pagination-link" href="javascript:void(0)" data-filter="'+getLetter+'">'+getLetter+'</a></li>');
+		}
+		$('.filter_list ul').append(lisAdd);
+	});
+	
+	function sortList() {
+	  var list, i, switching, b, shouldSwitch;
+	  list = document.getElementById("filterID");
+	  switching = true;
+	  /*Make a loop that will continue until
+	  no switching has been done:*/
+	  while (switching) {
+		//start by saying: no switching is done:
+		switching = false;
+		b = list.getElementsByTagName("LI");
+		//Loop through all list-items:
+		for (i = 0; i < (b.length - 1); i++) {
+		  //start by saying there should be no switching:
+		  shouldSwitch = false;
+		  /*check if the next item should
+		  switch place with the current item:*/
+		  if (b[i].innerHTML.toLowerCase() > b[i + 1].innerHTML.toLowerCase()) {
+			/*if next item is alphabetically
+			lower than current item, mark as a switch
+			and break the loop:*/
+			shouldSwitch= true;
+			break;
+		  }
+		}
+		if (shouldSwitch) {
+		  /*If a switch has been marked, make the switch
+		  and mark the switch as done:*/
+		  b[i].parentNode.insertBefore(b[i + 1], b[i]);
+		  switching = true;
+		}
+	  }
+	}
+	sortList();
+
+	$(document).on('click','a.pagination-link', function(){
+		var getId = $(this).attr('data-filter');
+		$('.filter_list a.pagination-link').removeClass('active');
+		$('.filter_list .pagination-item').removeClass('active');
+		$(this).addClass('active');
+		$(this).parent().addClass('active');
+		//alert(getId)
+		$('ul.brandGrid li.brand').slideUp()
+		$('ul.brandGrid li.brand[data-filter-letter="'+getId+'"]').slideDown();
+	})
+});
+
+  $( function() {
+	  var autocomplArrayi = [];
+
+	var index = 1;
+	$('.brand_list li a').each(function() {
+		var addClas = 'prorow_'+index;
+		$(this).addClass(addClas);
+		var getProCode = $('.brand_list li a.prorow_'+index).attr('href');
+		var getProName = $('.brand_list li a.prorow_'+index).text();
+		
+		item = {}
+		item['value'] = getProCode;
+		item['label'] = getProName;
+		autocomplArrayi.push(item);
+		
+		index++;
+	});
+	  
+	var projects = autocomplArrayi;
+	console.log(projects)
+	
+	$( "#brand_search" ).autocomplete({
+      minLength: 0,
+      source: projects,
+      focus: function( event, ui ) {
+        //$( "#project" ).val( ui.item.label );
+        return false;
+      },
+      select: function( event, ui ) {
+        //$( "#project" ).val( ui.item.label );
+        //$( "#project-id" ).val( ui.item.value );
+ 
+        return false;
+      }
+    })
+    .autocomplete( "instance" )._renderItem = function( ul, item ) {
+      return $( "<li>" )
+        .append( "<div><a href='"+item.value+"'>" + item.label + "</a><div class='clr'></div></div>" )
+        .appendTo( ul );
+    };
+	
+	
+});
+</script>
+
+{{/partial}}
+{{> layout/base}}
