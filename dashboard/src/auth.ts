@@ -5,6 +5,7 @@ import Google from "next-auth/providers/google"
 const ALLOWED_EMAILS = [
   "peter@teelixir.com",
   "jayson@teelixir.com",
+  "jayson@fyic.com.au",
 ]
 
 function isEmailAllowed(email: string | null | undefined): boolean {
