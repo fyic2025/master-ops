@@ -3,7 +3,7 @@ region: syd
 services:
   - name: web
     github:
-      repo: your-org/master-ops
+      repo: fyic2025/master-ops
       branch: main
       deploy_on_push: true
     source_dir: dashboard
@@ -21,5 +21,8 @@ services:
         scope: RUN_AND_BUILD_TIME
         type: SECRET
       - key: SUPABASE_SERVICE_ROLE_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: SUPABASE_URL
         scope: RUN_TIME
         type: SECRET

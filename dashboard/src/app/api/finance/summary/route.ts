@@ -35,9 +35,32 @@ export async function GET() {
       net_profit: businesses.reduce((sum, b) => sum + (Number(b.net_profit) || 0), 0),
     }
 
-    // Consolidated Teelixir + Elevate
+    // Get MTD intercompany eliminations
+    const currentYear = new Date().getFullYear()
+    const currentMonth = new Date().getMonth() + 1
+    const { data: eliminations } = await supabase
+      .from('intercompany_transactions')
+      .select('source_entity, direction, total')
+      .eq('period_year', currentYear)
+      .eq('period_month', currentMonth)
+
+    // Calculate elimination totals
+    const eliminationTotals = {
+      teelixir_to_elevate: 0, // Revenue to eliminate
+      elevate_to_teelixir: 0, // Service revenue to eliminate
+    }
+    for (const tx of eliminations || []) {
+      if (tx.source_entity === 'teelixir' && tx.direction === 'sale') {
+        eliminationTotals.teelixir_to_elevate += Number(tx.total) || 0
+      }
+      if (tx.source_entity === 'elevate' && tx.direction === 'sale') {
+        eliminationTotals.elevate_to_teelixir += Number(tx.total) || 0
+      }
+    }
+
+    // Consolidated Teelixir + Elevate (before eliminations)
     const consolidatedKeys = ['teelixir', 'elevate']
-    const consolidated = {
+    const consolidatedRaw = {
       revenue: 0,
       cogs: 0,
       gross_profit: 0,
@@ -47,18 +70,34 @@ export async function GET() {
     for (const key of consolidatedKeys) {
       const biz = latestByBusiness[key]
       if (biz) {
-        consolidated.revenue += Number(biz.revenue) || 0
-        consolidated.cogs += Number(biz.cogs) || 0
-        consolidated.gross_profit += Number(biz.gross_profit) || 0
-        consolidated.operating_expenses += Number(biz.operating_expenses) || 0
-        consolidated.net_profit += Number(biz.net_profit) || 0
+        consolidatedRaw.revenue += Number(biz.revenue) || 0
+        consolidatedRaw.cogs += Number(biz.cogs) || 0
+        consolidatedRaw.gross_profit += Number(biz.gross_profit) || 0
+        consolidatedRaw.operating_expenses += Number(biz.operating_expenses) || 0
+        consolidatedRaw.net_profit += Number(biz.net_profit) || 0
       }
+    }
+
+    // Apply eliminations (revenue and matching COGS cancel out)
+    const totalRevElim = eliminationTotals.teelixir_to_elevate + eliminationTotals.elevate_to_teelixir
+    const consolidated = {
+      revenue: consolidatedRaw.revenue - totalRevElim,
+      cogs: consolidatedRaw.cogs - totalRevElim, // Corresponding COGS eliminated
+      gross_profit: consolidatedRaw.gross_profit, // GP unchanged (rev - cogs both reduced)
+      operating_expenses: consolidatedRaw.operating_expenses,
+      net_profit: consolidatedRaw.net_profit,
     }
 
     return NextResponse.json({
       businesses: latestByBusiness,
       totals,
-      consolidated,
+      consolidatedRaw, // Before eliminations
+      consolidated,    // After eliminations
+      eliminations: {
+        teelixir_to_elevate: eliminationTotals.teelixir_to_elevate,
+        elevate_to_teelixir: eliminationTotals.elevate_to_teelixir,
+        total: totalRevElim,
+      },
       syncedAt: businesses[0]?.synced_at || null,
     })
   } catch (error: any) {

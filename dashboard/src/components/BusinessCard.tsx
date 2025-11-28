@@ -55,7 +55,7 @@ export function BusinessCard({ name, code, platform, color }: BusinessCardProps)
   })
 
   return (
-    <Link href={`/business/${code}`}>
+    <Link href={`/${code}`}>
       <div className="bg-gray-900 border border-gray-800 rounded-lg p-4 hover:border-gray-700 transition-colors">
         <div className="flex items-start justify-between">
           <div className={`w-3 h-3 rounded-full ${color}`} />
