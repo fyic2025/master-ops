@@ -4,23 +4,20 @@ import { signIn } from "next-auth/react"
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen relative overflow-hidden flex items-center justify-center"
-      style={{
-        background: 'linear-gradient(135deg, #0a1f0a 0%, #1a3a1a 25%, #0d2818 50%, #1a4a2a 75%, #0a1f0a 100%)',
-      }}
-    >
-      {/* Jungle vines/leaves decoration */}
-      <div className="absolute inset-0 opacity-20">
-        <div className="absolute top-0 left-0 text-6xl">🌿</div>
-        <div className="absolute top-10 right-10 text-5xl">🌴</div>
-        <div className="absolute bottom-20 left-10 text-7xl">🌿</div>
-        <div className="absolute top-1/4 right-1/4 text-4xl">🍃</div>
-        <div className="absolute bottom-10 right-20 text-6xl">🌴</div>
-        <div className="absolute top-1/3 left-1/4 text-5xl">🌿</div>
-        <div className="absolute bottom-1/3 right-1/3 text-4xl">🍃</div>
-        <div className="absolute top-20 left-1/3 text-3xl">🦜</div>
-        <div className="absolute bottom-40 left-1/2 text-4xl">🐒</div>
-      </div>
+    <div className="min-h-screen relative overflow-hidden flex items-center justify-center">
+      {/* Full-screen jungle background */}
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: 'url(https://images.unsplash.com/photo-1440342359743-84fcb8c21f21?w=1920&q=80)',
+        }}
+      />
+
+      {/* Dark overlay for readability */}
+      <div className="absolute inset-0 bg-black/50" />
+
+      {/* Gradient overlay for depth */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/70" />
 
       {/* Main content */}
       <div className="relative z-10 text-center px-6 max-w-2xl">
@@ -73,8 +70,8 @@ export default function LoginPage() {
         </p>
       </div>
 
-      {/* Animated fog/mist effect */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
+      {/* Bottom vignette */}
+      <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
     </div>
   )
 }
