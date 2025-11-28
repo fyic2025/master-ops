@@ -1,0 +1,16 @@
+{
+  "name": "gsc-sync",
+  "version": "1.0.0",
+  "description": "Google Search Console data sync to Supabase",
+  "main": "sync-gsc-data.js",
+  "scripts": {
+    "sync": "node sync-gsc-data.js",
+    "sites": "node sync-gsc-data.js sites",
+    "stats": "node sync-gsc-data.js stats"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "dotenv": "^16.3.1",
+    "googleapis": "^144.0.0"
+  }
+}
