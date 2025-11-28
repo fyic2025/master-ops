@@ -6,6 +6,7 @@ const ALLOWED_EMAILS = [
   "peter@teelixir.com",
   "jayson@teelixir.com",
   "jayson@fyic.com.au",
+  "ops@growthcohq.com",
 ]
 
 function isEmailAllowed(email: string | null | undefined): boolean {
