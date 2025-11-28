@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import { Sidebar } from '@/components/Sidebar'
 import { QueryProvider } from '@/components/QueryProvider'
+import { SessionProvider } from '@/components/SessionProvider'
 
 export const metadata: Metadata = {
   title: 'Master Ops Dashboard',
@@ -16,14 +16,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen bg-gray-950">
-        <QueryProvider>
-          <div className="flex h-screen">
-            <Sidebar />
-            <main className="flex-1 overflow-auto p-6">
-              {children}
-            </main>
-          </div>
-        </QueryProvider>
+        <SessionProvider>
+          <QueryProvider>
+            {children}
+          </QueryProvider>
+        </SessionProvider>
       </body>
     </html>
   )
