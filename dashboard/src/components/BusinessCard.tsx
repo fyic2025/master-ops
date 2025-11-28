@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useQuery } from '@tanstack/react-query'
 import { ExternalLink, Loader2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
-import type { BusinessCode } from '@/lib/supabase'
+import type { BusinessCode } from '@/lib/business-config'
 
 interface BusinessCardProps {
   name: string
