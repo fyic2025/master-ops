@@ -1,26 +1,40 @@
 # 🚨 REMOTE CLAUDE CODE - MUST READ FIRST
 
-> **Last Updated:** 2025-11-26
+> **Last Updated:** 2025-11-30
 > **Purpose:** Essential setup for remote Claude Code sessions
 
 ---
 
-## ✅ Credentials System - READY
+## ✅ Credentials System - UNIFIED
 
-All API credentials are stored securely in Supabase Vault. **No .env files needed.**
+All 57 credentials stored in **Supabase Vault** (AES-256 encrypted).
+Works identically local and remote - **no .env files needed.**
 
 ### Quick Commands
 
 ```bash
-# List all available credentials
-node infra/supabase/vault-helper.js list
+# List all credentials
+node creds.js
+
+# List for specific project
+node creds.js list boo
 
 # Get a specific credential
-node infra/supabase/vault-helper.js get boo bc_access_token
-node infra/supabase/vault-helper.js get elevate shopify_access_token
+node creds.js get boo bc_access_token
 
 # Store a new credential
-node infra/supabase/vault-helper.js store <project> <name> <value> "<description>"
+node creds.js store boo api_key "value" "Description"
+
+# Verify vault access
+node creds.js verify
+```
+
+### In Your Scripts
+
+```javascript
+const creds = require('./creds');
+await creds.load('boo');  // Loads BOO + global into process.env
+// Now use process.env.BOO_BC_ACCESS_TOKEN, etc.
 ```
 
 ### Available Projects
@@ -30,7 +44,7 @@ node infra/supabase/vault-helper.js store <project> <name> <value> "<description
 - `redhillfresh` - Red Hill Fresh (6 credentials)
 - `global` - Shared infrastructure (11 credentials)
 
-**Full documentation:** [infra/supabase/CREDENTIALS-VAULT-README.md](infra/supabase/CREDENTIALS-VAULT-README.md)
+**Full documentation:** [CREDS.md](CREDS.md)
 
 ---
 
@@ -110,10 +124,10 @@ Full Google Ads automation system for BOO (Teelixir/RHF later).
 ### Quick Check
 ```bash
 # Check Google Ads credentials status
-node shared/libs/load-vault-credentials.js google-ads boo
+node creds.js list boo | grep google
 
 # Load all credentials into environment
-node shared/libs/load-vault-credentials.js boo
+node creds.js load boo
 ```
 
 ### Slash Commands (once dev token approved)
@@ -133,12 +147,12 @@ node shared/libs/load-vault-credentials.js boo
 
 ```
 master-ops/
-├── infra/supabase/          # Credential vault system
-│   ├── vault-helper.js      # CLI tool for credentials
-│   └── CREDENTIALS-VAULT-README.md
+├── creds.js                 # Unified credential loader
+├── CREDS.md                 # Credential documentation
 ├── buy-organics-online/     # BOO project files
 ├── elevate-wholesale/       # Elevate project files
-└── docs/plans/              # Project plans
+├── shared/libs/integrations/# API connectors
+└── infra/supabase/          # Database schemas
 ```
 
 ---
@@ -146,7 +160,7 @@ master-ops/
 ## 🚀 Starting a Task
 
 1. Pull latest: `git pull`
-2. Check credentials: `node infra/supabase/vault-helper.js list`
+2. Verify credentials: `node creds.js verify`
 3. Review pending branches: `git branch -r | grep "origin/claude/"`
 4. Start work!
 
@@ -154,6 +168,6 @@ master-ops/
 
 ## Need Help?
 
-- Credential issues: Check [CREDENTIALS-VAULT-README.md](infra/supabase/CREDENTIALS-VAULT-README.md)
+- Credential issues: See [CREDS.md](CREDS.md)
 - Project structure: Run `tree -L 2`
 - Recent commits: `git log --oneline -20`
