@@ -10,7 +10,10 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const WEBHOOK_SECRET = Deno.env.get('BOO_CHECKOUT_WEBHOOK_SECRET') || ''
 
-// Gmail OAuth2 configuration (preferred - uses existing G Suite)
+// n8n Webhook for email (preferred - uses existing Gmail SMTP setup)
+const N8N_EMAIL_WEBHOOK = Deno.env.get('N8N_EMAIL_WEBHOOK_URL') || Deno.env.get('N8N_CHECKOUT_ERROR_WEBHOOK') || ''
+
+// Gmail OAuth2 configuration (fallback)
 const GMAIL_CLIENT_ID = Deno.env.get('BOO_GMAIL_CLIENT_ID') || Deno.env.get('GMAIL_CLIENT_ID') || ''
 const GMAIL_CLIENT_SECRET = Deno.env.get('BOO_GMAIL_CLIENT_SECRET') || Deno.env.get('GMAIL_CLIENT_SECRET') || ''
 const GMAIL_REFRESH_TOKEN = Deno.env.get('BOO_GMAIL_REFRESH_TOKEN') || Deno.env.get('GMAIL_REFRESH_TOKEN') || ''
@@ -356,7 +359,7 @@ function encodeMessage(message: string): string {
     .replace(/=+$/, '')
 }
 
-// Send email via Gmail API or fallback services
+// Send email via n8n, Gmail API, or fallback services
 async function sendEmailNotification(
   payload: CheckoutErrorPayload,
   correlationId: string
@@ -364,7 +367,40 @@ async function sendEmailNotification(
   const subject = `[BOO Checkout Error] ${getErrorTypeLabel(payload.error_type)} - ${payload.customer_email || 'Unknown Customer'}`
   const html = buildEmailHtml(payload, correlationId)
 
-  // Option 1: Use Gmail OAuth2 (preferred - uses existing G Suite)
+  // Option 1: Use n8n webhook (preferred - uses existing Gmail SMTP via n8n)
+  if (N8N_EMAIL_WEBHOOK) {
+    try {
+      const response = await fetch(N8N_EMAIL_WEBHOOK, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: EMAIL_TO,
+          cc: EMAIL_CC,
+          subject,
+          html,
+          // Also pass raw data for n8n to use if needed
+          error_type: payload.error_type,
+          error_message: payload.error_message,
+          customer_email: payload.customer_email,
+          customer_name: payload.customer_name,
+          cart_value: payload.cart_value,
+          correlation_id: correlationId
+        })
+      })
+
+      if (response.ok) {
+        console.log(`[${correlationId}] Email sent successfully via n8n webhook`)
+        return true
+      } else {
+        const error = await response.text()
+        console.error(`[${correlationId}] n8n webhook failed: ${error}`)
+      }
+    } catch (error) {
+      console.error(`[${correlationId}] n8n webhook error:`, error)
+    }
+  }
+
+  // Option 2: Use Gmail OAuth2 (fallback)
   if (GMAIL_CLIENT_ID && GMAIL_CLIENT_SECRET && GMAIL_REFRESH_TOKEN && GMAIL_USER_EMAIL) {
     try {
       const accessToken = await getGmailAccessToken()
