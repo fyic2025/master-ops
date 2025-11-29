@@ -118,18 +118,42 @@ psql $DATABASE_URL -f infra/supabase/schema-bigcommerce-checkout.sql
 
 ### Step 4: Configure Email Service
 
-**Option A: Gmail / G Suite (Recommended - Uses Existing Setup)**
+**Option A: n8n Webhook (Recommended - Uses Existing Gmail SMTP)**
 
-Since you already have G Suite connected, this is the easiest option.
+This uses your existing n8n instance at `automation.growthcohq.com` to send emails via Gmail SMTP.
 
-1. **Use existing OAuth2 credentials** or create new ones:
+1. **Import the workflow into n8n:**
+   - Go to https://automation.growthcohq.com
+   - Click "Workflows" → "Import from File"
+   - Select: `/home/user/master-ops/infra/n8n-workflows/boo-checkout-error-email.json`
+
+2. **Configure Gmail credentials in n8n:**
+   - Open the imported workflow
+   - Click on "Send Email via Gmail" node
+   - Select or create Gmail OAuth2 credentials
+   - Use the existing G Suite account
+
+3. **Activate the workflow:**
+   - Toggle the workflow to "Active"
+   - Note the webhook URL: `https://automation.growthcohq.com/webhook/boo-checkout-error`
+
+4. **Add webhook URL to Supabase Edge Function:**
+   In Supabase Dashboard → Settings → Edge Functions, add:
+   ```
+   N8N_EMAIL_WEBHOOK_URL=https://automation.growthcohq.com/webhook/boo-checkout-error
+   ```
+
+**Option B: Gmail OAuth2 (Fallback)**
+
+If n8n is not available, the Edge Function can send directly via Gmail API.
+
+1. **Get OAuth2 credentials:**
    - Go to Google Cloud Console: https://console.cloud.google.com
-   - Select your project (or create one)
    - Enable Gmail API: APIs & Services → Library → Gmail API → Enable
    - Create OAuth2 credentials: APIs & Services → Credentials → Create Credentials → OAuth 2.0 Client ID
 
-2. **Get a refresh token** (if not already available):
-   - Use the OAuth2 Playground: https://developers.google.com/oauthplayground
+2. **Get a refresh token:**
+   - Use OAuth2 Playground: https://developers.google.com/oauthplayground
    - Authorize `https://www.googleapis.com/auth/gmail.send` scope
    - Exchange authorization code for refresh token
 
@@ -142,15 +166,7 @@ Since you already have G Suite connected, this is the easiest option.
    BOO_GMAIL_FROM_NAME=Buy Organics Online Alerts
    ```
 
-   Or use shared credentials (will fall back to these):
-   ```
-   GMAIL_CLIENT_ID=...
-   GMAIL_CLIENT_SECRET=...
-   GMAIL_REFRESH_TOKEN=...
-   GMAIL_USER_EMAIL=...
-   ```
-
-**Option B: Resend (Fallback)**
+**Option C: Resend (Fallback)**
 
 1. Sign up at https://resend.com
 2. Verify your domain (buyorganicsonline.com.au)
@@ -160,7 +176,7 @@ Since you already have G Suite connected, this is the easiest option.
    RESEND_API_KEY=re_xxxxxxxxxxxx
    ```
 
-**Option C: SendGrid (Fallback)**
+**Option D: SendGrid (Fallback)**
 
 1. Sign up at https://sendgrid.com
 2. Verify sender identity
@@ -170,7 +186,7 @@ Since you already have G Suite connected, this is the easiest option.
    SENDGRID_API_KEY=SG.xxxxxxxxxxxx
    ```
 
-**Priority Order:** Gmail → Resend → SendGrid (first configured option is used)
+**Priority Order:** n8n Webhook → Gmail OAuth2 → Resend → SendGrid (first configured option is used)
 
 ---
 
@@ -287,6 +303,7 @@ WHERE id = 'error-uuid-here';
 | `supabase/functions/checkout-error-collector/index.ts` | Edge function that receives errors, stores in DB, sends emails |
 | `storefront/checkout-error-tracker.js` | JavaScript to add to BigCommerce theme |
 | `../../infra/supabase/schema-bigcommerce-checkout.sql` | Database schema |
+| `../../infra/n8n-workflows/boo-checkout-error-email.json` | n8n workflow for sending emails via Gmail |
 
 ---
 
