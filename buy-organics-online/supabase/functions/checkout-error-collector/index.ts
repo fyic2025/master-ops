@@ -10,12 +10,12 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const WEBHOOK_SECRET = Deno.env.get('BOO_CHECKOUT_WEBHOOK_SECRET') || ''
 
-// Email configuration
-const SMTP_HOST = Deno.env.get('SMTP_HOST') || 'smtp.gmail.com'
-const SMTP_PORT = parseInt(Deno.env.get('SMTP_PORT') || '587')
-const SMTP_USER = Deno.env.get('SMTP_USER') || ''
-const SMTP_PASS = Deno.env.get('SMTP_PASS') || ''
-const EMAIL_FROM = Deno.env.get('EMAIL_FROM') || 'alerts@buyorganicsonline.com.au'
+// Gmail OAuth2 configuration (preferred - uses existing G Suite)
+const GMAIL_CLIENT_ID = Deno.env.get('BOO_GMAIL_CLIENT_ID') || Deno.env.get('GMAIL_CLIENT_ID') || ''
+const GMAIL_CLIENT_SECRET = Deno.env.get('BOO_GMAIL_CLIENT_SECRET') || Deno.env.get('GMAIL_CLIENT_SECRET') || ''
+const GMAIL_REFRESH_TOKEN = Deno.env.get('BOO_GMAIL_REFRESH_TOKEN') || Deno.env.get('GMAIL_REFRESH_TOKEN') || ''
+const GMAIL_USER_EMAIL = Deno.env.get('BOO_GMAIL_USER_EMAIL') || Deno.env.get('GMAIL_USER_EMAIL') || ''
+const GMAIL_FROM_NAME = Deno.env.get('BOO_GMAIL_FROM_NAME') || 'Buy Organics Online Alerts'
 
 // Email recipients
 const EMAIL_TO = 'sales@buyorganicsonline.com.au'
@@ -285,8 +285,78 @@ function buildEmailHtml(payload: CheckoutErrorPayload, correlationId: string): s
   `
 }
 
-// Send email via SMTP (using Deno's fetch to an email service, or raw SMTP)
-// For simplicity, we'll use a webhook to an email service or Supabase's email function
+// Gmail OAuth2: Refresh access token
+async function getGmailAccessToken(): Promise<string | null> {
+  if (!GMAIL_CLIENT_ID || !GMAIL_CLIENT_SECRET || !GMAIL_REFRESH_TOKEN) {
+    return null
+  }
+
+  try {
+    const response = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_id: GMAIL_CLIENT_ID,
+        client_secret: GMAIL_CLIENT_SECRET,
+        refresh_token: GMAIL_REFRESH_TOKEN,
+        grant_type: 'refresh_token',
+      }),
+    })
+
+    if (!response.ok) {
+      const error = await response.text()
+      console.error('Failed to refresh Gmail access token:', error)
+      return null
+    }
+
+    const data = await response.json()
+    return data.access_token
+  } catch (error) {
+    console.error('Gmail token refresh error:', error)
+    return null
+  }
+}
+
+// Gmail OAuth2: Build MIME message
+function buildMimeMessage(to: string, cc: string, subject: string, html: string): string {
+  const boundary = `boundary_${Date.now()}`
+  const fromHeader = GMAIL_FROM_NAME ? `${GMAIL_FROM_NAME} <${GMAIL_USER_EMAIL}>` : GMAIL_USER_EMAIL
+
+  const headers = [
+    `From: ${fromHeader}`,
+    `To: ${to}`,
+    `Cc: ${cc}`,
+    `Subject: ${subject}`,
+    'MIME-Version: 1.0',
+    'Content-Type: text/html; charset="UTF-8"',
+  ]
+
+  return [...headers, '', html].join('\r\n')
+}
+
+// Gmail OAuth2: Encode message for Gmail API (base64url)
+function encodeMessage(message: string): string {
+  // Deno/browser compatible base64url encoding
+  const encoder = new TextEncoder()
+  const data = encoder.encode(message)
+  let base64 = ''
+
+  // Convert to base64
+  const bytes = new Uint8Array(data)
+  const len = bytes.length
+  for (let i = 0; i < len; i++) {
+    base64 += String.fromCharCode(bytes[i])
+  }
+  base64 = btoa(base64)
+
+  // Convert to base64url
+  return base64
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '')
+}
+
+// Send email via Gmail API or fallback services
 async function sendEmailNotification(
   payload: CheckoutErrorPayload,
   correlationId: string
@@ -294,8 +364,43 @@ async function sendEmailNotification(
   const subject = `[BOO Checkout Error] ${getErrorTypeLabel(payload.error_type)} - ${payload.customer_email || 'Unknown Customer'}`
   const html = buildEmailHtml(payload, correlationId)
 
-  // Option 1: Use Resend API (recommended)
+  // Option 1: Use Gmail OAuth2 (preferred - uses existing G Suite)
+  if (GMAIL_CLIENT_ID && GMAIL_CLIENT_SECRET && GMAIL_REFRESH_TOKEN && GMAIL_USER_EMAIL) {
+    try {
+      const accessToken = await getGmailAccessToken()
+
+      if (accessToken) {
+        const mimeMessage = buildMimeMessage(EMAIL_TO, EMAIL_CC, subject, html)
+        const encodedMessage = encodeMessage(mimeMessage)
+
+        const response = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            raw: encodedMessage,
+          }),
+        })
+
+        if (response.ok) {
+          const result = await response.json()
+          console.log(`[${correlationId}] Email sent successfully via Gmail API. Message ID: ${result.id}`)
+          return true
+        } else {
+          const error = await response.text()
+          console.error(`[${correlationId}] Gmail API error: ${error}`)
+        }
+      }
+    } catch (error) {
+      console.error(`[${correlationId}] Gmail email error:`, error)
+    }
+  }
+
+  // Option 2: Use Resend API (fallback)
   const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
+  const EMAIL_FROM = GMAIL_USER_EMAIL || 'alerts@buyorganicsonline.com.au'
 
   if (RESEND_API_KEY) {
     try {
@@ -326,7 +431,7 @@ async function sendEmailNotification(
     }
   }
 
-  // Option 2: Use SendGrid API
+  // Option 3: Use SendGrid API (fallback)
   const SENDGRID_API_KEY = Deno.env.get('SENDGRID_API_KEY')
 
   if (SENDGRID_API_KEY) {

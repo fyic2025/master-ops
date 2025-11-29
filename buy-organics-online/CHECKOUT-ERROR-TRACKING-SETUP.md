@@ -118,7 +118,39 @@ psql $DATABASE_URL -f infra/supabase/schema-bigcommerce-checkout.sql
 
 ### Step 4: Configure Email Service
 
-**Option A: Resend (Recommended - Free tier available)**
+**Option A: Gmail / G Suite (Recommended - Uses Existing Setup)**
+
+Since you already have G Suite connected, this is the easiest option.
+
+1. **Use existing OAuth2 credentials** or create new ones:
+   - Go to Google Cloud Console: https://console.cloud.google.com
+   - Select your project (or create one)
+   - Enable Gmail API: APIs & Services → Library → Gmail API → Enable
+   - Create OAuth2 credentials: APIs & Services → Credentials → Create Credentials → OAuth 2.0 Client ID
+
+2. **Get a refresh token** (if not already available):
+   - Use the OAuth2 Playground: https://developers.google.com/oauthplayground
+   - Authorize `https://www.googleapis.com/auth/gmail.send` scope
+   - Exchange authorization code for refresh token
+
+3. **Add to Supabase Edge Function secrets:**
+   ```
+   BOO_GMAIL_CLIENT_ID=your-client-id.apps.googleusercontent.com
+   BOO_GMAIL_CLIENT_SECRET=your-client-secret
+   BOO_GMAIL_REFRESH_TOKEN=your-refresh-token
+   BOO_GMAIL_USER_EMAIL=alerts@buyorganicsonline.com.au
+   BOO_GMAIL_FROM_NAME=Buy Organics Online Alerts
+   ```
+
+   Or use shared credentials (will fall back to these):
+   ```
+   GMAIL_CLIENT_ID=...
+   GMAIL_CLIENT_SECRET=...
+   GMAIL_REFRESH_TOKEN=...
+   GMAIL_USER_EMAIL=...
+   ```
+
+**Option B: Resend (Fallback)**
 
 1. Sign up at https://resend.com
 2. Verify your domain (buyorganicsonline.com.au)
@@ -128,7 +160,7 @@ psql $DATABASE_URL -f infra/supabase/schema-bigcommerce-checkout.sql
    RESEND_API_KEY=re_xxxxxxxxxxxx
    ```
 
-**Option B: SendGrid**
+**Option C: SendGrid (Fallback)**
 
 1. Sign up at https://sendgrid.com
 2. Verify sender identity
@@ -137,6 +169,8 @@ psql $DATABASE_URL -f infra/supabase/schema-bigcommerce-checkout.sql
    ```
    SENDGRID_API_KEY=SG.xxxxxxxxxxxx
    ```
+
+**Priority Order:** Gmail → Resend → SendGrid (first configured option is used)
 
 ---
 
