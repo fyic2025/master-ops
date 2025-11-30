@@ -22,6 +22,29 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
+    // CRITICAL: This controls which routes require authentication
+    // API routes must be explicitly allowed or they get 307 redirects
+    authorized({ request, auth }) {
+      const { pathname } = request.nextUrl
+
+      // Always allow API routes - they handle their own auth if needed
+      if (pathname.startsWith('/api/')) {
+        return true
+      }
+
+      // Always allow auth endpoints
+      if (pathname.startsWith('/api/auth')) {
+        return true
+      }
+
+      // Allow login page
+      if (pathname === '/login') {
+        return true
+      }
+
+      // All other routes require authentication
+      return !!auth
+    },
     async signIn({ user }) {
       // Only allow specific emails from permissions list
       return isEmailAllowed(user.email)
