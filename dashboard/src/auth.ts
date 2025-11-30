@@ -22,19 +22,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    // CRITICAL: This controls route protection when auth is used as middleware
-    authorized: async ({ auth, request: { nextUrl } }) => {
-      // ALWAYS allow API routes - they handle their own auth if needed
-      if (nextUrl.pathname.startsWith("/api")) {
-        return true
-      }
-      // Allow login page
-      if (nextUrl.pathname === "/login") {
-        return true
-      }
-      // Require auth for all other routes
-      return !!auth
-    },
     async signIn({ user }) {
       // Only allow specific emails from permissions list
       return isEmailAllowed(user.email)
