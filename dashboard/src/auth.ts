@@ -22,6 +22,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
+    // Allow all requests through middleware - we handle auth redirects manually
+    authorized: () => true,
     async signIn({ user }) {
       // Only allow specific emails/domains
       return isEmailAllowed(user.email)

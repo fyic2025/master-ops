@@ -2,17 +2,17 @@ import { auth } from "@/auth"
 import { NextResponse } from "next/server"
 
 export default auth((req) => {
+  const pathname = req.nextUrl.pathname
   const isLoggedIn = !!req.auth
-  const isLoginPage = req.nextUrl.pathname === "/login"
-  const isAuthRoute = req.nextUrl.pathname.startsWith("/api/auth")
-  const isApiRoute = req.nextUrl.pathname.startsWith("/api/")
+  const isLoginPage = pathname === "/login"
 
-  // Allow auth routes and API routes (API routes handle their own auth if needed)
-  if (isAuthRoute || isApiRoute) {
+  // Allow all API routes EXCEPT auth routes to pass through without auth
+  // Auth routes need session handling
+  if (pathname.startsWith("/api/") && !pathname.startsWith("/api/auth")) {
     return NextResponse.next()
   }
 
-  // Redirect to login if not authenticated
+  // Redirect to login if not authenticated (for non-API routes)
   if (!isLoggedIn && !isLoginPage) {
     return NextResponse.redirect(new URL("/login", req.url))
   }
@@ -26,15 +26,8 @@ export default auth((req) => {
 })
 
 export const config = {
-  // Only run middleware on specific paths:
-  // - Dashboard pages (excluding api routes)
-  // - Auth API routes only
   matcher: [
-    // Dashboard pages
-    "/",
-    "/login",
-    "/:business/:path*",
-    // Auth API only
-    "/api/auth/:path*",
+    // Match all paths except static files
+    "/((?!_next/static|_next/image|favicon.ico).*)",
   ],
 }
