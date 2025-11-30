@@ -1,0 +1,35 @@
+name: brand-connections
+region: syd
+domains:
+  - domain: brandconnections.com.au
+    type: PRIMARY
+  - domain: www.brandconnections.com.au
+    type: ALIAS
+services:
+  - name: web
+    github:
+      repo: fyic2025/master-ops
+      branch: main
+      deploy_on_push: true
+    source_dir: brand-connections
+    build_command: npm run build
+    run_command: npm start
+    environment_slug: node-js
+    instance_count: 1
+    instance_size_slug: apps-s-1vcpu-0.5gb
+    http_port: 3000
+    envs:
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        scope: RUN_AND_BUILD_TIME
+        value: "https://qcvfxxsnqvdfmpbcgdni.supabase.co"
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        scope: RUN_AND_BUILD_TIME
+        value: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjdmZ4eHNucXZkZm1wYmNnZG5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg1NjcyMjcsImV4cCI6MjA2NDE0MzIyN30.vnKdEOIq_KE93EktcrlPw7zUqEVUU4aVCYnRE1sBA0U"
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        scope: RUN_TIME
+        type: SECRET
+        value: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjdmZ4eHNucXZkZm1wYmNnZG5pIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0ODU2NzIyNywiZXhwIjoyMDY0MTQzMjI3fQ.JLTj1pOvZLoWUKfCV5NtctNI-lkEBhCzF7C9Axm6nf8"
+      - key: HUBSPOT_ACCESS_TOKEN
+        scope: RUN_TIME
+        type: SECRET
+        value: "${HUBSPOT_ACCESS_TOKEN}"

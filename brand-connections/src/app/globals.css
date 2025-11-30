@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+:root {
+  /* Brand Colors - Modern SaaS Aesthetic */
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --primary-light: #3b82f6;
+  --secondary: #0f172a;
+  --accent: #10b981;
+  --accent-dark: #059669;
+
+  /* Neutrals */
+  --background: #ffffff;
+  --foreground: #0f172a;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --card: #f8fafc;
+
+  /* Semantic */
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+}
+
+@theme inline {
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+  --color-primary-light: var(--primary-light);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-accent-dark: var(--accent-dark);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-card: var(--card);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --font-sans: var(--font-inter);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Focus styles for accessibility */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Selection styles */
+::selection {
+  background: var(--primary-light);
+  color: white;
+}
