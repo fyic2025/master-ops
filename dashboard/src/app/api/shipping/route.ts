@@ -11,6 +11,7 @@ function getSupabase() {
   )
 }
 
+// Map status filter to database status values
 const STATUS_MAP: Record<string, string[]> = {
   new: ['pending', 'ready'],
   printed: ['printed'],
