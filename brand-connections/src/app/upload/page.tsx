@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -34,7 +34,7 @@ interface ParsedProduct {
   notes: string;
 }
 
-export default function UploadPage() {
+function UploadContent() {
   const searchParams = useSearchParams();
   const applicationId = searchParams.get('id') || '';
 
@@ -436,5 +436,17 @@ export default function UploadPage() {
       </main>
       <Footer />
     </>
+  );
+}
+
+export default function UploadPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+      </div>
+    }>
+      <UploadContent />
+    </Suspense>
   );
 }
