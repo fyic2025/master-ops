@@ -2,7 +2,7 @@ import { auth } from "@/auth"
 import { NextResponse } from "next/server"
 
 export default auth((req) => {
-  const isLoggedIn = !!req.auth
+  const isLoggedIn = !!req.auth?.user
   const isLoginPage = req.nextUrl.pathname === "/login"
   const isAuthRoute = req.nextUrl.pathname.startsWith("/api/auth")
   const isApiRoute = req.nextUrl.pathname.startsWith("/api/")

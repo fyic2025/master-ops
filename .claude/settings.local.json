@@ -19,7 +19,9 @@
       "Bash(npm run build:*)",
       "Bash(gh run list:*)",
       "Bash(doctl apps:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(nslookup ops.growthcohq.com)",
+      "Bash(nslookup:*)"
     ],
     "deny": [],
     "ask": []
