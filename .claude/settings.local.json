@@ -41,7 +41,10 @@
       "Bash(curl -s \"https://usibnysqelovfuctmkqw.supabase.co/rest/v1/\" -H \"apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzaWJueXNxZWxvdmZ1Y3Rta3F3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDQ4ODA4OCwiZXhwIjoyMDY2MDY0MDg4fQ.B9uihsaUvwkJWFAuKAtu7uij1KiXVoiHPHa9mm-Tz1s\")",
       "Bash(node check-existing-schema.js:*)",
       "Bash(FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch:*)",
-      "Bash(git for-each-ref:*)"
+      "Bash(git for-each-ref:*)",
+      "Bash(for f in route.ts sync/route.ts manifest/route.ts)",
+      "Bash(do sed -i '2a\\\\export const dynamic = ''''force-dynamic''''' \"$f\")",
+      "Bash(done)"
     ],
     "deny": [],
     "ask": []
