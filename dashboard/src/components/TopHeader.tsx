@@ -2,22 +2,38 @@
 
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import { BUSINESSES, BUSINESS_ORDER, type BusinessCode } from '@/lib/business-config'
+import { getAllowedBusinesses, isAdmin, getDefaultRedirect } from '@/lib/user-permissions'
 
 export function TopHeader() {
   const params = useParams()
+  const { data: session } = useSession()
   const currentBusiness = (params.business as BusinessCode) || 'home'
+  const userEmail = session?.user?.email
+
+  // Filter businesses based on user permissions
+  const allowedBusinesses = getAllowedBusinesses(userEmail)
+  const hasFullAccess = isAdmin(userEmail)
+
+  // Get the default landing page for restricted users
+  const defaultRedirect = getDefaultRedirect(userEmail)
+
+  // Filter business tabs based on permissions
+  const visibleBusinesses = hasFullAccess
+    ? BUSINESS_ORDER
+    : BUSINESS_ORDER.filter(code => allowedBusinesses.includes(code))
 
   return (
     <header className="sticky top-0 z-50 h-14 bg-gray-900 border-b border-gray-800 flex items-center px-4">
       {/* Logo */}
-      <Link href="/home" className="flex items-center gap-2 mr-6">
+      <Link href={hasFullAccess ? "/home" : defaultRedirect} className="flex items-center gap-2 mr-6">
         <span className="text-xl font-bold text-white">Master Ops</span>
       </Link>
 
       {/* Business Tabs */}
       <nav className="flex items-center gap-1">
-        {BUSINESS_ORDER.map((code) => {
+        {visibleBusinesses.map((code) => {
           const business = BUSINESSES[code]
           const isActive = currentBusiness === code
 

@@ -1,44 +1,30 @@
+import { auth } from "@/auth"
 import { NextResponse } from "next/server"
-import type { NextRequest } from "next/server"
 
-// Custom middleware - NO NextAuth imports to avoid any side effects
-export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
+export default auth((req) => {
+  const isLoggedIn = !!req.auth
+  const isLoginPage = req.nextUrl.pathname === "/login"
+  const isAuthRoute = req.nextUrl.pathname.startsWith("/api/auth")
+  const isApiRoute = req.nextUrl.pathname.startsWith("/api/")
 
-  // DEBUG: Add header to track middleware execution
-  const response = NextResponse.next()
-  response.headers.set("X-Middleware-Matched", `true:${pathname}`)
-
-  // === PAGE ROUTES ONLY - Check for session cookie ===
-  const hasSession = request.cookies.has("authjs.session-token")
-    || request.cookies.has("__Secure-authjs.session-token")
-
-  if (!hasSession) {
-    const redirectResponse = NextResponse.redirect(new URL("/login", request.url))
-    redirectResponse.headers.set("X-Middleware-Redirect", `true:${pathname}`)
-    return redirectResponse
+  // Allow auth routes and API routes (API routes handle their own auth if needed)
+  if (isAuthRoute || isApiRoute) {
+    return NextResponse.next()
   }
 
-  return response
-}
+  // Redirect to login if not authenticated
+  if (!isLoggedIn && !isLoginPage) {
+    return NextResponse.redirect(new URL("/login", req.url))
+  }
 
-// Use explicit paths only - NOT regex patterns
-// API routes excluded by simply not listing them
+  // Redirect to home if already logged in and on login page
+  if (isLoggedIn && isLoginPage) {
+    return NextResponse.redirect(new URL("/", req.url))
+  }
+
+  return NextResponse.next()
+})
+
 export const config = {
-  matcher: [
-    // ONLY match root and business dashboards - nothing else
-    "/",
-    "/home",
-    "/home/:path*",
-    "/boo",
-    "/boo/:path*",
-    "/teelixir",
-    "/teelixir/:path*",
-    "/elevate",
-    "/elevate/:path*",
-    "/rhf",
-    "/rhf/:path*",
-    "/brandco",
-    "/brandco/:path*",
-  ],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 }

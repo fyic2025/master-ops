@@ -17,6 +17,7 @@ import {
   Tag,
   AlertCircle,
   BarChart3,
+  Send,
   type LucideIcon
 } from 'lucide-react'
 
@@ -47,6 +48,7 @@ export const BUSINESSES: Record<BusinessCode, Business> = {
     bgColor: 'bg-gray-500',
     navigation: [
       { name: 'Dashboard', href: '', icon: Home },
+      { name: 'Shipping', href: '/shipping', icon: Send },
       { name: 'PPC', href: '/ppc', icon: TrendingUp },
       { name: 'SEO', href: '/seo', icon: Search },
       { name: 'Sync', href: '/sync', icon: RefreshCw },
@@ -64,6 +66,7 @@ export const BUSINESSES: Record<BusinessCode, Business> = {
     bgColor: 'bg-brand-boo',
     navigation: [
       { name: 'Dashboard', href: '', icon: Home },
+      { name: 'Shipping', href: '/shipping', icon: Send },
       { name: 'SEO', href: '/seo', icon: Search },
       { name: 'Merchant Center', href: '/merchant', icon: ShoppingCart },
       { name: 'Stock Sync', href: '/stock', icon: Package },
@@ -95,6 +98,7 @@ export const BUSINESSES: Record<BusinessCode, Business> = {
     bgColor: 'bg-brand-teelixir',
     navigation: [
       { name: 'Dashboard', href: '', icon: Home },
+      { name: 'Shipping', href: '/shipping', icon: Send },
       { name: 'Distributors', href: '/distributors', icon: Truck },
       { name: 'Dist. Trends', href: '/distributors/trends', icon: TrendingUp },
       { name: 'Re-engagement', href: '/reengagement', icon: Users },
@@ -112,6 +116,7 @@ export const BUSINESSES: Record<BusinessCode, Business> = {
     bgColor: 'bg-brand-elevate',
     navigation: [
       { name: 'Dashboard', href: '', icon: Home },
+      { name: 'Shipping', href: '/shipping', icon: Send },
       { name: 'Prospecting', href: '/prospecting', icon: Target },
       { name: 'Customers', href: '/customers', icon: Users },
       { name: 'Trials', href: '/trials', icon: Clock },
