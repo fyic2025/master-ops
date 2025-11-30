@@ -1,8 +1,9 @@
 // Use NextAuth's auth middleware with the authorized callback from auth.ts
-// The authorized callback allows API routes through and protects pages
+// The authorized callback protects pages but allows API routes through
 export { auth as middleware } from "@/auth"
 
 export const config = {
-  // Match all routes except static files and _next
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  // IMPORTANT: Exclude /api routes from middleware entirely
+  // The official NextAuth v5 docs recommend this pattern
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 }
