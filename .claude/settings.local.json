@@ -9,7 +9,17 @@
       "Bash(taskkill:*)",
       "Bash(cmd /c \"taskkill /F /IM node.exe\")",
       "Bash(dir:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nAdd shipping platform, Unleashed-Shopify sync, and middleware cleanup\n\n- Clean middleware: remove debug headers, use standard NextAuth v5 pattern\n- Add shipping UI and API routes for carrier integration\n- Add AusPost and Sendle carrier client libraries\n- Add Unleashed-Shopify inventory/order sync module\n- Update sidebar and header components\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git push:*)",
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(git ls-files:*)",
+      "Bash(git branch:*)",
+      "Bash(npm run build:*)",
+      "Bash(gh run list:*)",
+      "Bash(doctl apps:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []
