@@ -24,16 +24,16 @@ export async function POST(request: NextRequest) {
     const application: Partial<BrandApplication> = {
       contact_name: contactName,
       email: email.toLowerCase().trim(),
-      phone: phone || null,
+      phone: phone || undefined,
       brand_name: brandName,
-      website: website || null,
+      website: website || undefined,
       categories: categories || [],
-      current_retailers: currentRetailers ? parseInt(currentRetailers) : null,
+      current_retailers: currentRetailers ? parseInt(currentRetailers) : undefined,
       status: 'pending',
       source: 'website',
-      utm_source: body.utmSource || null,
-      utm_medium: body.utmMedium || null,
-      utm_campaign: body.utmCampaign || null,
+      utm_source: body.utmSource || undefined,
+      utm_medium: body.utmMedium || undefined,
+      utm_campaign: body.utmCampaign || undefined,
     };
 
     const { data, error } = await supabase
