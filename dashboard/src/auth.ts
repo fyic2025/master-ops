@@ -1,17 +1,17 @@
 import NextAuth from "next-auth"
 import Google from "next-auth/providers/google"
+import { isEmailAllowed, getUserPermissions, type UserRole } from "@/lib/user-permissions"
 
-// Allowed email addresses - strict whitelist
-const ALLOWED_EMAILS = [
-  "peter@teelixir.com",
-  "jayson@teelixir.com",
-  "jayson@fyic.com.au",
-  "ops@growthcohq.com",
-]
-
-function isEmailAllowed(email: string | null | undefined): boolean {
-  if (!email) return false
-  return ALLOWED_EMAILS.includes(email.toLowerCase())
+// Extend session types to include role
+declare module "next-auth" {
+  interface Session {
+    user: {
+      name?: string | null
+      email?: string | null
+      image?: string | null
+      role?: UserRole
+    }
+  }
 }
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
@@ -22,16 +22,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    // Allow all requests through middleware - we handle auth redirects manually
-    authorized: async ({ request, auth }) => {
-      // Always return true - let our middleware handle auth logic
-      return true
-    },
     async signIn({ user }) {
-      // Only allow specific emails/domains
+      // Only allow specific emails from permissions list
       return isEmailAllowed(user.email)
     },
     async session({ session }) {
+      // Attach user role to session for client-side access control
+      if (session.user?.email) {
+        const permissions = getUserPermissions(session.user.email)
+        if (permissions) {
+          session.user.role = permissions.role
+        }
+      }
       return session
     },
   },
