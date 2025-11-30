@@ -1,0 +1,27 @@
+{
+  "name": "unleashed-shopify-sync",
+  "version": "1.0.0",
+  "description": "Two-way sync between Unleashed inventory and Shopify for Teelixir and Elevate Wholesale",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "inventory-sync": "npx tsx scripts/run-inventory-sync.ts",
+    "order-sync": "npx tsx scripts/run-order-sync.ts",
+    "full-sync": "npx tsx scripts/run-full-sync.ts",
+    "test-connection": "npx tsx scripts/test-connection.ts"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.86.0",
+    "dotenv": "^16.3.1",
+    "node-cron": "^3.0.3",
+    "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/node-cron": "^3.0.11",
+    "@types/pg": "^8.15.6",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0"
+  }
+}

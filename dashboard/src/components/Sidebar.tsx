@@ -5,6 +5,7 @@ import { useParams, usePathname } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
 import { LogOut } from 'lucide-react'
 import { BUSINESSES, type BusinessCode } from '@/lib/business-config'
+import { getAllowedPages, isAdmin } from '@/lib/user-permissions'
 
 export function Sidebar() {
   const params = useParams()
@@ -13,7 +14,15 @@ export function Sidebar() {
 
   const businessCode = (params.business as BusinessCode) || 'home'
   const business = BUSINESSES[businessCode] || BUSINESSES.home
-  const navigation = business.navigation
+  const userEmail = session?.user?.email
+
+  // Filter navigation based on user permissions
+  const allowedPages = getAllowedPages(userEmail, businessCode)
+  const hasFullAccess = allowedPages.includes('all') || isAdmin(userEmail)
+
+  const navigation = hasFullAccess
+    ? business.navigation
+    : business.navigation.filter(item => allowedPages.includes(item.href))
 
   return (
     <aside className="w-64 bg-gray-900 border-r border-gray-800 flex flex-col">
