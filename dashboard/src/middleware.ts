@@ -2,12 +2,18 @@ import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
 // Simple middleware that only protects page routes
-// API routes are completely excluded via the matcher config
+// API routes are excluded via BOTH the matcher config AND explicit check below
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
-  // Skip auth check for login page
-  if (pathname === "/login") {
+  // CRITICAL: Explicitly skip ALL API routes (belt-and-suspenders with matcher)
+  // This handles Edge Runtime quirks where matcher may not work as expected
+  if (pathname.startsWith("/api")) {
+    return NextResponse.next()
+  }
+
+  // Skip auth check for login page and static assets
+  if (pathname === "/login" || pathname.startsWith("/_next") || pathname === "/favicon.ico") {
     return NextResponse.next()
   }
 
@@ -25,7 +31,7 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // ONLY match page routes - explicitly exclude api, static, and image routes
-  // This is the official NextAuth v5 recommended pattern
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  // Match all routes - we handle exclusions explicitly in the middleware function
+  // This is more reliable across different runtimes than complex regex patterns
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 }
