@@ -85,7 +85,7 @@ export function Sidebar() {
           <LogOut className="w-4 h-4" />
           Sign out
         </button>
-        <p className="text-xs text-gray-600 mt-2">v0.2.0</p>
+        <p className="text-xs text-gray-600 mt-2">v0.3.0</p>
       </div>
     </aside>
   )

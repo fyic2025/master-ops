@@ -1,3 +1,4 @@
+// Nav config v2025-11-30T12:22
 import {
   Home,
   TrendingUp,
