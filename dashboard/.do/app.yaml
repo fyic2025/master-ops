@@ -1,5 +1,26 @@
+# DigitalOcean App Platform Specification
+# See DEPLOYMENT.md for setup instructions and troubleshooting
+#
+# IMPORTANT: All environment variables should be defined here at service level only.
+# Do NOT add app-level envs to avoid conflicts.
+#
+# To deploy: doctl apps update <APP_ID> --spec .do/app.yaml
+
 name: master-ops-dashboard
 region: syd
+
+domains:
+  - domain: ops.growthcohq.com
+    type: PRIMARY
+
+ingress:
+  rules:
+    - component:
+        name: web
+      match:
+        path:
+          prefix: /
+
 services:
   - name: web
     github:
@@ -14,6 +35,7 @@ services:
     instance_size_slug: apps-s-1vcpu-0.5gb
     http_port: 3000
     envs:
+      # === Supabase ===
       - key: NEXT_PUBLIC_SUPABASE_URL
         scope: RUN_AND_BUILD_TIME
         value: "https://qcvfxxsnqvdfmpbcgdni.supabase.co"
@@ -23,7 +45,39 @@ services:
       - key: SUPABASE_SERVICE_ROLE_KEY
         scope: RUN_TIME
         type: SECRET
-        value: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjdmZ4eHNucXZkZm1wYmNnZG5pIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0ODU2NzIyNywiZXhwIjoyMDY0MTQzMjI3fQ.JLTj1pOvZLoWUKfCV5NtctNI-lkEBhCzF7C9Axm6nf8"
+        # Set via DO Console - do not commit actual value
+        value: "${SUPABASE_SERVICE_ROLE_KEY}"
       - key: SUPABASE_URL
         scope: RUN_TIME
         value: "https://qcvfxxsnqvdfmpbcgdni.supabase.co"
+
+      # === NextAuth v5 ===
+      # CRITICAL: All auth vars must be RUN_AND_BUILD_TIME scope
+      - key: AUTH_SECRET
+        scope: RUN_AND_BUILD_TIME
+        type: SECRET
+        # Generate with: openssl rand -base64 32
+        value: "${AUTH_SECRET}"
+      - key: AUTH_URL
+        scope: RUN_AND_BUILD_TIME
+        value: "https://ops.growthcohq.com"
+      - key: NEXTAUTH_URL
+        scope: RUN_AND_BUILD_TIME
+        value: "https://ops.growthcohq.com"
+      - key: AUTH_TRUST_HOST
+        scope: RUN_AND_BUILD_TIME
+        # REQUIRED when behind proxy/CDN (DigitalOcean, Cloudflare, etc)
+        value: "true"
+
+      # === Google OAuth ===
+      # Client ID: 204183633386-l8r30d5tgd4luc5pd9vhreeibq7c6287.apps.googleusercontent.com
+      # Ensure Google Console has:
+      #   - JavaScript Origin: https://ops.growthcohq.com
+      #   - Redirect URI: https://ops.growthcohq.com/api/auth/callback/google
+      - key: GOOGLE_AUTH_CLIENT_ID
+        scope: RUN_AND_BUILD_TIME
+        value: "204183633386-l8r30d5tgd4luc5pd9vhreeibq7c6287.apps.googleusercontent.com"
+      - key: GOOGLE_AUTH_CLIENT_SECRET
+        scope: RUN_AND_BUILD_TIME
+        type: SECRET
+        value: "${GOOGLE_AUTH_CLIENT_SECRET}"
