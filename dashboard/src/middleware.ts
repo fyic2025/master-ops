@@ -40,7 +40,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Match all paths except static files
-    "/((?!_next/static|_next/image|favicon.ico).*)",
+    // Match all paths except static files and API routes (except /api/auth)
+    "/((?!_next/static|_next/image|favicon.ico|api(?!/auth)).*)",
   ],
 }
