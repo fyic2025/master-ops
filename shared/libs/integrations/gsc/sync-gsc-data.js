@@ -175,7 +175,7 @@ async function fetchPagePerformance(gsc, options = {}) {
     const startDate = options.startDate || getDateString(-days);
     const endDate = options.endDate || getDateString(-1);
 
-    console.log(`Fetching GSC data from ${startDate} to ${endDate}...`);
+    console.log(`Fetching GSC data from ${startDate} to ${endDate} (Australia only)...`);
 
     try {
         const response = await gsc.searchanalytics.query({
@@ -184,6 +184,14 @@ async function fetchPagePerformance(gsc, options = {}) {
                 startDate,
                 endDate,
                 dimensions: ['page'],
+                // Filter to Australia only
+                dimensionFilterGroups: [{
+                    filters: [{
+                        dimension: 'country',
+                        operator: 'equals',
+                        expression: 'aus'
+                    }]
+                }],
                 rowLimit: 25000,
                 startRow: 0
             }
@@ -232,6 +240,96 @@ async function fetchKeywordData(gsc, options = {}) {
 }
 
 /**
+ * Sync daily stats for anomaly detection
+ * Stores daily snapshots in gsc_page_daily_stats table
+ */
+async function syncDailyStats(options = {}) {
+    const business = options.business || 'boo';
+    const gsc = await initGSCClient();
+    if (!gsc) return { synced: 0, newUrls: 0, errors: 0 };
+
+    // Fetch yesterday's data specifically (GSC data has ~2 day delay)
+    const yesterday = getDateString(-2);
+    console.log(`\nSyncing daily stats for ${yesterday}...`);
+
+    try {
+        const response = await gsc.searchanalytics.query({
+            siteUrl: SITE_URL,
+            requestBody: {
+                startDate: yesterday,
+                endDate: yesterday,
+                dimensions: ['page'],
+                // Filter to Australia only
+                dimensionFilterGroups: [{
+                    filters: [{
+                        dimension: 'country',
+                        operator: 'equals',
+                        expression: 'aus'
+                    }]
+                }],
+                rowLimit: 25000
+            }
+        });
+
+        const pages = response.data.rows || [];
+        console.log(`Fetched ${pages.length} pages for ${yesterday} (Australia)`);
+
+        if (pages.length === 0) return { synced: 0, newUrls: 0, errors: 0 };
+
+        // Get existing URLs to detect new ones
+        const { data: existingUrls } = await supabase
+            .from('gsc_page_daily_stats')
+            .select('url')
+            .eq('business', business);
+
+        const existingUrlSet = new Set((existingUrls || []).map(r => r.url));
+
+        const stats = { synced: 0, newUrls: 0, errors: 0 };
+        const BATCH_SIZE = 500;
+
+        // Prepare all daily data
+        const allDailyData = pages.map(row => {
+            const url = row.keys[0];
+            const isNew = !existingUrlSet.has(url);
+            if (isNew) stats.newUrls++;
+
+            return {
+                business,
+                url,
+                stat_date: yesterday,
+                impressions: Math.round(row.impressions),
+                clicks: Math.round(row.clicks),
+                avg_position: row.position?.toFixed(2),
+                ctr: row.ctr?.toFixed(4),  // Store as decimal (0-1), not percentage
+                first_seen: isNew ? yesterday : null
+            };
+        });
+
+        // Batch upsert for better performance
+        for (let i = 0; i < allDailyData.length; i += BATCH_SIZE) {
+            const batch = allDailyData.slice(i, i + BATCH_SIZE);
+            const { error } = await supabase
+                .from('gsc_page_daily_stats')
+                .upsert(batch, { onConflict: 'business,url,stat_date' });
+
+            if (error) {
+                stats.errors += batch.length;
+                if (stats.errors <= BATCH_SIZE) console.log(`Batch error: ${error.message}`);
+            } else {
+                stats.synced += batch.length;
+            }
+        }
+
+        console.log(`Daily stats: ${stats.synced} synced, ${stats.newUrls} new URLs, ${stats.errors} errors`);
+        return stats;
+
+    } catch (error) {
+        console.error('Error syncing daily stats:', error.message);
+        return { synced: 0, newUrls: 0, errors: 1 };
+    }
+}
+
+/**
  * Sync GSC page data to Supabase
  */
 async function syncPageData(options = {}) {
@@ -270,7 +368,7 @@ async function syncPageData(options = {}) {
         return { total: 0, synced: 0, errors: 0 };
     }
 
-    // Process and upsert pages
+    // Process and upsert pages in batches for better performance
     const stats = {
         total: pages.length,
         synced: 0,
@@ -282,34 +380,49 @@ async function syncPageData(options = {}) {
     };
 
     const today = getDateString(0);
+    const BATCH_SIZE = 500;
 
-    for (const row of pages) {
+    // Prepare all page data
+    const allPageData = pages.map(row => {
         const url = row.keys[0];
         const pageType = detectPageType(url);
-
-        const pageData = {
+        stats[pageType] = (stats[pageType] || 0) + 1;
+        return {
             url,
             page_type: pageType,
             impressions_30d: Math.round(row.impressions),
             clicks_30d: Math.round(row.clicks),
             avg_position: row.position?.toFixed(2),
-            ctr: (row.ctr * 100).toFixed(2),
+            ctr: row.ctr?.toFixed(4),  // Store as decimal (0-1), not percentage
             last_updated: today
         };
+    });
 
+    // Batch upsert for much better performance
+    for (let i = 0; i < allPageData.length; i += BATCH_SIZE) {
+        const batch = allPageData.slice(i, i + BATCH_SIZE);
         const { error } = await supabase
             .from('seo_gsc_pages')
-            .upsert(pageData, { onConflict: 'url' });
+            .upsert(batch, { onConflict: 'url' });
 
         if (error) {
-            stats.errors++;
-            if (stats.errors <= 3) {
-                console.log(`Error upserting ${url}:`, error.message);
-            }
+            stats.errors += batch.length;
+            console.log(`Batch error at ${i}:`, error.message);
         } else {
-            stats.synced++;
-            stats[pageType] = (stats[pageType] || 0) + 1;
+            stats.synced += batch.length;
         }
+
+        // Progress indicator
+        if ((i + BATCH_SIZE) % 2000 === 0 || i + BATCH_SIZE >= allPageData.length) {
+            console.log(`Progress: ${Math.min(i + BATCH_SIZE, allPageData.length)}/${allPageData.length} pages`);
+        }
+    }
+
+    // Also sync daily stats for anomaly detection
+    if (options.includeDailyStats !== false) {
+        console.log('\n--- Syncing daily stats for anomaly detection ---');
+        const dailyStats = await syncDailyStats({ business: options.business || 'boo' });
+        stats.dailyStats = dailyStats;
     }
 
     // Log completion
@@ -330,6 +443,9 @@ async function syncPageData(options = {}) {
     console.log(`Brands: ${stats.brands}`);
     console.log(`Other: ${stats.other}`);
     console.log(`Errors: ${stats.errors}`);
+    if (stats.dailyStats) {
+        console.log(`Daily stats: ${stats.dailyStats.synced} synced, ${stats.dailyStats.newUrls} new URLs`);
+    }
 
     return stats;
 }
@@ -485,4 +601,4 @@ if (require.main === module) {
     }
 }
 
-module.exports = { syncPageData, syncKeywordData, getGSCStats, listSites };
+module.exports = { syncPageData, syncKeywordData, syncDailyStats, getGSCStats, listSites, initGSCClient };

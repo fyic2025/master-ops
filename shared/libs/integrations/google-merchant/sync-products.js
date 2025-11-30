@@ -319,6 +319,118 @@ async function upsertProducts(accountId, products) {
 }
 
 // ============================================
+// SNAPSHOT FUNCTIONS
+// ============================================
+
+async function createDailySnapshot(accountId, products) {
+  console.log('\n5. Creating daily snapshot...');
+
+  // Calculate product counts
+  let approved = 0, disapproved = 0, pending = 0;
+  let totalErrors = 0, totalWarnings = 0, totalSuggestions = 0;
+  let totalImpressions = 0, totalClicks = 0;
+
+  for (const p of products) {
+    // Count by status
+    if (p.destinationStatuses?.some(d => d.status === 'approved' || d.approvedCountries?.length > 0)) {
+      approved++;
+    } else if (p.destinationStatuses?.some(d => d.status === 'disapproved' || d.disapprovedCountries?.length > 0)) {
+      disapproved++;
+    } else {
+      pending++;
+    }
+
+    // Count issues
+    if (p.itemLevelIssues && Array.isArray(p.itemLevelIssues)) {
+      for (const issue of p.itemLevelIssues) {
+        const severity = issue.severity || 'warning';
+        if (severity === 'error') totalErrors++;
+        else if (severity === 'warning') totalWarnings++;
+        else totalSuggestions++;
+      }
+    }
+  }
+
+  const total = products.length;
+  const approvalRate = total > 0 ? (approved * 100.0 / total) : 0;
+
+  // Get today's date in YYYY-MM-DD format
+  const today = new Date().toISOString().split('T')[0];
+
+  const snapshot = {
+    account_id: accountId,
+    snapshot_date: today,
+    products_total: total,
+    products_active: approved,
+    products_pending: pending,
+    products_disapproved: disapproved,
+    products_expiring: 0, // Not tracked in current data
+    total_errors: totalErrors,
+    total_warnings: totalWarnings,
+    total_suggestions: totalSuggestions,
+    total_impressions_30d: totalImpressions,
+    total_clicks_30d: totalClicks,
+    approval_rate: approvalRate,
+    ctr: 0, // Will be calculated if we have impressions/clicks
+  };
+
+  try {
+    // Upsert snapshot (update if exists for today)
+    const url = new URL(DATA_SUPABASE_URL + '/rest/v1/google_merchant_account_snapshots');
+
+    const options = {
+      hostname: url.hostname,
+      path: url.pathname,
+      method: 'POST',
+      headers: {
+        'apikey': DATA_SUPABASE_KEY,
+        'Authorization': `Bearer ${DATA_SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates,return=representation',
+      },
+    };
+
+    const postData = JSON.stringify(snapshot);
+    options.headers['Content-Length'] = Buffer.byteLength(postData);
+
+    const response = await httpsRequest(options, postData);
+    const result = JSON.parse(response.data || '[]');
+
+    console.log(`   ✓ Snapshot created for ${today}`);
+    console.log(`     Total: ${total}, Approved: ${approved}, Disapproved: ${disapproved}, Pending: ${pending}`);
+    console.log(`     Issues: ${totalErrors} errors, ${totalWarnings} warnings, ${totalSuggestions} suggestions`);
+
+    return result[0];
+  } catch (err) {
+    console.error('   Failed to create snapshot:', err.message);
+    return null;
+  }
+}
+
+async function logSyncCompletion(accountId, productCount) {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+
+    const logEntry = {
+      account_id: accountId,
+      sync_type: 'merchant',
+      date_range_start: today,
+      date_range_end: today,
+      status: 'success',
+      records_fetched: productCount,
+      records_inserted: productCount,
+      records_updated: 0,
+      completed_at: new Date().toISOString(),
+    };
+
+    await supabaseRequest('POST', '/rest/v1/google_ads_sync_log', logEntry);
+    console.log('   ✓ Sync logged to google_ads_sync_log');
+  } catch (err) {
+    console.error('   Failed to log sync:', err.message);
+  }
+}
+
+// ============================================
 // MAIN
 // ============================================
 
@@ -385,6 +497,13 @@ async function main() {
     console.error('   Failed to sync:', err.message);
     process.exit(1);
   }
+
+  // Step 5: Create daily snapshot for trend tracking
+  await createDailySnapshot(account.id, products);
+
+  // Step 6: Log sync completion
+  console.log('\n6. Logging sync completion...');
+  await logSyncCompletion(account.id, products.length);
 
   // Summary
   console.log('\n========================================');

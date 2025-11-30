@@ -1,16 +1,21 @@
 {
   "name": "gsc-sync",
-  "version": "1.0.0",
-  "description": "Google Search Console data sync to Supabase",
+  "version": "2.0.0",
+  "description": "Google Search Console data sync and issue tracking",
   "main": "sync-gsc-data.js",
   "scripts": {
     "sync": "node sync-gsc-data.js",
     "sites": "node sync-gsc-data.js sites",
-    "stats": "node sync-gsc-data.js stats"
+    "stats": "node sync-gsc-data.js stats",
+    "detect": "node detect-issues.js",
+    "inspect": "node inspect-urls.js --queue",
+    "issues": "node sync-gsc-issues.js",
+    "issues:summary": "node sync-gsc-issues.js --summary"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
     "dotenv": "^16.3.1",
-    "googleapis": "^144.0.0"
+    "googleapis": "^144.0.0",
+    "node-cron": "^3.0.3"
   }
 }

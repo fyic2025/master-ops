@@ -3,6 +3,7 @@ import { BUSINESSES, isValidBusinessCode, type BusinessCode } from '@/lib/busine
 import { BusinessCard } from '@/components/BusinessCard'
 import { IntegrationStatus } from '@/components/IntegrationStatus'
 import { AlertsPanel } from '@/components/AlertsPanel'
+import ApiUsageWidget from '@/components/ApiUsageWidget'
 
 export default function BusinessDashboard({
   params,
@@ -70,10 +71,16 @@ function HomeDashboard() {
         </div>
       </section>
 
-      {/* Integration Status */}
-      <section>
-        <h2 className="text-xl font-semibold text-white mb-4">Integration Health</h2>
-        <IntegrationStatus />
+      {/* API Usage + Integration Status */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div>
+          <h2 className="text-xl font-semibold text-white mb-4">API Usage</h2>
+          <ApiUsageWidget />
+        </div>
+        <div>
+          <h2 className="text-xl font-semibold text-white mb-4">Integration Health</h2>
+          <IntegrationStatus />
+        </div>
       </section>
 
       {/* Alerts */}

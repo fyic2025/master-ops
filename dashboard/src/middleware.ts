@@ -5,9 +5,10 @@ export default auth((req) => {
   const isLoggedIn = !!req.auth
   const isLoginPage = req.nextUrl.pathname === "/login"
   const isAuthRoute = req.nextUrl.pathname.startsWith("/api/auth")
+  const isApiRoute = req.nextUrl.pathname.startsWith("/api/")
 
-  // Allow auth routes
-  if (isAuthRoute) {
+  // Allow auth routes and API routes (API routes handle their own auth if needed)
+  if (isAuthRoute || isApiRoute) {
     return NextResponse.next()
   }
 

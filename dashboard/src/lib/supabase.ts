@@ -27,3 +27,14 @@ export const BUSINESSES = {
   elevate: { name: 'Elevate Wholesale', platform: 'Shopify B2B' },
   rhf: { name: 'Red Hill Fresh', platform: 'WooCommerce' },
 } as const
+
+// BOO Supabase (for SEO data)
+const BOO_SUPABASE_URL = 'https://usibnysqelovfuctmkqw.supabase.co'
+const BOO_SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzaWJueXNxZWxvdmZ1Y3Rta3F3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDQ4ODA4OCwiZXhwIjoyMDY2MDY0MDg4fQ.B9uihsaUvwkJWFAuKAtu7uij1KiXVoiHPHa9mm-Tz1s'
+
+export function createBooClient() {
+  return createClient(
+    process.env.BOO_SUPABASE_URL || BOO_SUPABASE_URL,
+    process.env.BOO_SUPABASE_SERVICE_ROLE_KEY || BOO_SUPABASE_SERVICE_KEY
+  )
+}

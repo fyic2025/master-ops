@@ -18,6 +18,25 @@ export interface DateRangeSelectorProps {
   onCompareChange?: (range: DateRange | null) => void
 }
 
+// Get current time in Melbourne timezone
+function getMelbourneNow(): Date {
+  const now = new Date()
+  // Use Intl.DateTimeFormat for reliable parsing
+  const formatter = new Intl.DateTimeFormat('en-AU', {
+    timeZone: 'Australia/Melbourne',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  })
+  const parts = formatter.formatToParts(now)
+  const get = (type: string) => parseInt(parts.find(p => p.type === type)?.value || '0', 10)
+  return new Date(get('year'), get('month') - 1, get('day'), get('hour'), get('minute'), get('second'))
+}
+
 function formatDate(date: Date): string {
   return date.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })
 }
@@ -35,7 +54,7 @@ function endOfDay(date: Date): Date {
 }
 
 export function getDatePresets(): DateRange[] {
-  const now = new Date()
+  const now = getMelbourneNow()
   const today = startOfDay(now)
 
   // Today
@@ -125,25 +144,124 @@ export function getDatePresets(): DateRange[] {
     end: endOfDay(now),
   }
 
+  // Last 60 Days
+  const last60Start = new Date(today)
+  last60Start.setDate(last60Start.getDate() - 59)
+  const last60Range: DateRange = {
+    key: 'last_60',
+    label: 'Last 60 Days',
+    start: last60Start,
+    end: endOfDay(now),
+  }
+
+  // Last 90 Days
+  const last90Start = new Date(today)
+  last90Start.setDate(last90Start.getDate() - 89)
+  const last90Range: DateRange = {
+    key: 'last_90',
+    label: 'Last 90 Days',
+    start: last90Start,
+    end: endOfDay(now),
+  }
+
+  // Last 6 Calendar Months (full months before current month)
+  // e.g., if Nov 2024, shows May 1 - Oct 31
+  const last6MonthsEnd = new Date(today.getFullYear(), today.getMonth(), 0) // Last day of previous month
+  const last6MonthsStart = new Date(last6MonthsEnd.getFullYear(), last6MonthsEnd.getMonth() - 5, 1) // First day, 6 months back
+  const last6MonthsRange: DateRange = {
+    key: 'last_6_months',
+    label: 'Last 6 Months',
+    start: last6MonthsStart,
+    end: endOfDay(last6MonthsEnd),
+  }
+
+  // Last 12 Calendar Months (full months before current month)
+  // e.g., if Nov 2024, shows Nov 1 2023 - Oct 31 2024
+  const last12MonthsEnd = new Date(today.getFullYear(), today.getMonth(), 0) // Last day of previous month
+  const last12MonthsStart = new Date(last12MonthsEnd.getFullYear(), last12MonthsEnd.getMonth() - 11, 1) // First day, 12 months back
+  const last12MonthsRange: DateRange = {
+    key: 'last_12_months',
+    label: 'Last 12 Months',
+    start: last12MonthsStart,
+    end: endOfDay(last12MonthsEnd),
+  }
+
+  // Previous Year (full calendar year before last year)
+  const prevYearStart = new Date(today.getFullYear() - 2, 0, 1)
+  const prevYearEnd = new Date(today.getFullYear() - 2, 11, 31)
+  const prevYearRange: DateRange = {
+    key: 'prev_year',
+    label: 'Previous Year',
+    start: prevYearStart,
+    end: endOfDay(prevYearEnd),
+  }
+
   return [
     todayRange,
     yesterdayRange,
     last7Range,
     last30Range,
+    last60Range,
+    last90Range,
+    last6MonthsRange,
+    last12MonthsRange,
     mtdRange,
     lastMonthRange,
     lastQuarterRange,
     ytdRange,
     lastYearRange,
+    prevYearRange,
   ]
 }
 
 export function getCompareRange(range: DateRange): DateRange {
-  const days = Math.ceil((range.end.getTime() - range.start.getTime()) / (1000 * 60 * 60 * 24))
-  const compareEnd = new Date(range.start)
-  compareEnd.setDate(compareEnd.getDate() - 1)
-  const compareStart = new Date(compareEnd)
-  compareStart.setDate(compareStart.getDate() - days + 1)
+  let compareStart: Date
+  let compareEnd: Date
+
+  // Calendar-based comparisons for specific presets
+  if (range.key === 'last_month') {
+    // Previous calendar month
+    compareEnd = new Date(range.start.getFullYear(), range.start.getMonth(), 0) // Last day of month before
+    compareStart = new Date(compareEnd.getFullYear(), compareEnd.getMonth(), 1) // First day of that month
+  } else if (range.key === 'last_quarter') {
+    // Previous calendar quarter
+    const quarterStartMonth = range.start.getMonth()
+    compareEnd = new Date(range.start.getFullYear(), quarterStartMonth, 0) // Last day before quarter
+    compareStart = new Date(compareEnd.getFullYear(), compareEnd.getMonth() - 2, 1) // First day of prev quarter
+  } else if (range.key === 'last_6_months') {
+    // Previous 6 calendar months (before the Last 6 Months range)
+    compareEnd = new Date(range.start.getFullYear(), range.start.getMonth(), 0) // Last day of month before range start
+    compareStart = new Date(compareEnd.getFullYear(), compareEnd.getMonth() - 5, 1) // 6 months back from that
+  } else if (range.key === 'last_12_months') {
+    // Previous 12 calendar months (same period year before)
+    compareStart = new Date(range.start.getFullYear() - 1, range.start.getMonth(), 1)
+    compareEnd = new Date(range.end.getFullYear() - 1, range.end.getMonth() + 1, 0)
+  } else if (range.key === 'last_year') {
+    // Previous calendar year (year before last year)
+    compareStart = new Date(range.start.getFullYear() - 1, 0, 1)
+    compareEnd = new Date(range.start.getFullYear() - 1, 11, 31)
+  } else if (range.key === 'prev_year') {
+    // Year before the previous year
+    compareStart = new Date(range.start.getFullYear() - 1, 0, 1)
+    compareEnd = new Date(range.start.getFullYear() - 1, 11, 31)
+  } else if (range.key === 'ytd') {
+    // Same period last year
+    compareStart = new Date(range.start.getFullYear() - 1, range.start.getMonth(), range.start.getDate())
+    compareEnd = new Date(range.end.getFullYear() - 1, range.end.getMonth(), range.end.getDate())
+  } else if (range.key === 'mtd') {
+    // Same period last month
+    compareStart = new Date(range.start.getFullYear(), range.start.getMonth() - 1, 1)
+    const endDay = Math.min(range.end.getDate(), new Date(range.start.getFullYear(), range.start.getMonth(), 0).getDate())
+    compareEnd = new Date(range.start.getFullYear(), range.start.getMonth() - 1, endDay)
+  } else {
+    // Rolling periods (Last 7 Days, Last 30 Days, Today, Yesterday, Custom)
+    // Use same duration, ending day before current range starts
+    const days = Math.ceil((range.end.getTime() - range.start.getTime()) / (1000 * 60 * 60 * 24))
+    compareEnd = new Date(range.start)
+    compareEnd.setDate(compareEnd.getDate() - 1)
+    compareStart = new Date(compareEnd)
+    compareStart.setDate(compareStart.getDate() - days + 1)
+  }
 
   return {
     key: 'compare',
@@ -278,27 +396,41 @@ export default function DateRangeSelector({
                   </div>
                 )}
               </div>
+
+              {/* Compare to Past Period - inside dropdown */}
+              {showCompare && onCompareChange && (
+                <div className="border-t border-gray-700 mt-2 pt-2">
+                  <button
+                    onClick={handleCompareToggle}
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
+                      compareRange
+                        ? 'bg-purple-600 text-white'
+                        : 'text-gray-300 hover:bg-gray-800'
+                    }`}
+                  >
+                    <span className="flex items-center gap-2">
+                      <ArrowLeftRight className="w-4 h-4" />
+                      Compare to past
+                    </span>
+                    {compareRange && (
+                      <span className="text-xs opacity-80">On</span>
+                    )}
+                  </button>
+                  {compareRange && (
+                    <div className="px-3 py-2 text-xs text-gray-400">
+                      vs {compareRange.label}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         )}
       </div>
 
-      {showCompare && onCompareChange && (
-        <button
-          onClick={handleCompareToggle}
-          className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
-            compareRange
-              ? 'bg-purple-600 text-white'
-              : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
-          }`}
-        >
-          <ArrowLeftRight className="w-4 h-4" />
-          {compareRange ? 'Comparing' : 'Compare'}
-        </button>
-      )}
-
       {compareRange && (
-        <span className="text-sm text-gray-400">
+        <span className="flex items-center gap-2 text-sm text-purple-400">
+          <ArrowLeftRight className="w-4 h-4" />
           vs {compareRange.label}
         </span>
       )}

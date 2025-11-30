@@ -16,8 +16,8 @@ const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../../../../.env') });
 
 // Supabase config (BOO database)
-const SUPABASE_URL = 'https://qcvfxxsnqvdfmpbcgdni.supabase.co';
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const SUPABASE_URL = 'https://usibnysqelovfuctmkqw.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzaWJueXNxZWxvdmZ1Y3Rta3F3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDQ4ODA4OCwiZXhwIjoyMDY2MDY0MDg4fQ.B9uihsaUvwkJWFAuKAtu7uij1KiXVoiHPHa9mm-Tz1s';
 
 // LiveChat config
 const LIVECHAT_ACCOUNT_ID = process.env.LIVECHAT_ACCOUNT_ID;

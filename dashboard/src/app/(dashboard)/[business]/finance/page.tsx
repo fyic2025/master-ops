@@ -72,9 +72,14 @@ export default function FinanceDashboard() {
   const [dateRange, setDateRange] = useState<DateRange>(presets.find(p => p.key === 'mtd') || presets[0])
   const [compareRange, setCompareRange] = useState<DateRange | null>(null)
 
+  // Format date in local timezone (Melbourne) - avoids UTC conversion issues
+  const formatLocalDate = (d: Date) => {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  }
+
   const fetchPnL = async (range: DateRange): Promise<PnLResponse> => {
-    const from = range.start.toISOString().split('T')[0]
-    const to = range.end.toISOString().split('T')[0]
+    const from = formatLocalDate(range.start)
+    const to = formatLocalDate(range.end)
 
     const res = await fetch(`/api/finance/pnl?from=${from}&to=${to}`)
     if (!res.ok) throw new Error('Failed to fetch finance data')

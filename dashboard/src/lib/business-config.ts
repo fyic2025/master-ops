@@ -64,6 +64,7 @@ export const BUSINESSES: Record<BusinessCode, Business> = {
     bgColor: 'bg-brand-boo',
     navigation: [
       { name: 'Dashboard', href: '', icon: Home },
+      { name: 'SEO', href: '/seo', icon: Search },
       { name: 'Merchant Center', href: '/merchant', icon: ShoppingCart },
       { name: 'Stock Sync', href: '/stock', icon: Package },
       { name: 'Product Health', href: '/products', icon: AlertCircle },
@@ -94,6 +95,8 @@ export const BUSINESSES: Record<BusinessCode, Business> = {
     bgColor: 'bg-brand-teelixir',
     navigation: [
       { name: 'Dashboard', href: '', icon: Home },
+      { name: 'Distributors', href: '/distributors', icon: Truck },
+      { name: 'Dist. Trends', href: '/distributors/trends', icon: TrendingUp },
       { name: 'Re-engagement', href: '/reengagement', icon: Users },
       { name: 'Orders', href: '/orders', icon: ShoppingCart },
       { name: 'Products', href: '/products', icon: Package },
