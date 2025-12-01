@@ -183,20 +183,28 @@ export default function WinbackPage() {
 
   const updateDailyLimit = async (newLimit: number) => {
     if (!config) return
+    setActionLoading('limit')
     try {
+      // Only send the nested config fields, not 'enabled' which is top-level
+      const { enabled, ...configFields } = config
       const res = await fetch('/api/automations/config', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           automation_type: 'winback_40',
-          config: { ...config, daily_limit: newLimit }
+          config: { ...configFields, daily_limit: newLimit }
         })
       })
       if (res.ok) {
         setConfig({ ...config, daily_limit: newLimit })
+      } else {
+        const data = await res.json()
+        setError(data.error || 'Failed to update daily limit')
       }
     } catch (err: any) {
       setError(err.message)
+    } finally {
+      setActionLoading(null)
     }
   }
 
@@ -393,9 +401,17 @@ export default function WinbackPage() {
                       setSuccessMessage('Daily limit updated')
                       setTimeout(() => setSuccessMessage(null), 2000)
                     }}
-                    className="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded font-medium"
+                    disabled={actionLoading === 'limit'}
+                    className="px-3 py-1 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-sm rounded font-medium flex items-center gap-1"
                   >
-                    Save
+                    {actionLoading === 'limit' ? (
+                      <>
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      'Save'
+                    )}
                   </button>
                 )}
               </div>
