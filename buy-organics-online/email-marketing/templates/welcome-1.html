@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Buy Organics Online!</title>
+    <!--[if mso]>
+    <noscript>
+        <xml>
+            <o:OfficeDocumentSettings>
+                <o:PixelsPerInch>96</o:PixelsPerInch>
+            </o:OfficeDocumentSettings>
+        </xml>
+    </noscript>
+    <![endif]-->
+    <style>
+        /* Reset styles */
+        body, table, td, p, a, li {
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
+        table, td {
+            mso-table-lspace: 0pt;
+            mso-table-rspace: 0pt;
+        }
+        img {
+            -ms-interpolation-mode: bicubic;
+            border: 0;
+            height: auto;
+            line-height: 100%;
+            outline: none;
+            text-decoration: none;
+        }
+
+        /* Base styles */
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100% !important;
+            background-color: #f4f4f4;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+        }
+
+        .header {
+            background-color: #4a7c59;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .header img {
+            max-width: 200px;
+            height: auto;
+        }
+
+        .header h1 {
+            color: #ffffff;
+            margin: 20px 0 0 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .content {
+            padding: 40px 30px;
+        }
+
+        .content h2 {
+            color: #333333;
+            font-size: 24px;
+            margin: 0 0 20px 0;
+        }
+
+        .content p {
+            color: #555555;
+            font-size: 16px;
+            line-height: 1.6;
+            margin: 0 0 20px 0;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background-color: #4a7c59;
+            color: #ffffff !important;
+            text-decoration: none;
+            padding: 14px 32px;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 20px 0;
+        }
+
+        .cta-button:hover {
+            background-color: #3d6a4a;
+        }
+
+        .features {
+            background-color: #f9f9f9;
+            padding: 30px;
+            margin: 20px 0;
+        }
+
+        .features h3 {
+            color: #333333;
+            font-size: 18px;
+            margin: 0 0 15px 0;
+        }
+
+        .features ul {
+            margin: 0;
+            padding: 0 0 0 20px;
+            color: #555555;
+        }
+
+        .features li {
+            margin-bottom: 10px;
+            font-size: 15px;
+        }
+
+        .social {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .social a {
+            display: inline-block;
+            margin: 0 10px;
+        }
+
+        .social img {
+            width: 32px;
+            height: 32px;
+        }
+
+        .footer {
+            background-color: #333333;
+            color: #aaaaaa;
+            padding: 30px;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        .footer a {
+            color: #aaaaaa;
+            text-decoration: underline;
+        }
+
+        .footer p {
+            margin: 10px 0;
+        }
+
+        @media screen and (max-width: 600px) {
+            .content {
+                padding: 20px 15px !important;
+            }
+            .header h1 {
+                font-size: 24px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+        <tr>
+            <td style="padding: 20px 0;">
+                <table class="email-container" role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" align="center">
+                    <!-- Header -->
+                    <tr>
+                        <td class="header">
+                            <img src="https://buyorganicsonline.com.au/content/images/logo.png" alt="Buy Organics Online" />
+                            <h1>Welcome to the Family!</h1>
+                        </td>
+                    </tr>
+
+                    <!-- Main Content -->
+                    <tr>
+                        <td class="content">
+                            <h2>Hi {{ .first_name | default "there" }},</h2>
+
+                            <p>
+                                We're thrilled to have you join the Buy Organics Online community!
+                                You've just taken an important step towards a healthier, more
+                                natural lifestyle.
+                            </p>
+
+                            <p>
+                                At Buy Organics Online, we're passionate about bringing you
+                                Australia's best selection of organic, natural, and eco-friendly
+                                products at competitive prices.
+                            </p>
+
+                            <div style="text-align: center;">
+                                <a href="https://buyorganicsonline.com.au/categories?utm_source=email&utm_medium=automation&utm_campaign=welcome_series&utm_content=shop_now" class="cta-button">
+                                    Start Shopping
+                                </a>
+                            </div>
+
+                            <div class="features">
+                                <h3>Why Choose Us?</h3>
+                                <ul>
+                                    <li><strong>Certified Organic:</strong> We only stock products that meet strict organic standards</li>
+                                    <li><strong>Australian Owned:</strong> Supporting local farmers and producers</li>
+                                    <li><strong>Free Shipping:</strong> On orders over $99 Australia-wide</li>
+                                    <li><strong>Expert Support:</strong> Our team is here to help with any questions</li>
+                                    <li><strong>5,000+ Products:</strong> One of Australia's largest organic selections</li>
+                                </ul>
+                            </div>
+
+                            <p>
+                                Keep an eye on your inbox - we'll be sending you some helpful
+                                guides and an exclusive discount code for your first order!
+                            </p>
+
+                            <p>
+                                In the meantime, feel free to browse our store or reach out
+                                if you have any questions.
+                            </p>
+
+                            <p style="margin-top: 30px;">
+                                Warm regards,<br />
+                                <strong>The Buy Organics Online Team</strong>
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Social Links -->
+                    <tr>
+                        <td class="social">
+                            <p style="margin-bottom: 15px; color: #555;">Follow us for organic tips and exclusive offers:</p>
+                            <a href="https://facebook.com/buyorganicsonline" target="_blank">
+                                <img src="https://cdn.buyorganicsonline.com.au/email/icons/facebook.png" alt="Facebook" />
+                            </a>
+                            <a href="https://instagram.com/buyorganicsonline" target="_blank">
+                                <img src="https://cdn.buyorganicsonline.com.au/email/icons/instagram.png" alt="Instagram" />
+                            </a>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td class="footer">
+                            <p>
+                                Buy Organics Online Pty Ltd<br />
+                                Australia's Trusted Organic Store
+                            </p>
+                            <p>
+                                <a href="https://buyorganicsonline.com.au">Shop</a> |
+                                <a href="https://buyorganicsonline.com.au/contact">Contact Us</a> |
+                                <a href="{{ .UnsubscribeURL }}">Unsubscribe</a>
+                            </p>
+                            <p style="font-size: 11px; color: #888888;">
+                                You're receiving this email because you signed up at buyorganicsonline.com.au.<br />
+                                &copy; {{ .Year }} Buy Organics Online. All rights reserved.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

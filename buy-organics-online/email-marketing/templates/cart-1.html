@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>You left something behind!</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100% !important;
+            background-color: #f4f4f4;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+        }
+        .header {
+            background-color: #4a7c59;
+            padding: 25px 20px;
+            text-align: center;
+        }
+        .header img {
+            max-width: 180px;
+            height: auto;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .content h2 {
+            color: #333333;
+            font-size: 26px;
+            margin: 0 0 20px 0;
+            text-align: center;
+        }
+        .content p {
+            color: #555555;
+            font-size: 16px;
+            line-height: 1.6;
+            margin: 0 0 20px 0;
+        }
+        .cart-items {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+        }
+        .cart-item {
+            display: flex;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 15px 0;
+        }
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+        .cart-item-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-right: 15px;
+        }
+        .cart-item-details {
+            flex: 1;
+        }
+        .cart-item-name {
+            color: #333333;
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 5px;
+        }
+        .cart-item-price {
+            color: #4a7c59;
+            font-weight: 600;
+            font-size: 16px;
+        }
+        .cart-item-qty {
+            color: #888888;
+            font-size: 14px;
+        }
+        .cart-total {
+            text-align: right;
+            padding-top: 15px;
+            border-top: 2px solid #e0e0e0;
+            margin-top: 15px;
+        }
+        .cart-total-label {
+            color: #555555;
+            font-size: 14px;
+        }
+        .cart-total-value {
+            color: #333333;
+            font-size: 22px;
+            font-weight: 700;
+        }
+        .cta-button {
+            display: block;
+            background-color: #4a7c59;
+            color: #ffffff !important;
+            text-decoration: none;
+            padding: 16px 32px;
+            border-radius: 4px;
+            font-size: 18px;
+            font-weight: 600;
+            text-align: center;
+            margin: 30px auto;
+            max-width: 280px;
+        }
+        .cta-button:hover {
+            background-color: #3d6a4a;
+        }
+        .reminder-text {
+            text-align: center;
+            color: #888888;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+        .footer {
+            background-color: #333333;
+            color: #aaaaaa;
+            padding: 30px;
+            text-align: center;
+            font-size: 13px;
+        }
+        .footer a {
+            color: #aaaaaa;
+            text-decoration: underline;
+        }
+        @media screen and (max-width: 600px) {
+            .content {
+                padding: 20px 15px !important;
+            }
+            .cart-item {
+                flex-direction: column;
+            }
+            .cart-item-image {
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+        <tr>
+            <td style="padding: 20px 0;">
+                <table class="email-container" role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" align="center">
+                    <!-- Header -->
+                    <tr>
+                        <td class="header">
+                            <img src="https://buyorganicsonline.com.au/content/images/logo.png" alt="Buy Organics Online" />
+                        </td>
+                    </tr>
+
+                    <!-- Main Content -->
+                    <tr>
+                        <td class="content">
+                            <h2>Oops! You left something behind</h2>
+
+                            <p style="text-align: center;">
+                                Hi {{ .first_name | default "there" }}, we noticed you were browsing
+                                some great organic products but didn't complete your purchase.
+                                Don't worry - we've saved your cart for you!
+                            </p>
+
+                            <!-- Cart Items -->
+                            <div class="cart-items">
+                                {{ range .cart_items }}
+                                <table class="cart-item" role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                                    <tr>
+                                        <td width="80" valign="top">
+                                            <img src="{{ .image_url }}" alt="{{ .name }}" class="cart-item-image" width="80" height="80" />
+                                        </td>
+                                        <td valign="top" style="padding-left: 15px;">
+                                            <div class="cart-item-name">{{ .name }}</div>
+                                            <div class="cart-item-qty">Qty: {{ .quantity }}</div>
+                                            <div class="cart-item-price">${{ .price }}</div>
+                                        </td>
+                                    </tr>
+                                </table>
+                                {{ end }}
+
+                                <div class="cart-total">
+                                    <span class="cart-total-label">Cart Total:</span><br />
+                                    <span class="cart-total-value">${{ .cart_value }}</span>
+                                </div>
+                            </div>
+
+                            <a href="{{ .cart_url }}?utm_source=email&utm_medium=automation&utm_campaign=abandoned_cart&utm_content=complete_order" class="cta-button">
+                                Complete My Order
+                            </a>
+
+                            <p class="reminder-text">
+                                Your cart is reserved, but items may sell out!<br />
+                                Free shipping on orders over $99.
+                            </p>
+
+                            <p style="margin-top: 30px;">
+                                Need help? Our friendly team is here to assist.<br />
+                                <a href="mailto:sales@buyorganicsonline.com.au" style="color: #4a7c59;">sales@buyorganicsonline.com.au</a>
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td class="footer">
+                            <p>
+                                Buy Organics Online Pty Ltd<br />
+                                Australia's Trusted Organic Store
+                            </p>
+                            <p>
+                                <a href="https://buyorganicsonline.com.au">Shop</a> |
+                                <a href="https://buyorganicsonline.com.au/contact">Contact Us</a> |
+                                <a href="{{ .UnsubscribeURL }}">Unsubscribe</a>
+                            </p>
+                            <p style="font-size: 11px; color: #888888;">
+                                &copy; {{ .Year }} Buy Organics Online. All rights reserved.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
