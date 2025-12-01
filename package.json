@@ -5,7 +5,9 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
-    "test:watch": "vitest --watch"
+    "test:watch": "vitest --watch",
+    "beauty-campaign": "tsx scripts/launch-beauty-campaign-automated.ts",
+    "beauty-campaign:dry-run": "tsx scripts/launch-beauty-campaign-automated.ts --dry-run"
   },
   "dependencies": {
     "@hubspot/api-client": "^13.4.0",
