@@ -389,8 +389,10 @@ Vault Credentials Required:
       }
     }
 
-  } catch (error) {
-    console.error(`❌ Error: ${error instanceof Error ? error.message : error}`)
+  } catch (error: any) {
+    console.error(`❌ Error: ${error?.message || JSON.stringify(error, null, 2)}`)
+    if (error?.code) console.error(`   Code: ${error.code}`)
+    if (error?.hint) console.error(`   Hint: ${error.hint}`)
     process.exit(1)
   }
 
