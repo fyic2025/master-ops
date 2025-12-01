@@ -121,6 +121,7 @@ interface SendConfig {
   limitOverride: number | null
   testEmail: string | null
   testName: string | null
+  processQueue: boolean  // Process scheduled queue instead of direct send
 }
 
 interface AutomationConfig {
@@ -441,7 +442,177 @@ class GmailSender {
 }
 
 // ============================================================================
-// MAIN SEND FUNCTION
+// QUEUE PROCESSING FUNCTION
+// ============================================================================
+
+async function processQueue(config: SendConfig): Promise<SendResult> {
+  const startTime = Date.now()
+  const result: SendResult = {
+    success: false,
+    emailsSent: 0,
+    emailsFailed: 0,
+    errors: [],
+    duration: 0,
+  }
+
+  try {
+    console.log('\n🔐 Loading credentials...')
+    await creds.load('teelixir')
+
+    const supabaseKey = process.env.SUPABASE_SERVICE_KEY ||
+      await creds.get('global', 'supabase_service_key') ||
+      SUPABASE_SERVICE_KEY_FALLBACK
+
+    const supabase = createClient(SUPABASE_URL, supabaseKey)
+
+    // Get current Melbourne time
+    const { hour: currentHour, formatted: currentTime } = getMelbourneTime()
+    const today = new Date().toLocaleString('en-CA', { timeZone: TIMEZONE }).split(',')[0]
+
+    console.log(`\n🕐 Melbourne time: ${currentTime} (hour: ${currentHour})`)
+    console.log(`📅 Date: ${today}`)
+
+    // Get automation config
+    const { data: configData, error: configError } = await supabase
+      .from('tlx_automation_config')
+      .select('enabled, config')
+      .eq('automation_type', 'winback_40')
+      .single()
+
+    if (configError || !configData) {
+      throw new Error('Automation config not found')
+    }
+
+    const automationConfig: AutomationConfig = configData.config
+
+    if (!configData.enabled && !config.dryRun) {
+      console.log('\n⚠️  Automation is disabled')
+      result.success = true
+      return result
+    }
+
+    // Initialize Gmail
+    const gmail = await GmailSender.create(automationConfig)
+    if (!gmail.isConfigured() && !config.dryRun) {
+      throw new Error('Gmail not configured')
+    }
+
+    // Fetch pending queue items for current hour
+    console.log(`\n📥 Fetching queue for ${currentHour}:00...`)
+
+    const { data: queueItems, error: fetchError } = await supabase
+      .from('tlx_winback_queue')
+      .select('*')
+      .eq('scheduled_date', today)
+      .eq('scheduled_hour', currentHour)
+      .eq('status', 'pending')
+      .limit(config.limitOverride || 50)
+
+    if (fetchError) {
+      throw new Error(`Failed to fetch queue: ${fetchError.message}`)
+    }
+
+    if (!queueItems || queueItems.length === 0) {
+      console.log(`\n✅ No emails scheduled for ${currentHour}:00`)
+      result.success = true
+      return result
+    }
+
+    console.log(`   Found ${queueItems.length} emails to send`)
+
+    if (config.dryRun) {
+      console.log('\n🔍 DRY RUN - Would send:')
+      for (const item of queueItems.slice(0, 10)) {
+        console.log(`   - ${item.email} (${item.first_name || 'N/A'})`)
+      }
+      if (queueItems.length > 10) {
+        console.log(`   ... and ${queueItems.length - 10} more`)
+      }
+      result.emailsSent = queueItems.length
+      result.success = true
+      return result
+    }
+
+    // Send each email
+    const defaultName = automationConfig.default_name || 'there'
+    for (let i = 0; i < queueItems.length; i++) {
+      const item = queueItems[i]
+      const firstName = item.first_name || defaultName
+      const subject = automationConfig.subject_template.replace('{{ first_name }}', firstName)
+      const html = generateEmailHtml(firstName, item.email, automationConfig.discount_code, automationConfig.discount_percent)
+      const text = generateEmailText(firstName, automationConfig.discount_code, automationConfig.discount_percent)
+
+      process.stdout.write(`\r   Sending ${i + 1}/${queueItems.length}...`)
+
+      const sendResult = await gmail.send(item.email, subject, html, text)
+
+      if (sendResult.success) {
+        // Update queue status
+        await supabase
+          .from('tlx_winback_queue')
+          .update({ status: 'sent', processed_at: new Date().toISOString() })
+          .eq('id', item.id)
+
+        // Log to winback_emails table
+        await supabase.from('tlx_winback_emails').insert({
+          email: item.email,
+          klaviyo_profile_id: item.klaviyo_profile_id,
+          first_name: firstName,
+          discount_code: automationConfig.discount_code,
+          status: 'sent',
+          send_hour_melbourne: currentHour,
+        })
+
+        result.emailsSent++
+      } else {
+        // Mark as failed in queue
+        await supabase
+          .from('tlx_winback_queue')
+          .update({
+            status: 'failed',
+            processed_at: new Date().toISOString(),
+            error_message: sendResult.error,
+          })
+          .eq('id', item.id)
+
+        result.emailsFailed++
+        result.errors.push(`${item.email}: ${sendResult.error}`)
+      }
+
+      // Rate limit
+      await new Promise(r => setTimeout(r, 1000))
+    }
+
+    console.log('')
+
+    // Update automation config
+    await supabase
+      .from('tlx_automation_config')
+      .update({
+        last_run_at: new Date().toISOString(),
+        last_run_result: {
+          type: 'queue_process',
+          hour: currentHour,
+          emails_sent: result.emailsSent,
+          emails_failed: result.emailsFailed,
+        },
+        updated_at: new Date().toISOString(),
+      })
+      .eq('automation_type', 'winback_40')
+
+    result.success = result.errors.length === 0
+
+  } catch (error: any) {
+    result.errors.push(error.message)
+    result.success = false
+  }
+
+  result.duration = Date.now() - startTime
+  return result
+}
+
+// ============================================================================
+// MAIN SEND FUNCTION (Direct mode - bypasses queue)
 // ============================================================================
 
 async function sendWinbackEmails(config: SendConfig): Promise<SendResult> {
@@ -716,18 +887,27 @@ async function main() {
     limitOverride: parseInt(args.find(a => a.startsWith('--limit='))?.split('=')[1] || '') || null,
     testEmail: args.find(a => a.startsWith('--test-email='))?.split('=')[1] || null,
     testName: args.find(a => a.startsWith('--test-name='))?.split('=')[1] || null,
+    processQueue: args.includes('--process-queue'),
   }
 
   console.log('\n╔══════════════════════════════════════════════════════════════════════╗')
-  console.log('║  TEELIXIR - WINBACK EMAIL SENDER                                     ║')
-  console.log('║  Re-engage customers with 40% discount via GSuite                    ║')
+  if (config.processQueue) {
+    console.log('║  TEELIXIR - WINBACK QUEUE PROCESSOR                                  ║')
+    console.log('║  Send scheduled emails for the current hour                         ║')
+  } else {
+    console.log('║  TEELIXIR - WINBACK EMAIL SENDER                                     ║')
+    console.log('║  Re-engage customers with 40% discount via GSuite                    ║')
+  }
   console.log('╚══════════════════════════════════════════════════════════════════════╝')
 
   if (config.dryRun) {
     console.log('\n⚠️  DRY RUN MODE - No emails will be sent')
   }
 
-  const result = await sendWinbackEmails(config)
+  // Choose mode: queue processing or direct send
+  const result = config.processQueue
+    ? await processQueue(config)
+    : await sendWinbackEmails(config)
 
   console.log('\n┌─────────────────────────────────────────────────────────────────────┐')
   console.log('│ SEND RESULTS                                                        │')
