@@ -1,4 +1,4 @@
-// Nav config v2025-11-30T12:22
+// Nav config v2025-12-01T09:30 - Added SEO/Merchant nav for Teelixir & RHF
 import {
   Home,
   TrendingUp,
@@ -86,6 +86,8 @@ export const BUSINESSES: Record<BusinessCode, Business> = {
     bgColor: 'bg-brand-rhf',
     navigation: [
       { name: 'Dashboard', href: '', icon: Home },
+      { name: 'SEO', href: '/seo', icon: Search },
+      { name: 'Merchant Center', href: '/merchant', icon: ShoppingCart },
       { name: 'Orders', href: '/orders', icon: ShoppingCart },
       { name: 'Delivery Zones', href: '/delivery', icon: Truck },
       { name: 'Inventory', href: '/inventory', icon: Package },
@@ -101,6 +103,8 @@ export const BUSINESSES: Record<BusinessCode, Business> = {
     navigation: [
       { name: 'Dashboard', href: '', icon: Home },
       { name: 'Shipping', href: '/shipping', icon: Send },
+      { name: 'SEO', href: '/seo', icon: Search },
+      { name: 'Merchant Center', href: '/merchant', icon: ShoppingCart },
       { name: 'Distributors', href: '/distributors', icon: Truck },
       { name: 'Dist. Trends', href: '/distributors/trends', icon: TrendingUp },
       { name: 'Automations', href: '/automations', icon: Zap },

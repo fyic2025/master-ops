@@ -164,6 +164,23 @@ const CREDENTIAL_MAPPINGS = {
   'GOOGLE_ADS_BOO_CUSTOMER_ID': { project: 'boo', name: 'google_ads_customer_id', desc: 'BOO Google Ads Customer ID' },
   'GOOGLE_ADS_BOO_REFRESH_TOKEN': { project: 'boo', name: 'google_ads_refresh_token', desc: 'BOO Google Ads Refresh Token' },
   'GMC_BOO_MERCHANT_ID': { project: 'boo', name: 'google_merchant_id', desc: 'BOO Google Merchant Center ID' },
+  'GMC_BOO_REFRESH_TOKEN': { project: 'boo', name: 'google_merchant_refresh_token', desc: 'BOO Google Merchant Center Refresh Token' },
+
+  // Google Merchant Center - Teelixir
+  'GMC_TEELIXIR_MERCHANT_ID': { project: 'teelixir', name: 'google_merchant_id', desc: 'Teelixir Google Merchant Center ID' },
+  'GMC_TEELIXIR_REFRESH_TOKEN': { project: 'teelixir', name: 'google_merchant_refresh_token', desc: 'Teelixir GMC Refresh Token' },
+
+  // Google Merchant Center - Red Hill Fresh
+  'GMC_RHF_MERCHANT_ID': { project: 'redhillfresh', name: 'google_merchant_id', desc: 'RHF Google Merchant Center ID' },
+  'GMC_RHF_REFRESH_TOKEN': { project: 'redhillfresh', name: 'google_merchant_refresh_token', desc: 'RHF GMC Refresh Token' },
+
+  // Google Ads - Teelixir
+  'GOOGLE_ADS_TEELIXIR_CUSTOMER_ID': { project: 'teelixir', name: 'google_ads_customer_id', desc: 'Teelixir Google Ads Customer ID' },
+  'GOOGLE_ADS_TEELIXIR_REFRESH_TOKEN': { project: 'teelixir', name: 'google_ads_refresh_token', desc: 'Teelixir Google Ads Refresh Token' },
+
+  // Google Ads - RHF
+  'GOOGLE_ADS_RHF_CUSTOMER_ID': { project: 'redhillfresh', name: 'google_ads_customer_id', desc: 'RHF Google Ads Customer ID' },
+  'GOOGLE_ADS_RHF_REFRESH_TOKEN': { project: 'redhillfresh', name: 'google_ads_refresh_token', desc: 'RHF Google Ads Refresh Token' },
   'LIVECHAT_ACCOUNT_ID': { project: 'boo', name: 'livechat_account_id', desc: 'BOO LiveChat Account ID' },
   'LIVECHAT_PAT': { project: 'boo', name: 'livechat_pat', desc: 'BOO LiveChat PAT' },
   'LIVECHAT_ENTITY_ID': { project: 'boo', name: 'livechat_entity_id', desc: 'BOO LiveChat Entity ID' },
