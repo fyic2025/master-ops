@@ -62,6 +62,7 @@ const REDIRECT_URI = 'http://localhost:3000/callback'
 const SCOPES = [
   'offline_access',
   'accounting.transactions.read',
+  'accounting.journals.read',  // Required for journal data sync
   'accounting.reports.read',
   'accounting.settings',  // Full read/write for account updates
   'accounting.contacts.read',

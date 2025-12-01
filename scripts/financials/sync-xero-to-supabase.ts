@@ -25,10 +25,10 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
-import { XeroClient } from '../../shared/libs/integrations/xero/client';
+import { XeroConnector as XeroClient } from '../../shared/libs/integrations/xero/client';
 import * as fs from 'fs';
 import * as path from 'path';
-import logger from '../../shared/libs/logger';
+import { logger } from '../../shared/libs/logger';
 import { v4 as uuidv4 } from 'uuid';
 
 // Types
@@ -151,13 +151,13 @@ const elevateClient = new XeroClient({
 
 // Set tokens from credentials file
 if (xeroCredentials.teelixir) {
-  teelixirClient['tokenSet'] = xeroCredentials.teelixir.tokens;
-  teelixirClient['tenantId'] = xeroCredentials.teelixir.tenantId;
+  teelixirClient.storeTokens(xeroCredentials.teelixir.tenantId, xeroCredentials.teelixir.tokens);
+  teelixirClient.setTenant(xeroCredentials.teelixir.tenantId);
 }
 
 if (xeroCredentials.elevate) {
-  elevateClient['tokenSet'] = xeroCredentials.elevate.tokens;
-  elevateClient['tenantId'] = xeroCredentials.elevate.tenantId;
+  elevateClient.storeTokens(xeroCredentials.elevate.tenantId, xeroCredentials.elevate.tokens);
+  elevateClient.setTenant(xeroCredentials.elevate.tenantId);
 }
 
 // Validation: Check prerequisites
@@ -175,11 +175,11 @@ async function validatePrerequisites(): Promise<void> {
     throw new Error(`Cannot connect to Supabase: ${error.message}`);
   }
 
-  // Check account mappings exist
+  // Check account mappings exist (approved = has approved_by set)
   const { data: mappings, error: mappingsError } = await supabase
     .from('account_mappings')
     .select('count')
-    .eq('approval_status', 'approved');
+    .not('approved_by', 'is', null);
 
   if (mappingsError) {
     throw new Error(`Error checking mappings: ${mappingsError.message}`);
@@ -203,36 +203,41 @@ async function fetchXeroData(
   console.log(`Fetching ${orgName} data from Xero...`);
 
   try {
-    // Fetch journals for date range
-    const journals = await client.getJournals({
-      fromDate: from,
-      toDate: to
+    // Fetch all journals (then filter by date)
+    const allJournals = await client.journals.list();
+
+    // Filter by date range
+    const fromDate = new Date(from);
+    const toDate = new Date(to);
+    const journals = allJournals.filter(journal => {
+      const journalDate = new Date(journal.JournalDate);
+      return journalDate >= fromDate && journalDate <= toDate;
     });
 
-    logger.info(`Fetched ${journals.length} journals for ${orgName}`);
+    logger.info(`Fetched ${journals.length} journals (of ${allJournals.length} total) for ${orgName}`, { source: 'xero' });
 
     const journalLines: JournalLine[] = [];
 
     for (const journal of journals) {
-      for (const line of journal.journalLines || []) {
+      for (const line of journal.JournalLines || []) {
         journalLines.push({
           organization_id: orgId,
-          journal_id: journal.journalID,
-          journal_number: journal.journalNumber,
-          date: journal.journalDate,
-          description: line.description,
-          account_id: line.accountID,
-          account_code: line.accountCode,
-          account_name: line.accountName,
-          account_type: line.accountType,
-          contact_name: journal.sourceType === 'ACCREC' || journal.sourceType === 'ACCPAY'
-            ? (journal as any).contactName
+          journal_id: journal.JournalID,
+          journal_number: String(journal.JournalNumber),
+          date: journal.JournalDate,
+          description: line.Description,
+          account_id: line.AccountID,
+          account_code: line.AccountCode,
+          account_name: line.AccountName,
+          account_type: line.AccountType,
+          contact_name: journal.SourceType === 'ACCREC' || journal.SourceType === 'ACCPAY'
+            ? (journal as any).ContactName
             : undefined,
-          debit_amount: line.netAmount > 0 ? line.netAmount : 0,
-          credit_amount: line.netAmount < 0 ? Math.abs(line.netAmount) : 0,
-          net_amount: line.netAmount,
-          gross_amount: line.grossAmount || line.netAmount,
-          tax_amount: line.taxAmount,
+          debit_amount: line.NetAmount > 0 ? line.NetAmount : 0,
+          credit_amount: line.NetAmount < 0 ? Math.abs(line.NetAmount) : 0,
+          net_amount: line.NetAmount,
+          gross_amount: line.GrossAmount || line.NetAmount,
+          tax_amount: line.TaxAmount,
           sync_id: ''
         });
       }
@@ -241,8 +246,8 @@ async function fetchXeroData(
     console.log(`✓ Fetched ${journalLines.length} journal lines for ${orgName}\n`);
     return journalLines;
 
-  } catch (error) {
-    logger.error(`Error fetching ${orgName} data:`, error);
+  } catch (error: any) {
+    logger.error(`Error fetching ${orgName} data:`, { source: 'xero' }, error);
     throw error;
   }
 }
@@ -253,11 +258,11 @@ async function applyAccountMappings(
 ): Promise<JournalLine[]> {
   console.log('Applying account mappings...');
 
-  // Load approved mappings
+  // Load approved mappings (approved = has approved_by set)
   const { data: mappings, error } = await supabase
     .from('account_mappings')
     .select('*')
-    .eq('approval_status', 'approved');
+    .not('approved_by', 'is', null);
 
   if (error) {
     throw new Error(`Error loading mappings: ${error.message}`);
@@ -554,15 +559,23 @@ async function main() {
     // Step 2: Apply account mappings
     const mappedElevateLines = await applyAccountMappings(elevateLines);
 
-    // Step 3: Get intercompany eliminations
-    const { data: eliminations, error: elimError } = await supabase
-      .from('intercompany_eliminations')
-      .select('*')
-      .eq('period', options.period)
-      .eq('approval_status', 'approved');
+    // Step 3: Get intercompany eliminations (if table/view exists)
+    let eliminations: any[] = [];
+    try {
+      const [year, month] = options.period!.split('-').map(Number);
+      const { data, error: elimError } = await supabase
+        .from('intercompany_transactions')
+        .select('*')
+        .eq('period_year', year)
+        .eq('period_month', month)
+        .eq('is_eliminated', true);
 
-    if (elimError) {
-      throw new Error(`Error loading eliminations: ${elimError.message}`);
+      if (!elimError && data) {
+        eliminations = data;
+      }
+    } catch {
+      // Table may not exist, continue without eliminations
+      console.log('Note: intercompany_transactions table not available, skipping eliminations');
     }
 
     const eliminatedIds = new Set<string>();

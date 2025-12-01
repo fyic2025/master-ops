@@ -142,44 +142,109 @@ async function loadOborneProducts() {
 
     console.log(`Transformed ${supplierProducts.length} valid products\n`);
 
-    // Delete existing Oborne products
-    console.log(`Deleting existing ${SUPPLIER_NAME} products...`);
-    const { error: deleteError } = await supabase
-      .from('supplier_products')
-      .delete()
-      .eq('supplier_name', SUPPLIER_NAME);
+    // Deduplicate by SKU (keep first occurrence with highest stock)
+    const skuMap = new Map();
+    supplierProducts.forEach(p => {
+      const existing = skuMap.get(p.supplier_sku);
+      if (!existing || p.stock_level > existing.stock_level) {
+        skuMap.set(p.supplier_sku, p);
+      }
+    });
+    const deduped = Array.from(skuMap.values());
+    console.log(`Deduplicated: ${supplierProducts.length} -> ${deduped.length} unique SKUs\n`);
 
-    if (deleteError) {
-      console.error('Delete error:', deleteError.message);
-    } else {
-      console.log('Cleared existing products\n');
+    // Fetch all existing SKUs (paginated to handle >1000 rows)
+    console.log('Fetching existing Oborne products from database...');
+    const existingSkuMap = new Map();
+    let page = 0;
+    const PAGE_SIZE = 1000;
+    let hasMore = true;
+
+    while (hasMore) {
+      const { data: existingProducts, error: fetchError } = await supabase
+        .from('supplier_products')
+        .select('id, supplier_sku')
+        .eq('supplier_name', SUPPLIER_NAME)
+        .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
+
+      if (fetchError) {
+        console.error('Error fetching existing products:', fetchError.message);
+        break;
+      }
+
+      (existingProducts || []).forEach(p => existingSkuMap.set(p.supplier_sku, p.id));
+      hasMore = existingProducts && existingProducts.length === PAGE_SIZE;
+      page++;
     }
+    console.log(`Found ${existingSkuMap.size} existing Oborne products\n`);
 
-    // Batch insert
-    console.log('Loading to Supabase...');
+    // Split into updates and inserts
+    const toUpdate = [];
+    const toInsert = [];
+
+    deduped.forEach(p => {
+      const existingId = existingSkuMap.get(p.supplier_sku);
+      if (existingId) {
+        toUpdate.push({ ...p, id: existingId });
+      } else {
+        toInsert.push(p);
+      }
+    });
+
+    console.log(`Products to update: ${toUpdate.length}`);
+    console.log(`Products to insert: ${toInsert.length}\n`);
 
     const BATCH_SIZE = 500;
-    let inserted = 0;
+    let upserted = 0;
     let errors = 0;
 
-    for (let i = 0; i < supplierProducts.length; i += BATCH_SIZE) {
-      const batch = supplierProducts.slice(i, i + BATCH_SIZE);
+    // Process updates
+    if (toUpdate.length > 0) {
+      console.log('Updating existing products...');
+      for (let i = 0; i < toUpdate.length; i += BATCH_SIZE) {
+        const batch = toUpdate.slice(i, i + BATCH_SIZE);
 
-      try {
-        const { error } = await supabase
-          .from('supplier_products')
-          .insert(batch);
+        try {
+          const { error } = await supabase
+            .from('supplier_products')
+            .upsert(batch);
 
-        if (error) {
-          console.error(`Batch ${Math.floor(i / BATCH_SIZE) + 1} failed:`, error.message);
+          if (error) {
+            console.error(`Update batch ${Math.floor(i / BATCH_SIZE) + 1} failed:`, error.message);
+            errors += batch.length;
+          } else {
+            upserted += batch.length;
+            console.log(`Updated batch ${Math.floor(i / BATCH_SIZE) + 1}: ${batch.length} products`);
+          }
+        } catch (err) {
+          console.error(`Update batch ${Math.floor(i / BATCH_SIZE) + 1} error:`, err.message);
           errors += batch.length;
-        } else {
-          inserted += batch.length;
-          console.log(`Batch ${Math.floor(i / BATCH_SIZE) + 1}: ${batch.length} products`);
         }
-      } catch (err) {
-        console.error(`Batch ${Math.floor(i / BATCH_SIZE) + 1} error:`, err.message);
-        errors += batch.length;
+      }
+    }
+
+    // Process inserts
+    if (toInsert.length > 0) {
+      console.log('\nInserting new products...');
+      for (let i = 0; i < toInsert.length; i += BATCH_SIZE) {
+        const batch = toInsert.slice(i, i + BATCH_SIZE);
+
+        try {
+          const { error } = await supabase
+            .from('supplier_products')
+            .insert(batch);
+
+          if (error) {
+            console.error(`Insert batch ${Math.floor(i / BATCH_SIZE) + 1} failed:`, error.message);
+            errors += batch.length;
+          } else {
+            upserted += batch.length;
+            console.log(`Inserted batch ${Math.floor(i / BATCH_SIZE) + 1}: ${batch.length} products`);
+          }
+        } catch (err) {
+          console.error(`Insert batch ${Math.floor(i / BATCH_SIZE) + 1} error:`, err.message);
+          errors += batch.length;
+        }
       }
     }
 
@@ -189,13 +254,14 @@ async function loadOborneProducts() {
     console.log('========================================\n');
     console.log(`Total products fetched: ${products.length}`);
     console.log(`Valid products:         ${supplierProducts.length}`);
-    console.log(`Successfully loaded:    ${inserted}`);
+    console.log(`Unique SKUs:            ${deduped.length}`);
+    console.log(`Successfully upserted:  ${upserted}`);
     console.log(`Errors:                 ${errors}\n`);
 
-    // Count stock status
-    const availableCount = supplierProducts.filter(p => p.availability === 'available').length;
-    const outOfStockCount = supplierProducts.filter(p => p.availability === 'out_of_stock').length;
-    const discontinuedCount = supplierProducts.filter(p => p.availability === 'discontinued').length;
+    // Count stock status (from deduplicated data)
+    const availableCount = deduped.filter(p => p.availability === 'available').length;
+    const outOfStockCount = deduped.filter(p => p.availability === 'out_of_stock').length;
+    const discontinuedCount = deduped.filter(p => p.availability === 'discontinued').length;
 
     console.log(`In Stock:     ${availableCount}`);
     console.log(`Out of Stock: ${outOfStockCount}`);
@@ -210,7 +276,7 @@ async function loadOborneProducts() {
     console.log(`Oborne products in database: ${count}\n`);
     console.log('========================================\n');
 
-    return { success: true, count: inserted, available: availableCount, outOfStock: outOfStockCount, discontinued: discontinuedCount };
+    return { success: true, count: upserted, available: availableCount, outOfStock: outOfStockCount, discontinued: discontinuedCount };
 
   } catch (error) {
     console.error('\nError:', error.message);

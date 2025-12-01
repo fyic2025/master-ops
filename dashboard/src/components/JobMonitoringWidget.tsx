@@ -11,7 +11,8 @@ import {
   Copy,
   ChevronRight,
   X,
-  Loader2
+  Loader2,
+  Play
 } from 'lucide-react'
 
 interface JobStatus {
@@ -107,10 +108,23 @@ async function refreshJobs(): Promise<JobsResponse> {
   return res.json()
 }
 
+async function triggerSync(jobName: string): Promise<{ success: boolean; message?: string; error?: string }> {
+  const res = await fetch('/api/jobs/sync', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ jobName })
+  })
+  return res.json()
+}
+
+// Jobs that support manual sync via dashboard
+const SYNCABLE_JOBS = ['livechat-sync', 'gmc-sync', 'gsc-issues-sync']
+
 export function JobMonitoringWidget() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [showAllJobs, setShowAllJobs] = useState(false)
   const [copiedId, setCopiedId] = useState<string | null>(null)
+  const [syncingJob, setSyncingJob] = useState<string | null>(null)
   const queryClient = useQueryClient()
 
   const { data, isLoading, error } = useQuery({
@@ -125,6 +139,26 @@ export function JobMonitoringWidget() {
       queryClient.setQueryData(['job-status'], data)
     }
   })
+
+  const syncMutation = useMutation({
+    mutationFn: triggerSync,
+    onMutate: (jobName) => {
+      setSyncingJob(jobName)
+    },
+    onSuccess: () => {
+      // Refresh job statuses after sync
+      queryClient.invalidateQueries({ queryKey: ['job-status'] })
+    },
+    onSettled: () => {
+      setSyncingJob(null)
+    }
+  })
+
+  const handleSync = async (job: JobStatus) => {
+    if (SYNCABLE_JOBS.includes(job.job_name)) {
+      syncMutation.mutate(job.job_name)
+    }
+  }
 
   const handleCopy = async (job: JobStatus) => {
     const command = generateFixCommand(job)
@@ -262,6 +296,9 @@ export function JobMonitoringWidget() {
                       job={job}
                       onCopy={handleCopy}
                       isCopied={copiedId === job.id}
+                      onSync={handleSync}
+                      isSyncing={syncingJob === job.job_name}
+                      canSync={SYNCABLE_JOBS.includes(job.job_name)}
                     />
                   ))}
                 </>
@@ -310,11 +347,17 @@ export function JobMonitoringWidget() {
 function JobCard({
   job,
   onCopy,
-  isCopied
+  isCopied,
+  onSync,
+  isSyncing,
+  canSync
 }: {
   job: JobStatus
   onCopy: (job: JobStatus) => void
   isCopied: boolean
+  onSync?: (job: JobStatus) => void
+  isSyncing?: boolean
+  canSync?: boolean
 }) {
   const config = statusConfig[job.status] || statusConfig.unknown
   const Icon = config.icon
@@ -344,21 +387,41 @@ function JobCard({
             <p className="text-xs text-red-400 mt-2">{job.error_message}</p>
           )}
         </div>
-        <button
-          onClick={() => onCopy(job)}
-          className={`p-2 rounded transition-colors ${
-            isCopied
-              ? 'bg-green-500/20 text-green-400'
-              : 'bg-gray-800 hover:bg-gray-700 text-gray-400'
-          }`}
-          title="Copy fix command for Claude Code"
-        >
-          {isCopied ? (
-            <CheckCircle className="w-4 h-4" />
-          ) : (
-            <Copy className="w-4 h-4" />
+        <div className="flex gap-1">
+          {canSync && onSync && (
+            <button
+              onClick={() => onSync(job)}
+              disabled={isSyncing}
+              className={`p-2 rounded transition-colors ${
+                isSyncing
+                  ? 'bg-blue-500/20 text-blue-400'
+                  : 'bg-blue-600 hover:bg-blue-500 text-white'
+              }`}
+              title="Sync Now"
+            >
+              {isSyncing ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Play className="w-4 h-4" />
+              )}
+            </button>
           )}
-        </button>
+          <button
+            onClick={() => onCopy(job)}
+            className={`p-2 rounded transition-colors ${
+              isCopied
+                ? 'bg-green-500/20 text-green-400'
+                : 'bg-gray-800 hover:bg-gray-700 text-gray-400'
+            }`}
+            title="Copy fix command for Claude Code"
+          >
+            {isCopied ? (
+              <CheckCircle className="w-4 h-4" />
+            ) : (
+              <Copy className="w-4 h-4" />
+            )}
+          </button>
+        </div>
       </div>
     </div>
   )

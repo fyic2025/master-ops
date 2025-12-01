@@ -20,6 +20,16 @@
     },
     {
       "parameters": {
+        "jsCode": "// Generate HMAC-SHA256 signature for Unleashed API\n// Unleashed requires: signature = HMAC-SHA256(API_KEY, queryString)\n\nconst crypto = require('crypto');\n\nconst apiId = $env.UNLEASHED_TEELIXIR_API_ID || '7fda9404-7197-477b-89b1-dadbcefae168';\nconst apiKey = $env.UNLEASHED_TEELIXIR_API_KEY || 'a65AOqESdYl9GHyhqohaoYPGWsugYa2V1xi90zRn4pW4LzjCcgF3JUB3Z8YI4PNq5duUphxQ8zGOCwNKexDQ==';\n\n// Query string for the Sales Orders endpoint (pageSize=200)\nconst queryString = 'pageSize=200';\n\n// Generate HMAC-SHA256 signature\nconst signature = crypto\n  .createHmac('sha256', apiKey)\n  .update(queryString)\n  .digest('base64');\n\nreturn [{\n  json: {\n    apiId,\n    signature,\n    queryString\n  }\n}];"
+      },
+      "id": "generate-signature",
+      "name": "Generate HMAC Signature",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
         "url": "https://api.unleashedsoftware.com/SalesOrders/1?pageSize=200",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
@@ -28,14 +38,18 @@
           "parameters": [
             {
               "name": "api-auth-id",
-              "value": "={{ $env.UNLEASHED_TEELIXIR_API_ID }}"
+              "value": "={{ $json.apiId }}"
             },
             {
               "name": "api-auth-signature",
-              "value": "={{ $env.UNLEASHED_TEELIXIR_API_KEY }}"
+              "value": "={{ $json.signature }}"
             },
             {
               "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Accept",
               "value": "application/json"
             }
           ]
@@ -46,7 +60,7 @@
       "name": "Fetch Unleashed Sales Orders",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 3,
-      "position": [450, 300]
+      "position": [650, 300]
     },
     {
       "parameters": {
@@ -56,7 +70,7 @@
       "name": "Split into Items",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [650, 300]
+      "position": [850, 300]
     },
     {
       "parameters": {
@@ -113,7 +127,7 @@
       "name": "Parse Order Data",
       "type": "n8n-nodes-base.set",
       "typeVersion": 1,
-      "position": [850, 300]
+      "position": [1050, 300]
     },
     {
       "parameters": {
@@ -371,6 +385,17 @@
       "main": [
         [
           {
+            "node": "Generate HMAC Signature",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate HMAC Signature": {
+      "main": [
+        [
+          {
             "node": "Fetch Unleashed Sales Orders",
             "type": "main",
             "index": 0
@@ -525,11 +550,11 @@
       ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "1",
+  "versionId": "2",
   "id": "unleashed-order-sync",
   "meta": {
     "instanceId": "master-ops"

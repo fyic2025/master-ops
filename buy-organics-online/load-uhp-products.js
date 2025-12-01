@@ -133,44 +133,98 @@ async function loadUHPProducts() {
 
     console.log(`✓ Transformed ${products.length} valid products\n`);
 
-    // Delete existing UHP products
-    console.log(`Deleting existing ${SUPPLIER_NAME} products...`);
-    const { error: deleteError } = await supabase
-      .from('supplier_products')
-      .delete()
-      .eq('supplier_name', SUPPLIER_NAME);
+    // Fetch all existing SKUs (paginated to handle >1000 rows)
+    console.log('Fetching existing UHP products from database...');
+    const existingSkuMap = new Map();
+    let page = 0;
+    const PAGE_SIZE = 1000;
+    let hasMore = true;
 
-    if (deleteError) {
-      console.error('⚠️  Delete error:', deleteError.message);
-    } else {
-      console.log('✓ Cleared existing products\n');
+    while (hasMore) {
+      const { data: existingProducts, error: fetchError } = await supabase
+        .from('supplier_products')
+        .select('id, supplier_sku')
+        .eq('supplier_name', SUPPLIER_NAME)
+        .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
+
+      if (fetchError) {
+        console.error('Error fetching existing products:', fetchError.message);
+        break;
+      }
+
+      (existingProducts || []).forEach(p => existingSkuMap.set(p.supplier_sku, p.id));
+      hasMore = existingProducts && existingProducts.length === PAGE_SIZE;
+      page++;
     }
+    console.log(`Found ${existingSkuMap.size} existing UHP products\n`);
 
-    // Batch insert
-    console.log('Loading to Supabase...');
+    // Split into updates and inserts
+    const toUpdate = [];
+    const toInsert = [];
+
+    products.forEach(p => {
+      const existingId = existingSkuMap.get(p.supplier_sku);
+      if (existingId) {
+        toUpdate.push({ ...p, id: existingId });
+      } else {
+        toInsert.push(p);
+      }
+    });
+
+    console.log(`Products to update: ${toUpdate.length}`);
+    console.log(`Products to insert: ${toInsert.length}\n`);
 
     const BATCH_SIZE = 500;
-    let inserted = 0;
+    let upserted = 0;
     let errors = 0;
 
-    for (let i = 0; i < products.length; i += BATCH_SIZE) {
-      const batch = products.slice(i, i + BATCH_SIZE);
+    // Process updates
+    if (toUpdate.length > 0) {
+      console.log('Updating existing products...');
+      for (let i = 0; i < toUpdate.length; i += BATCH_SIZE) {
+        const batch = toUpdate.slice(i, i + BATCH_SIZE);
 
-      try {
-        const { error } = await supabase
-          .from('supplier_products')
-          .insert(batch);
+        try {
+          const { error } = await supabase
+            .from('supplier_products')
+            .upsert(batch);
 
-        if (error) {
-          console.error(`✗ Batch ${Math.floor(i / BATCH_SIZE) + 1} failed:`, error.message);
+          if (error) {
+            console.error(`✗ Update batch ${Math.floor(i / BATCH_SIZE) + 1} failed:`, error.message);
+            errors += batch.length;
+          } else {
+            upserted += batch.length;
+            console.log(`✓ Updated batch ${Math.floor(i / BATCH_SIZE) + 1}: ${batch.length} products`);
+          }
+        } catch (err) {
+          console.error(`✗ Update batch ${Math.floor(i / BATCH_SIZE) + 1} error:`, err.message);
           errors += batch.length;
-        } else {
-          inserted += batch.length;
-          console.log(`✓ Batch ${Math.floor(i / BATCH_SIZE) + 1}: ${batch.length} products`);
         }
-      } catch (err) {
-        console.error(`✗ Batch ${Math.floor(i / BATCH_SIZE) + 1} error:`, err.message);
-        errors += batch.length;
+      }
+    }
+
+    // Process inserts
+    if (toInsert.length > 0) {
+      console.log('\nInserting new products...');
+      for (let i = 0; i < toInsert.length; i += BATCH_SIZE) {
+        const batch = toInsert.slice(i, i + BATCH_SIZE);
+
+        try {
+          const { error } = await supabase
+            .from('supplier_products')
+            .insert(batch);
+
+          if (error) {
+            console.error(`✗ Insert batch ${Math.floor(i / BATCH_SIZE) + 1} failed:`, error.message);
+            errors += batch.length;
+          } else {
+            upserted += batch.length;
+            console.log(`✓ Inserted batch ${Math.floor(i / BATCH_SIZE) + 1}: ${batch.length} products`);
+          }
+        } catch (err) {
+          console.error(`✗ Insert batch ${Math.floor(i / BATCH_SIZE) + 1} error:`, err.message);
+          errors += batch.length;
+        }
       }
     }
 
@@ -180,7 +234,7 @@ async function loadUHPProducts() {
     console.log('========================================\n');
     console.log(`Total products fetched: ${data.length}`);
     console.log(`Valid products:         ${products.length}`);
-    console.log(`Successfully loaded:    ${inserted}`);
+    console.log(`Successfully upserted:  ${upserted}`);
     console.log(`Errors:                 ${errors}\n`);
 
     // Verify

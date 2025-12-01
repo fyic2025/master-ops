@@ -276,12 +276,12 @@ async function upsertProducts(accountId, products) {
     const batch = records.slice(i, i + batchSize);
 
     try {
-      // Use upsert with on_conflict
-      const url = new URL(DATA_SUPABASE_URL + '/rest/v1/google_merchant_products');
+      // Use upsert with on_conflict - specify the unique constraint columns
+      const url = new URL(DATA_SUPABASE_URL + '/rest/v1/google_merchant_products?on_conflict=account_id,product_id');
 
       const options = {
         hostname: url.hostname,
-        path: url.pathname,
+        path: url.pathname + url.search,
         method: 'POST',
         headers: {
           'apikey': DATA_SUPABASE_KEY,
@@ -375,12 +375,12 @@ async function createDailySnapshot(accountId, products) {
   };
 
   try {
-    // Upsert snapshot (update if exists for today)
-    const url = new URL(DATA_SUPABASE_URL + '/rest/v1/google_merchant_account_snapshots');
+    // Upsert snapshot (update if exists for today) - use account_id,snapshot_date as conflict columns
+    const url = new URL(DATA_SUPABASE_URL + '/rest/v1/google_merchant_account_snapshots?on_conflict=account_id,snapshot_date');
 
     const options = {
       hostname: url.hostname,
-      path: url.pathname,
+      path: url.pathname + url.search,
       method: 'POST',
       headers: {
         'apikey': DATA_SUPABASE_KEY,

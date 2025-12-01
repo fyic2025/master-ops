@@ -17,12 +17,12 @@
     },
     {
       "parameters": {
-        "sendTo": "={{ $json.to }}",
-        "subject": "={{ $json.subject }}",
+        "sendTo": "={{ $json.body.to }}",
+        "subject": "={{ $json.body.subject }}",
         "emailType": "html",
-        "message": "={{ $json.html }}",
+        "message": "={{ $json.body.html }}",
         "options": {
-          "ccEmail": "={{ $json.cc }}"
+          "ccEmail": "={{ $json.body.cc }}"
         }
       },
       "id": "send-gmail",
@@ -32,7 +32,7 @@
       "position": [460, 300],
       "credentials": {
         "gmailOAuth2": {
-          "id": "gmail",
+          "id": "VMKG9RXxpw8wfHdU",
           "name": "Gmail account"
         }
       }
@@ -84,6 +84,13 @@
             "type": "main",
             "index": 0
           }
+        ],
+        [
+          {
+            "node": "Respond Error",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     }
@@ -91,7 +98,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "active": false,
+  "active": true,
   "tags": [
     {
       "name": "BOO"

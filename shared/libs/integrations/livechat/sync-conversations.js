@@ -254,7 +254,7 @@ async function upsertMessages(conversationId, chat) {
     try {
       await supabaseRequest(
         'POST',
-        '/rest/v1/livechat_messages',
+        '/rest/v1/livechat_messages?on_conflict=conversation_id,livechat_message_id',
         batch,
         { 'Prefer': 'resolution=merge-duplicates' }
       );

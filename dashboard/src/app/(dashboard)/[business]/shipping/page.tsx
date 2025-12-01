@@ -18,6 +18,7 @@ import {
   Filter,
 } from 'lucide-react'
 import { type BusinessCode } from '@/lib/business-config'
+import { OrderDetailsDrawer } from '@/components/shipping/OrderDetailsDrawer'
 
 // Types for shipping orders
 interface ShippingOrder {
@@ -28,10 +29,16 @@ interface ShippingOrder {
   business_code: string
   customer_name: string
   customer_email: string
+  customer_phone?: string
+  // Full shipping address
+  ship_to_name?: string
+  ship_to_company?: string
+  ship_to_address1?: string
+  ship_to_address2?: string
   ship_to_city: string
   ship_to_state: string
-  ship_to_country: string
   ship_to_postcode: string
+  ship_to_country: string
   order_date: string
   item_count: number
   total_weight_grams: number | null
@@ -41,6 +48,12 @@ interface ShippingOrder {
   service_code: string | null
   tracking_number: string | null
   manifest_number: string | null
+  products?: Array<{
+    name: string
+    sku?: string
+    quantity: number
+    price: number
+  }>
 }
 
 const BUSINESS_LABELS: Record<string, { name: string; color: string }> = {
@@ -104,6 +117,11 @@ export default function ShippingPage() {
   const [searchQuery, setSearchQuery] = useState('')
   // Business filter for home view - 'all' shows all businesses
   const [businessFilter, setBusinessFilter] = useState<string>('all')
+  // Drawer state
+  const [selectedOrder, setSelectedOrder] = useState<ShippingOrder | null>(null)
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  // Historical sync months (0 = new only)
+  const [syncMonths, setSyncMonths] = useState<number>(0)
 
   // Fetch orders
   const fetchOrders = useCallback(async () => {
@@ -130,15 +148,18 @@ export default function ShippingPage() {
   }, [fetchOrders])
 
   // Sync orders from platform
-  const syncOrders = async () => {
+  const syncOrders = async (months: number = 0) => {
     setSyncing(true)
+    setError(null)
     try {
       const res = await fetch(`/api/shipping/sync`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ business: businessCode }),
+        body: JSON.stringify({ business: businessCode, months }),
       })
       if (!res.ok) throw new Error('Sync failed')
+      const data = await res.json()
+      console.log('Sync result:', data)
       await fetchOrders()
     } catch (err: any) {
       setError(err.message)
@@ -221,6 +242,23 @@ export default function ShippingPage() {
     }
   }
 
+  // Open order drawer
+  const openOrderDrawer = (order: ShippingOrder) => {
+    setSelectedOrder(order)
+    setDrawerOpen(true)
+  }
+
+  // Close order drawer
+  const closeOrderDrawer = () => {
+    setDrawerOpen(false)
+    setSelectedOrder(null)
+  }
+
+  // Handle label created - refresh orders
+  const handleLabelCreated = () => {
+    fetchOrders()
+  }
+
   // Get platform source label
   const getSourceLabel = (source: string) => {
     switch (source) {
@@ -274,14 +312,38 @@ export default function ShippingPage() {
           )}
         </div>
         <div className="flex items-center gap-3">
+          {/* Sync New Orders button */}
           <button
-            onClick={syncOrders}
+            onClick={() => syncOrders(0)}
             disabled={syncing}
             className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors disabled:opacity-50"
           >
             <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
-            {syncing ? 'Syncing...' : 'Sync Orders'}
+            {syncing ? 'Syncing...' : 'Sync New'}
           </button>
+          {/* Historical Sync with month selector */}
+          <div className="flex items-center gap-1">
+            <select
+              value={syncMonths}
+              onChange={(e) => setSyncMonths(Number(e.target.value))}
+              disabled={syncing}
+              className="bg-gray-800 border border-gray-700 text-white rounded-l-lg px-3 py-2 text-sm focus:outline-none focus:border-purple-500 disabled:opacity-50"
+            >
+              <option value={1}>1 month</option>
+              <option value={2}>2 months</option>
+              <option value={3}>3 months</option>
+              <option value={6}>6 months</option>
+            </select>
+            <button
+              onClick={() => syncOrders(syncMonths)}
+              disabled={syncing || syncMonths === 0}
+              className="flex items-center gap-2 px-3 py-2 bg-purple-700 hover:bg-purple-600 text-white rounded-r-lg transition-colors disabled:opacity-50 text-sm"
+              title={`Sync ${syncMonths} month(s) of historical orders`}
+            >
+              <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
+              {syncing ? 'Syncing...' : 'Historical'}
+            </button>
+          </div>
           {/* Manifest button - show when on printed tab */}
           {activeTab === 'printed' && (
             <button
@@ -378,14 +440,38 @@ export default function ShippingPage() {
                 : `No orders in the ${activeTab} status.`}
             </p>
             {activeTab === 'new' && (
-              <button
-                onClick={syncOrders}
-                disabled={syncing}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors"
-              >
-                <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
-                Sync Orders
-              </button>
+              <div className="flex flex-col items-center gap-3">
+                <button
+                  onClick={() => syncOrders(0)}
+                  disabled={syncing}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors"
+                >
+                  <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
+                  Sync New Orders
+                </button>
+                <div className="flex items-center gap-2">
+                  <span className="text-gray-400 text-sm">Or sync historical:</span>
+                  <select
+                    value={syncMonths}
+                    onChange={(e) => setSyncMonths(Number(e.target.value))}
+                    disabled={syncing}
+                    className="bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-purple-500"
+                  >
+                    <option value={1}>1 month</option>
+                    <option value={2}>2 months</option>
+                    <option value={3}>3 months</option>
+                    <option value={6}>6 months</option>
+                  </select>
+                  <button
+                    onClick={() => syncOrders(syncMonths)}
+                    disabled={syncing}
+                    className="inline-flex items-center gap-2 px-3 py-2 bg-purple-700 hover:bg-purple-600 text-white rounded-lg transition-colors text-sm"
+                  >
+                    <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
+                    Go
+                  </button>
+                </div>
+              </div>
             )}
           </div>
         ) : (
@@ -416,11 +502,12 @@ export default function ShippingPage() {
               {filteredOrders.map(order => (
                 <tr
                   key={order.id}
-                  className={`hover:bg-gray-800/50 transition-colors ${
+                  onClick={() => openOrderDrawer(order)}
+                  className={`hover:bg-gray-800/50 transition-colors cursor-pointer ${
                     selectedOrders.has(order.id) ? 'bg-blue-500/10' : ''
                   }`}
                 >
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                     <input
                       type="checkbox"
                       checked={selectedOrders.has(order.id)}
@@ -475,7 +562,7 @@ export default function ShippingPage() {
                       {order.status}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center justify-end gap-2">
                       {order.tracking_number && (
                         <a
@@ -489,6 +576,7 @@ export default function ShippingPage() {
                         </a>
                       )}
                       <button
+                        onClick={() => openOrderDrawer(order)}
                         className="p-1.5 text-gray-400 hover:text-white transition-colors"
                         title="Print Label"
                       >
@@ -521,6 +609,14 @@ export default function ShippingPage() {
           </span>
         </div>
       )}
+
+      {/* Order Details Drawer */}
+      <OrderDetailsDrawer
+        order={selectedOrder}
+        isOpen={drawerOpen}
+        onClose={closeOrderDrawer}
+        onLabelCreated={handleLabelCreated}
+      />
     </div>
   )
 }
