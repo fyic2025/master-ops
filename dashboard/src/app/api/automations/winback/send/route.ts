@@ -276,19 +276,30 @@ export async function POST() {
       return NextResponse.json({ error: 'Gmail credentials not configured in vault' }, { status: 500 })
     }
 
-    // Get eligible profiles (not yet emailed)
-    const { data: profiles, error: profilesError } = await supabase
-      .from('tlx_unengaged_pool')
+    // Get emails already sent (to exclude them)
+    const { data: alreadySent } = await supabase
+      .from('tlx_winback_emails')
+      .select('email')
+
+    const sentEmails = new Set((alreadySent || []).map(r => r.email.toLowerCase()))
+
+    // Get eligible profiles from Klaviyo unengaged pool (not yet emailed)
+    const { data: allProfiles, error: profilesError } = await supabase
+      .from('tlx_klaviyo_unengaged')
       .select('*')
-      .eq('status', 'pending')
       .order('last_order_date', { ascending: true })
-      .limit(remaining)
 
     if (profilesError) {
-      return NextResponse.json({ error: 'Failed to fetch profiles' }, { status: 500 })
+      console.error('Profile fetch error:', profilesError)
+      return NextResponse.json({ error: `Failed to fetch profiles: ${profilesError.message}` }, { status: 500 })
     }
 
-    if (!profiles || profiles.length === 0) {
+    // Filter out already-emailed profiles
+    const profiles = (allProfiles || [])
+      .filter(p => !sentEmails.has(p.email.toLowerCase()))
+      .slice(0, remaining)
+
+    if (profiles.length === 0) {
       return NextResponse.json({ message: 'No eligible profiles to email', emails_sent: 0 })
     }
 
@@ -318,7 +329,7 @@ export async function POST() {
 
         // Record in database
         await supabase.from('tlx_winback_emails').insert({
-          profile_id: profile.id,
+          klaviyo_profile_id: profile.klaviyo_profile_id,
           email: profile.email,
           first_name: profile.first_name,
           discount_code: config.discount_code,
@@ -326,15 +337,21 @@ export async function POST() {
           sent_at: new Date().toISOString()
         })
 
-        // Update profile status
-        await supabase
-          .from('tlx_unengaged_pool')
-          .update({ status: 'emailed', updated_at: new Date().toISOString() })
-          .eq('id', profile.id)
-
         console.log(`[Winback] Sent to ${profile.email}`)
       } else {
         failedCount++
+
+        // Record failed attempt
+        await supabase.from('tlx_winback_emails').insert({
+          klaviyo_profile_id: profile.klaviyo_profile_id,
+          email: profile.email,
+          first_name: profile.first_name,
+          discount_code: config.discount_code,
+          status: 'failed',
+          error_message: result.error,
+          sent_at: new Date().toISOString()
+        })
+
         console.error(`[Winback] Failed to send to ${profile.email}: ${result.error}`)
       }
 
