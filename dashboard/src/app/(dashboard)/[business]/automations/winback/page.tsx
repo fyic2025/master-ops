@@ -365,17 +365,20 @@ export default function WinbackPage() {
             {/* Daily Limit */}
             <div>
               <label className="block text-gray-400 text-sm mb-2">Daily Send Limit</label>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-4">
                 <input
                   type="range"
                   min={5}
-                  max={50}
+                  max={100}
                   step={5}
                   value={config?.daily_limit ?? 20}
                   onChange={(e) => updateDailyLimit(parseInt(e.target.value))}
-                  className="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+                  className="flex-1 h-2 rounded-lg cursor-pointer accent-purple-500 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-purple-500 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-lg [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-purple-500 [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:cursor-pointer"
+                  style={{
+                    background: `linear-gradient(to right, #a855f7 0%, #a855f7 ${((config?.daily_limit ?? 20) - 5) / 95 * 100}%, #374151 ${((config?.daily_limit ?? 20) - 5) / 95 * 100}%, #374151 100%)`
+                  }}
                 />
-                <span className="text-white font-semibold w-12 text-right">
+                <span className="text-white font-bold text-lg min-w-[3rem] text-right">
                   {config?.daily_limit ?? 20}
                 </span>
               </div>
