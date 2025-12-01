@@ -4,6 +4,7 @@ import { BusinessCard } from '@/components/BusinessCard'
 import { IntegrationStatus } from '@/components/IntegrationStatus'
 import { AlertsPanel } from '@/components/AlertsPanel'
 import ApiUsageWidget from '@/components/ApiUsageWidget'
+import { JobMonitoringWidget } from '@/components/JobMonitoringWidget'
 
 export default function BusinessDashboard({
   params,
@@ -71,16 +72,22 @@ function HomeDashboard() {
         </div>
       </section>
 
-      {/* API Usage + Integration Status */}
+      {/* Job Monitoring + Integration Status */}
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div>
-          <h2 className="text-xl font-semibold text-white mb-4">API Usage</h2>
-          <ApiUsageWidget />
+          <h2 className="text-xl font-semibold text-white mb-4">Automated Jobs</h2>
+          <JobMonitoringWidget />
         </div>
         <div>
           <h2 className="text-xl font-semibold text-white mb-4">Integration Health</h2>
           <IntegrationStatus />
         </div>
+      </section>
+
+      {/* API Usage */}
+      <section>
+        <h2 className="text-xl font-semibold text-white mb-4">API Usage</h2>
+        <ApiUsageWidget />
       </section>
 
       {/* Alerts */}
