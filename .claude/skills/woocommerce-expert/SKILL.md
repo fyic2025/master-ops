@@ -73,22 +73,91 @@
 ### Red Hill Fresh
 
 **Platform:** WooCommerce + WordPress
-**Store URL:** redhillfresh.com.au
+**Store URL:** https://redhillfresh.com.au
 **WooCommerce Version:** Latest stable
 **WordPress Version:** Latest stable
 
+**Business Model:**
+Red Hill Fresh is a local farm-to-table fresh produce business serving the Mornington Peninsula and Melbourne metro areas. They specialize in locally sourced organic fruits, vegetables, dairy, eggs, and prepared foods with a focus on seasonal availability and farm-gate freshness.
+
 **Store Stats:**
-- Products: 200+ (fresh produce)
-- Categories: 20+
-- Orders/week: Variable (local delivery)
-- Customer accounts: Active
+- Products: 200+ (fresh produce, seasonal rotation)
+- Categories: 20+ organized by product type
+- Orders/week: Variable (influenced by seasonal demand)
+- Delivery zones: Mornington Peninsula (local), Melbourne Metro, Rest of Australia
+- Customer accounts: Active with repeat customer loyalty programs
+
+**Key Features:**
+- Farm gate pickup available at Red Hill location
+- Local delivery scheduling (same-day/next-day for peninsula)
+- Seasonal product rotation based on harvest availability
+- Weight-based variable products (1kg, 2kg, 3kg options)
+- Fresh produce with short shelf-life inventory management
+
+**Payment Methods:**
+- Stripe (primary credit/debit card processor)
+- PayPal
+- Bank transfer (for wholesale/large orders)
+
+**Shipping Configuration:**
+- Zone 1: Mornington Peninsula - Free delivery over $50, $8 flat rate under $50
+- Zone 2: Melbourne Metro - $15 flat rate, free over $100
+- Zone 3: Rest of Australia - Australia Post calculated rates
+- Farm gate pickup: Free (Red Hill location)
 
 **Key Integrations:**
-- Local delivery scheduling
-- Australia Post shipping
-- Stripe payments
-- PayPal
-- Xero accounting
+- Xero accounting (automated invoice sync)
+- Stripe payment gateway
+- Local delivery scheduling system
+- Australia Post shipping calculator
+- Inventory management for perishable goods
+
+---
+
+## Credential Setup
+
+This skill uses the unified credential system via `creds.js` to securely load Red Hill Fresh WooCommerce credentials from the encrypted vault.
+
+### Available Credentials
+
+All credentials are stored in the vault under the `redhillfresh` project:
+
+| Vault Name | Environment Variable | Purpose |
+|------------|---------------------|---------|
+| `wc_consumer_key` | `REDHILLFRESH_WC_CONSUMER_KEY` | WooCommerce REST API consumer key |
+| `wc_consumer_secret` | `REDHILLFRESH_WC_CONSUMER_SECRET` | WooCommerce REST API consumer secret |
+| `wp_url` | `REDHILLFRESH_WP_URL` | WordPress/WooCommerce store URL |
+| `wp_admin_user` | `REDHILLFRESH_WP_ADMIN_USER` | WordPress admin username |
+| `wp_admin_password` | `REDHILLFRESH_WP_ADMIN_PASSWORD` | WordPress admin password |
+| `wp_app_password` | `REDHILLFRESH_WP_APP_PASSWORD` | WordPress application password |
+
+### Loading Credentials
+
+```javascript
+// In any script within this skill
+const creds = require('../../../../creds');
+
+// Load Red Hill Fresh + global credentials into process.env
+await creds.load('redhillfresh');
+
+// Now access via environment variables
+const consumerKey = process.env.REDHILLFRESH_WC_CONSUMER_KEY;
+const consumerSecret = process.env.REDHILLFRESH_WC_CONSUMER_SECRET;
+const storeUrl = process.env.REDHILLFRESH_WP_URL;
+```
+
+### Manual Credential Access
+
+```bash
+# List all Red Hill Fresh credentials
+node creds.js list redhillfresh
+
+# Get specific credential
+node creds.js get redhillfresh wc_consumer_key
+
+# Export as .env format
+node creds.js export redhillfresh > .env.rhf
+```
 
 ---
 
@@ -97,11 +166,11 @@
 ### Authentication
 
 ```typescript
-// WooCommerce REST API
+// WooCommerce REST API with Red Hill Fresh credentials
 const config = {
-  url: process.env.WC_STORE_URL,
-  consumerKey: process.env.WC_CONSUMER_KEY,
-  consumerSecret: process.env.WC_CONSUMER_SECRET,
+  url: process.env.REDHILLFRESH_WP_URL || 'https://redhillfresh.com.au',
+  consumerKey: process.env.REDHILLFRESH_WC_CONSUMER_KEY,
+  consumerSecret: process.env.REDHILLFRESH_WC_CONSUMER_SECRET,
   version: 'wc/v3'
 }
 

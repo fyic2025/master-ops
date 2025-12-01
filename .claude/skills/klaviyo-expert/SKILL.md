@@ -69,12 +69,52 @@
 
 ---
 
+## Multi-Account Configuration
+
+This skill supports **3 active Klaviyo accounts** with real credential integration:
+
+### Credential Loading
+
+```javascript
+// Load credentials from vault
+const creds = require('../../../../creds');
+
+// Load BOO credentials
+await creds.load('boo');
+// Sets: process.env.BOO_KLAVIYO_API_KEY
+
+// Load Teelixir credentials
+await creds.load('teelixir');
+// Sets: process.env.TEELIXIR_KLAVIYO_API_KEY
+
+// Load Elevate credentials
+await creds.load('elevate');
+// Sets: process.env.ELEVATE_KLAVIYO_API_KEY
+```
+
+### Account Selection
+
+When executing operations, always specify which account:
+
+```bash
+# Using scripts
+ACCOUNT=boo npx tsx scripts/klaviyo-client.ts profiles --recent
+ACCOUNT=teelixir npx tsx scripts/klaviyo-client.ts campaigns --list
+ACCOUNT=elevate npx tsx scripts/klaviyo-client.ts flows --list
+```
+
+---
+
 ## Account Profiles
 
-### BOO (Buy Organics Online)
+### 1. BOO (Buy Organics Online)
 
 **Platform:** Klaviyo + BigCommerce
+**Credential:** `BOO_KLAVIYO_API_KEY`
 **List Size:** Large (40,000+)
+**Integration:** Native BigCommerce
+**Project Code:** `boo`
+
 **Key Flows:**
 - Welcome series (5 emails)
 - Abandoned cart (3 emails)
@@ -88,10 +128,20 @@
 - Organic enthusiasts (by category)
 - Lapsed customers (90+ days)
 
-### Teelixir
+**Credential Access:**
+```javascript
+await creds.load('boo');
+const apiKey = process.env.BOO_KLAVIYO_API_KEY;
+```
+
+### 2. Teelixir
 
 **Platform:** Klaviyo + Shopify
+**Credential:** `TEELIXIR_KLAVIYO_API_KEY`
 **List Size:** Medium (15,000+)
+**Integration:** Native Shopify
+**Project Code:** `teelixir`
+
 **Key Flows:**
 - Welcome series (7 emails)
 - Abandoned cart (3 emails)
@@ -105,20 +155,50 @@
 - First-time buyers
 - Health practitioners
 
-### RHF (Red Hill Fresh)
+**Credential Access:**
+```javascript
+await creds.load('teelixir');
+const apiKey = process.env.TEELIXIR_KLAVIYO_API_KEY;
+```
 
-**Platform:** Klaviyo + WooCommerce
-**List Size:** Small (5,000+)
+### 3. Elevate Wholesale
+
+**Platform:** Klaviyo + Shopify
+**Credential:** `ELEVATE_KLAVIYO_API_KEY`
+**List Size:** Small (3,000+)
+**Integration:** Native Shopify
+**Project Code:** `elevate`
+**Business Model:** B2B Wholesale
+
 **Key Flows:**
-- Welcome + first order
-- Weekly specials
-- Delivery reminder
-- Reorder prompts
+- B2B welcome series
+- Bulk order follow-up
+- Reorder reminders
+- Quarterly check-ins
+- Trade show follow-up
 
 **Segments:**
-- Local delivery zone
-- Weekly subscribers
-- Seasonal produce fans
+- Active wholesale accounts
+- High-value retailers
+- Inactive accounts (90+ days)
+- First-time wholesale buyers
+- Distributor partners
+
+**Credential Access:**
+```javascript
+await creds.load('elevate');
+const apiKey = process.env.ELEVATE_KLAVIYO_API_KEY;
+```
+
+### Account Comparison
+
+| Feature | BOO | Teelixir | Elevate |
+|---------|-----|----------|---------|
+| Platform | BigCommerce | Shopify | Shopify |
+| List Size | 40,000+ | 15,000+ | 3,000+ |
+| Business Model | B2C Retail | B2C eCommerce | B2B Wholesale |
+| Primary Focus | Organic products | Mushroom extracts | Wholesale distribution |
+| Key Metric | Order frequency | Subscription retention | Account value |
 
 ---
 
@@ -126,11 +206,46 @@
 
 ### Authentication
 
+#### Multi-Account Setup
+
+```typescript
+// Load credentials for specific account
+const creds = require('../../../../creds');
+
+// Determine which account to use
+const account = process.env.ACCOUNT || 'boo'; // Default to BOO
+
+// Load account credentials
+await creds.load(account);
+
+// Get the appropriate API key
+const API_KEY_MAP = {
+  boo: process.env.BOO_KLAVIYO_API_KEY,
+  teelixir: process.env.TEELIXIR_KLAVIYO_API_KEY,
+  elevate: process.env.ELEVATE_KLAVIYO_API_KEY
+};
+
+const config = {
+  account: account,
+  apiKey: API_KEY_MAP[account],
+  revision: '2024-02-15',
+  baseUrl: 'https://a.klaviyo.com/api'
+}
+
+const headers = {
+  'Authorization': `Klaviyo-API-Key ${config.apiKey}`,
+  'revision': config.revision,
+  'Content-Type': 'application/json',
+  'Accept': 'application/json'
+}
+```
+
+#### Single Account (Legacy)
+
 ```typescript
 const config = {
   apiKey: process.env.KLAVIYO_API_KEY,  // Private API key
-  publicKey: process.env.KLAVIYO_PUBLIC_KEY,  // Site ID
-  revision: '2024-02-15'  // API revision date
+  revision: '2024-02-15'
 }
 
 const headers = {
@@ -714,16 +829,167 @@ Weekly Checks:
 
 ---
 
+## Usage Examples
+
+### Example 1: Load Credentials and Query Profiles
+
+```javascript
+// Load BOO credentials from vault
+const creds = require('../../../../creds');
+await creds.load('boo');
+
+// API key is now available
+const apiKey = process.env.BOO_KLAVIYO_API_KEY;
+
+// Make API request
+const response = await fetch('https://a.klaviyo.com/api/profiles?page[size]=10', {
+  headers: {
+    'Authorization': `Klaviyo-API-Key ${apiKey}`,
+    'revision': '2024-02-15'
+  }
+});
+
+const data = await response.json();
+console.log(`Found ${data.data.length} profiles`);
+```
+
+### Example 2: Multi-Account Campaign Comparison
+
+```bash
+# Compare campaign performance across all accounts
+node scripts/klaviyo.js boo campaigns --list > boo-campaigns.txt
+node scripts/klaviyo.js teelixir campaigns --list > teelixir-campaigns.txt
+node scripts/klaviyo.js elevate campaigns --list > elevate-campaigns.txt
+```
+
+### Example 3: Segment Creation for Each Account
+
+```javascript
+const creds = require('../../../../creds');
+
+async function createVIPSegmentForAccount(account) {
+  await creds.load(account);
+
+  const apiKeyMap = {
+    boo: process.env.BOO_KLAVIYO_API_KEY,
+    teelixir: process.env.TEELIXIR_KLAVIYO_API_KEY,
+    elevate: process.env.ELEVATE_KLAVIYO_API_KEY
+  };
+
+  const apiKey = apiKeyMap[account];
+
+  // Create VIP segment with account-specific criteria
+  const vipThreshold = {
+    boo: 500,      // $500+ for BOO
+    teelixir: 300, // $300+ for Teelixir
+    elevate: 2000  // $2000+ for B2B Elevate
+  };
+
+  const segmentDef = {
+    definition: {
+      condition_groups: [{
+        conditions: [{
+          type: "metric",
+          metric_id: "placed_order",
+          operator: "greater-than",
+          measurement: "sum",
+          property: "value",
+          value: vipThreshold[account]
+        }]
+      }]
+    }
+  };
+
+  console.log(`Creating VIP segment for ${account} (threshold: $${vipThreshold[account]})`);
+  // ... API call to create segment
+}
+```
+
+### Example 4: Using the CLI Wrapper
+
+```bash
+# Search for a customer across all accounts
+node scripts/klaviyo.js boo profiles --search customer@example.com
+node scripts/klaviyo.js teelixir profiles --search customer@example.com
+node scripts/klaviyo.js elevate profiles --search customer@example.com
+
+# View recent flows for each account
+node scripts/klaviyo.js boo flows --list
+node scripts/klaviyo.js teelixir flows --list
+node scripts/klaviyo.js elevate flows --list
+
+# Check campaign status
+ACCOUNT=boo node scripts/klaviyo.js campaigns --status sent
+ACCOUNT=teelixir node scripts/klaviyo.js campaigns --status scheduled
+```
+
+### Example 5: Programmatic Event Tracking
+
+```javascript
+const creds = require('../../../../creds');
+
+async function trackBulkOrderEvent(account, orderData) {
+  await creds.load(account);
+
+  const apiKeyMap = {
+    boo: process.env.BOO_KLAVIYO_API_KEY,
+    teelixir: process.env.TEELIXIR_KLAVIYO_API_KEY,
+    elevate: process.env.ELEVATE_KLAVIYO_API_KEY
+  };
+
+  await fetch('https://a.klaviyo.com/api/events', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Klaviyo-API-Key ${apiKeyMap[account]}`,
+      'revision': '2024-02-15',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      data: {
+        type: 'event',
+        attributes: {
+          metric: {
+            data: {
+              type: 'metric',
+              attributes: { name: 'Placed Order' }
+            }
+          },
+          profile: {
+            data: {
+              type: 'profile',
+              attributes: { email: orderData.email }
+            }
+          },
+          properties: orderData,
+          value: orderData.total
+        }
+      }
+    })
+  });
+}
+
+// Track order for BOO
+await trackBulkOrderEvent('boo', {
+  email: 'customer@example.com',
+  orderId: 'BOO-12345',
+  total: 89.99
+});
+```
+
+---
+
 ## Skill Documentation
 
 | Document | Purpose |
 |----------|---------|
-| `QUICK-REFERENCE.md` | Quick API reference |
+| `QUICK-REFERENCE.md` | Quick API reference with multi-account setup |
 | `context/API-GUIDE.md` | Detailed API docs |
 | `playbooks/FLOWS.md` | Flow best practices |
-| `scripts/klaviyo-client.ts` | API client |
+| `scripts/klaviyo-client.ts` | Multi-account TypeScript API client |
+| `scripts/klaviyo.js` | Auto-loading credential wrapper script |
 
 ---
 
 **Skill Level:** Expert (Level 3)
 **Confidence:** 95%
+**Multi-Account:** 3 active accounts (BOO, Teelixir, Elevate)

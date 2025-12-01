@@ -95,19 +95,57 @@
 
 ### Authentication
 
+**Buy Organics Online uses the following credentials:**
+
 ```typescript
+// Load BOO credentials from vault
+const creds = require('../../../../creds');
+await creds.load('boo');
+
+// Credentials are now available as environment variables
 const config = {
-  storeHash: process.env.BC_STORE_HASH,
-  accessToken: process.env.BC_ACCESS_TOKEN,
-  baseUrl: `https://api.bigcommerce.com/stores/${storeHash}/v3`
+  storeHash: process.env.BOO_BC_STORE_HASH,
+  accessToken: process.env.BOO_BC_ACCESS_TOKEN,
+  clientId: process.env.BOO_BC_CLIENT_ID,
+  clientSecret: process.env.BOO_BC_CLIENT_SECRET,
+  baseUrl: `https://api.bigcommerce.com/stores/${process.env.BOO_BC_STORE_HASH}/v3`
 }
 
 const headers = {
-  'X-Auth-Token': accessToken,
+  'X-Auth-Token': process.env.BOO_BC_ACCESS_TOKEN,
   'Content-Type': 'application/json',
   'Accept': 'application/json'
 }
 ```
+
+### Credential Setup
+
+All BOO credentials are stored securely in the Supabase vault. To use them in scripts:
+
+```javascript
+// At the top of your script
+const creds = require('../../../../creds');
+
+// Load BOO + global credentials into process.env
+await creds.load('boo');
+
+// Now use the credentials
+const storeHash = process.env.BOO_BC_STORE_HASH;
+const accessToken = process.env.BOO_BC_ACCESS_TOKEN;
+```
+
+**Available BOO BigCommerce Credentials:**
+- `BOO_BC_STORE_HASH` - Store identifier
+- `BOO_BC_ACCESS_TOKEN` - API access token (X-Auth-Token header)
+- `BOO_BC_CLIENT_ID` - API client ID
+- `BOO_BC_CLIENT_SECRET` - API client secret
+
+**Backup Credentials (if primary fails):**
+- `BOO_BC_ACCESS_TOKEN_2`
+- `BOO_BC_CLIENT_ID_2`
+- `BOO_BC_CLIENT_SECRET_2`
+
+All credentials are automatically loaded when using `await creds.load('boo')`.
 
 ### Common Endpoints
 

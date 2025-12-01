@@ -1,32 +1,73 @@
 #!/usr/bin/env npx tsx
 
 /**
- * Shopify API Client
+ * Shopify API Client - Multi-Store Support
  *
- * Command-line interface for Shopify operations.
+ * Command-line interface for Shopify operations across Teelixir and Elevate Wholesale.
  *
  * Usage:
- *   npx tsx shopify-client.ts products --list
- *   npx tsx shopify-client.ts products --get 123
- *   npx tsx shopify-client.ts products --low-stock 10
- *   npx tsx shopify-client.ts orders --unfulfilled
- *   npx tsx shopify-client.ts collections --list
+ *   npx tsx shopify-client.ts --store teelixir products --list
+ *   npx tsx shopify-client.ts --store elevate products --get 123
+ *   npx tsx shopify-client.ts --store teelixir products --low-stock 10
+ *   npx tsx shopify-client.ts --store elevate orders --unfulfilled
+ *   npx tsx shopify-client.ts --store teelixir collections --list
+ *
+ * Stores:
+ *   teelixir   - Teelixir.com (DTC, Shopify Plus)
+ *   elevate    - Elevate Wholesale (B2B)
  */
 
-// Environment configuration
-const config = {
-  shop: process.env.SHOPIFY_SHOP_DOMAIN || '',
-  accessToken: process.env.SHOPIFY_ACCESS_TOKEN || '',
-  apiVersion: '2024-01',
-  get baseUrl() {
-    return `https://${this.shop}/admin/api/${this.apiVersion}`
+import * as path from 'path'
+import { fileURLToPath } from 'url'
+import { createRequire } from 'module'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const require = createRequire(import.meta.url)
+
+// Load credentials from vault
+const credsPath = path.join(__dirname, '../../../../creds.js')
+const creds = require(credsPath)
+
+// Store configurations
+interface StoreConfig {
+  shop: string
+  accessToken: string
+  apiVersion: string
+  baseUrl: string
+  storeName: string
+  displayName: string
+}
+
+let currentConfig: StoreConfig | null = null
+
+function getStoreConfig(storeName: 'teelixir' | 'elevate'): StoreConfig {
+  const prefix = storeName.toUpperCase()
+  const shop = process.env[`${prefix}_SHOPIFY_STORE_URL`] || ''
+  const accessToken = process.env[`${prefix}_SHOPIFY_ACCESS_TOKEN`] || ''
+  const apiVersion = '2024-01'
+
+  const displayNames = {
+    teelixir: 'Teelixir (DTC)',
+    elevate: 'Elevate Wholesale (B2B)'
+  }
+
+  return {
+    shop,
+    accessToken,
+    apiVersion,
+    baseUrl: `https://${shop}/admin/api/${apiVersion}`,
+    storeName,
+    displayName: displayNames[storeName]
   }
 }
 
-const headers = {
-  'X-Shopify-Access-Token': config.accessToken,
-  'Content-Type': 'application/json',
-  'Accept': 'application/json'
+function getHeaders(config: StoreConfig) {
+  return {
+    'X-Shopify-Access-Token': config.accessToken,
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  }
 }
 
 // Interfaces
@@ -74,7 +115,12 @@ interface ShopifyCollection {
 
 // API Functions
 async function fetchAPI(endpoint: string, options: RequestInit = {}): Promise<any> {
-  const url = endpoint.startsWith('http') ? endpoint : `${config.baseUrl}${endpoint}`
+  if (!currentConfig) {
+    throw new Error('Store not configured. Use --store flag.')
+  }
+
+  const url = endpoint.startsWith('http') ? endpoint : `${currentConfig.baseUrl}${endpoint}`
+  const headers = getHeaders(currentConfig)
 
   const response = await fetch(url, {
     ...options,
@@ -110,7 +156,7 @@ async function fetchAPI(endpoint: string, options: RequestInit = {}): Promise<an
 async function listProducts(limit = 50): Promise<void> {
   const data = await fetchAPI(`/products.json?limit=${limit}&status=active`)
 
-  console.log('\n📦 PRODUCTS')
+  console.log(`\n📦 PRODUCTS - ${currentConfig?.displayName}`)
   console.log('='.repeat(80))
 
   data.products.forEach((p: ShopifyProduct) => {
@@ -300,23 +346,28 @@ async function getShopInfo(): Promise<void> {
   const data = await fetchAPI('/shop.json')
   const shop = data.shop
 
-  console.log('\n🏪 SHOP INFO')
-  console.log('='.repeat(40))
+  console.log(`\n🏪 SHOP INFO - ${currentConfig?.displayName}`)
+  console.log('='.repeat(50))
   console.log(`Name:        ${shop.name}`)
   console.log(`Domain:      ${shop.domain}`)
   console.log(`Email:       ${shop.email}`)
   console.log(`Currency:    ${shop.currency}`)
   console.log(`Timezone:    ${shop.iana_timezone}`)
   console.log(`Plan:        ${shop.plan_name}`)
+  console.log(`Store:       ${currentConfig?.storeName}`)
 }
 
 // Help
 function showHelp(): void {
   console.log(`
-Shopify CLI Client
+Shopify CLI Client - Multi-Store Support
 
 Usage:
-  npx tsx shopify-client.ts <command> [options]
+  npx tsx shopify-client.ts --store <store> <command> [options]
+
+Stores:
+  teelixir                    Teelixir.com (DTC, Shopify Plus)
+  elevate                     Elevate Wholesale (B2B)
 
 Commands:
   shop                        Show shop info
@@ -334,15 +385,17 @@ Commands:
   inventory --locations       List warehouse locations
   inventory --set <item_id> <location_id> <qty>  Set inventory level
 
-Environment:
-  SHOPIFY_SHOP_DOMAIN       Your shop domain (store.myshopify.com)
-  SHOPIFY_ACCESS_TOKEN      Your Shopify access token
+Authentication:
+  Credentials loaded automatically from Supabase vault using creds.js
+  - Teelixir: TEELIXIR_SHOPIFY_STORE_URL, TEELIXIR_SHOPIFY_ACCESS_TOKEN
+  - Elevate: ELEVATE_SHOPIFY_STORE_URL, ELEVATE_SHOPIFY_ACCESS_TOKEN
 
 Examples:
-  npx tsx shopify-client.ts shop
-  npx tsx shopify-client.ts products --low-stock 5
-  npx tsx shopify-client.ts orders --unfulfilled
-  npx tsx shopify-client.ts products --get 12345
+  npx tsx shopify-client.ts --store teelixir shop
+  npx tsx shopify-client.ts --store teelixir products --low-stock 5
+  npx tsx shopify-client.ts --store elevate orders --unfulfilled
+  npx tsx shopify-client.ts --store teelixir products --get 12345
+  npx tsx shopify-client.ts --store elevate collections --list
 `)
 }
 
@@ -350,20 +403,53 @@ Examples:
 async function main(): Promise<void> {
   const args = process.argv.slice(2)
 
-  if (!config.shop || !config.accessToken) {
-    console.error('Error: SHOPIFY_SHOP_DOMAIN and SHOPIFY_ACCESS_TOKEN environment variables required')
-    process.exit(1)
-  }
-
   if (args.length === 0 || args.includes('--help') || args.includes('-h')) {
     showHelp()
     process.exit(0)
   }
 
-  const command = args[0]
-  const subcommand = args[1]
+  // Parse store flag
+  let storeName: 'teelixir' | 'elevate' | null = null
+  let commandArgs = args
+
+  const storeIndex = args.indexOf('--store')
+  if (storeIndex !== -1 && args[storeIndex + 1]) {
+    const storeArg = args[storeIndex + 1].toLowerCase()
+    if (storeArg === 'teelixir' || storeArg === 'elevate') {
+      storeName = storeArg
+      commandArgs = [...args.slice(0, storeIndex), ...args.slice(storeIndex + 2)]
+    } else {
+      console.error(`Invalid store: ${storeArg}. Must be 'teelixir' or 'elevate'`)
+      process.exit(1)
+    }
+  }
+
+  if (!storeName) {
+    console.error('Error: --store flag is required')
+    console.error('Usage: npx tsx shopify-client.ts --store <teelixir|elevate> <command>')
+    console.error('Run with --help for more information')
+    process.exit(1)
+  }
 
   try {
+    // Load credentials for the specified store
+    console.log(`Loading credentials for ${storeName}...`)
+    await creds.load(storeName)
+
+    // Configure the store
+    currentConfig = getStoreConfig(storeName)
+
+    if (!currentConfig.shop || !currentConfig.accessToken) {
+      console.error(`Error: Missing credentials for ${storeName} store`)
+      console.error(`Required: ${storeName.toUpperCase()}_SHOPIFY_STORE_URL and ${storeName.toUpperCase()}_SHOPIFY_ACCESS_TOKEN`)
+      process.exit(1)
+    }
+
+    console.log(`Connected to ${currentConfig.displayName}\n`)
+
+    const command = commandArgs[0]
+    const subcommand = commandArgs[1]
+
     switch (command) {
       case 'shop':
         await getShopInfo()
@@ -371,13 +457,13 @@ async function main(): Promise<void> {
 
       case 'products':
         if (subcommand === '--list') {
-          await listProducts(parseInt(args[2]) || 50)
-        } else if (subcommand === '--get' && args[2]) {
-          await getProduct(parseInt(args[2]))
-        } else if (subcommand === '--search' && args[2]) {
-          await searchProducts(args[2])
+          await listProducts(parseInt(commandArgs[2]) || 50)
+        } else if (subcommand === '--get' && commandArgs[2]) {
+          await getProduct(parseInt(commandArgs[2]))
+        } else if (subcommand === '--search' && commandArgs[2]) {
+          await searchProducts(commandArgs[2])
         } else if (subcommand === '--low-stock') {
-          await getLowStockProducts(parseInt(args[2]) || 10)
+          await getLowStockProducts(parseInt(commandArgs[2]) || 10)
         } else {
           console.error('Invalid products command. Use --help for usage.')
         }
@@ -385,7 +471,7 @@ async function main(): Promise<void> {
 
       case 'orders':
         if (subcommand === '--recent') {
-          await listRecentOrders(parseInt(args[2]) || 10)
+          await listRecentOrders(parseInt(commandArgs[2]) || 10)
         } else if (subcommand === '--unfulfilled') {
           await listUnfulfilledOrders()
         } else {
@@ -404,8 +490,8 @@ async function main(): Promise<void> {
       case 'inventory':
         if (subcommand === '--locations') {
           await getLocations()
-        } else if (subcommand === '--set' && args[2] && args[3] && args[4]) {
-          await updateInventory(parseInt(args[2]), parseInt(args[3]), parseInt(args[4]))
+        } else if (subcommand === '--set' && commandArgs[2] && commandArgs[3] && commandArgs[4]) {
+          await updateInventory(parseInt(commandArgs[2]), parseInt(commandArgs[3]), parseInt(commandArgs[4]))
         } else {
           console.error('Invalid inventory command. Use --help for usage.')
         }

@@ -3,13 +3,18 @@
 ## API Basics
 
 ```typescript
+// Load BOO credentials from vault
+const creds = require('../../../../creds');
+await creds.load('boo');
+
 // Headers for all requests
 const headers = {
-  'X-Auth-Token': process.env.BC_ACCESS_TOKEN,
+  'X-Auth-Token': process.env.BOO_BC_ACCESS_TOKEN,
   'Content-Type': 'application/json'
 }
 
 // Base URLs
+const storeHash = process.env.BOO_BC_STORE_HASH;
 const v3 = `https://api.bigcommerce.com/stores/${storeHash}/v3`
 const v2 = `https://api.bigcommerce.com/stores/${storeHash}/v2`
 ```
@@ -172,28 +177,34 @@ PUT /v3/catalog/products/{id}/variants/{vid}
 ## BOO Store Details
 
 ```
-Store Hash: [from env]
+Store URL: buyorganicsonline.com.au
+Store Hash: BOO_BC_STORE_HASH (from vault)
 API Version: V3 (primary)
 Products: 3,000+
 Categories: 50+
 ```
+
+**Credentials Location:** Supabase vault under `boo` project
 
 ---
 
 ## Quick Commands
 
 ```bash
+# Load credentials first
+node creds.js load boo
+
 # Test connection
-curl -H "X-Auth-Token: $BC_TOKEN" \
-  "https://api.bigcommerce.com/stores/$STORE_HASH/v3/catalog/summary"
+curl -H "X-Auth-Token: $BOO_BC_ACCESS_TOKEN" \
+  "https://api.bigcommerce.com/stores/$BOO_BC_STORE_HASH/v3/catalog/summary"
 
 # Get product
-curl -H "X-Auth-Token: $BC_TOKEN" \
-  "https://api.bigcommerce.com/stores/$STORE_HASH/v3/catalog/products/123"
+curl -H "X-Auth-Token: $BOO_BC_ACCESS_TOKEN" \
+  "https://api.bigcommerce.com/stores/$BOO_BC_STORE_HASH/v3/catalog/products/123"
 
 # Low stock report
-curl -H "X-Auth-Token: $BC_TOKEN" \
-  "https://api.bigcommerce.com/stores/$STORE_HASH/v3/catalog/products?inventory_level:less=10&is_visible=true"
+curl -H "X-Auth-Token: $BOO_BC_ACCESS_TOKEN" \
+  "https://api.bigcommerce.com/stores/$BOO_BC_STORE_HASH/v3/catalog/products?inventory_level:less=10&is_visible=true"
 ```
 
 ---

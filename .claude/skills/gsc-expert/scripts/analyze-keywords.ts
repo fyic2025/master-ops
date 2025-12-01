@@ -13,9 +13,16 @@
  */
 
 import { createClient } from '@supabase/supabase-js'
-import dotenv from 'dotenv'
+import path from 'path'
+import { fileURLToPath } from 'url'
+import { createRequire } from 'module'
 
-dotenv.config()
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const require = createRequire(import.meta.url)
+
+// Load credentials from vault
+const creds = require(path.resolve(__dirname, '../../../../creds'))
 
 const config = {
   supabaseUrl: process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -261,12 +268,19 @@ Options:
 Examples:
   npx tsx analyze-keywords.ts --top 50
   npx tsx analyze-keywords.ts --opportunities --business teelixir
+
+Credentials:
+  Loads from secure vault (global) - requires Master Supabase access
     `)
     process.exit(0)
   }
 
   console.log('🔍 Keyword Analysis')
   console.log('='.repeat(50))
+
+  // Load credentials from vault
+  console.log('Loading credentials from vault...')
+  await creds.load('global')
 
   const supabase = getSupabase()
 

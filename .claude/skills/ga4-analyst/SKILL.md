@@ -4,12 +4,20 @@ Google Analytics 4 reporting, conversion tracking, user behavior analysis, and e
 
 ## Businesses Covered
 
-| Business | Property ID | Platform | Enhanced E-commerce |
-|----------|-------------|----------|---------------------|
-| Buy Organics Online | GA4-BOO | BigCommerce | Yes |
-| Teelixir | GA4-TLX | Shopify | Yes |
-| Elevate Wholesale | GA4-ELV | Shopify | Yes |
-| Red Hill Fresh | GA4-RHF | WooCommerce | Yes |
+| Business | Property ID (Vault Key) | Platform | Enhanced E-commerce |
+|----------|------------------------|----------|---------------------|
+| Buy Organics Online | `boo/ga4_property_id` | BigCommerce | Yes |
+| Teelixir | `teelixir/ga4_property_id` | Shopify | Yes |
+| Elevate Wholesale | `elevate/ga4_property_id` | Shopify | Yes |
+| Red Hill Fresh | `redhillfresh/ga4_property_id` | WooCommerce | Yes |
+
+**Note:** Property IDs are stored in the Supabase vault. Add them with:
+```bash
+node creds.js store boo ga4_property_id "123456789" "BOO GA4 property"
+node creds.js store teelixir ga4_property_id "123456790" "Teelixir GA4 property"
+node creds.js store elevate ga4_property_id "123456791" "Elevate GA4 property"
+node creds.js store redhillfresh ga4_property_id "123456792" "Red Hill Fresh GA4 property"
+```
 
 ---
 
@@ -418,14 +426,65 @@ npx tsx .claude/skills/ga4-analyst/scripts/analyze-audience.ts --geo
 
 ## GA4 Data API Integration
 
-### Authentication
-Uses Google OAuth 2.0 with service account or user credentials.
+### Authentication Setup
+
+GA4 Data API uses **OAuth 2.0** with the same credentials as Google Ads and Google Search Console.
+
+**Available Credentials (Global Vault):**
+- `GOOGLE_ADS_CLIENT_ID` - OAuth2 client ID (reusable for GA4, GSC, Ads)
+- `GOOGLE_ADS_CLIENT_SECRET` - OAuth2 client secret (reusable for GA4, GSC, Ads)
+- `GOOGLE_GSC_REFRESH_TOKEN` - OAuth2 refresh token (reusable for GA4, GSC, Ads)
+
+**Important:** The same Google OAuth credentials work across:
+- Google Analytics 4 (GA4)
+- Google Search Console (GSC)
+- Google Ads API
+- Google Merchant Center
+
+### Getting GA4 Refresh Token
+
+If you don't have `GOOGLE_GSC_REFRESH_TOKEN` yet:
+
+1. **Generate Authorization URL:**
+   ```bash
+   node creds.js get global google_ads_client_id
+   # Use the client ID in this URL:
+   https://accounts.google.com/o/oauth2/v2/auth?client_id=YOUR_CLIENT_ID&redirect_uri=http://localhost&response_type=code&scope=https://www.googleapis.com/auth/analytics.readonly%20https://www.googleapis.com/auth/webmasters.readonly&access_type=offline&prompt=consent
+   ```
+
+2. **Exchange Code for Refresh Token:**
+   ```bash
+   curl -d "code=YOUR_AUTH_CODE&client_id=YOUR_CLIENT_ID&client_secret=YOUR_CLIENT_SECRET&redirect_uri=http://localhost&grant_type=authorization_code" https://oauth2.googleapis.com/token
+   ```
+
+3. **Store in Vault:**
+   ```bash
+   node creds.js store global google_gsc_refresh_token "YOUR_REFRESH_TOKEN" "Google OAuth refresh token (GA4, GSC, Ads)"
+   ```
+
+### Implementation
 
 ```typescript
 import { BetaAnalyticsDataClient } from '@google-analytics/data'
+import { google } from 'googleapis'
 
+const creds = require('../../../../creds')
+await creds.load('global')
+
+// Create OAuth2 client
+const oauth2Client = new google.auth.OAuth2(
+  process.env.GOOGLE_ADS_CLIENT_ID,
+  process.env.GOOGLE_ADS_CLIENT_SECRET,
+  'http://localhost'
+)
+
+oauth2Client.setCredentials({
+  refresh_token: process.env.GOOGLE_GSC_REFRESH_TOKEN
+})
+
+// Initialize GA4 Data API client
 const analyticsDataClient = new BetaAnalyticsDataClient({
-  keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
+  auth: oauth2Client
 })
 ```
 
@@ -542,21 +601,48 @@ const [response] = await analyticsDataClient.runFunnelReport({
 
 ---
 
-## Environment Variables Required
+## Credentials Required
 
+All credentials stored in Supabase vault (`creds.js`):
+
+### Global Credentials
 ```bash
-# Google API (Service Account)
-GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
+# OAuth2 credentials (reusable for GA4, GSC, Ads, Merchant Center)
+node creds.js get global google_ads_client_id
+node creds.js get global google_ads_client_secret
+node creds.js get global google_gsc_refresh_token
+```
 
+### Business-Specific Credentials
+```bash
 # GA4 Property IDs
-GA4_BOO_PROPERTY_ID=123456789
-GA4_TEELIXIR_PROPERTY_ID=123456790
-GA4_ELEVATE_PROPERTY_ID=123456791
-GA4_RHF_PROPERTY_ID=123456792
+node creds.js store boo ga4_property_id "123456789"
+node creds.js store teelixir ga4_property_id "123456790"
+node creds.js store elevate ga4_property_id "123456791"
+node creds.js store redhillfresh ga4_property_id "123456792"
+```
 
-# Supabase
-SUPABASE_URL=https://qcvfxxsnqvdfmpbcgdni.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=
+### Supabase (Auto-loaded)
+The master Supabase instance is automatically configured:
+- URL: `https://qcvfxxsnqvdfmpbcgdni.supabase.co`
+- Service role key loaded from vault
+
+### Loading Credentials in Scripts
+```typescript
+const creds = require('../../../../creds')
+
+// Load global credentials (OAuth2)
+await creds.load('global')
+
+// Load business-specific credentials (includes global)
+await creds.load('boo')
+await creds.load('teelixir')
+await creds.load('elevate')
+await creds.load('redhillfresh')
+
+// Access via environment variables
+const propertyId = process.env.BOO_GA4_PROPERTY_ID
+const clientId = process.env.GOOGLE_ADS_CLIENT_ID
 ```
 
 ---

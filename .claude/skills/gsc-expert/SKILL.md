@@ -4,12 +4,12 @@ Search performance monitoring, indexing management, and SEO insights for all 4 e
 
 ## Businesses Covered
 
-| Business | Property | Platform | Verification |
-|----------|----------|----------|--------------|
-| Buy Organics Online | buyorganicsonline.com.au | BigCommerce | DNS TXT |
-| Teelixir | teelixir.com | Shopify | DNS TXT |
-| Elevate Wholesale | elevatewholesale.com.au | Shopify | DNS TXT |
-| Red Hill Fresh | redhillfresh.com.au | WooCommerce | DNS TXT |
+| Business | Property | GSC Property Format | Platform | Verification |
+|----------|----------|---------------------|----------|--------------|
+| Buy Organics Online | buyorganicsonline.com.au | sc-domain:buyorganicsonline.com.au | BigCommerce | DNS TXT |
+| Teelixir | teelixir.com | sc-domain:teelixir.com | Shopify | DNS TXT |
+| Elevate Wholesale | elevatewholesale.com.au | sc-domain:elevatewholesale.com.au | Shopify | DNS TXT |
+| Red Hill Fresh | redhillfresh.com.au | sc-domain:redhillfresh.com.au | WooCommerce | DNS TXT |
 
 ---
 
@@ -432,17 +432,35 @@ npx tsx .claude/skills/gsc-expert/scripts/generate-seo-report.ts --business teel
 ## GSC API Integration
 
 ### Authentication
-Uses Google OAuth 2.0 with service account or user credentials.
+Uses Google OAuth 2.0 with credentials stored in secure vault.
 
+**Loading Credentials:**
+```javascript
+// Load credentials from vault (automatically loads global + project-specific)
+const creds = require('../../../../creds');
+await creds.load('global');  // Loads Google credentials from global vault
+
+// Credentials available:
+// - GOOGLE_ADS_CLIENT_ID (global)
+// - GOOGLE_ADS_CLIENT_SECRET (global)
+// - GOOGLE_GSC_REFRESH_TOKEN (global)
+```
+
+**OAuth2 Setup:**
 ```typescript
 import { google } from 'googleapis'
 
-const auth = new google.auth.GoogleAuth({
-  keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS,
-  scopes: ['https://www.googleapis.com/auth/webmasters.readonly']
+const oauth2Client = new google.auth.OAuth2(
+  process.env.GOOGLE_ADS_CLIENT_ID,
+  process.env.GOOGLE_ADS_CLIENT_SECRET,
+  'http://localhost'
+)
+
+oauth2Client.setCredentials({
+  refresh_token: process.env.GOOGLE_GSC_REFRESH_TOKEN
 })
 
-const searchconsole = google.searchconsole({ version: 'v1', auth })
+const searchconsole = google.searchconsole({ version: 'v1', auth: oauth2Client })
 ```
 
 ### Key API Endpoints
@@ -563,27 +581,75 @@ await searchconsole.sitemaps.submit({
 
 ---
 
-## Environment Variables Required
+## Credentials Configuration
+
+**Vault Credentials (Secure Storage):**
+
+All credentials are stored in the secure Supabase vault and loaded via `creds.js`:
 
 ```bash
-# Google API (Service Account)
-GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
+# Global vault credentials (shared across all businesses):
+GOOGLE_ADS_CLIENT_ID          # Google OAuth2 client ID
+GOOGLE_ADS_CLIENT_SECRET      # Google OAuth2 client secret
+GOOGLE_GSC_REFRESH_TOKEN      # GSC-specific refresh token
 
-# Or OAuth2 credentials
-GSC_CLIENT_ID=
-GSC_CLIENT_SECRET=
-GSC_REFRESH_TOKEN=
-
-# Site properties (sc-domain: format)
-GSC_BOO_PROPERTY=sc-domain:buyorganicsonline.com.au
-GSC_TEELIXIR_PROPERTY=sc-domain:teelixir.com
-GSC_ELEVATE_PROPERTY=sc-domain:elevatewholesale.com.au
-GSC_RHF_PROPERTY=sc-domain:redhillfresh.com.au
-
-# Supabase
-SUPABASE_URL=https://qcvfxxsnqvdfmpbcgdni.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=
+# Master Supabase (for GSC data storage):
+SUPABASE_URL                  # Master Supabase URL
+SUPABASE_SERVICE_ROLE_KEY     # Master Supabase service key
 ```
+
+**Load credentials in scripts:**
+```javascript
+const creds = require('../../../../creds');
+await creds.load('global');  // Loads all global credentials into process.env
+```
+
+**Property Mappings (hardcoded in scripts):**
+```javascript
+const BUSINESS_PROPERTIES = {
+  boo: 'sc-domain:buyorganicsonline.com.au',
+  teelixir: 'sc-domain:teelixir.com',
+  elevate: 'sc-domain:elevatewholesale.com.au',
+  rhf: 'sc-domain:redhillfresh.com.au'
+}
+```
+
+---
+
+## Existing GSC Integration Scripts
+
+**Production GSC Scripts** (in `shared/libs/integrations/gsc/`):
+
+These are battle-tested scripts already in production for Buy Organics Online:
+
+1. **`sync-gsc-data.js`** - Full-featured GSC data sync
+   - OAuth2 authentication with vault credentials
+   - Syncs search performance data to Supabase
+   - Daily stats tracking for anomaly detection
+   - Supports 30-day and custom date ranges
+   - Usage: `node shared/libs/integrations/gsc/sync-gsc-data.js [--days=30]`
+   - Already configured for: Buy Organics Online
+
+2. **`sync-gsc-issues.js`** - Issue detection and tracking
+   - Orchestrates full GSC issues sync workflow
+   - Performance sync + anomaly detection + URL inspection
+   - Tracks indexing issues and alerts
+   - API budget management (500 calls/day default)
+   - Usage: `node shared/libs/integrations/gsc/sync-gsc-issues.js [--business=boo] [--budget=500]`
+
+**Key Features:**
+- Already uses OAuth2 with `GOOGLE_ADS_CLIENT_ID`, `GOOGLE_ADS_CLIENT_SECRET`, `GOOGLE_GSC_REFRESH_TOKEN`
+- Stores data in BOO Supabase (`seo_gsc_pages`, `gsc_page_daily_stats`, `gsc_issue_urls`)
+- Page type detection (product, category, brand, blog)
+- Australia-only filtering
+- Batch processing (500-1000 rows per batch)
+- Comprehensive error handling
+
+**To Extend to Other Businesses:**
+- Use the production scripts as reference implementation
+- Adapt table schemas to master Supabase
+- Update `SITE_URL` for each business property
+- Consider multi-business support in single script
 
 ---
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env npx tsx
 
 /**
- * BigCommerce API Client
+ * BigCommerce API Client for Buy Organics Online
  *
  * Command-line interface for BigCommerce operations.
  *
@@ -13,22 +13,41 @@
  *   npx tsx bc-client.ts categories --tree
  */
 
-// Environment configuration
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
+// Load BOO credentials from vault
+const creds = require('../../../../creds');
+
+// Environment configuration (loaded from vault)
 const config = {
-  storeHash: process.env.BC_STORE_HASH || '',
-  accessToken: process.env.BC_ACCESS_TOKEN || '',
+  get storeHash() {
+    return process.env.BOO_BC_STORE_HASH || '';
+  },
+  get accessToken() {
+    return process.env.BOO_BC_ACCESS_TOKEN || '';
+  },
+  get clientId() {
+    return process.env.BOO_BC_CLIENT_ID || '';
+  },
+  get clientSecret() {
+    return process.env.BOO_BC_CLIENT_SECRET || '';
+  },
   get baseUrl() {
-    return `https://api.bigcommerce.com/stores/${this.storeHash}/v3`
+    return `https://api.bigcommerce.com/stores/${this.storeHash}/v3`;
   },
   get v2Url() {
-    return `https://api.bigcommerce.com/stores/${this.storeHash}/v2`
+    return `https://api.bigcommerce.com/stores/${this.storeHash}/v2`;
   }
 }
 
-const headers = {
-  'X-Auth-Token': config.accessToken,
-  'Content-Type': 'application/json',
-  'Accept': 'application/json'
+// Helper to get headers (must be called as function since auth token is loaded at runtime)
+function getHeaders() {
+  return {
+    'X-Auth-Token': config.accessToken,
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  };
 }
 
 // Interfaces
@@ -70,7 +89,7 @@ async function fetchAPI(endpoint: string, options: RequestInit = {}): Promise<an
 
   const response = await fetch(url, {
     ...options,
-    headers: { ...headers, ...options.headers }
+    headers: { ...getHeaders(), ...options.headers }
   })
 
   if (response.status === 429) {
@@ -291,7 +310,7 @@ async function getStoreSummary(): Promise<void> {
 // Help
 function showHelp(): void {
   console.log(`
-BigCommerce CLI Client
+BigCommerce CLI Client - Buy Organics Online
 
 Usage:
   npx tsx bc-client.ts <command> [options]
@@ -315,15 +334,21 @@ Order Status IDs:
   1=Pending, 2=Shipped, 5=Cancelled, 9=Awaiting Shipment,
   10=Completed, 11=Awaiting Fulfillment
 
-Environment:
-  BC_STORE_HASH       Your BigCommerce store hash
-  BC_ACCESS_TOKEN     Your BigCommerce API access token
+Credentials:
+  Automatically loaded from vault (BOO project)
+  - BOO_BC_STORE_HASH
+  - BOO_BC_ACCESS_TOKEN
+  - BOO_BC_CLIENT_ID
+  - BOO_BC_CLIENT_SECRET
 
 Examples:
   npx tsx bc-client.ts summary
   npx tsx bc-client.ts products --low-stock 5
   npx tsx bc-client.ts orders --status 11
   npx tsx bc-client.ts products --get 12345
+
+Store: buyorganicsonline.com.au
+Products: 3,000+
 `)
 }
 
@@ -331,8 +356,17 @@ Examples:
 async function main(): Promise<void> {
   const args = process.argv.slice(2)
 
+  // Load BOO credentials from vault
+  try {
+    await creds.load('boo');
+  } catch (error) {
+    console.error('Error loading credentials from vault:', error instanceof Error ? error.message : error);
+    process.exit(1);
+  }
+
   if (!config.storeHash || !config.accessToken) {
-    console.error('Error: BC_STORE_HASH and BC_ACCESS_TOKEN environment variables required')
+    console.error('Error: BOO_BC_STORE_HASH and BOO_BC_ACCESS_TOKEN credentials not found in vault')
+    console.error('Run: node creds.js list boo')
     process.exit(1)
   }
 

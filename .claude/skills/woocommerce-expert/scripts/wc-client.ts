@@ -1,9 +1,10 @@
 #!/usr/bin/env npx tsx
 
 /**
- * WooCommerce API Client
+ * WooCommerce API Client for Red Hill Fresh
  *
  * Command-line interface for WooCommerce operations.
+ * Automatically loads credentials from the secure vault.
  *
  * Usage:
  *   npx tsx wc-client.ts products --list
@@ -13,11 +14,26 @@
  *   npx tsx wc-client.ts categories --list
  */
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
+// Load credentials from vault
+const creds = require('../../../../creds');
+
+// Initialize credentials (will be loaded in main())
+let credentialsLoaded = false;
+
 // Environment configuration
 const config = {
-  url: process.env.WC_STORE_URL || '',
-  consumerKey: process.env.WC_CONSUMER_KEY || '',
-  consumerSecret: process.env.WC_CONSUMER_SECRET || '',
+  get url() {
+    return process.env.REDHILLFRESH_WP_URL || 'https://redhillfresh.com.au'
+  },
+  get consumerKey() {
+    return process.env.REDHILLFRESH_WC_CONSUMER_KEY || ''
+  },
+  get consumerSecret() {
+    return process.env.REDHILLFRESH_WC_CONSUMER_SECRET || ''
+  },
   get baseUrl() {
     return `${this.url}/wp-json/wc/v3`
   },
@@ -27,7 +43,9 @@ const config = {
 }
 
 const headers = {
-  'Authorization': `Basic ${config.auth}`,
+  get Authorization() {
+    return `Basic ${config.auth}`
+  },
   'Content-Type': 'application/json'
 }
 
@@ -311,7 +329,7 @@ async function getSystemStatus(): Promise<void> {
 // Help
 function showHelp(): void {
   console.log(`
-WooCommerce CLI Client
+WooCommerce CLI Client - Red Hill Fresh
 
 Usage:
   npx tsx wc-client.ts <command> [options]
@@ -334,10 +352,15 @@ Commands:
 Order Statuses:
   pending, processing, on-hold, completed, cancelled, refunded, failed
 
-Environment:
-  WC_STORE_URL          Your WooCommerce store URL
-  WC_CONSUMER_KEY       Your API consumer key
-  WC_CONSUMER_SECRET    Your API consumer secret
+Credentials:
+  This script automatically loads credentials from the secure vault.
+  Required credentials (stored under 'redhillfresh' project):
+    - wc_consumer_key    → REDHILLFRESH_WC_CONSUMER_KEY
+    - wc_consumer_secret → REDHILLFRESH_WC_CONSUMER_SECRET
+    - wp_url             → REDHILLFRESH_WP_URL
+
+  To verify credentials:
+    node creds.js list redhillfresh
 
 Examples:
   npx tsx wc-client.ts status
@@ -351,8 +374,28 @@ Examples:
 async function main(): Promise<void> {
   const args = process.argv.slice(2)
 
+  // Load credentials from vault if not already loaded
+  if (!credentialsLoaded) {
+    try {
+      console.log('Loading Red Hill Fresh credentials from vault...')
+      await creds.load('redhillfresh')
+      credentialsLoaded = true
+      console.log('Credentials loaded successfully.\n')
+    } catch (error) {
+      console.error('Error loading credentials:', error instanceof Error ? error.message : error)
+      console.error('\nPlease ensure credentials are stored in the vault:')
+      console.error('  node creds.js list redhillfresh')
+      process.exit(1)
+    }
+  }
+
   if (!config.url || !config.consumerKey || !config.consumerSecret) {
-    console.error('Error: WC_STORE_URL, WC_CONSUMER_KEY, and WC_CONSUMER_SECRET environment variables required')
+    console.error('Error: REDHILLFRESH_WP_URL, REDHILLFRESH_WC_CONSUMER_KEY, and REDHILLFRESH_WC_CONSUMER_SECRET not found')
+    console.error('\nPlease ensure the following credentials are stored in the vault:')
+    console.error('  - wc_consumer_key')
+    console.error('  - wc_consumer_secret')
+    console.error('  - wp_url')
+    console.error('\nUse: node creds.js list redhillfresh')
     process.exit(1)
   }
 

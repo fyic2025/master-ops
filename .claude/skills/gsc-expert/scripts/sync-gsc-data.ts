@@ -15,26 +15,32 @@
 
 import { createClient } from '@supabase/supabase-js'
 import { google } from 'googleapis'
-import dotenv from 'dotenv'
+import path from 'path'
+import { fileURLToPath } from 'url'
+import { createRequire } from 'module'
 
-dotenv.config()
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const require = createRequire(import.meta.url)
 
-// Configuration
+// Load credentials from vault
+const creds = require(path.resolve(__dirname, '../../../../creds'))
+
+// Configuration (loaded from vault)
 const config = {
   supabaseUrl: process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL,
   supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
-  googleCredentials: process.env.GOOGLE_APPLICATION_CREDENTIALS,
-  gscClientId: process.env.GSC_CLIENT_ID,
-  gscClientSecret: process.env.GSC_CLIENT_SECRET,
-  gscRefreshToken: process.env.GSC_REFRESH_TOKEN,
+  googleClientId: process.env.GOOGLE_ADS_CLIENT_ID,
+  googleClientSecret: process.env.GOOGLE_ADS_CLIENT_SECRET,
+  gscRefreshToken: process.env.GOOGLE_GSC_REFRESH_TOKEN,
 }
 
-// Business property mappings
+// Business property mappings (sc-domain: format for GSC API)
 const BUSINESS_PROPERTIES: Record<string, string> = {
-  boo: process.env.GSC_BOO_PROPERTY || 'sc-domain:buyorganicsonline.com.au',
-  teelixir: process.env.GSC_TEELIXIR_PROPERTY || 'sc-domain:teelixir.com',
-  elevate: process.env.GSC_ELEVATE_PROPERTY || 'sc-domain:elevatewholesale.com.au',
-  rhf: process.env.GSC_RHF_PROPERTY || 'sc-domain:redhillfresh.com.au',
+  boo: 'sc-domain:buyorganicsonline.com.au',
+  teelixir: 'sc-domain:teelixir.com',
+  elevate: 'sc-domain:elevatewholesale.com.au',
+  rhf: 'sc-domain:redhillfresh.com.au',
 }
 
 interface SearchAnalyticsRow {
@@ -52,21 +58,19 @@ interface SyncResult {
   errors: string[]
 }
 
-// Initialize Google Auth
+// Initialize Google Auth with vault credentials
 async function getGoogleAuth() {
-  // Try service account first
-  if (config.googleCredentials) {
-    return new google.auth.GoogleAuth({
-      keyFile: config.googleCredentials,
-      scopes: ['https://www.googleapis.com/auth/webmasters.readonly']
-    })
+  // Load credentials from vault if not already loaded
+  if (!process.env.GOOGLE_ADS_CLIENT_ID) {
+    await creds.load('global')
   }
 
-  // Fall back to OAuth2
-  if (config.gscClientId && config.gscClientSecret && config.gscRefreshToken) {
+  // Use OAuth2 with vault credentials
+  if (config.googleClientId && config.googleClientSecret && config.gscRefreshToken) {
     const oauth2Client = new google.auth.OAuth2(
-      config.gscClientId,
-      config.gscClientSecret
+      config.googleClientId,
+      config.googleClientSecret,
+      'http://localhost'
     )
     oauth2Client.setCredentials({
       refresh_token: config.gscRefreshToken
@@ -74,7 +78,7 @@ async function getGoogleAuth() {
     return oauth2Client
   }
 
-  throw new Error('No Google credentials configured. Set GOOGLE_APPLICATION_CREDENTIALS or GSC_CLIENT_ID/SECRET/REFRESH_TOKEN')
+  throw new Error('Google credentials not found in vault. Ensure global vault contains: GOOGLE_ADS_CLIENT_ID, GOOGLE_ADS_CLIENT_SECRET, GOOGLE_GSC_REFRESH_TOKEN')
 }
 
 // Initialize Supabase
@@ -282,12 +286,19 @@ Examples:
   npx tsx sync-gsc-data.ts --business teelixir          # Teelixir only
   npx tsx sync-gsc-data.ts --start 2024-11-01 --end 2024-11-30
   npx tsx sync-gsc-data.ts --full                       # Full historical sync
+
+Credentials:
+  Loads from secure vault (global): GOOGLE_ADS_CLIENT_ID, GOOGLE_ADS_CLIENT_SECRET, GOOGLE_GSC_REFRESH_TOKEN
     `)
     process.exit(0)
   }
 
   console.log('🔄 GSC Data Sync')
   console.log('='.repeat(50))
+
+  // Load credentials from vault
+  console.log('Loading credentials from vault...')
+  await creds.load('global')
 
   // Get date range
   const { startDate, endDate } = getDateRange(args)
@@ -299,9 +310,10 @@ Examples:
     auth = await getGoogleAuth()
   } catch (error) {
     console.error(`❌ ${error instanceof Error ? error.message : error}`)
-    console.log('\nTo configure Google credentials:')
-    console.log('1. Service Account: Set GOOGLE_APPLICATION_CREDENTIALS')
-    console.log('2. OAuth2: Set GSC_CLIENT_ID, GSC_CLIENT_SECRET, GSC_REFRESH_TOKEN')
+    console.log('\nCredentials must be stored in vault:')
+    console.log('  node creds.js store global google_ads_client_id "YOUR_CLIENT_ID"')
+    console.log('  node creds.js store global google_ads_client_secret "YOUR_CLIENT_SECRET"')
+    console.log('  node creds.js store global google_gsc_refresh_token "YOUR_REFRESH_TOKEN"')
     process.exit(1)
   }
 

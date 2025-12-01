@@ -11,13 +11,17 @@
  */
 
 import { createClient } from '@supabase/supabase-js'
-import dotenv from 'dotenv'
+import { createRequire } from 'module'
 
-dotenv.config()
+const require = createRequire(import.meta.url)
+const creds = require('../../../../creds')
 
-const config = {
-  supabaseUrl: process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL,
-  supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
+// Master Supabase configuration
+const MASTER_SUPABASE_URL = 'https://qcvfxxsnqvdfmpbcgdni.supabase.co'
+
+// Initialize credentials
+async function initCredentials() {
+  await creds.load('global')
 }
 
 interface TrafficSummary {
@@ -34,10 +38,13 @@ interface TrafficSummary {
 }
 
 function getSupabase() {
-  if (!config.supabaseUrl || !config.supabaseKey) {
-    throw new Error('Supabase not configured')
+  const serviceKey = process.env.MASTER_SUPABASE_SERVICE_ROLE_KEY
+
+  if (!serviceKey) {
+    throw new Error('MASTER_SUPABASE_SERVICE_ROLE_KEY not found in vault')
   }
-  return createClient(config.supabaseUrl, config.supabaseKey)
+
+  return createClient(MASTER_SUPABASE_URL, serviceKey)
 }
 
 function formatNumber(num: number): string {
@@ -251,7 +258,7 @@ async function main() {
 
   if (args.includes('--help')) {
     console.log(`
-Traffic Report Generator
+Traffic Report Generator - Vault Credentials
 
 Usage:
   npx tsx generate-traffic-report.ts [options]
@@ -265,8 +272,22 @@ Options:
 Examples:
   npx tsx generate-traffic-report.ts --weekly
   npx tsx generate-traffic-report.ts --monthly --business teelixir
+
+Vault Credentials Required:
+  - master_supabase_service_role_key (global)
+
+  Check credentials: node creds.js list global
     `)
     process.exit(0)
+  }
+
+  // Initialize credentials from vault
+  try {
+    await initCredentials()
+  } catch (error) {
+    console.error(`❌ Failed to load credentials: ${error instanceof Error ? error.message : error}`)
+    console.log('\nRun: node creds.js list global')
+    process.exit(1)
   }
 
   const supabase = getSupabase()

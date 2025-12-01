@@ -1,20 +1,42 @@
 #!/usr/bin/env npx tsx
 
 /**
- * Klaviyo API Client
+ * Klaviyo API Client - Multi-Account Support
  *
- * Command-line interface for Klaviyo operations.
+ * Command-line interface for Klaviyo operations across all businesses.
  *
  * Usage:
- *   npx tsx klaviyo-client.ts profiles --search test@example.com
- *   npx tsx klaviyo-client.ts lists --list
- *   npx tsx klaviyo-client.ts campaigns --recent
- *   npx tsx klaviyo-client.ts flows --list
+ *   ACCOUNT=boo npx tsx klaviyo-client.ts profiles --search test@example.com
+ *   ACCOUNT=teelixir npx tsx klaviyo-client.ts lists --list
+ *   ACCOUNT=elevate npx tsx klaviyo-client.ts campaigns --recent
+ *   npx tsx klaviyo-client.ts flows --list  # Uses default account (BOO)
+ *
+ * Accounts:
+ *   boo      - Buy Organics Online (40K+ subscribers)
+ *   teelixir - Teelixir (15K+ subscribers)
+ *   elevate  - Elevate Wholesale (3K+ subscribers, B2B)
  */
+
+// Account-specific API key mapping
+const API_KEY_MAP: Record<string, string> = {
+  boo: process.env.BOO_KLAVIYO_API_KEY || '',
+  teelixir: process.env.TEELIXIR_KLAVIYO_API_KEY || '',
+  elevate: process.env.ELEVATE_KLAVIYO_API_KEY || ''
+}
+
+// Determine which account to use
+const account = (process.env.ACCOUNT || 'boo').toLowerCase()
+
+if (!API_KEY_MAP[account]) {
+  console.error(`\nError: Invalid account '${account}'`)
+  console.error('Valid accounts: boo, teelixir, elevate\n')
+  process.exit(1)
+}
 
 // Environment configuration
 const config = {
-  apiKey: process.env.KLAVIYO_API_KEY || '',
+  account: account,
+  apiKey: API_KEY_MAP[account],
   revision: '2024-02-15',
   baseUrl: 'https://a.klaviyo.com/api'
 }
@@ -307,10 +329,17 @@ async function trackEvent(email: string, event: string, properties: string): Pro
 // Help
 function showHelp(): void {
   console.log(`
-Klaviyo CLI Client
+╔════════════════════════════════════════════════════════════════════════╗
+║  Klaviyo CLI Client - Multi-Account Support                           ║
+╚════════════════════════════════════════════════════════════════════════╝
 
 Usage:
-  npx tsx klaviyo-client.ts <command> [options]
+  ACCOUNT=<account> npx tsx klaviyo-client.ts <command> [options]
+
+Accounts:
+  boo      Buy Organics Online (40K+ subscribers, BigCommerce)
+  teelixir Teelixir (15K+ subscribers, Shopify)
+  elevate  Elevate Wholesale (3K+ subscribers, B2B Shopify)
 
 Commands:
   profiles --search <email>   Search for profile by email
@@ -330,15 +359,34 @@ Commands:
 
   events --track <email> <event> <json>  Track custom event
 
-Environment:
-  KLAVIYO_API_KEY    Your Klaviyo private API key
+Environment Variables:
+  ACCOUNT                    Account to use (boo, teelixir, elevate) [default: boo]
+  BOO_KLAVIYO_API_KEY       Buy Organics Online API key
+  TEELIXIR_KLAVIYO_API_KEY  Teelixir API key
+  ELEVATE_KLAVIYO_API_KEY   Elevate Wholesale API key
 
 Examples:
+  # BOO (default account)
   npx tsx klaviyo-client.ts profiles --search test@example.com
-  npx tsx klaviyo-client.ts lists --list
-  npx tsx klaviyo-client.ts campaigns --status sent
-  npx tsx klaviyo-client.ts flows --list
-  npx tsx klaviyo-client.ts events --track test@example.com "Custom Event" '{"value":100}'
+  ACCOUNT=boo npx tsx klaviyo-client.ts lists --list
+
+  # Teelixir
+  ACCOUNT=teelixir npx tsx klaviyo-client.ts campaigns --status sent
+  ACCOUNT=teelixir npx tsx klaviyo-client.ts flows --list
+
+  # Elevate Wholesale
+  ACCOUNT=elevate npx tsx klaviyo-client.ts profiles --recent 10
+  ACCOUNT=elevate npx tsx klaviyo-client.ts segments --list
+
+  # Track custom event
+  ACCOUNT=boo npx tsx klaviyo-client.ts events --track test@example.com "Custom Event" '{"value":100}'
+
+Credential Loading:
+  Load credentials from vault before running:
+
+  node ../../../../creds.js load boo
+  node ../../../../creds.js load teelixir
+  node ../../../../creds.js load elevate
 `)
 }
 
@@ -347,7 +395,10 @@ async function main(): Promise<void> {
   const args = process.argv.slice(2)
 
   if (!config.apiKey) {
-    console.error('Error: KLAVIYO_API_KEY environment variable required')
+    console.error(`\nError: API key not found for account '${config.account}'`)
+    console.error(`Please set ${config.account.toUpperCase()}_KLAVIYO_API_KEY environment variable`)
+    console.error(`\nLoad credentials from vault:`)
+    console.error(`  node ../../../../creds.js load ${config.account}\n`)
     process.exit(1)
   }
 
@@ -355,6 +406,17 @@ async function main(): Promise<void> {
     showHelp()
     process.exit(0)
   }
+
+  // Display active account header
+  const accountNames: Record<string, string> = {
+    boo: 'Buy Organics Online',
+    teelixir: 'Teelixir',
+    elevate: 'Elevate Wholesale'
+  }
+
+  console.log('\n' + '═'.repeat(70))
+  console.log(`  Account: ${accountNames[config.account]} (${config.account})`)
+  console.log('═'.repeat(70))
 
   const command = args[0]
   const subcommand = args[1]

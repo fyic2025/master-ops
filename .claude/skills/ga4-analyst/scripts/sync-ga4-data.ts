@@ -14,23 +14,34 @@
 
 import { BetaAnalyticsDataClient } from '@google-analytics/data'
 import { createClient } from '@supabase/supabase-js'
-import dotenv from 'dotenv'
+import { google } from 'googleapis'
+import { createRequire } from 'module'
 
-dotenv.config()
+const require = createRequire(import.meta.url)
+const creds = require('../../../../creds')
 
-// Configuration
-const config = {
-  supabaseUrl: process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL,
-  supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
-  googleCredentials: process.env.GOOGLE_APPLICATION_CREDENTIALS,
-}
+// Master Supabase configuration
+const MASTER_SUPABASE_URL = 'https://qcvfxxsnqvdfmpbcgdni.supabase.co'
 
-// Business property mappings
-const BUSINESS_PROPERTIES: Record<string, string> = {
-  boo: process.env.GA4_BOO_PROPERTY_ID || '',
-  teelixir: process.env.GA4_TEELIXIR_PROPERTY_ID || '',
-  elevate: process.env.GA4_ELEVATE_PROPERTY_ID || '',
-  rhf: process.env.GA4_RHF_PROPERTY_ID || '',
+// Business property mappings (loaded from vault)
+const BUSINESS_PROPERTIES: Record<string, string> = {}
+
+// Initialize credentials
+async function initCredentials() {
+  // Load global credentials (Google OAuth2)
+  await creds.load('global')
+
+  // Load all business credentials (includes GA4 property IDs)
+  await creds.load('boo')
+  await creds.load('teelixir')
+  await creds.load('elevate')
+  await creds.load('redhillfresh')
+
+  // Map business property IDs
+  BUSINESS_PROPERTIES.boo = process.env.BOO_GA4_PROPERTY_ID || ''
+  BUSINESS_PROPERTIES.teelixir = process.env.TEELIXIR_GA4_PROPERTY_ID || ''
+  BUSINESS_PROPERTIES.elevate = process.env.ELEVATE_GA4_PROPERTY_ID || ''
+  BUSINESS_PROPERTIES.rhf = process.env.REDHILLFRESH_GA4_PROPERTY_ID || ''
 }
 
 interface DailyMetrics {
@@ -57,23 +68,52 @@ interface SyncResult {
   errors: string[]
 }
 
-// Initialize GA4 Data API client
-function getAnalyticsClient(): BetaAnalyticsDataClient {
-  if (!config.googleCredentials) {
-    throw new Error('GOOGLE_APPLICATION_CREDENTIALS not set')
+// Initialize GA4 Data API client with OAuth2
+async function getAnalyticsClient(): Promise<BetaAnalyticsDataClient> {
+  const clientId = process.env.GOOGLE_ADS_CLIENT_ID
+  const clientSecret = process.env.GOOGLE_ADS_CLIENT_SECRET
+  const refreshToken = process.env.GOOGLE_GSC_REFRESH_TOKEN
+
+  if (!clientId || !clientSecret || !refreshToken) {
+    throw new Error('Missing Google OAuth2 credentials. Run: node creds.js list global')
+  }
+
+  // Create OAuth2 client
+  const oauth2Client = new google.auth.OAuth2(
+    clientId,
+    clientSecret,
+    'http://localhost'
+  )
+
+  oauth2Client.setCredentials({
+    refresh_token: refreshToken
+  })
+
+  // Test authentication
+  try {
+    const { token } = await oauth2Client.getAccessToken()
+    if (!token) {
+      throw new Error('Failed to get access token')
+    }
+    console.log('✓ GA4 OAuth2 authenticated')
+  } catch (error) {
+    throw new Error(`OAuth2 authentication failed: ${error instanceof Error ? error.message : error}`)
   }
 
   return new BetaAnalyticsDataClient({
-    keyFilename: config.googleCredentials
+    auth: oauth2Client
   })
 }
 
-// Initialize Supabase
+// Initialize Supabase (master instance)
 function getSupabase() {
-  if (!config.supabaseUrl || !config.supabaseKey) {
-    return null
+  const serviceKey = process.env.MASTER_SUPABASE_SERVICE_ROLE_KEY
+
+  if (!serviceKey) {
+    throw new Error('MASTER_SUPABASE_SERVICE_ROLE_KEY not found in vault')
   }
-  return createClient(config.supabaseUrl, config.supabaseKey)
+
+  return createClient(MASTER_SUPABASE_URL, serviceKey)
 }
 
 // Fetch daily metrics from GA4
@@ -336,7 +376,7 @@ async function main() {
 
   if (args.includes('--help')) {
     console.log(`
-GA4 Data Sync
+GA4 Data Sync - Vault Credentials
 
 Usage:
   npx tsx sync-ga4-data.ts [options]
@@ -352,18 +392,36 @@ Examples:
   npx tsx sync-ga4-data.ts --business teelixir          # Teelixir only
   npx tsx sync-ga4-data.ts --start 2024-11-01 --end 2024-11-30
 
-Environment Variables Required:
-  GOOGLE_APPLICATION_CREDENTIALS - Path to service account JSON
-  GA4_BOO_PROPERTY_ID           - BOO GA4 property ID
-  GA4_TEELIXIR_PROPERTY_ID      - Teelixir GA4 property ID
-  GA4_ELEVATE_PROPERTY_ID       - Elevate GA4 property ID
-  GA4_RHF_PROPERTY_ID           - RHF GA4 property ID
+Vault Credentials Required:
+  Global:
+    - google_ads_client_id
+    - google_ads_client_secret
+    - google_gsc_refresh_token (reusable for GA4)
+
+  Business-specific:
+    - boo/ga4_property_id
+    - teelixir/ga4_property_id
+    - elevate/ga4_property_id
+    - redhillfresh/ga4_property_id
+
+  Check credentials: node creds.js list
     `)
     process.exit(0)
   }
 
   console.log('🔄 GA4 Data Sync')
   console.log('='.repeat(50))
+
+  // Initialize credentials from vault
+  console.log('Loading credentials from vault...')
+  try {
+    await initCredentials()
+    console.log('✓ Credentials loaded')
+  } catch (error) {
+    console.error(`❌ Failed to load credentials: ${error instanceof Error ? error.message : error}`)
+    console.log('\nRun: node creds.js list global')
+    process.exit(1)
+  }
 
   // Get date range
   const { startDate, endDate } = getDateRange(args)
@@ -372,16 +430,16 @@ Environment Variables Required:
   // Initialize clients
   let analyticsClient
   try {
-    analyticsClient = getAnalyticsClient()
+    analyticsClient = await getAnalyticsClient()
   } catch (error) {
     console.error(`❌ ${error instanceof Error ? error.message : error}`)
-    console.log('\nSet GOOGLE_APPLICATION_CREDENTIALS to your service account JSON file.')
     process.exit(1)
   }
 
   const supabase = getSupabase()
   if (!supabase) {
-    console.warn('⚠️ Supabase not configured - data will not be stored')
+    console.error('❌ Supabase not configured')
+    process.exit(1)
   }
 
   // Determine businesses to sync

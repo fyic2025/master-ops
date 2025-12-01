@@ -1,5 +1,39 @@
 # Klaviyo Expert - Quick Reference
 
+## Multi-Account Setup
+
+### Active Accounts
+
+| Account | Business | List Size | API Key Env Var |
+|---------|----------|-----------|-----------------|
+| **boo** | Buy Organics Online | 40,000+ | BOO_KLAVIYO_API_KEY |
+| **teelixir** | Teelixir | 15,000+ | TEELIXIR_KLAVIYO_API_KEY |
+| **elevate** | Elevate Wholesale | 3,000+ | ELEVATE_KLAVIYO_API_KEY |
+
+### Load Credentials
+
+```bash
+# Load from vault
+node creds.js load boo
+node creds.js load teelixir
+node creds.js load elevate
+```
+
+### Script Usage
+
+```bash
+# Using wrapper (auto-loads credentials)
+node scripts/klaviyo.js boo profiles --recent
+node scripts/klaviyo.js teelixir campaigns --list
+node scripts/klaviyo.js elevate flows --list
+
+# Using client directly
+ACCOUNT=boo npx tsx scripts/klaviyo-client.ts profiles --recent
+ACCOUNT=teelixir npx tsx scripts/klaviyo-client.ts lists --list
+```
+
+---
+
 ## API Basics
 
 ```typescript
@@ -218,26 +252,37 @@ POST /events
 
 ## Account Details
 
-| Business | Platform | List Size |
-|----------|----------|-----------|
-| BOO | BigCommerce | 40,000+ |
-| Teelixir | Shopify | 15,000+ |
-| RHF | WooCommerce | 5,000+ |
+| Business | Platform | List Size | Focus |
+|----------|----------|-----------|-------|
+| BOO | BigCommerce | 40,000+ | B2C Organic Products |
+| Teelixir | Shopify | 15,000+ | B2C Mushroom Extracts |
+| Elevate | Shopify | 3,000+ | B2B Wholesale |
 
 ---
 
 ## Quick Commands
 
 ```bash
-# Get profiles
-curl -H "Authorization: Klaviyo-API-Key $KEY" \
+# Multi-account wrapper (recommended)
+node scripts/klaviyo.js boo profiles --search test@example.com
+node scripts/klaviyo.js teelixir lists --list
+node scripts/klaviyo.js elevate campaigns --recent
+
+# Direct API calls
+# BOO
+curl -H "Authorization: Klaviyo-API-Key $BOO_KLAVIYO_API_KEY" \
   -H "revision: 2024-02-15" \
   "https://a.klaviyo.com/api/profiles?page[size]=10"
 
-# Get lists
-curl -H "Authorization: Klaviyo-API-Key $KEY" \
+# Teelixir
+curl -H "Authorization: Klaviyo-API-Key $TEELIXIR_KLAVIYO_API_KEY" \
   -H "revision: 2024-02-15" \
   "https://a.klaviyo.com/api/lists"
+
+# Elevate
+curl -H "Authorization: Klaviyo-API-Key $ELEVATE_KLAVIYO_API_KEY" \
+  -H "revision: 2024-02-15" \
+  "https://a.klaviyo.com/api/campaigns"
 ```
 
 ---

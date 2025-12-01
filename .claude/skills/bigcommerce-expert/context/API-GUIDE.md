@@ -12,31 +12,40 @@ BigCommerce provides REST APIs for store management:
 
 ### API Account Setup
 
-1. Go to Store > Settings > API Accounts
-2. Create V2/V3 API Token
-3. Required scopes:
-   - Products: `modify`
-   - Orders: `read` (V2)
-   - Customers: `modify`
-   - Content: `modify`
-   - Carts: `modify`
-   - Checkouts: `modify`
-   - Stored Payment Instruments: `read`
+BOO BigCommerce API credentials are stored in the Supabase vault under the `boo` project:
+- `bc_store_hash` → `BOO_BC_STORE_HASH`
+- `bc_access_token` → `BOO_BC_ACCESS_TOKEN`
+- `bc_client_id` → `BOO_BC_CLIENT_ID`
+- `bc_client_secret` → `BOO_BC_CLIENT_SECRET`
 
-### Environment Variables
+**Required API Scopes:**
+- Products: `modify`
+- Orders: `read` (V2)
+- Customers: `modify`
+- Content: `modify`
+- Carts: `modify`
+- Checkouts: `modify`
+- Stored Payment Instruments: `read`
 
-```env
-BC_STORE_HASH=your_store_hash
-BC_ACCESS_TOKEN=your_access_token
-BC_CLIENT_ID=your_client_id
-BC_CLIENT_SECRET=your_client_secret
+### Loading Credentials
+
+```javascript
+// Load from vault (loads BOO + global credentials)
+const creds = require('../../../../creds');
+await creds.load('boo');
+
+// Credentials now available in process.env
+const storeHash = process.env.BOO_BC_STORE_HASH;
+const accessToken = process.env.BOO_BC_ACCESS_TOKEN;
+const clientId = process.env.BOO_BC_CLIENT_ID;
+const clientSecret = process.env.BOO_BC_CLIENT_SECRET;
 ```
 
 ### Request Headers
 
 ```typescript
 const headers = {
-  'X-Auth-Token': process.env.BC_ACCESS_TOKEN,
+  'X-Auth-Token': process.env.BOO_BC_ACCESS_TOKEN,
   'Content-Type': 'application/json',
   'Accept': 'application/json'
 }
