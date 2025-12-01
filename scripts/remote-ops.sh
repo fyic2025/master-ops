@@ -79,9 +79,9 @@ vault_get() {
 vault_list() {
   local business="$1"
   if [ -n "$business" ]; then
-    supabase_call GET "secure_credentials?name=like.${business}/*&select=name&order=name"
+    supabase_call GET "secure_credentials?project=eq.${business}&select=project,name&order=name"
   else
-    supabase_call GET "secure_credentials?select=name&order=name"
+    supabase_call GET "secure_credentials?select=project,name&order=project,name"
   fi
 }
 
