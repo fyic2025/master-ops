@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>We Miss You - Special Offer Inside</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { text-align: center; padding: 20px 0; }
+    .logo { max-width: 150px; }
+    .content { background: #f9f9f9; border-radius: 8px; padding: 30px; margin: 20px 0; }
+    .discount-box { background: #8B0000; color: white; text-align: center; padding: 20px; border-radius: 8px; margin: 20px 0; }
+    .discount-code { font-size: 28px; font-weight: bold; letter-spacing: 3px; margin: 10px 0; }
+    .discount-percent { font-size: 48px; font-weight: bold; }
+    .cta-button { display: inline-block; background: #8B0000; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; margin: 20px 0; }
+    .footer { text-align: center; font-size: 12px; color: #666; padding: 20px 0; }
+    .footer a { color: #666; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="https://teelixir.com/cdn/shop/files/Teelixir_Logo_Green.png" alt="Teelixir" class="logo">
+    </div>
+
+    <div class="content">
+      <h1>We miss you, {{first_name}}! 💚</h1>
+
+      <p>It's been a while since we've seen you at Teelixir, and we wanted to reach out.</p>
+
+      <p>We know life gets busy, but your wellness journey doesn't have to wait. We've been working on some amazing new products and would love to welcome you back.</p>
+
+      <div class="discount-box">
+        <p style="margin: 0;">Your comeback discount</p>
+        <div class="discount-percent">40% OFF</div>
+        <div class="discount-code">MISSYOU40</div>
+        <p style="margin: 0; font-size: 14px;">Valid on your entire order</p>
+      </div>
+
+      <p><strong>What's new since your last visit:</strong></p>
+      <ul>
+        <li>New mushroom blends for energy & focus</li>
+        <li>Enhanced formulas with better bioavailability</li>
+        <li>Sustainable packaging updates</li>
+      </ul>
+
+      <p style="text-align: center;">
+        <a href="https://teelixir.com?discount=MISSYOU40" class="cta-button">Claim Your 40% Off</a>
+      </p>
+
+      <p>This is our biggest discount - we really do miss you!</p>
+
+      <p>Warm regards,<br>
+      <strong>Colette & the Teelixir Team</strong></p>
+    </div>
+
+    <div class="footer">
+      <p>Teelixir Pty Ltd | Australia</p>
+      <p>
+        <a href="https://teelixir.com">Shop</a> |
+        <a href="https://teelixir.com/pages/contact">Contact</a> |
+        <a href="{{unsubscribe_url}}">Unsubscribe</a>
+      </p>
+      <p style="font-size: 10px;">You're receiving this email because you previously purchased from Teelixir. We noticed you haven't visited in a while and wanted to offer you a special discount.</p>
+    </div>
+  </div>
+</body>
+</html>
