@@ -19,6 +19,7 @@ import {
   AlertCircle,
   BarChart3,
   Send,
+  Zap,
   type LucideIcon
 } from 'lucide-react'
 
@@ -102,7 +103,7 @@ export const BUSINESSES: Record<BusinessCode, Business> = {
       { name: 'Shipping', href: '/shipping', icon: Send },
       { name: 'Distributors', href: '/distributors', icon: Truck },
       { name: 'Dist. Trends', href: '/distributors/trends', icon: TrendingUp },
-      { name: 'Re-engagement', href: '/reengagement', icon: Users },
+      { name: 'Automations', href: '/automations', icon: Zap },
       { name: 'Orders', href: '/orders', icon: ShoppingCart },
       { name: 'Products', href: '/products', icon: Package },
       { name: 'Ads Performance', href: '/ads', icon: BarChart3 },
