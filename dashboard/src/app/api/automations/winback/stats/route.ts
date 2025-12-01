@@ -20,6 +20,7 @@ export async function GET() {
     return NextResponse.json({
       stats: stats || {
         total_sent: 0,
+        total_opened: 0,
         total_clicked: 0,
         total_converted: 0,
         total_bounced: 0,
@@ -27,6 +28,7 @@ export async function GET() {
         total_revenue: 0,
         sent_today: 0,
         sent_this_week: 0,
+        open_rate_percent: 0,
         click_rate_percent: 0,
         conversion_rate_percent: 0,
       }

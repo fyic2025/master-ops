@@ -148,14 +148,25 @@ interface SendResult {
 // EMAIL TEMPLATE
 // ============================================================================
 
+// Dashboard URL for tracking endpoints
+const TRACKING_BASE_URL = 'https://ops.growthcohq.com'
+
 function generateEmailHtml(
   firstName: string,
   email: string,
   discountCode: string,
   discountPercent: number
 ): string {
-  // Base64 encode email for tracking link (privacy consideration)
-  const encodedEmail = Buffer.from(email).toString('base64')
+  // Base64 encode email for tracking
+  const encodedEmail = Buffer.from(email.toLowerCase()).toString('base64')
+
+  // Target URL with UTM params
+  const targetUrl = `https://teelixir.com.au/collections/all?utm_source=winback&utm_campaign=missyou40&utm_medium=email`
+  const encodedTargetUrl = Buffer.from(targetUrl).toString('base64')
+
+  // Tracking URLs
+  const openTrackUrl = `${TRACKING_BASE_URL}/api/track/open?id=${encodedEmail}`
+  const clickTrackUrl = `${TRACKING_BASE_URL}/api/track/click?id=${encodedEmail}&url=${encodedTargetUrl}`
 
   return `
 <!DOCTYPE html>
@@ -210,7 +221,7 @@ function generateEmailHtml(
               <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
                 <tr>
                   <td align="center">
-                    <a href="https://teelixir.com.au/collections/all?utm_email=${encodedEmail}&utm_source=winback&utm_campaign=missyou40"
+                    <a href="${clickTrackUrl}"
                        style="display: inline-block; background-color: #2c5530; color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 6px; font-size: 18px; font-weight: bold;">
                       Shop Now
                     </a>
@@ -240,6 +251,8 @@ function generateEmailHtml(
                 Teelixir Pty Ltd | Melbourne, Australia<br>
                 <a href="https://teelixir.com.au" style="color: #2c5530;">teelixir.com.au</a>
               </p>
+              <!-- Open Tracking Pixel -->
+              <img src="${openTrackUrl}" width="1" height="1" alt="" style="display:block;width:1px;height:1px;border:0;" />
             </td>
           </tr>
         </table>
