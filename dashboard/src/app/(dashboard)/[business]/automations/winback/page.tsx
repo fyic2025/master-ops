@@ -16,7 +16,8 @@ import {
   MousePointer2,
   Loader2,
   AlertCircle,
-  Send
+  Send,
+  Eye
 } from 'lucide-react'
 
 interface WinbackConfig {
@@ -32,6 +33,7 @@ interface WinbackConfig {
 
 interface WinbackStats {
   total_sent: number
+  total_opened: number
   total_clicked: number
   total_converted: number
   total_bounced: number
@@ -39,6 +41,7 @@ interface WinbackStats {
   total_revenue: number
   sent_today: number
   sent_this_week: number
+  open_rate_percent: number
   click_rate_percent: number
   conversion_rate_percent: number
 }
@@ -276,7 +279,7 @@ export default function WinbackPage() {
       )}
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
         <StatCard
           label="Unengaged Pool"
           value={unengagedPool?.total ?? 0}
@@ -295,6 +298,13 @@ export default function WinbackPage() {
           value={stats?.total_sent ?? 0}
           icon={Mail}
           color="gray"
+        />
+        <StatCard
+          label="Opened"
+          value={stats?.total_opened ?? 0}
+          subtext={`${stats?.open_rate_percent ?? 0}%`}
+          icon={Eye}
+          color="blue"
         />
         <StatCard
           label="Clicked"
