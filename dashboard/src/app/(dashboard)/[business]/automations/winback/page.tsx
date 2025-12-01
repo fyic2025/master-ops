@@ -122,7 +122,7 @@ export default function WinbackPage() {
     setActionLoading('toggle')
     try {
       const res = await fetch('/api/automations/config', {
-        method: 'PUT',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           automation_type: 'winback_40',
@@ -188,7 +188,7 @@ export default function WinbackPage() {
       // Only send the nested config fields, not 'enabled' which is top-level
       const { enabled, ...configFields } = config
       const res = await fetch('/api/automations/config', {
-        method: 'PUT',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           automation_type: 'winback_40',

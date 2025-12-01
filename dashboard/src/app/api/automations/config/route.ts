@@ -23,8 +23,9 @@ export async function GET() {
   }
 }
 
-// PUT /api/automations/config - Update automation config
-export async function PUT(request: Request) {
+// POST /api/automations/config - Update automation config
+// Using POST instead of PUT for better CDN/proxy compatibility
+export async function POST(request: Request) {
   try {
     const body = await request.json()
     const { automation_type, enabled, config } = body
@@ -71,3 +72,6 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
+
+// Also export as PUT for backwards compatibility
+export { POST as PUT }
