@@ -27,6 +27,7 @@ interface AutomationConfig {
 
 interface AutomationStats {
   total_sent: number
+  total_opened: number
   total_clicked: number
   total_converted: number
   total_bounced: number
@@ -34,6 +35,7 @@ interface AutomationStats {
   total_revenue: number
   sent_today: number
   sent_this_week: number
+  open_rate_percent: number
   click_rate_percent: number
   conversion_rate_percent: number
 }
@@ -181,18 +183,25 @@ function AutomationCard({ name, description, href, automation, stats }: Automati
 
         {/* Quick Stats */}
         {stats && (
-          <div className="grid grid-cols-4 gap-4 mt-6 pt-4 border-t border-gray-800">
+          <div className="grid grid-cols-5 gap-4 mt-6 pt-4 border-t border-gray-800">
             <div>
               <p className="text-gray-500 text-xs">Sent</p>
               <p className="text-white font-semibold">{stats.total_sent}</p>
             </div>
             <div>
-              <p className="text-gray-500 text-xs">Converted</p>
-              <p className="text-white font-semibold">{stats.total_converted}</p>
+              <p className="text-gray-500 text-xs">Opened</p>
+              <p className="text-white font-semibold">{stats.total_opened ?? 0}</p>
+              <p className="text-gray-600 text-xs">{stats.open_rate_percent ?? 0}%</p>
             </div>
             <div>
-              <p className="text-gray-500 text-xs">Conv. Rate</p>
-              <p className="text-white font-semibold">{stats.conversion_rate_percent}%</p>
+              <p className="text-gray-500 text-xs">Clicked</p>
+              <p className="text-white font-semibold">{stats.total_clicked ?? 0}</p>
+              <p className="text-gray-600 text-xs">{stats.click_rate_percent ?? 0}%</p>
+            </div>
+            <div>
+              <p className="text-gray-500 text-xs">Converted</p>
+              <p className="text-white font-semibold">{stats.total_converted}</p>
+              <p className="text-gray-600 text-xs">{stats.conversion_rate_percent ?? 0}%</p>
             </div>
             <div>
               <p className="text-gray-500 text-xs">Revenue</p>
