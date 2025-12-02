@@ -14,12 +14,14 @@ function getMelbourneHour(): number {
   return melbourneTime.getHours()
 }
 
-// GET /api/track/open?id=<base64_email>
+// GET /api/track/open?id=<base64_email>&t=<type>
 // Records email open and returns tracking pixel
+// Types: winback (default), anniversary
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const encodedId = searchParams.get('id')
+    const trackType = searchParams.get('t') || 'winback'
 
     if (encodedId) {
       // Decode the email from base64
@@ -29,9 +31,14 @@ export async function GET(request: NextRequest) {
         const supabase = createServerClient()
         const openHour = getMelbourneHour()
 
+        // Determine target table based on type
+        const tableName = trackType === 'anniversary'
+          ? 'tlx_anniversary_discounts'
+          : 'tlx_winback_emails'
+
         // Update the record - only set opened_at if not already set (first open)
         await supabase
-          .from('tlx_winback_emails')
+          .from(tableName)
           .update({
             opened_at: new Date().toISOString(),
             first_open_hour_melbourne: openHour,
@@ -39,9 +46,7 @@ export async function GET(request: NextRequest) {
           .eq('email', email.toLowerCase())
           .is('opened_at', null) // Only update if not already opened
 
-        // Also update any record regardless of opened_at for status tracking
-        // This ensures we capture the event even if opened_at was set
-        console.log(`[Track] Open recorded: ${email.substring(0, 3)}***@*** at ${openHour}:00 Melbourne`)
+        console.log(`[Track] Open recorded (${trackType}): ${email.substring(0, 3)}***@*** at ${openHour}:00 Melbourne`)
       }
     }
 

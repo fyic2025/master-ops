@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { Zap, Mail, Clock, CheckCircle2, XCircle, ChevronRight, Loader2 } from 'lucide-react'
+import { Zap, Mail, Gift, Clock, CheckCircle2, XCircle, ChevronRight, Loader2 } from 'lucide-react'
 
 interface AutomationConfig {
   id: string
@@ -54,9 +54,10 @@ export default function AutomationsPage() {
 
     async function fetchData() {
       try {
-        const [configRes, statsRes] = await Promise.all([
+        const [configRes, winbackStatsRes, anniversaryStatsRes] = await Promise.all([
           fetch('/api/automations/config'),
-          fetch('/api/automations/winback/stats')
+          fetch('/api/automations/winback/stats'),
+          fetch('/api/automations/anniversary/stats')
         ])
 
         if (configRes.ok) {
@@ -64,9 +65,14 @@ export default function AutomationsPage() {
           setAutomations(configData.automations || [])
         }
 
-        if (statsRes.ok) {
-          const statsData = await statsRes.json()
-          setStats({ winback_40: statsData.stats })
+        if (winbackStatsRes.ok) {
+          const winbackData = await winbackStatsRes.json()
+          setStats(prev => ({ ...prev, winback_40: winbackData.stats }))
+        }
+
+        if (anniversaryStatsRes.ok) {
+          const anniversaryData = await anniversaryStatsRes.json()
+          setStats(prev => ({ ...prev, anniversary_upsell: anniversaryData.stats }))
         }
       } catch (err: any) {
         setError(err.message)
@@ -120,6 +126,16 @@ export default function AutomationsPage() {
             stats={stats.winback_40}
           />
 
+          {/* Anniversary Upsell Card */}
+          <AutomationCard
+            name="Anniversary Upsell"
+            description="Send 15% discount with personalized upsell offers to first-time customers"
+            href={`/${business}/automations/anniversary`}
+            automation={automations.find(a => a.automation_type === 'anniversary_upsell')}
+            stats={stats.anniversary_upsell}
+            icon={Gift}
+          />
+
           {/* Placeholder for future automations */}
           <div className="bg-gray-900/50 border border-gray-800 border-dashed rounded-lg p-6">
             <div className="flex items-center gap-3 text-gray-500">
@@ -139,9 +155,10 @@ interface AutomationCardProps {
   href: string
   automation?: AutomationConfig
   stats?: AutomationStats
+  icon?: React.ElementType
 }
 
-function AutomationCard({ name, description, href, automation, stats }: AutomationCardProps) {
+function AutomationCard({ name, description, href, automation, stats, icon: Icon = Mail }: AutomationCardProps) {
   const isEnabled = automation?.enabled ?? false
   const lastRun = automation?.last_run_at ? new Date(automation.last_run_at) : null
 
@@ -151,7 +168,7 @@ function AutomationCard({ name, description, href, automation, stats }: Automati
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-4">
             <div className={`p-3 rounded-lg ${isEnabled ? 'bg-green-500/10' : 'bg-gray-800'}`}>
-              <Mail className={`w-6 h-6 ${isEnabled ? 'text-green-400' : 'text-gray-500'}`} />
+              <Icon className={`w-6 h-6 ${isEnabled ? 'text-green-400' : 'text-gray-500'}`} />
             </div>
             <div>
               <div className="flex items-center gap-2">

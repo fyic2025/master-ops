@@ -8,12 +8,14 @@ function getMelbourneHour(): number {
   return melbourneTime.getHours()
 }
 
-// GET /api/track/click?id=<base64_email>&url=<base64_url>
+// GET /api/track/click?id=<base64_email>&url=<base64_url>&t=<type>
 // Records click and redirects to target URL
+// Types: winback (default), anniversary
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const encodedId = searchParams.get('id')
   const encodedUrl = searchParams.get('url')
+  const trackType = searchParams.get('t') || 'winback'
 
   // Default fallback URL
   const fallbackUrl = 'https://teelixir.com.au/collections/all'
@@ -39,9 +41,14 @@ export async function GET(request: NextRequest) {
         const supabase = createServerClient()
         const clickHour = getMelbourneHour()
 
+        // Determine target table based on type
+        const tableName = trackType === 'anniversary'
+          ? 'tlx_anniversary_discounts'
+          : 'tlx_winback_emails'
+
         // Update the record - set clicked_at and update status
         const { error } = await supabase
-          .from('tlx_winback_emails')
+          .from(tableName)
           .update({
             clicked_at: new Date().toISOString(),
             first_click_hour_melbourne: clickHour,
@@ -51,7 +58,7 @@ export async function GET(request: NextRequest) {
           .is('clicked_at', null) // Only update if not already clicked
 
         if (!error) {
-          console.log(`[Track] Click recorded: ${email.substring(0, 3)}***@*** at ${clickHour}:00 Melbourne`)
+          console.log(`[Track] Click recorded (${trackType}): ${email.substring(0, 3)}***@*** at ${clickHour}:00 Melbourne`)
         }
       }
     }

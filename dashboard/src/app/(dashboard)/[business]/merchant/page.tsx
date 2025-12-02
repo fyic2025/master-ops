@@ -566,17 +566,117 @@ ${issueText}`
                   </div>
 
                   {/* Expanded Products List */}
-                  {expandedIssue === issue.issue_code && issue.products.length > 0 && (
+                  {expandedIssue === issue.issue_code && (
                     <div className="bg-gray-800/30 px-4 py-3 border-t border-gray-700">
+                      {/* Resolution Options */}
+                      <div className="mb-4 p-3 bg-gray-900 rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-white">Resolution Plan</span>
+                          {issue.resolution && (
+                            <span className="text-xs text-green-400">
+                              GMC says: {issue.resolution}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Quick Fix Options based on issue type */}
+                        <div className="flex flex-wrap gap-2 mb-3">
+                          {issue.issue_code === 'landing_page_error' && (
+                            <>
+                              <button
+                                onClick={() => updateResolutionStatus(issue.issue_code, 'fixed', 'Hide from Google Shopping in BigCommerce')}
+                                className="px-3 py-1.5 text-xs bg-blue-900/50 text-blue-400 hover:bg-blue-800/50 rounded transition-colors"
+                              >
+                                Hide from Shopping
+                              </button>
+                              <button
+                                onClick={() => updateResolutionStatus(issue.issue_code, 'fixed', 'Set up 301 redirects to similar products')}
+                                className="px-3 py-1.5 text-xs bg-purple-900/50 text-purple-400 hover:bg-purple-800/50 rounded transition-colors"
+                              >
+                                Add Redirects
+                              </button>
+                              <button
+                                onClick={() => updateResolutionStatus(issue.issue_code, 'fixed', 'Products discontinued - removed from feed')}
+                                className="px-3 py-1.5 text-xs bg-orange-900/50 text-orange-400 hover:bg-orange-800/50 rounded transition-colors"
+                              >
+                                Remove from Feed
+                              </button>
+                            </>
+                          )}
+                          {issue.issue_code === 'personal_hardships_policy_violation' && (
+                            <>
+                              <button
+                                onClick={() => updateResolutionStatus(issue.issue_code, 'fixed', 'Reviewed titles - removed health claims')}
+                                className="px-3 py-1.5 text-xs bg-blue-900/50 text-blue-400 hover:bg-blue-800/50 rounded transition-colors"
+                              >
+                                Remove Health Claims
+                              </button>
+                              <button
+                                onClick={() => updateResolutionStatus(issue.issue_code, 'verified', 'Warning only - products still approved')}
+                                className="px-3 py-1.5 text-xs bg-green-900/50 text-green-400 hover:bg-green-800/50 rounded transition-colors"
+                              >
+                                Accept Warning
+                              </button>
+                              <button
+                                onClick={() => updateResolutionStatus(issue.issue_code, 'fixed', 'Excluded sensitive products from Shopping Ads')}
+                                className="px-3 py-1.5 text-xs bg-purple-900/50 text-purple-400 hover:bg-purple-800/50 rounded transition-colors"
+                              >
+                                Exclude from Ads
+                              </button>
+                            </>
+                          )}
+                          {/* Generic options for other issue types */}
+                          {!['landing_page_error', 'personal_hardships_policy_violation'].includes(issue.issue_code) && (
+                            <>
+                              <button
+                                onClick={() => updateResolutionStatus(issue.issue_code, 'verified', 'Informational warning - no action needed')}
+                                className="px-3 py-1.5 text-xs bg-gray-700 text-gray-300 hover:bg-gray-600 rounded transition-colors"
+                              >
+                                Accept (Info Only)
+                              </button>
+                              <button
+                                onClick={() => updateResolutionStatus(issue.issue_code, 'fixed', 'Triggered feed resync')}
+                                className="px-3 py-1.5 text-xs bg-cyan-900/50 text-cyan-400 hover:bg-cyan-800/50 rounded transition-colors"
+                              >
+                                Resync Feed
+                              </button>
+                            </>
+                          )}
+                        </div>
+
+                        {/* Custom notes input */}
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            placeholder="Add custom resolution note..."
+                            className="flex-1 px-3 py-1.5 text-sm bg-gray-800 border border-gray-700 rounded text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && e.currentTarget.value) {
+                                updateResolutionStatus(issue.issue_code, 'fixed', e.currentTarget.value)
+                                e.currentTarget.value = ''
+                              }
+                            }}
+                          />
+                          <button
+                            onClick={(e) => {
+                              const input = e.currentTarget.previousElementSibling as HTMLInputElement
+                              if (input?.value) {
+                                updateResolutionStatus(issue.issue_code, 'fixed', input.value)
+                                input.value = ''
+                              }
+                            }}
+                            className="px-3 py-1.5 text-xs bg-cyan-900/50 text-cyan-400 hover:bg-cyan-800/50 rounded transition-colors"
+                          >
+                            Save Note
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Affected Products */}
                       <div className="flex items-center justify-between mb-3">
                         <span className="text-sm text-gray-400">
                           Affected Products ({issue.products.length})
                         </span>
-                        {issue.resolution && (
-                          <span className="text-xs text-green-400">
-                            Resolution: {issue.resolution}
-                          </span>
-                        )}
                       </div>
                       <div className="space-y-2 max-h-64 overflow-y-auto">
                         {issue.products.slice(0, 20).map((product) => (
