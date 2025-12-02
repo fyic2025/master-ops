@@ -22,7 +22,9 @@ import {
   ChevronRight,
   ListTodo,
   TrendingUp,
-  Package
+  Package,
+  UserPlus,
+  ArrowRight
 } from 'lucide-react'
 
 interface AnniversaryConfig {
@@ -80,6 +82,36 @@ interface QueueStatus {
   byHour: Record<number, { pending: number; sent: number; failed: number }>
 }
 
+interface UpcomingCandidate {
+  email: string
+  firstName: string | null
+  lastName: string | null
+  firstOrderDate: string
+  daysSinceOrder: number
+  daysUntilSend: number
+  idealSendDay: number
+  leadDays: number
+  originalProductType: string
+  originalSize: number
+  originalPrice: string | null
+  originalTitle: string | null
+  isLargestSize: boolean
+  upsellSize: number | null
+  upsellPrice: string | null
+  upsellTitle: string | null
+  upsellVariantTitle: string | null
+  savingsPercent: string | null
+  status: 'ready' | 'upcoming' | 'future'
+}
+
+interface UpcomingSummary {
+  total: number
+  ready: number
+  upcoming: number
+  withUpsell: number
+  repeatOnly: number
+}
+
 export default function AnniversaryPage() {
   const params = useParams()
   const business = params?.business as string
@@ -89,6 +121,8 @@ export default function AnniversaryPage() {
   const [stats, setStats] = useState<AnniversaryStats | null>(null)
   const [recentEmails, setRecentEmails] = useState<RecentEmail[]>([])
   const [queueStatus, setQueueStatus] = useState<QueueStatus | null>(null)
+  const [upcomingCandidates, setUpcomingCandidates] = useState<UpcomingCandidate[]>([])
+  const [upcomingSummary, setUpcomingSummary] = useState<UpcomingSummary | null>(null)
   const [selectedDate, setSelectedDate] = useState<string>(() => {
     return new Date().toLocaleDateString('en-CA', { timeZone: 'Australia/Melbourne' })
   })
@@ -99,11 +133,12 @@ export default function AnniversaryPage() {
   const fetchData = useCallback(async (date?: string) => {
     try {
       const targetDate = date || selectedDate
-      const [configRes, statsRes, recentRes, queueRes] = await Promise.all([
+      const [configRes, statsRes, recentRes, queueRes, upcomingRes] = await Promise.all([
         fetch('/api/automations/config'),
         fetch('/api/automations/anniversary/stats'),
         fetch('/api/automations/anniversary/recent'),
-        fetch(`/api/automations/anniversary/queue?date=${targetDate}`)
+        fetch(`/api/automations/anniversary/queue?date=${targetDate}`),
+        fetch('/api/automations/anniversary/upcoming?limit=30')
       ])
 
       if (configRes.ok) {
@@ -130,6 +165,12 @@ export default function AnniversaryPage() {
       if (queueRes.ok) {
         const data = await queueRes.json()
         setQueueStatus(data)
+      }
+
+      if (upcomingRes.ok) {
+        const data = await upcomingRes.json()
+        setUpcomingCandidates(data.candidates || [])
+        setUpcomingSummary(data.summary || null)
       }
     } catch (err: any) {
       setError(err.message)
@@ -449,6 +490,110 @@ export default function AnniversaryPage() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Upcoming Candidates */}
+      <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+            <UserPlus className="w-5 h-5" />
+            Upcoming Candidates
+          </h2>
+          {upcomingSummary && (
+            <div className="flex items-center gap-4 text-sm">
+              <span className="text-gray-400">
+                <span className="text-white font-medium">{upcomingSummary.total}</span> total
+              </span>
+              <span className="text-purple-400">
+                <span className="font-medium">{upcomingSummary.withUpsell}</span> with upsell
+              </span>
+              <span className="text-gray-500">
+                <span className="font-medium">{upcomingSummary.repeatOnly}</span> repeat only
+              </span>
+            </div>
+          )}
+        </div>
+
+        {upcomingCandidates.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            <Users className="w-8 h-8 mx-auto mb-2 opacity-50" />
+            <p>No upcoming candidates found</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="text-left text-gray-500 text-sm border-b border-gray-800">
+                  <th className="pb-3 font-medium">Customer</th>
+                  <th className="pb-3 font-medium">First Order</th>
+                  <th className="pb-3 font-medium">Original Purchase</th>
+                  <th className="pb-3 font-medium">Upsell Recommendation</th>
+                  <th className="pb-3 font-medium">Savings</th>
+                  <th className="pb-3 font-medium text-right">Send In</th>
+                </tr>
+              </thead>
+              <tbody>
+                {upcomingCandidates.map((candidate, idx) => (
+                  <tr key={idx} className="border-b border-gray-800/50">
+                    <td className="py-3">
+                      <div>
+                        <p className="text-white">{candidate.firstName} {candidate.lastName}</p>
+                        <p className="text-gray-500 text-xs">{candidate.email}</p>
+                      </div>
+                    </td>
+                    <td className="py-3 text-gray-400 text-sm">
+                      {new Date(candidate.firstOrderDate).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      <span className="text-gray-600 text-xs block">{candidate.daysSinceOrder} days ago</span>
+                    </td>
+                    <td className="py-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-white">{candidate.originalProductType}</span>
+                        <span className="text-gray-500">{candidate.originalSize}g</span>
+                        {candidate.originalPrice && (
+                          <span className="text-gray-400">${parseFloat(candidate.originalPrice).toFixed(0)}</span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="py-3">
+                      {candidate.isLargestSize ? (
+                        <span className="text-xs text-gray-500 bg-gray-800 px-2 py-1 rounded">
+                          Largest size - repeat offer
+                        </span>
+                      ) : candidate.upsellSize ? (
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-500">{candidate.originalSize}g</span>
+                          <ArrowRight className="w-3 h-3 text-purple-400" />
+                          <span className="text-purple-400 font-medium">{candidate.upsellSize}g</span>
+                          {candidate.upsellPrice && (
+                            <span className="text-gray-400">${parseFloat(candidate.upsellPrice).toFixed(0)}</span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-gray-500">-</span>
+                      )}
+                    </td>
+                    <td className="py-3">
+                      {candidate.savingsPercent ? (
+                        <span className="text-green-400 font-medium">{candidate.savingsPercent}%</span>
+                      ) : (
+                        <span className="text-gray-600">-</span>
+                      )}
+                    </td>
+                    <td className="py-3 text-right">
+                      {candidate.daysUntilSend <= 0 ? (
+                        <span className="text-green-400 font-medium bg-green-500/10 px-2 py-1 rounded text-sm">Ready</span>
+                      ) : candidate.daysUntilSend <= 7 ? (
+                        <span className="text-yellow-400 font-medium">{candidate.daysUntilSend} days</span>
+                      ) : (
+                        <span className="text-gray-500">{candidate.daysUntilSend} days</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* Recent Activity */}
