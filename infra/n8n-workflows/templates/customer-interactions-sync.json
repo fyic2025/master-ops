@@ -1,0 +1,266 @@
+{
+  "name": "BOO Customer Interactions Sync",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Every 6 Hours",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.livechatinc.com/v3.5/agent/action/list_archives",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"limit\": 100,\n  \"filters\": {\n    \"from\": \"{{ $now.minus({ hours: 6 }).toISO() }}\"\n  }\n}",
+        "options": {}
+      },
+      "id": "livechat-fetch",
+      "name": "Fetch LiveChat",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [450, 200],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "livechat-basic-auth",
+          "name": "LiveChat Basic Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "tableId": "customer_interactions",
+        "conflictColumns": ["external_id"],
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "source": "='livechat'",
+            "external_id": "={{ $json.id }}",
+            "customer_email": "={{ $json.users?.find(u => u.type === 'customer')?.email }}",
+            "customer_name": "={{ $json.users?.find(u => u.type === 'customer')?.name }}",
+            "subject": "={{ ($json.thread?.thread_summary || '').substring(0, 100) }}",
+            "transcript": "={{ $json.thread?.thread_summary }}",
+            "status": "={{ $json.thread?.properties?.routing?.continuous ? 'open' : 'resolved' }}",
+            "started_at": "={{ $json.thread?.created_at }}",
+            "raw_data": "={{ JSON.stringify($json) }}"
+          }
+        }
+      },
+      "id": "supabase-upsert-livechat",
+      "name": "Upsert to Supabase",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [650, 200],
+      "credentials": {
+        "supabaseApi": {
+          "id": "boo-supabase",
+          "name": "BOO Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "getAll",
+        "mailbox": "INBOX",
+        "returnAll": false,
+        "limit": 50,
+        "filters": {
+          "receivedAfter": "={{ $now.minus({ hours: 6 }).toISO() }}"
+        },
+        "options": {
+          "dataPropertyAttachmentsPrefixName": "attachment_"
+        }
+      },
+      "id": "gmail-fetch",
+      "name": "Fetch Emails",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [450, 400],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "boo-sales-gmail",
+          "name": "BOO Sales Gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "tableId": "customer_interactions",
+        "conflictColumns": ["external_id"],
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "source": "='email'",
+            "external_id": "={{ $json.id }}",
+            "customer_email": "={{ $json.from?.value?.[0]?.address }}",
+            "customer_name": "={{ $json.from?.value?.[0]?.name }}",
+            "subject": "={{ $json.subject }}",
+            "transcript": "={{ $json.text || $json.textPlain }}",
+            "status": "='open'",
+            "started_at": "={{ $json.date }}",
+            "raw_data": "={{ JSON.stringify({ to: $json.to, hasAttachments: $json.attachments?.length > 0 }) }}"
+          }
+        }
+      },
+      "id": "supabase-upsert-email",
+      "name": "Upsert Emails",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [650, 400],
+      "credentials": {
+        "supabaseApi": {
+          "id": "boo-supabase",
+          "name": "BOO Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.chats?.length > 0 }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "if-has-livechat",
+      "name": "Has LiveChat?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [550, 200]
+    },
+    {
+      "parameters": {
+        "channel": "#boo-alerts",
+        "text": "=📊 Customer Interactions Sync Complete\n\n• LiveChat: {{ $('Upsert to Supabase').all().length }} new/updated\n• Email: {{ $('Upsert Emails').all().length }} new/updated\n• Time: {{ $now.toLocaleString() }}",
+        "otherOptions": {}
+      },
+      "id": "slack-notify",
+      "name": "Notify Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.1,
+      "position": [850, 300],
+      "credentials": {
+        "slackApi": {
+          "id": "slack-webhook",
+          "name": "Slack Webhook"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "merge-results",
+      "name": "Merge Results",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2.1,
+      "position": [750, 300]
+    },
+    {
+      "parameters": {
+        "errorMessage": "={{ $json.error }}"
+      },
+      "id": "error-trigger",
+      "name": "On Error",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [250, 500]
+    },
+    {
+      "parameters": {
+        "channel": "#boo-alerts",
+        "text": "=❌ Customer Interactions Sync Failed\n\nError: {{ $json.error?.message }}\nNode: {{ $json.node?.name }}\nTime: {{ $now.toLocaleString() }}",
+        "otherOptions": {}
+      },
+      "id": "slack-error",
+      "name": "Alert Error",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.1,
+      "position": [450, 500],
+      "credentials": {
+        "slackApi": {
+          "id": "slack-webhook",
+          "name": "Slack Webhook"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Every 6 Hours": {
+      "main": [
+        [
+          { "node": "Fetch LiveChat", "type": "main", "index": 0 },
+          { "node": "Fetch Emails", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Fetch LiveChat": {
+      "main": [
+        [{ "node": "Has LiveChat?", "type": "main", "index": 0 }]
+      ]
+    },
+    "Has LiveChat?": {
+      "main": [
+        [{ "node": "Upsert to Supabase", "type": "main", "index": 0 }],
+        []
+      ]
+    },
+    "Upsert to Supabase": {
+      "main": [
+        [{ "node": "Merge Results", "type": "main", "index": 0 }]
+      ]
+    },
+    "Fetch Emails": {
+      "main": [
+        [{ "node": "Upsert Emails", "type": "main", "index": 0 }]
+      ]
+    },
+    "Upsert Emails": {
+      "main": [
+        [{ "node": "Merge Results", "type": "main", "index": 1 }]
+      ]
+    },
+    "Merge Results": {
+      "main": [
+        [{ "node": "Notify Slack", "type": "main", "index": 0 }]
+      ]
+    },
+    "On Error": {
+      "main": [
+        [{ "node": "Alert Error", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    { "name": "BOO" },
+    { "name": "Customer Service" },
+    { "name": "Sync" }
+  ],
+  "triggerCount": 1,
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "notes": "# BOO Customer Interactions Sync\n\nAutomatically syncs customer interactions from LiveChat and Email to Supabase every 6 hours.\n\n## Required Credentials\n\n1. **LiveChat Basic Auth** - PAT base64 encoded\n2. **BOO Supabase** - Service role key\n3. **BOO Sales Gmail** - OAuth2 for sales@buyorganicsonline.com.au\n4. **Slack Webhook** - For notifications (optional)\n\n## Tables\n\n- customer_interactions (upsert on external_id)\n\n## Schedule\n\nRuns every 6 hours, pulls interactions from the last 6 hours."
+}
