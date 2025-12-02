@@ -5,6 +5,7 @@ import { IntegrationStatus } from '@/components/IntegrationStatus'
 import { AlertsPanel } from '@/components/AlertsPanel'
 import ApiUsageWidget from '@/components/ApiUsageWidget'
 import { JobMonitoringWidget } from '@/components/JobMonitoringWidget'
+import AwsMigrationWidget from '@/components/AwsMigrationWidget'
 
 export default function BusinessDashboard({
   params,
@@ -82,6 +83,12 @@ function HomeDashboard() {
           <h2 className="text-xl font-semibold text-white mb-4">Integration Health</h2>
           <IntegrationStatus />
         </div>
+      </section>
+
+      {/* AWS Migration Status */}
+      <section>
+        <h2 className="text-xl font-semibold text-white mb-4">Infrastructure Migration</h2>
+        <AwsMigrationWidget />
       </section>
 
       {/* API Usage */}
