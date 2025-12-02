@@ -123,16 +123,39 @@ const TRANSFORMATION_PRESETS: Record<string, TransformationPreset> = {
   }
 };
 
+// Helper to load creds synchronously (for constructor)
+let credsCache: { cloudName?: string; apiKey?: string; apiSecret?: string } = {};
+
+async function loadCredsFromVault(): Promise<void> {
+  try {
+    const credsPath = require('path').join(__dirname, '../../../../creds.js');
+    const creds = require(credsPath);
+    credsCache.cloudName = await creds.get('global', 'cloudinary_cloud_name');
+    credsCache.apiKey = await creds.get('global', 'cloudinary_api_key');
+    credsCache.apiSecret = await creds.get('global', 'cloudinary_api_secret');
+  } catch (e) {
+    // Fallback to env vars if creds.js not available
+  }
+}
+
 export class CloudinaryClient {
   private cloudName: string;
   private apiKey: string;
   private apiSecret: string;
   private static instance: CloudinaryClient;
+  private static initialized: boolean = false;
 
   private constructor(config?: CloudinaryConfig) {
-    this.cloudName = config?.cloudName || process.env.CLOUDINARY_CLOUD_NAME || '';
-    this.apiKey = config?.apiKey || process.env.CLOUDINARY_API_KEY || '';
-    this.apiSecret = config?.apiSecret || process.env.CLOUDINARY_API_SECRET || '';
+    this.cloudName = config?.cloudName || credsCache.cloudName || process.env.CLOUDINARY_CLOUD_NAME || '';
+    this.apiKey = config?.apiKey || credsCache.apiKey || process.env.CLOUDINARY_API_KEY || '';
+    this.apiSecret = config?.apiSecret || credsCache.apiSecret || process.env.CLOUDINARY_API_SECRET || '';
+  }
+
+  static async initialize(): Promise<void> {
+    if (!CloudinaryClient.initialized) {
+      await loadCredsFromVault();
+      CloudinaryClient.initialized = true;
+    }
   }
 
   static getInstance(config?: CloudinaryConfig): CloudinaryClient {

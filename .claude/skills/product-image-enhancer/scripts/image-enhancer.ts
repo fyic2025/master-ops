@@ -6,9 +6,14 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { getCloudinaryClient } from '../../../../shared/libs/integrations/cloudinary/client';
+import { getCloudinaryClient, CloudinaryClient } from '../../../../shared/libs/integrations/cloudinary/client';
 
-const client = getCloudinaryClient();
+let client: ReturnType<typeof getCloudinaryClient>;
+
+async function initClient() {
+  await CloudinaryClient.initialize();
+  client = getCloudinaryClient();
+}
 
 async function showPresets() {
   console.log('\nAvailable Image Presets:\n');
@@ -138,14 +143,15 @@ async function generateSrcSet(publicId: string, widths?: string) {
 
 // CLI
 async function main() {
+  // Initialize client with creds from vault
+  await initClient();
+
   const [command, ...args] = process.argv.slice(2);
 
   // Check configuration
   if (command !== 'presets' && command !== 'help' && !client.isConfigured()) {
-    console.log('⚠️ Cloudinary not fully configured. Set environment variables:');
-    console.log('  CLOUDINARY_CLOUD_NAME');
-    console.log('  CLOUDINARY_API_KEY');
-    console.log('  CLOUDINARY_API_SECRET');
+    console.log('⚠️ Cloudinary not fully configured.');
+    console.log('Store credentials with: node creds.js store global cloudinary_cloud_name "YOUR_NAME"');
     console.log('\nURL generation will still work with cloud name only.\n');
   }
 
