@@ -59,11 +59,11 @@ Based on Pearl 250g:
 ## API Access
 
 ### Teelixir Unleashed
-- API ID: `7fda9404-7197-477b-89b1-dadbcefae168`
+- API ID: Configured in `.env` (TEELIXIR_UNLEASHED_API_ID)
 - Contains: Cost, Distributor, Wholesale, RRP tiers
 
 ### Kikai/Elevate Unleashed
-- API ID: `336a6015-eae0-43ab-83eb-e08121e7655d`
+- API ID: Configured in `.env` (ELEVATE_UNLEASHED_API_ID)
 - `DefaultSellPrice` = Wholesale price to retailers (matches Teelixir `SellPriceTier1`)
 
 ### Shopify Teelixir

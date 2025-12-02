@@ -643,11 +643,11 @@ Port: 5432
 - Supabase: [project #1 connection string]
 
 **Teelixir/Elevate:**
-- Shopify API: teelixir.com.au (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)
-- Unleashed API KIK: 336a6015-eae0-43ab-83eb-e08121e7655d
-- Unleashed API Teelixir: 7fda9404-7197-477b-89b1-dadbcefae168
-- Klaviyo API: pk_bdf656d626ab7c7556cf9da8063794722f
-- SendGrid API: SG.4zDQd8hpQZSvJ7Pat57EKg...
+- Shopify API: teelixir.com.au (configured in .env)
+- Unleashed API KIK: configured in .env (ELEVATE_UNLEASHED_API_ID)
+- Unleashed API Teelixir: configured in .env (TEELIXIR_UNLEASHED_API_ID)
+- Klaviyo API: configured in .env (KLAVIYO_API_KEY)
+- SendGrid API: configured in .env (SENDGRID_API_KEY)
 - Supabase: [project #2 connection string]
 
 ---

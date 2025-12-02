@@ -103,11 +103,11 @@ N8N_BASE_URL=https://automation.growthcohq.com
 N8N_API_KEY=<configured>
 
 # Unleashed Teelixir (CONFIGURED ✅)
-UNLEASHED_TEELIXIR_API_ID=7fda9404-7197-477b-89b1-dadbcefae168
+UNLEASHED_TEELIXIR_API_ID=<configured>
 UNLEASHED_TEELIXIR_API_KEY=<configured>
 
 # Unleashed Elevate (CONFIGURED ✅)
-UNLEASHED_ELEVATE_API_ID=336a6015-eae0-43ab-83eb-e08121e7655d
+UNLEASHED_ELEVATE_API_ID=<configured>
 UNLEASHED_ELEVATE_API_KEY=<configured>
 
 # Missing - Required for Phase 3+

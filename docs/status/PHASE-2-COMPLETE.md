@@ -11,12 +11,12 @@ Phase 2 of the HubSpot Integration is now complete. This phase adds **Unleashed 
 ### 1. Unleashed API Credentials (Both Businesses)
 
 **Teelixir Unleashed:**
-- API ID: `7fda9404-7197-477b-89b1-dadbcefae168`
-- API Key: Configured in `.env`
+- API ID: Configured in `.env` (TEELIXIR_UNLEASHED_API_ID)
+- API Key: Configured in `.env` (TEELIXIR_UNLEASHED_API_KEY)
 
 **Elevate Wholesale Unleashed:**
-- API ID: `336a6015-eae0-43ab-83eb-e08121e7655d`
-- API Key: Configured in `.env`
+- API ID: Configured in `.env` (ELEVATE_UNLEASHED_API_ID)
+- API Key: Configured in `.env` (ELEVATE_UNLEASHED_API_KEY)
 
 ### 2. New n8n Workflows
 
@@ -177,11 +177,11 @@ Ensure these environment variables are set in n8n:
 
 ```bash
 # Teelixir Unleashed
-UNLEASHED_TEELIXIR_API_ID=7fda9404-7197-477b-89b1-dadbcefae168
+UNLEASHED_TEELIXIR_API_ID=[configured in .env]
 UNLEASHED_TEELIXIR_API_KEY=[configured in .env]
 
 # Elevate Unleashed
-UNLEASHED_ELEVATE_API_ID=336a6015-eae0-43ab-83eb-e08121e7655d
+UNLEASHED_ELEVATE_API_ID=[configured in .env]
 UNLEASHED_ELEVATE_API_KEY=[configured in .env]
 ```
 
