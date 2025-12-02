@@ -173,8 +173,10 @@ async function getAnniversaryMetrics(days: number): Promise<AnniversaryMetrics> 
     };
   }
 
-  const sent = data.filter(d => d.status === 'sent' || d.status === 'used').length;
-  const converted = data.filter(d => d.status === 'used').length;
+  const sent = data.filter(d => d.status === 'sent' || d.status === 'opened' || d.status === 'clicked' || d.status === 'converted').length;
+  const opened = data.filter(d => d.opened_at).length;
+  const clicked = data.filter(d => d.clicked_at).length;
+  const converted = data.filter(d => d.status === 'converted').length;
   const expired = data.filter(d => d.status === 'expired').length;
   const failed = data.filter(d => d.status === 'failed').length;
   const totalRevenue = data
@@ -184,8 +186,8 @@ async function getAnniversaryMetrics(days: number): Promise<AnniversaryMetrics> 
   return {
     totalCodes: data.length,
     sent,
-    opened: 0, // Not tracked in current schema
-    clicked: 0, // Not tracked in current schema
+    opened,
+    clicked,
     converted,
     expired,
     failed,
@@ -378,6 +380,8 @@ function printReport(report: AnalyticsReport) {
   // Anniversary
   console.log('--- ANNIVERSARY EMAILS (Teelixir) ---');
   console.log(`Sent: ${report.anniversary.sent}`);
+  console.log(`Opened: ${report.anniversary.opened} (${report.anniversary.sent > 0 ? Math.round((report.anniversary.opened / report.anniversary.sent) * 100) : 0}%)`);
+  console.log(`Clicked: ${report.anniversary.clicked} (${report.anniversary.opened > 0 ? Math.round((report.anniversary.clicked / report.anniversary.opened) * 100) : 0}%)`);
   console.log(`Converted: ${report.anniversary.converted} (${report.anniversary.conversionRate}%)`);
   console.log(`Revenue: $${report.anniversary.totalRevenue.toLocaleString()}`);
   console.log(`Revenue/Email: $${report.anniversary.revenuePerEmail}\n`);

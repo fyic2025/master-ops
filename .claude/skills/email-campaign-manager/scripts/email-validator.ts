@@ -112,25 +112,47 @@ async function checkSuppressionList(emails: string[]): Promise<Map<string, strin
     .in('email', emails)
     .eq('status', 'bounced');
 
-  bounced?.forEach(b => suppressed.set(b.email.toLowerCase(), 'previous_bounce'));
+  bounced?.forEach(b => suppressed.set(b.email.toLowerCase(), 'smartlead_bounce'));
 
-  // Check unsubscribed
+  // Check unsubscribed from Smartlead
   const { data: unsubbed } = await supabase
     .from('smartlead_engagement')
     .select('lead_id')
     .in('event_type', ['LEAD_UNSUBSCRIBED'])
     .in('lead_id', emails);
 
-  unsubbed?.forEach(u => suppressed.set(u.lead_id.toLowerCase(), 'unsubscribed'));
+  unsubbed?.forEach(u => suppressed.set(u.lead_id.toLowerCase(), 'smartlead_unsubscribed'));
 
-  // Check failed anniversary emails
-  const { data: failed } = await supabase
+  // Check failed/bounced anniversary emails
+  const { data: anniversaryFailed } = await supabase
+    .from('tlx_anniversary_discounts')
+    .select('email, status')
+    .in('email', emails)
+    .in('status', ['failed', 'bounced']);
+
+  anniversaryFailed?.forEach(f => suppressed.set(f.email.toLowerCase(), `anniversary_${f.status}`));
+
+  // Check already sent anniversary emails (within 90 days - avoid re-sending)
+  const ninetyDaysAgo = new Date();
+  ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+
+  const { data: recentAnniversary } = await supabase
     .from('tlx_anniversary_discounts')
     .select('email')
     .in('email', emails)
-    .eq('status', 'failed');
+    .in('status', ['sent', 'opened', 'clicked', 'converted'])
+    .gte('sent_at', ninetyDaysAgo.toISOString());
 
-  failed?.forEach(f => suppressed.set(f.email.toLowerCase(), 'previous_failure'));
+  recentAnniversary?.forEach(r => suppressed.set(r.email.toLowerCase(), 'anniversary_recent_90d'));
+
+  // Check failed/bounced winback emails
+  const { data: winbackFailed } = await supabase
+    .from('tlx_winback_emails')
+    .select('email, status')
+    .in('email', emails)
+    .in('status', ['failed', 'bounced']);
+
+  winbackFailed?.forEach(f => suppressed.set(f.email.toLowerCase(), `winback_${f.status}`));
 
   return suppressed;
 }

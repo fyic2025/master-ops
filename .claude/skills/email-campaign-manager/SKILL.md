@@ -616,12 +616,22 @@ async function sendWithFallback(email: EmailPayload): Promise<void> {
 ## Reference Files
 
 ### Existing Scripts
+
+#### Teelixir Anniversary Upsell
+- [teelixir/scripts/sync-shopify-variants.ts](../../../teelixir/scripts/sync-shopify-variants.ts) - Sync Shopify variants to Supabase
+- [teelixir/scripts/queue-anniversary-emails.ts](../../../teelixir/scripts/queue-anniversary-emails.ts) - Queue candidates based on product timing
+- [teelixir/scripts/send-anniversary-upsell.ts](../../../teelixir/scripts/send-anniversary-upsell.ts) - Send personalized upsell emails
+
+#### Teelixir Winback
+- [teelixir/scripts/send-winback-emails.ts](../../../teelixir/scripts/send-winback-emails.ts) - Winback automation
+- [teelixir/scripts/sync-klaviyo-unengaged.ts](../../../teelixir/scripts/sync-klaviyo-unengaged.ts) - Klaviyo sync
+
+#### Smartlead Cold Outreach
 - [scripts/create-smartlead-campaigns.ts](../../../scripts/create-smartlead-campaigns.ts) - Campaign creation
 - [scripts/setup-smartlead-properties.ts](../../../scripts/setup-smartlead-properties.ts) - Smartlead setup
 - [scripts/validate-smartlead-setup.ts](../../../scripts/validate-smartlead-setup.ts) - Setup validation
-- [teelixir/scripts/send-anniversary-emails.ts](../../../teelixir/scripts/send-anniversary-emails.ts) - Anniversary automation
-- [teelixir/scripts/send-winback-emails.ts](../../../teelixir/scripts/send-winback-emails.ts) - Winback automation
-- [teelixir/scripts/sync-klaviyo-unengaged.ts](../../../teelixir/scripts/sync-klaviyo-unengaged.ts) - Klaviyo sync
+
+#### Analytics & Monitoring
 - [scripts/klaviyo-engagement-analysis.js](../../../scripts/klaviyo-engagement-analysis.js) - Engagement analysis
 - [elevate-wholesale/scripts/prospecting/email-sender.ts](../../../elevate-wholesale/scripts/prospecting/email-sender.ts) - Elevate emails
 

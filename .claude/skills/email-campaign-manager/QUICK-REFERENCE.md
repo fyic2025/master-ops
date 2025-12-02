@@ -35,6 +35,30 @@ npx tsx .claude/skills/email-campaign-manager/scripts/bounce-manager.ts check em
 
 ---
 
+## Teelixir Anniversary Commands
+
+```bash
+# Sync Shopify variants (run daily)
+npx tsx teelixir/scripts/sync-shopify-variants.ts
+
+# Queue today's anniversary emails (dry run)
+npx tsx teelixir/scripts/queue-anniversary-emails.ts --dry-run
+
+# Queue today's anniversary emails (live)
+npx tsx teelixir/scripts/queue-anniversary-emails.ts
+
+# Process queue for current hour (dry run)
+npx tsx teelixir/scripts/send-anniversary-upsell.ts --process-queue --dry-run
+
+# Process queue for current hour (live)
+npx tsx teelixir/scripts/send-anniversary-upsell.ts --process-queue
+
+# Send test email
+npx tsx teelixir/scripts/send-anniversary-upsell.ts --test-email=you@example.com --test-name="First Last"
+```
+
+---
+
 ## Database Tables
 
 ### Smartlead
@@ -45,9 +69,12 @@ npx tsx .claude/skills/email-campaign-manager/scripts/bounce-manager.ts check em
 - `smartlead_sync_log` - HubSpot sync tracking
 
 ### Teelixir Anniversary
-- `tlx_anniversary_discounts` - Discount codes + conversions
+- `tlx_anniversary_discounts` - Discount codes, conversions, open/click tracking
+- `tlx_anniversary_queue` - Hourly send queue
 - `tlx_reorder_timing` - Product timing rules
+- `tlx_shopify_variants` - Product variant data for upsell matching
 - `tlx_automation_config` - Automation settings
+- `v_tlx_anniversary_upsell_candidates` - View of upcoming candidates
 
 ### Teelixir Winback
 - `tlx_winback_emails` - Winback tracking
@@ -64,11 +91,15 @@ npx tsx .claude/skills/email-campaign-manager/scripts/bounce-manager.ts check em
 -- Smartlead campaign performance
 SELECT * FROM v_smartlead_campaign_performance;
 
--- Anniversary candidates ready to send
-SELECT * FROM v_tlx_anniversary_candidates WHERE send_date <= CURRENT_DATE;
+-- Anniversary upsell candidates (with timing)
+SELECT * FROM v_tlx_anniversary_upsell_candidates LIMIT 20;
 
 -- Anniversary stats
 SELECT * FROM tlx_anniversary_stats;
+
+-- Today's anniversary queue status
+SELECT status, COUNT(*) FROM tlx_anniversary_queue
+WHERE scheduled_date = CURRENT_DATE GROUP BY status;
 
 -- Winback send time analysis
 SELECT * FROM v_winback_send_time_analytics;
@@ -158,12 +189,23 @@ WHERE bounced_at IS NOT NULL GROUP BY bounce_reason;
 
 ## Related Scripts (Existing)
 
+### Teelixir Anniversary Upsell
+| Script | Location |
+|--------|----------|
+| Sync Shopify variants | `teelixir/scripts/sync-shopify-variants.ts` |
+| Queue anniversary emails | `teelixir/scripts/queue-anniversary-emails.ts` |
+| Send anniversary upsell | `teelixir/scripts/send-anniversary-upsell.ts` |
+
+### Teelixir Winback
+| Script | Location |
+|--------|----------|
+| Send winback emails | `teelixir/scripts/send-winback-emails.ts` |
+| Sync Klaviyo unengaged | `teelixir/scripts/sync-klaviyo-unengaged.ts` |
+
+### Cold Outreach & Other
 | Script | Location |
 |--------|----------|
 | Create Smartlead campaigns | `scripts/create-smartlead-campaigns.ts` |
-| Send anniversary emails | `teelixir/scripts/send-anniversary-emails.ts` |
-| Send winback emails | `teelixir/scripts/send-winback-emails.ts` |
-| Sync Klaviyo unengaged | `teelixir/scripts/sync-klaviyo-unengaged.ts` |
 | Gmail OAuth flow | `scripts/gmail-oauth-flow.ts` |
 | Elevate email sender | `elevate-wholesale/scripts/prospecting/email-sender.ts` |
 
