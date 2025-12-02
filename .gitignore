@@ -150,5 +150,8 @@ remove-secrets.sh
 buy-organics-online/security-cleanup.js
 .claude/settings.local.json
 nul
-.claude/settings.local.json
 scripts/list-do-droplets.ps1
+
+# Encrypted Vault - SAFE to commit (password protected)
+# This line explicitly ALLOWS the encrypted vault to be tracked
+!credentials.vault.enc
