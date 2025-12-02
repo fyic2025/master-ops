@@ -207,13 +207,15 @@ npx tsx .claude/skills/product-image-enhancer/scripts/image-enhancer.ts product-
 
 ---
 
-## Next Steps
+## Completed (Dec 2, 2025)
+
+- [x] Apply marketing skills migration to Supabase
+- [x] Set up Cloudinary credentials
+- [x] Upload Teelixir images to Cloudinary (90 images)
+
+## Optional Next Steps
 
 1. [ ] Get GA4 property IDs from Google Analytics dashboard
-2. [ ] Add GA4 property IDs to vault
-3. [ ] Test GA4 sync
-4. [ ] Create GA4 Supabase migration if needed
-5. [ ] Investigate Teelixir low GSC data
-6. [ ] Apply marketing skills migration to Supabase
-7. [ ] Set up Litmus API credentials (LITMUS_API_KEY, LITMUS_API_SECRET)
-8. [ ] Set up Cloudinary credentials (CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET)
+2. [ ] Set up Litmus API credentials (for email preview testing)
+3. [ ] Upload BOO/Elevate images to Cloudinary
+4. [ ] Investigate Teelixir low GSC data (only 4 rows)
