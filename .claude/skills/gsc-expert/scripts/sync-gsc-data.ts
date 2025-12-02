@@ -28,17 +28,17 @@ const creds = require(path.resolve(__dirname, '../../../../creds'))
 
 // Configuration (loaded from vault)
 const config = {
-  supabaseUrl: process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL,
-  supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
+  supabaseUrl: process.env.MASTER_SUPABASE_URL || process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL,
+  supabaseKey: process.env.MASTER_SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY,
   googleClientId: process.env.GOOGLE_ADS_CLIENT_ID,
   googleClientSecret: process.env.GOOGLE_ADS_CLIENT_SECRET,
   gscRefreshToken: process.env.GOOGLE_GSC_REFRESH_TOKEN,
 }
 
-// Business property mappings (sc-domain: format for GSC API)
+// Business property mappings (use exact format from GSC sites.list)
 const BUSINESS_PROPERTIES: Record<string, string> = {
-  boo: 'sc-domain:buyorganicsonline.com.au',
-  teelixir: 'sc-domain:teelixir.com',
+  boo: 'https://www.buyorganicsonline.com.au/',
+  teelixir: 'https://teelixir.com/',
   elevate: 'sc-domain:elevatewholesale.com.au',
   rhf: 'sc-domain:redhillfresh.com.au',
 }
@@ -59,21 +59,40 @@ interface SyncResult {
 }
 
 // Initialize Google Auth with vault credentials
-async function getGoogleAuth() {
+async function getGoogleAuth(business?: string) {
   // Load credentials from vault if not already loaded
   if (!process.env.GOOGLE_ADS_CLIENT_ID) {
     await creds.load('global')
   }
 
+  // Try business-specific refresh token first (from Google Ads or Merchant)
+  let refreshToken = config.gscRefreshToken
+
+  if (business) {
+    await creds.load(business)
+    const prefix = business.toUpperCase()
+    // Try business-specific GSC token, then Google Ads token, then Merchant token
+    const businessGscToken = process.env[`${prefix}_GSC_REFRESH_TOKEN`]
+    const businessAdsToken = process.env[`${prefix}_GOOGLE_ADS_REFRESH_TOKEN`]
+    const businessMerchantToken = process.env[`${prefix}_GOOGLE_MERCHANT_REFRESH_TOKEN`]
+
+    if (businessGscToken) {
+      console.log(`   Using ${business} GSC refresh token`)
+      refreshToken = businessGscToken
+    }
+    // Note: Google Ads and Merchant tokens typically don't have GSC scopes
+    // They would need to be re-authorized with webmasters.readonly scope
+  }
+
   // Use OAuth2 with vault credentials
-  if (config.googleClientId && config.googleClientSecret && config.gscRefreshToken) {
+  if (config.googleClientId && config.googleClientSecret && refreshToken) {
     const oauth2Client = new google.auth.OAuth2(
       config.googleClientId,
       config.googleClientSecret,
       'http://localhost'
     )
     oauth2Client.setCredentials({
-      refresh_token: config.gscRefreshToken
+      refresh_token: refreshToken
     })
     return oauth2Client
   }
@@ -197,15 +216,27 @@ async function syncBusiness(
           position: row.position
         }))
 
-        const { error } = await supabase
+        const response = await supabase
           .from('gsc_search_performance')
           .upsert(batch, {
             onConflict: 'business,date,query,page,country,device',
             ignoreDuplicates: false
           })
 
-        if (error) {
-          result.errors.push(`Batch ${i}-${i + batchSize}: ${error.message}`)
+        const { error, status, statusText } = response as any
+
+        if (error || status >= 400) {
+          const errMsg = error?.message || error?.details || error?.hint || statusText || `status: ${status}`
+          result.errors.push(`Batch ${i}-${i + batchSize}: ${errMsg}`)
+          // Log first error in detail
+          if (result.errors.length === 1) {
+            console.error(`   ⚠️ Insert error: ${errMsg} (${status})`)
+            if (status === 404) {
+              console.error('   💡 Table "gsc_search_performance" does not exist.')
+              console.error('   📋 Run this migration in Supabase SQL Editor:')
+              console.error('      infra/supabase/migrations/20251202_gsc_search_performance.sql')
+            }
+          }
         } else {
           result.rowsInserted += batch.length
         }
@@ -304,22 +335,8 @@ Credentials:
   const { startDate, endDate } = getDateRange(args)
   console.log(`Date range: ${startDate} to ${endDate}`)
 
-  // Initialize services
-  let auth
-  try {
-    auth = await getGoogleAuth()
-  } catch (error) {
-    console.error(`❌ ${error instanceof Error ? error.message : error}`)
-    console.log('\nCredentials must be stored in vault:')
-    console.log('  node creds.js store global google_ads_client_id "YOUR_CLIENT_ID"')
-    console.log('  node creds.js store global google_ads_client_secret "YOUR_CLIENT_SECRET"')
-    console.log('  node creds.js store global google_gsc_refresh_token "YOUR_REFRESH_TOKEN"')
-    process.exit(1)
-  }
-
-  const searchconsole = google.searchconsole({ version: 'v1', auth })
+  // Initialize Supabase
   const supabase = getSupabase()
-
   if (!supabase) {
     console.warn('⚠️ Supabase not configured - data will not be stored')
   }
@@ -330,9 +347,25 @@ Credentials:
     ? [args[businessArg + 1]]
     : Object.keys(BUSINESS_PROPERTIES)
 
-  // Sync each business
+  // Sync each business (with its own auth)
   const results: SyncResult[] = []
   for (const business of businesses) {
+    // Get auth for this business (tries business-specific tokens first)
+    let auth
+    try {
+      auth = await getGoogleAuth(business)
+    } catch (error) {
+      console.error(`❌ ${error instanceof Error ? error.message : error}`)
+      results.push({
+        business,
+        rowsProcessed: 0,
+        rowsInserted: 0,
+        errors: [`Auth failed: ${error instanceof Error ? error.message : error}`]
+      })
+      continue
+    }
+
+    const searchconsole = google.searchconsole({ version: 'v1', auth })
     const result = await syncBusiness(
       searchconsole,
       supabase,
