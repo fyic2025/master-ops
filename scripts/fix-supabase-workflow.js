@@ -103,8 +103,7 @@ async function main() {
     parameters: {
       method: method,
       url: url,
-      authentication: 'genericCredentialType',
-      genericAuthType: 'httpHeaderAuth',
+      authentication: 'none',
       sendHeaders: true,
       headerParameters: {
         parameters: [
@@ -112,15 +111,8 @@ async function main() {
           { name: 'Authorization', value: `Bearer ${CONFIG.SUPABASE_SERVICE_KEY}` }
         ]
       },
-      options: {
-        response: {
-          response: {
-            fullResponse: false
-          }
-        }
-      }
+      options: {}
     }
-    // Note: Removed credentials - using inline headers instead
   };
 
   console.log(`\nReplacing with HTTP Request node:`);
