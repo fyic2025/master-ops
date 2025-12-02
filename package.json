@@ -18,7 +18,8 @@
     "csv-parser": "^3.2.0",
     "dotenv": "^17.2.3",
     "googleapis": "^166.0.0",
-    "uuid": "^13.0.0"
+    "uuid": "^13.0.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
