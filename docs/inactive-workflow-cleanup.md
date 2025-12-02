@@ -1,15 +1,25 @@
 # Inactive Workflow Cleanup Guide
 
 **Date**: 2025-12-02
+**Last Updated**: 2025-12-02 14:00 UTC
 **Total Inactive**: 346 workflows
+
+## ✅ FIXED VIA API (2025-12-02)
+
+**83 HTTP nodes across 32 workflows were automatically fixed:**
+- Changed `authentication: 'genericCredentialType'` to `authentication: 'none'`
+- All nodes now use inline headers instead of n8n credential references
+- Verified working: System Monitor workflow (BZU7YiMydr0YNSCP) executed successfully
+
+**Script used**: `node scripts/batch-fix-http-auth.js`
 
 ## Summary
 
 | Category | Count | Action |
 |----------|-------|--------|
 | Clean (no creds) | 159 | Ready to activate if needed |
-| Clean (working creds) | 58 | Ready to activate if needed |
-| Needs Fix | 105+ | Fix credentials in n8n UI |
+| Clean (working creds) | 58+32 | Ready to activate if needed |
+| Needs Fix | ~73 | Fix credentials in n8n UI |
 | Verify | ~24 | Check after fixing main creds |
 
 ## Credentials to Fix in n8n UI
