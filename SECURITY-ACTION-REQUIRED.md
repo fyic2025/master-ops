@@ -22,18 +22,12 @@ API Key: a65AOqESdYl9GHyhqohaoYPGWsugYa2V1xi90zRn4pW4LzjCcgF3JUB3Z8YI4PNq5duUphx
 
 **Files affected:**
 - `unleashed-shopify-sync/src/config.ts`
-- `fix-crypto-import.ts`
-- `fix-with-pure-js-hmac.ts`
-- `test-fixed-auth.ts`
-- `test-unleashed-auth.ts`
-- `apply-unleashed-fix.ts`
-- `fix-crypto-restriction.ts`
-- `scripts/fixes/fix-crypto-import.ts`
-- `scripts/fixes/fix-with-pure-js-hmac.ts`
-- `scripts/fixes/apply-unleashed-fix.ts`
-- `scripts/fixes/fix-crypto-restriction.ts`
-- `scripts/tests/test-fixed-auth.ts`
-- `scripts/tests/test-unleashed-auth.ts`
+- `archive/one-off-scripts/fix-crypto-import.ts`
+- `archive/one-off-scripts/fix-with-pure-js-hmac.ts`
+- `archive/one-off-scripts/test-fixed-auth.ts`
+- `archive/one-off-scripts/test-unleashed-auth.ts`
+- `archive/one-off-scripts/apply-unleashed-fix.ts`
+- `archive/one-off-scripts/fix-crypto-restriction.ts`
 - `scripts/unleashed-pricing-analysis.js`
 
 ### Elevate/KIK Unleashed API (4 files)
@@ -135,7 +129,11 @@ Since these credentials were in git history, consider rotating them:
 
 - ✅ Documentation files redacted (no more credentials in .md files)
 - ✅ `.env.example` updated with all required variables
-- ✅ Folder structure reorganized (Phase 1 complete)
+- ✅ Folder structure reorganized (Phase 1 & 2 complete)
+- ✅ 69 one-off scripts archived to `archive/one-off-scripts/`
+- ✅ Test scripts consolidated in `scripts/tests/`
+- ✅ Utility scripts organized in `scripts/utilities/`
+- ✅ Duplicate files removed
 
 ---
 
