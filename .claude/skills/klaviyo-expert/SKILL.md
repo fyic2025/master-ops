@@ -1,3 +1,9 @@
+---
+name: klaviyo-expert
+description: Expert-level Klaviyo email marketing platform management across all businesses. Handles campaigns, flows, segmentation, templates, and analytics. Use for email automation, A/B testing, and subscriber management.
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Task
+---
+
 # Klaviyo Expert Skill
 
 > Expert-level Klaviyo email marketing platform management across all businesses.

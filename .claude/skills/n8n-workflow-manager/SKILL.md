@@ -1,3 +1,9 @@
+---
+name: n8n-workflow-manager
+description: Comprehensive management, monitoring, and troubleshooting of n8n automation workflows across all 4 businesses. Handles workflow lifecycle, execution monitoring, error diagnosis, and cross-business orchestration.
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Task
+---
+
 # n8n Workflow Manager Skill
 
 > Comprehensive management, monitoring, and troubleshooting of n8n automation workflows across all 4 businesses.

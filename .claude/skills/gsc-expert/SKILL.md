@@ -1,3 +1,9 @@
+---
+name: gsc-expert
+description: Search performance monitoring, indexing management, and SEO insights for all 4 e-commerce stores. Tracks impressions, clicks, CTR, position, and coverage issues. Use for GSC data analysis and indexing troubleshooting.
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Task
+---
+
 # Google Search Console Expert Skill
 
 Search performance monitoring, indexing management, and SEO insights for all 4 e-commerce stores.

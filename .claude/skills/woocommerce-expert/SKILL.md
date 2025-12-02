@@ -1,3 +1,9 @@
+---
+name: woocommerce-expert
+description: Expert-level WooCommerce platform management for Red Hill Fresh (RHF). Handles products, orders, inventory, and WordPress integration. Use for any RHF e-commerce operations.
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Task
+---
+
 # WooCommerce Expert Skill
 
 > Expert-level WooCommerce platform management for Red Hill Fresh (RHF).

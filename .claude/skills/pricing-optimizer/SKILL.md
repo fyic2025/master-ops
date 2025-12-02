@@ -1,3 +1,9 @@
+---
+name: pricing-optimizer
+description: Strategic pricing analysis, margin optimization, and competitive positioning across all businesses. Handles margin analysis, price elasticity, and competitive pricing. Use for pricing strategy and margin optimization.
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Task
+---
+
 # Pricing Optimizer Skill
 
 > Strategic pricing analysis, margin optimization, and competitive positioning across all businesses.

@@ -1,3 +1,9 @@
+---
+name: social-post-creator
+description: Expert social media content creation for Facebook, Instagram, LinkedIn, and other platforms. Creates captions, hashtags, and platform-optimized content. Use for social media post writing.
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Task
+---
+
 # Social Post Creator Skill
 
 > Expert social media content creation for Facebook, Instagram, LinkedIn, and other platforms.

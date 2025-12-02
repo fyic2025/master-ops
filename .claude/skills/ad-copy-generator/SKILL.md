@@ -1,3 +1,9 @@
+---
+name: ad-copy-generator
+description: Expert ad copywriting for Google Ads, Meta Ads, and other paid advertising platforms. Creates RSA, Performance Max, Display, Facebook, and Instagram ad copy. Use for ad creation and optimization.
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Task
+---
+
 # Ad Copy Generator Skill
 
 > Expert ad copywriting for Google Ads, Meta Ads, and other paid advertising platforms.

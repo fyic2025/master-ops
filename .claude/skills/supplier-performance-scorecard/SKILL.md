@@ -1,3 +1,9 @@
+---
+name: supplier-performance-scorecard
+description: Tracks and scores supplier performance for BOO across 4 suppliers (Oborne, UHP, Kadac, Unleashed). Monitors sync reliability, data quality, and product coverage. Use for supplier analysis and performance monitoring.
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Task
+---
+
 # Supplier Performance Scorecard Skill
 
 Tracks and scores supplier performance for BOO (Buy Organics Online) across 4 suppliers.

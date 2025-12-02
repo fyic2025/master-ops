@@ -1,3 +1,9 @@
+---
+name: seo-content-writer
+description: Expert SEO content creation for blogs, landing pages, and website copy. Creates keyword-targeted articles, pillar content, and category descriptions. Use for SEO-optimized content writing.
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Task
+---
+
 # SEO Content Writer Skill
 
 > Expert-level SEO content creation for blogs, landing pages, and website copy optimized for search engines and user engagement.
