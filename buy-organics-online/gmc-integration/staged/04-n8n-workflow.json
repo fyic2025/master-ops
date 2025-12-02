@@ -1,0 +1,186 @@
+{
+  "name": "GMC Weekly Snapshot - BOO",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 6,
+              "triggerAtDay": 5
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Every Friday 6am",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "command": "cd /home/user/master-ops/buy-organics-online/gmc-integration && node 03-snapshot.js"
+      },
+      "id": "run-snapshot",
+      "name": "Run GMC Snapshot",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.exitCode }}",
+              "value2": 0
+            }
+          ]
+        }
+      },
+      "id": "check-success",
+      "name": "Check Success",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://usibnysqelovfuctmkqw.supabase.co/rest/v1/rpc/get_current_gmc_snapshot_id",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzaWJueXNxZWxvdmZ1Y3Rta3F3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDQ4ODA4OCwiZXhwIjoyMDY2MDY0MDg4fQ.B9uihsaUvwkJWFAuKAtu7uij1KiXVoiHPHa9mm-Tz1s"
+            }
+          ]
+        }
+      },
+      "id": "get-snapshot-summary",
+      "name": "Get Snapshot Summary",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [850, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://hooks.slack.com/services/YOUR_WEBHOOK_URL",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "=✅ *GMC Weekly Snapshot Complete*\n\nSnapshot completed at {{ $now.format('yyyy-MM-dd HH:mm') }}\n\nCheck Supabase for full report."
+            }
+          ]
+        }
+      },
+      "id": "notify-success",
+      "name": "Notify Success (Optional)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1050, 200],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://hooks.slack.com/services/YOUR_WEBHOOK_URL",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "=❌ *GMC Snapshot Failed*\n\nError: {{ $json.stderr }}\n\nCheck logs for details."
+            }
+          ]
+        }
+      },
+      "id": "notify-failure",
+      "name": "Notify Failure (Optional)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1050, 400],
+      "disabled": true
+    }
+  ],
+  "connections": {
+    "Every Friday 6am": {
+      "main": [
+        [
+          {
+            "node": "Run GMC Snapshot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run GMC Snapshot": {
+      "main": [
+        [
+          {
+            "node": "Check Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Success": {
+      "main": [
+        [
+          {
+            "node": "Get Snapshot Summary",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Notify Failure (Optional)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Snapshot Summary": {
+      "main": [
+        [
+          {
+            "node": "Notify Success (Optional)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "BOO",
+      "id": "1"
+    },
+    {
+      "name": "GMC",
+      "id": "2"
+    },
+    {
+      "name": "Automated",
+      "id": "3"
+    }
+  ],
+  "triggerCount": 1,
+  "notes": "Weekly Google Merchant Center snapshot for Buy Organics Online.\n\nRuns every Friday at 6am AEST.\n\nFetches all product statuses and issues from GMC, cross-references with BigCommerce products, and stores in Supabase for analysis."
+}
