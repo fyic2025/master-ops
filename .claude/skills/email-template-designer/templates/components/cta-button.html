@@ -1,0 +1,22 @@
+<!--
+  CTA BUTTON COMPONENT
+
+  Required Variables:
+  - {{cta_url}} - Button link URL
+  - {{cta_text}} - Button text
+  - {{primary_color}} - Button background color
+
+  Optional Variables:
+  - {{button_style}} - 'primary' (default), 'secondary', 'outline'
+-->
+
+<!-- CTA BUTTON -->
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin: 25px auto;">
+  <tr>
+    <td class="button-td" style="border-radius: 4px; background-color: {{primary_color}};">
+      <a href="{{cta_url}}" class="button-a" style="display: inline-block; padding: 14px 32px; font-size: 16px; font-weight: bold; color: #ffffff; text-decoration: none; border-radius: 4px; text-align: center;">
+        {{cta_text}}
+      </a>
+    </td>
+  </tr>
+</table>

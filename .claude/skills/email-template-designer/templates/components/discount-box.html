@@ -1,0 +1,33 @@
+<!--
+  DISCOUNT BOX COMPONENT
+
+  Required Variables:
+  - {{discount_code}} - The discount code
+  - {{discount_percent}} - Discount percentage (e.g., "15")
+  - {{primary_color}} - Brand color for border
+
+  Optional Variables:
+  - {{discount_label}} - Label above code (default: "Your Exclusive Code")
+  - {{discount_description}} - Description below code
+-->
+
+<!-- DISCOUNT BOX -->
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: 25px 0;">
+  <tr>
+    <td style="background-color: #f8f8f8; border: 2px dashed {{primary_color}}; border-radius: 8px; padding: 25px; text-align: center;">
+      <p style="margin: 0 0 10px; font-size: 13px; color: #666666; text-transform: uppercase; letter-spacing: 1px;">
+        {{#if discount_label}}{{discount_label}}{{else}}Your Exclusive Code{{/if}}
+      </p>
+      <p style="margin: 0 0 10px; font-size: 32px; font-weight: bold; color: {{primary_color}}; letter-spacing: 3px; font-family: monospace;">
+        {{discount_code}}
+      </p>
+      <p style="margin: 0; font-size: 16px; color: #333333;">
+        {{#if discount_description}}
+        {{discount_description}}
+        {{else}}
+        Save {{discount_percent}}% on your order
+        {{/if}}
+      </p>
+    </td>
+  </tr>
+</table>

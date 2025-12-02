@@ -1,0 +1,65 @@
+<!--
+  EMAIL FOOTER COMPONENT
+
+  Required Variables:
+  - {{brand_name}} - Business name
+  - {{website_url}} - Website link
+  - {{unsubscribe_url}} - Unsubscribe link
+
+  Optional Variables:
+  - {{social_instagram}} - Instagram URL
+  - {{social_facebook}} - Facebook URL
+  - {{physical_address}} - Physical address for CAN-SPAM
+  - {{view_in_browser_url}} - Web version URL
+-->
+
+<!-- FOOTER -->
+<tr>
+  <td style="padding: 30px; background-color: #333333; text-align: center;">
+
+    <!-- Social Links -->
+    {{#if social_instagram}}
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin-bottom: 20px;">
+      <tr>
+        {{#if social_instagram}}
+        <td style="padding: 0 8px;">
+          <a href="{{social_instagram}}" style="display: inline-block;">
+            <img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/instagram.svg" alt="Instagram" width="24" height="24" style="filter: invert(1);">
+          </a>
+        </td>
+        {{/if}}
+        {{#if social_facebook}}
+        <td style="padding: 0 8px;">
+          <a href="{{social_facebook}}" style="display: inline-block;">
+            <img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/facebook.svg" alt="Facebook" width="24" height="24" style="filter: invert(1);">
+          </a>
+        </td>
+        {{/if}}
+      </tr>
+    </table>
+    {{/if}}
+
+    <!-- Links -->
+    <p style="margin: 0 0 15px; font-size: 13px; color: #999999;">
+      <a href="{{website_url}}" style="color: #999999; text-decoration: underline;">Visit Website</a>
+      &nbsp;|&nbsp;
+      <a href="{{unsubscribe_url}}" style="color: #999999; text-decoration: underline;">Unsubscribe</a>
+      {{#if view_in_browser_url}}
+      &nbsp;|&nbsp;
+      <a href="{{view_in_browser_url}}" style="color: #999999; text-decoration: underline;">View in Browser</a>
+      {{/if}}
+    </p>
+
+    <!-- Company Info -->
+    <p style="margin: 0; font-size: 12px; color: #666666;">
+      {{brand_name}}
+      {{#if physical_address}}
+      <br>{{physical_address}}
+      {{/if}}
+    </p>
+
+    <p style="margin: 15px 0 0; font-size: 11px; color: #666666;">
+      You're receiving this email because you signed up at {{website_url}}
+    </p>
+  </td>
+</tr>
