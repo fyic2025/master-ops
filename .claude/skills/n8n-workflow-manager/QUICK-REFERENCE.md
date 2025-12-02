@@ -67,6 +67,13 @@ curl -X POST "${N8N_BASE_URL}/api/v1/executions/{id}/retry" \
 ## Helper Scripts
 
 ```bash
+# NEW (2025-12-02) - Audit scripts using curl (bypasses DNS issues)
+node scripts/audit-all-workflows.js 1        # Audit batch 1 (20 workflows)
+node scripts/fix-n8n-workflows.js show {id}  # Show workflow structure
+node scripts/fix-n8n-workflows.js disable {id}  # Disable a workflow
+node scripts/get-workflow-errors.js          # Get detailed error info
+
+# Legacy scripts
 npx tsx list-n8n-workflows.ts          # List all workflows
 npx tsx check-n8n-workflow.ts {id}     # Check workflow status
 npx tsx diagnose-workflow-errors.ts    # Diagnose failures
@@ -98,6 +105,24 @@ npx tsx test-n8n-connection.ts         # Test connectivity
 
 ---
 
+## Credential Fix Guide (2025-12-02 Audit)
+
+| Credential Type | Fix Method | Via API? |
+|-----------------|------------|----------|
+| `gmailOAuth2` | Re-authenticate via Google OAuth flow | No - UI only |
+| `googleSheetsOAuth2Api` | Re-authenticate via Google OAuth flow | No - UI only |
+| `supabaseApi` | Update API key in n8n credentials | No - UI only |
+| `postgres` | Update connection string/password | No - UI only |
+| `httpHeaderAuth` | Update Bearer token | Yes - inline in node |
+| `hubspotAppToken` | Update Bearer token | Yes - inline in node |
+
+**What CAN be fixed via API:**
+- Inline Bearer tokens in HTTP Request nodes
+- Node logic changes (IF conditions, Code nodes)
+- Removing broken nodes entirely
+
+---
+
 ## Common Errors
 
 | Error | Code | Quick Fix |
@@ -107,6 +132,8 @@ npx tsx test-n8n-connection.ts         # Test connectivity
 | ECONNREFUSED | CONN-001 | Check service status |
 | HMAC signature | HMAC-001 | Check encoding |
 | Credential not found | CRED-001 | Re-link in n8n UI |
+| password auth failed | CRED-002 | Update postgres creds in UI |
+| EAI_AGAIN DNS | CONN-003 | Use curl -sk, not Node.js https |
 
 ---
 
@@ -180,4 +207,4 @@ infra/n8n-workflows/templates/         # Workflow templates
 
 ---
 
-**Document Version:** 1.0 | **Last Updated:** 2025-12-01
+**Document Version:** 1.1 | **Last Updated:** 2025-12-02

@@ -1,0 +1,794 @@
+{
+  "updatedAt": "2025-12-02T11:50:49.557Z",
+  "createdAt": "2025-12-02T11:29:19.769Z",
+  "id": "CdENdCkCmSQpnbDG",
+  "name": "📦 n8n Daily Backup to Supabase",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "triggerAtHour": 6
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "⏰ Daily 6AM Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "manual-trigger",
+      "name": "🔧 Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Initialize backup run\nconst timestamp = new Date().toISOString();\n\nconsole.log('🚀 Starting n8n backup to Supabase...');\nconsole.log(`Timestamp: ${timestamp}`);\n\nreturn [{\n  json: {\n    backup_started: timestamp,\n    status: 'running'\n  }\n}];"
+      },
+      "id": "init-backup",
+      "name": "🚀 Initialize Backup",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Fetch ALL workflows with pagination\nconst apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjZmJmYmQ0ZS1lYmUxLTQzMzMtYjNkMi01ZWFkYThiNzI2NDQiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzYzODUyMDAxfQ.sncjYpQTtaeK9t1cssVSv0GrMdm4kJ8ei4hYS9y4dq8';\nconst baseUrl = 'https://automation.growthcohq.com/api/v1/workflows';\n\nlet allWorkflows = [];\nlet cursor = null;\nlet pageNum = 0;\n\ndo {\n  pageNum++;\n  const url = cursor \n    ? `${baseUrl}?limit=250&cursor=${cursor}`\n    : `${baseUrl}?limit=250`;\n  \n  console.log(`Fetching page ${pageNum}...`);\n  \n  const response = await this.helpers.httpRequest({\n    method: 'GET',\n    url: url,\n    headers: {\n      'X-N8N-API-KEY': apiKey\n    }\n  });\n  \n  const workflows = response.data || [];\n  allWorkflows = allWorkflows.concat(workflows);\n  cursor = response.nextCursor;\n  \n  console.log(`Page ${pageNum}: ${workflows.length} workflows (total: ${allWorkflows.length})`);\n  \n} while (cursor);\n\nconsole.log(`Fetched ${allWorkflows.length} total workflows`);\n\nreturn [{ json: { data: allWorkflows } }];"
+      },
+      "id": "get-workflows",
+      "name": "📋 Get All Workflows",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Fetch ALL executions with pagination\nconst apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjZmJmYmQ0ZS1lYmUxLTQzMzMtYjNkMi01ZWFkYThiNzI2NDQiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzYzODUyMDAxfQ.sncjYpQTtaeK9t1cssVSv0GrMdm4kJ8ei4hYS9y4dq8';\nconst baseUrl = 'https://automation.growthcohq.com/api/v1/executions';\n\nlet allExecutions = [];\nlet cursor = null;\nlet pageNum = 0;\nconst maxPages = 10;\n\ndo {\n  pageNum++;\n  const url = cursor \n    ? `${baseUrl}?limit=250&cursor=${cursor}`\n    : `${baseUrl}?limit=250`;\n  \n  console.log(`Fetching executions page ${pageNum}...`);\n  \n  const response = await this.helpers.httpRequest({\n    method: 'GET',\n    url: url,\n    headers: {\n      'X-N8N-API-KEY': apiKey\n    }\n  });\n  \n  const executions = response.data || [];\n  allExecutions = allExecutions.concat(executions);\n  cursor = response.nextCursor;\n  \n  console.log(`Page ${pageNum}: ${executions.length} executions (total: ${allExecutions.length})`);\n  \n} while (cursor && pageNum < maxPages);\n\nconsole.log(`Fetched ${allExecutions.length} total executions`);\n\nreturn [{ json: { data: allExecutions } }];"
+      },
+      "id": "get-executions",
+      "name": "📊 Get Recent Executions",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Process workflows for Supabase\nconst workflows = $input.first().json.data || [];\nconst crypto = require('crypto');\n\nconsole.log(`Processing ${workflows.length} workflows...`);\n\nconst processed = workflows.map(w => {\n  // Create hash of workflow definition to detect changes\n  const defHash = crypto.createHash('md5')\n    .update(JSON.stringify(w.nodes || []))\n    .digest('hex');\n  \n  // Detect trigger type from nodes\n  let triggerType = 'manual';\n  const triggerNode = (w.nodes || []).find(n => \n    n.type?.includes('Trigger') || \n    n.type?.includes('webhook') ||\n    n.type?.includes('schedule')\n  );\n  if (triggerNode) {\n    if (triggerNode.type.includes('webhook')) triggerType = 'webhook';\n    else if (triggerNode.type.includes('schedule')) triggerType = 'schedule';\n    else if (triggerNode.type.includes('manual')) triggerType = 'manual';\n    else triggerType = triggerNode.type.split('.').pop();\n  }\n  \n  return {\n    n8n_workflow_id: w.id,\n    name: w.name,\n    active: w.active || false,\n    is_archived: w.isArchived || false,\n    created_at_n8n: w.createdAt,\n    updated_at_n8n: w.updatedAt,\n    workflow_definition: {\n      nodes: w.nodes,\n      connections: w.connections,\n      settings: w.settings\n    },\n    node_count: (w.nodes || []).length,\n    trigger_type: triggerType,\n    tags: (w.tags || []).map(t => t.name || t),\n    definition_hash: defHash,\n    last_backed_up_at: new Date().toISOString()\n  };\n});\n\nconsole.log(`Processed ${processed.length} workflows for backup`);\n\nreturn processed.map(p => ({ json: p }));"
+      },
+      "id": "process-workflows",
+      "name": "🔄 Process Workflows",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        920,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Process executions for Supabase\nconst executions = $input.first().json.data || [];\n\nconsole.log(`Processing ${executions.length} executions...`);\n\nconst processed = executions.map(e => {\n  // Extract error info\n  let errorMessage = null;\n  let errorNode = null;\n  let errorType = null;\n  let errorStack = null;\n  \n  if (e.data?.resultData?.error) {\n    const err = e.data.resultData.error;\n    errorMessage = err.message || String(err);\n    errorNode = err.node?.name || null;\n    errorStack = err.stack || null;\n    \n    // Categorize error type\n    if (errorMessage.includes('timeout')) errorType = 'timeout';\n    else if (errorMessage.includes('ECONNREFUSED') || errorMessage.includes('ETIMEDOUT')) errorType = 'connection';\n    else if (errorMessage.includes('401') || errorMessage.includes('403')) errorType = 'auth';\n    else if (errorMessage.includes('500')) errorType = 'server_error';\n    else if (errorMessage.includes('rate limit')) errorType = 'rate_limit';\n    else errorType = 'unknown';\n  }\n  \n  // Calculate duration\n  const startedAt = e.startedAt ? new Date(e.startedAt) : null;\n  const finishedAt = e.stoppedAt ? new Date(e.stoppedAt) : null;\n  const durationMs = (startedAt && finishedAt) ? finishedAt - startedAt : null;\n  \n  // Count nodes executed/failed\n  const nodeResults = e.data?.resultData?.runData || {};\n  const nodesExecuted = Object.keys(nodeResults).length;\n  const nodesFailed = Object.values(nodeResults).filter(r => \n    Array.isArray(r) && r.some(x => x.error)\n  ).length;\n  \n  // Create summary of node execution (limited)\n  const nodeSummary = {};\n  Object.entries(nodeResults).slice(0, 20).forEach(([name, results]) => {\n    if (Array.isArray(results) && results.length > 0) {\n      nodeSummary[name] = {\n        success: results.every(r => !r.error),\n        items: results.length\n      };\n    }\n  });\n  \n  return {\n    n8n_execution_id: String(e.id),\n    n8n_workflow_id: e.workflowId,\n    workflow_name: e.workflowData?.name || 'Unknown',\n    status: e.status || (e.finished ? 'success' : 'running'),\n    mode: e.mode || 'manual',\n    started_at: e.startedAt,\n    finished_at: e.stoppedAt,\n    duration_ms: durationMs,\n    has_error: e.status === 'error' || !!errorMessage,\n    error_message: errorMessage ? errorMessage.substring(0, 2000) : null,\n    error_node: errorNode,\n    error_type: errorType,\n    error_stack: errorStack ? errorStack.substring(0, 5000) : null,\n    nodes_executed: nodesExecuted,\n    nodes_failed: nodesFailed,\n    node_execution_summary: Object.keys(nodeSummary).length > 0 ? nodeSummary : null,\n    retry_of: e.retryOf || null,\n    retry_count: e.retrySuccessId ? 1 : 0,\n    backed_up_at: new Date().toISOString()\n  };\n});\n\nconsole.log(`Processed ${processed.length} executions for backup`);\nconsole.log(`Errors found: ${processed.filter(p => p.has_error).length}`);\n\nreturn processed.map(p => ({ json: p }));"
+      },
+      "id": "process-executions",
+      "name": "🔄 Process Executions",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        920,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://usibnysqelovfuctmkqw.supabase.co/rest/v1/n8n_workflows",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzaWJueXNxZWxvdmZ1Y3Rta3F3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDQ4ODA4OCwiZXhwIjoyMDY2MDY0MDg4fQ.B9uihsaUvwkJWFAuKAtu7uij1KiXVoiHPHa9mm-Tz1s"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzaWJueXNxZWxvdmZ1Y3Rta3F3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDQ4ODA4OCwiZXhwIjoyMDY2MDY0MDg4fQ.B9uihsaUvwkJWFAuKAtu7uij1KiXVoiHPHa9mm-Tz1s"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($input.all().map(i => i.json)) }}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "upsert-workflows",
+      "name": "💾 Upsert Workflows to Supabase",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1160,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://usibnysqelovfuctmkqw.supabase.co/rest/v1/n8n_executions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzaWJueXNxZWxvdmZ1Y3Rta3F3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDQ4ODA4OCwiZXhwIjoyMDY2MDY0MDg4fQ.B9uihsaUvwkJWFAuKAtu7uij1KiXVoiHPHa9mm-Tz1s"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzaWJueXNxZWxvdmZ1Y3Rta3F3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDQ4ODA4OCwiZXhwIjoyMDY2MDY0MDg4fQ.B9uihsaUvwkJWFAuKAtu7uij1KiXVoiHPHa9mm-Tz1s"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($input.all().map(i => i.json)) }}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "upsert-executions",
+      "name": "💾 Upsert Executions to Supabase",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1160,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Create summary report\nconst workflowResult = $('💾 Upsert Workflows to Supabase').first();\nconst executionResult = $('💾 Upsert Executions to Supabase').first();\nconst processedWorkflows = $('🔄 Process Workflows').all();\nconst processedExecutions = $('🔄 Process Executions').all();\n\nconst workflowsBackedUp = processedWorkflows.length;\nconst executionsBackedUp = processedExecutions.length;\nconst errorsFound = processedExecutions.filter(e => e.json.has_error).length;\n\nconst summary = {\n  timestamp: new Date().toISOString(),\n  workflows_backed_up: workflowsBackedUp,\n  executions_backed_up: executionsBackedUp,\n  errors_found: errorsFound,\n  workflow_upsert_status: workflowResult?.json?.statusCode || 'ok',\n  execution_upsert_status: executionResult?.json?.statusCode || 'ok',\n  active_workflows: processedWorkflows.filter(w => w.json.active).length,\n  error_rate: executionsBackedUp > 0 ? \n    ((errorsFound / executionsBackedUp) * 100).toFixed(2) + '%' : '0%'\n};\n\nconsole.log('='.repeat(50));\nconsole.log('📦 n8n BACKUP COMPLETE');\nconsole.log('='.repeat(50));\nconsole.log(`Workflows backed up: ${workflowsBackedUp}`);\nconsole.log(`Executions backed up: ${executionsBackedUp}`);\nconsole.log(`Errors found: ${errorsFound} (${summary.error_rate})`);\nconsole.log(`Active workflows: ${summary.active_workflows}`);\nconsole.log('='.repeat(50));\n\nreturn [{ json: summary }];"
+      },
+      "id": "create-summary",
+      "name": "📊 Create Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1400,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://usibnysqelovfuctmkqw.supabase.co/rest/v1/n8n_backup_runs",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzaWJueXNxZWxvdmZ1Y3Rta3F3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDQ4ODA4OCwiZXhwIjoyMDY2MDY0MDg4fQ.B9uihsaUvwkJWFAuKAtu7uij1KiXVoiHPHa9mm-Tz1s"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzaWJueXNxZWxvdmZ1Y3Rta3F3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDQ4ODA4OCwiZXhwIjoyMDY2MDY0MDg4fQ.B9uihsaUvwkJWFAuKAtu7uij1KiXVoiHPHa9mm-Tz1s"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"finished_at\": \"{{ $json.timestamp }}\",\n  \"status\": \"success\",\n  \"workflows_backed_up\": {{ $json.workflows_backed_up }},\n  \"executions_backed_up\": {{ $json.executions_backed_up }},\n  \"errors_found\": {{ $json.errors_found }},\n  \"details\": {{ JSON.stringify($json) }}\n}",
+        "options": {}
+      },
+      "id": "log-backup-run",
+      "name": "📝 Log Backup Run",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1620,
+        380
+      ]
+    }
+  ],
+  "connections": {
+    "⏰ Daily 6AM Trigger": {
+      "main": [
+        [
+          {
+            "node": "🚀 Initialize Backup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔧 Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "🚀 Initialize Backup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🚀 Initialize Backup": {
+      "main": [
+        [
+          {
+            "node": "📋 Get All Workflows",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "📊 Get Recent Executions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📋 Get All Workflows": {
+      "main": [
+        [
+          {
+            "node": "🔄 Process Workflows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📊 Get Recent Executions": {
+      "main": [
+        [
+          {
+            "node": "🔄 Process Executions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔄 Process Workflows": {
+      "main": [
+        [
+          {
+            "node": "💾 Upsert Workflows to Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔄 Process Executions": {
+      "main": [
+        [
+          {
+            "node": "💾 Upsert Executions to Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "💾 Upsert Workflows to Supabase": {
+      "main": [
+        [
+          {
+            "node": "📊 Create Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "💾 Upsert Executions to Supabase": {
+      "main": [
+        [
+          {
+            "node": "📊 Create Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📊 Create Summary": {
+      "main": [
+        [
+          {
+            "node": "📝 Log Backup Run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "shared": [
+    {
+      "updatedAt": "2025-12-02T11:29:19.773Z",
+      "createdAt": "2025-12-02T11:29:19.773Z",
+      "role": "workflow:owner",
+      "workflowId": "CdENdCkCmSQpnbDG",
+      "projectId": "5oCbMcXSAagVfhlF",
+      "project": {
+        "updatedAt": "2025-06-29T19:14:28.084Z",
+        "createdAt": "2025-06-29T19:10:57.538Z",
+        "id": "5oCbMcXSAagVfhlF",
+        "name": "Jayson rodda <jayson@fyic.com.au>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "updatedAt": "2025-06-29T19:10:57.539Z",
+            "createdAt": "2025-06-29T19:10:57.539Z",
+            "userId": "cfbfbd4e-ebe1-4333-b3d2-5eada8b72644",
+            "projectId": "5oCbMcXSAagVfhlF",
+            "user": {
+              "updatedAt": "2025-12-02T00:57:46.000Z",
+              "createdAt": "2025-06-29T19:10:57.240Z",
+              "id": "cfbfbd4e-ebe1-4333-b3d2-5eada8b72644",
+              "email": "jayson@fyic.com.au",
+              "firstName": "Jayson",
+              "lastName": "rodda",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-06-29T19:14:38.973Z",
+                "personalization_survey_n8n_version": "1.99.1",
+                "companySize": "<20",
+                "companyType": "ecommerce",
+                "role": "business-owner",
+                "reportedSource": "google"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "aiAgentStarterCallout": true
+                },
+                "firstSuccessfulWorkflowId": "hTAOVfbD24hU9eAF",
+                "userActivatedAt": 1751505505582,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1752809644774
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-12-02",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2025-12-02T11:50:49.546Z",
+    "createdAt": "2025-12-02T11:50:49.546Z",
+    "versionId": "bd64365a-99b6-45b0-aed9-e9f721483264",
+    "workflowId": "CdENdCkCmSQpnbDG",
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "hours",
+                "triggerAtHour": 6
+              }
+            ]
+          }
+        },
+        "id": "schedule-trigger",
+        "name": "⏰ Daily 6AM Trigger",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          240,
+          300
+        ]
+      },
+      {
+        "parameters": {},
+        "id": "manual-trigger",
+        "name": "🔧 Manual Trigger",
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          240,
+          480
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "// Initialize backup run\nconst timestamp = new Date().toISOString();\n\nconsole.log('🚀 Starting n8n backup to Supabase...');\nconsole.log(`Timestamp: ${timestamp}`);\n\nreturn [{\n  json: {\n    backup_started: timestamp,\n    status: 'running'\n  }\n}];"
+        },
+        "id": "init-backup",
+        "name": "🚀 Initialize Backup",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          480,
+          380
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "// Fetch ALL workflows with pagination\nconst apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjZmJmYmQ0ZS1lYmUxLTQzMzMtYjNkMi01ZWFkYThiNzI2NDQiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzYzODUyMDAxfQ.sncjYpQTtaeK9t1cssVSv0GrMdm4kJ8ei4hYS9y4dq8';\nconst baseUrl = 'https://automation.growthcohq.com/api/v1/workflows';\n\nlet allWorkflows = [];\nlet cursor = null;\nlet pageNum = 0;\n\ndo {\n  pageNum++;\n  const url = cursor \n    ? `${baseUrl}?limit=250&cursor=${cursor}`\n    : `${baseUrl}?limit=250`;\n  \n  console.log(`Fetching page ${pageNum}...`);\n  \n  const response = await this.helpers.httpRequest({\n    method: 'GET',\n    url: url,\n    headers: {\n      'X-N8N-API-KEY': apiKey\n    }\n  });\n  \n  const workflows = response.data || [];\n  allWorkflows = allWorkflows.concat(workflows);\n  cursor = response.nextCursor;\n  \n  console.log(`Page ${pageNum}: ${workflows.length} workflows (total: ${allWorkflows.length})`);\n  \n} while (cursor);\n\nconsole.log(`Fetched ${allWorkflows.length} total workflows`);\n\nreturn [{ json: { data: allWorkflows } }];"
+        },
+        "id": "get-workflows",
+        "name": "📋 Get All Workflows",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          700,
+          280
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "// Fetch ALL executions with pagination\nconst apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjZmJmYmQ0ZS1lYmUxLTQzMzMtYjNkMi01ZWFkYThiNzI2NDQiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzYzODUyMDAxfQ.sncjYpQTtaeK9t1cssVSv0GrMdm4kJ8ei4hYS9y4dq8';\nconst baseUrl = 'https://automation.growthcohq.com/api/v1/executions';\n\nlet allExecutions = [];\nlet cursor = null;\nlet pageNum = 0;\nconst maxPages = 10;\n\ndo {\n  pageNum++;\n  const url = cursor \n    ? `${baseUrl}?limit=250&cursor=${cursor}`\n    : `${baseUrl}?limit=250`;\n  \n  console.log(`Fetching executions page ${pageNum}...`);\n  \n  const response = await this.helpers.httpRequest({\n    method: 'GET',\n    url: url,\n    headers: {\n      'X-N8N-API-KEY': apiKey\n    }\n  });\n  \n  const executions = response.data || [];\n  allExecutions = allExecutions.concat(executions);\n  cursor = response.nextCursor;\n  \n  console.log(`Page ${pageNum}: ${executions.length} executions (total: ${allExecutions.length})`);\n  \n} while (cursor && pageNum < maxPages);\n\nconsole.log(`Fetched ${allExecutions.length} total executions`);\n\nreturn [{ json: { data: allExecutions } }];"
+        },
+        "id": "get-executions",
+        "name": "📊 Get Recent Executions",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          700,
+          480
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "// Process workflows for Supabase\nconst workflows = $input.first().json.data || [];\nconst crypto = require('crypto');\n\nconsole.log(`Processing ${workflows.length} workflows...`);\n\nconst processed = workflows.map(w => {\n  // Create hash of workflow definition to detect changes\n  const defHash = crypto.createHash('md5')\n    .update(JSON.stringify(w.nodes || []))\n    .digest('hex');\n  \n  // Detect trigger type from nodes\n  let triggerType = 'manual';\n  const triggerNode = (w.nodes || []).find(n => \n    n.type?.includes('Trigger') || \n    n.type?.includes('webhook') ||\n    n.type?.includes('schedule')\n  );\n  if (triggerNode) {\n    if (triggerNode.type.includes('webhook')) triggerType = 'webhook';\n    else if (triggerNode.type.includes('schedule')) triggerType = 'schedule';\n    else if (triggerNode.type.includes('manual')) triggerType = 'manual';\n    else triggerType = triggerNode.type.split('.').pop();\n  }\n  \n  return {\n    n8n_workflow_id: w.id,\n    name: w.name,\n    active: w.active || false,\n    is_archived: w.isArchived || false,\n    created_at_n8n: w.createdAt,\n    updated_at_n8n: w.updatedAt,\n    workflow_definition: {\n      nodes: w.nodes,\n      connections: w.connections,\n      settings: w.settings\n    },\n    node_count: (w.nodes || []).length,\n    trigger_type: triggerType,\n    tags: (w.tags || []).map(t => t.name || t),\n    definition_hash: defHash,\n    last_backed_up_at: new Date().toISOString()\n  };\n});\n\nconsole.log(`Processed ${processed.length} workflows for backup`);\n\nreturn processed.map(p => ({ json: p }));"
+        },
+        "id": "process-workflows",
+        "name": "🔄 Process Workflows",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          920,
+          280
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "// Process executions for Supabase\nconst executions = $input.first().json.data || [];\n\nconsole.log(`Processing ${executions.length} executions...`);\n\nconst processed = executions.map(e => {\n  // Extract error info\n  let errorMessage = null;\n  let errorNode = null;\n  let errorType = null;\n  let errorStack = null;\n  \n  if (e.data?.resultData?.error) {\n    const err = e.data.resultData.error;\n    errorMessage = err.message || String(err);\n    errorNode = err.node?.name || null;\n    errorStack = err.stack || null;\n    \n    // Categorize error type\n    if (errorMessage.includes('timeout')) errorType = 'timeout';\n    else if (errorMessage.includes('ECONNREFUSED') || errorMessage.includes('ETIMEDOUT')) errorType = 'connection';\n    else if (errorMessage.includes('401') || errorMessage.includes('403')) errorType = 'auth';\n    else if (errorMessage.includes('500')) errorType = 'server_error';\n    else if (errorMessage.includes('rate limit')) errorType = 'rate_limit';\n    else errorType = 'unknown';\n  }\n  \n  // Calculate duration\n  const startedAt = e.startedAt ? new Date(e.startedAt) : null;\n  const finishedAt = e.stoppedAt ? new Date(e.stoppedAt) : null;\n  const durationMs = (startedAt && finishedAt) ? finishedAt - startedAt : null;\n  \n  // Count nodes executed/failed\n  const nodeResults = e.data?.resultData?.runData || {};\n  const nodesExecuted = Object.keys(nodeResults).length;\n  const nodesFailed = Object.values(nodeResults).filter(r => \n    Array.isArray(r) && r.some(x => x.error)\n  ).length;\n  \n  // Create summary of node execution (limited)\n  const nodeSummary = {};\n  Object.entries(nodeResults).slice(0, 20).forEach(([name, results]) => {\n    if (Array.isArray(results) && results.length > 0) {\n      nodeSummary[name] = {\n        success: results.every(r => !r.error),\n        items: results.length\n      };\n    }\n  });\n  \n  return {\n    n8n_execution_id: String(e.id),\n    n8n_workflow_id: e.workflowId,\n    workflow_name: e.workflowData?.name || 'Unknown',\n    status: e.status || (e.finished ? 'success' : 'running'),\n    mode: e.mode || 'manual',\n    started_at: e.startedAt,\n    finished_at: e.stoppedAt,\n    duration_ms: durationMs,\n    has_error: e.status === 'error' || !!errorMessage,\n    error_message: errorMessage ? errorMessage.substring(0, 2000) : null,\n    error_node: errorNode,\n    error_type: errorType,\n    error_stack: errorStack ? errorStack.substring(0, 5000) : null,\n    nodes_executed: nodesExecuted,\n    nodes_failed: nodesFailed,\n    node_execution_summary: Object.keys(nodeSummary).length > 0 ? nodeSummary : null,\n    retry_of: e.retryOf || null,\n    retry_count: e.retrySuccessId ? 1 : 0,\n    backed_up_at: new Date().toISOString()\n  };\n});\n\nconsole.log(`Processed ${processed.length} executions for backup`);\nconsole.log(`Errors found: ${processed.filter(p => p.has_error).length}`);\n\nreturn processed.map(p => ({ json: p }));"
+        },
+        "id": "process-executions",
+        "name": "🔄 Process Executions",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          920,
+          480
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://usibnysqelovfuctmkqw.supabase.co/rest/v1/n8n_workflows",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "apikey",
+                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzaWJueXNxZWxvdmZ1Y3Rta3F3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDQ4ODA4OCwiZXhwIjoyMDY2MDY0MDg4fQ.B9uihsaUvwkJWFAuKAtu7uij1KiXVoiHPHa9mm-Tz1s"
+              },
+              {
+                "name": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzaWJueXNxZWxvdmZ1Y3Rta3F3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDQ4ODA4OCwiZXhwIjoyMDY2MDY0MDg4fQ.B9uihsaUvwkJWFAuKAtu7uij1KiXVoiHPHa9mm-Tz1s"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Prefer",
+                "value": "resolution=merge-duplicates"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify($input.all().map(i => i.json)) }}",
+          "options": {
+            "response": {
+              "response": {
+                "neverError": true
+              }
+            }
+          }
+        },
+        "id": "upsert-workflows",
+        "name": "💾 Upsert Workflows to Supabase",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1160,
+          280
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://usibnysqelovfuctmkqw.supabase.co/rest/v1/n8n_executions",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "apikey",
+                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzaWJueXNxZWxvdmZ1Y3Rta3F3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDQ4ODA4OCwiZXhwIjoyMDY2MDY0MDg4fQ.B9uihsaUvwkJWFAuKAtu7uij1KiXVoiHPHa9mm-Tz1s"
+              },
+              {
+                "name": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzaWJueXNxZWxvdmZ1Y3Rta3F3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDQ4ODA4OCwiZXhwIjoyMDY2MDY0MDg4fQ.B9uihsaUvwkJWFAuKAtu7uij1KiXVoiHPHa9mm-Tz1s"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Prefer",
+                "value": "resolution=merge-duplicates"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify($input.all().map(i => i.json)) }}",
+          "options": {
+            "response": {
+              "response": {
+                "neverError": true
+              }
+            }
+          }
+        },
+        "id": "upsert-executions",
+        "name": "💾 Upsert Executions to Supabase",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1160,
+          480
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "// Create summary report\nconst workflowResult = $('💾 Upsert Workflows to Supabase').first();\nconst executionResult = $('💾 Upsert Executions to Supabase').first();\nconst processedWorkflows = $('🔄 Process Workflows').all();\nconst processedExecutions = $('🔄 Process Executions').all();\n\nconst workflowsBackedUp = processedWorkflows.length;\nconst executionsBackedUp = processedExecutions.length;\nconst errorsFound = processedExecutions.filter(e => e.json.has_error).length;\n\nconst summary = {\n  timestamp: new Date().toISOString(),\n  workflows_backed_up: workflowsBackedUp,\n  executions_backed_up: executionsBackedUp,\n  errors_found: errorsFound,\n  workflow_upsert_status: workflowResult?.json?.statusCode || 'ok',\n  execution_upsert_status: executionResult?.json?.statusCode || 'ok',\n  active_workflows: processedWorkflows.filter(w => w.json.active).length,\n  error_rate: executionsBackedUp > 0 ? \n    ((errorsFound / executionsBackedUp) * 100).toFixed(2) + '%' : '0%'\n};\n\nconsole.log('='.repeat(50));\nconsole.log('📦 n8n BACKUP COMPLETE');\nconsole.log('='.repeat(50));\nconsole.log(`Workflows backed up: ${workflowsBackedUp}`);\nconsole.log(`Executions backed up: ${executionsBackedUp}`);\nconsole.log(`Errors found: ${errorsFound} (${summary.error_rate})`);\nconsole.log(`Active workflows: ${summary.active_workflows}`);\nconsole.log('='.repeat(50));\n\nreturn [{ json: summary }];"
+        },
+        "id": "create-summary",
+        "name": "📊 Create Summary",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1400,
+          380
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://usibnysqelovfuctmkqw.supabase.co/rest/v1/n8n_backup_runs",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "apikey",
+                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzaWJueXNxZWxvdmZ1Y3Rta3F3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDQ4ODA4OCwiZXhwIjoyMDY2MDY0MDg4fQ.B9uihsaUvwkJWFAuKAtu7uij1KiXVoiHPHa9mm-Tz1s"
+              },
+              {
+                "name": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzaWJueXNxZWxvdmZ1Y3Rta3F3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDQ4ODA4OCwiZXhwIjoyMDY2MDY0MDg4fQ.B9uihsaUvwkJWFAuKAtu7uij1KiXVoiHPHa9mm-Tz1s"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\n  \"finished_at\": \"{{ $json.timestamp }}\",\n  \"status\": \"success\",\n  \"workflows_backed_up\": {{ $json.workflows_backed_up }},\n  \"executions_backed_up\": {{ $json.executions_backed_up }},\n  \"errors_found\": {{ $json.errors_found }},\n  \"details\": {{ JSON.stringify($json) }}\n}",
+          "options": {}
+        },
+        "id": "log-backup-run",
+        "name": "📝 Log Backup Run",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1620,
+          380
+        ]
+      }
+    ],
+    "connections": {
+      "⏰ Daily 6AM Trigger": {
+        "main": [
+          [
+            {
+              "node": "🚀 Initialize Backup",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "🔧 Manual Trigger": {
+        "main": [
+          [
+            {
+              "node": "🚀 Initialize Backup",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "🚀 Initialize Backup": {
+        "main": [
+          [
+            {
+              "node": "📋 Get All Workflows",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "📊 Get Recent Executions",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "📋 Get All Workflows": {
+        "main": [
+          [
+            {
+              "node": "🔄 Process Workflows",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "📊 Get Recent Executions": {
+        "main": [
+          [
+            {
+              "node": "🔄 Process Executions",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "🔄 Process Workflows": {
+        "main": [
+          [
+            {
+              "node": "💾 Upsert Workflows to Supabase",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "🔄 Process Executions": {
+        "main": [
+          [
+            {
+              "node": "💾 Upsert Executions to Supabase",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "💾 Upsert Workflows to Supabase": {
+        "main": [
+          [
+            {
+              "node": "📊 Create Summary",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "💾 Upsert Executions to Supabase": {
+        "main": [
+          [
+            {
+              "node": "📊 Create Summary",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "📊 Create Summary": {
+        "main": [
+          [
+            {
+              "node": "📝 Log Backup Run",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Jayson rodda",
+    "name": null,
+    "description": null
+  }
+}
