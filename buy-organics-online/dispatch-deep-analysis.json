@@ -1,0 +1,1139 @@
+{
+  "generated_at": "2025-11-25T14:30:56.298Z",
+  "orders_analyzed": 20000,
+  "slow_orders_count": 3865,
+  "fast_orders_count": 10828,
+  "top_problem_products": [
+    {
+      "product_id": 42779,
+      "name": "Salt of the Earth Celtic Sea Salt Coarse 650g",
+      "sku": "OB - SESSC",
+      "slow_orders": 58,
+      "fast_orders": 4,
+      "total_orders": 62,
+      "slow_rate": 93.54838709677419,
+      "avg_dispatch_days": 7.551724137931035,
+      "impact_score": 54.25806451612903,
+      "sample_order_ids": [
+        170068,
+        169906,
+        168925,
+        168830,
+        168446
+      ]
+    },
+    {
+      "product_id": 2771,
+      "name": "Hiltona Prunes Organic 250g",
+      "sku": "KAD - 81054",
+      "slow_orders": 48,
+      "fast_orders": 5,
+      "total_orders": 53,
+      "slow_rate": 90.56603773584906,
+      "avg_dispatch_days": 6.0625,
+      "impact_score": 43.47169811320755,
+      "sample_order_ids": [
+        170355,
+        170347,
+        170185,
+        170184,
+        170004
+      ]
+    },
+    {
+      "product_id": 46957,
+      "name": "Salt of the Earth Celtic Sea Salt Fine 650g",
+      "sku": "OB - SESSF",
+      "slow_orders": 44,
+      "fast_orders": 3,
+      "total_orders": 47,
+      "slow_rate": 93.61702127659575,
+      "avg_dispatch_days": 5.9772727272727275,
+      "impact_score": 41.19148936170213,
+      "sample_order_ids": [
+        170355,
+        170052,
+        168925,
+        168201,
+        168140
+      ]
+    },
+    {
+      "product_id": 46375,
+      "name": "Nature's Shield Organic Castor Oil 500ml",
+      "sku": "OB - NSXCASOOXXL",
+      "slow_orders": 48,
+      "fast_orders": 9,
+      "total_orders": 57,
+      "slow_rate": 84.21052631578947,
+      "avg_dispatch_days": 6.770833333333333,
+      "impact_score": 40.42105263157894,
+      "sample_order_ids": [
+        169307,
+        168387,
+        167751,
+        167300,
+        166957
+      ]
+    },
+    {
+      "product_id": 570,
+      "name": "Dr Organic Pomegranate Roll On Deodorant 50ml",
+      "sku": "UN - DC40",
+      "slow_orders": 52,
+      "fast_orders": 15,
+      "total_orders": 67,
+      "slow_rate": 77.61194029850746,
+      "avg_dispatch_days": 7.1923076923076925,
+      "impact_score": 40.35820895522388,
+      "sample_order_ids": [
+        170344,
+        170337,
+        168452,
+        168442,
+        168324
+      ]
+    },
+    {
+      "product_id": 1559,
+      "name": "Dishwasher Powder 2.5kg By Kin Kin Naturals",
+      "sku": "GBN - KIKI107",
+      "slow_orders": 42,
+      "fast_orders": 2,
+      "total_orders": 44,
+      "slow_rate": 95.45454545454545,
+      "avg_dispatch_days": 7.595238095238095,
+      "impact_score": 40.09090909090909,
+      "sample_order_ids": [
+        169819,
+        167137,
+        166657,
+        166603,
+        166240
+      ]
+    },
+    {
+      "product_id": 61597,
+      "name": "Lotus Sea Salt Celtic Fine 1kg",
+      "sku": "KAD - 487755",
+      "slow_orders": 43,
+      "fast_orders": 4,
+      "total_orders": 47,
+      "slow_rate": 91.48936170212765,
+      "avg_dispatch_days": 6.209302325581396,
+      "impact_score": 39.34042553191489,
+      "sample_order_ids": [
+        169492,
+        169442,
+        168398,
+        166786,
+        166784
+      ]
+    },
+    {
+      "product_id": 3467,
+      "name": "Lotus Sea Salt Celtic Coarse 500g",
+      "sku": "KAD - 63881",
+      "slow_orders": 44,
+      "fast_orders": 10,
+      "total_orders": 54,
+      "slow_rate": 81.48148148148148,
+      "avg_dispatch_days": 8.909090909090908,
+      "impact_score": 35.851851851851855,
+      "sample_order_ids": [
+        169598,
+        168956,
+        168408,
+        167787,
+        166302
+      ]
+    },
+    {
+      "product_id": 45803,
+      "name": "Nature's Shield Organic Castor Oil 200ml",
+      "sku": "OB - NSXCASOOXL",
+      "slow_orders": 35,
+      "fast_orders": 2,
+      "total_orders": 37,
+      "slow_rate": 94.5945945945946,
+      "avg_dispatch_days": 7.171428571428572,
+      "impact_score": 33.108108108108105,
+      "sample_order_ids": [
+        169500,
+        168956,
+        166173,
+        164843,
+        164826
+      ]
+    },
+    {
+      "product_id": 48300,
+      "name": "Lotus Sea Salt Celtic Coarse 4.7kg",
+      "sku": "KAD - 488121",
+      "slow_orders": 43,
+      "fast_orders": 13,
+      "total_orders": 56,
+      "slow_rate": 76.78571428571429,
+      "avg_dispatch_days": 7.813953488372093,
+      "impact_score": 33.017857142857146,
+      "sample_order_ids": [
+        169442,
+        169418,
+        169324,
+        169227,
+        169092
+      ]
+    },
+    {
+      "product_id": 61968,
+      "name": "Teelixir Shilajit Resin 30g with metal spoon",
+      "sku": "KIK -TEE-SHI-30",
+      "slow_orders": 37,
+      "fast_orders": 5,
+      "total_orders": 42,
+      "slow_rate": 88.09523809523809,
+      "avg_dispatch_days": 9.162162162162161,
+      "impact_score": 32.595238095238095,
+      "sample_order_ids": [
+        170004,
+        169401,
+        168881,
+        168577,
+        167783
+      ]
+    },
+    {
+      "product_id": 7113,
+      "name": "Dr Bronner Pure Castile Liquid Soap Unscented Baby 3.78L",
+      "sku": "OB - DBCSUXL",
+      "slow_orders": 40,
+      "fast_orders": 12,
+      "total_orders": 52,
+      "slow_rate": 76.92307692307693,
+      "avg_dispatch_days": 6.925,
+      "impact_score": 30.76923076923077,
+      "sample_order_ids": [
+        169141,
+        169016,
+        168920,
+        167201,
+        167194
+      ]
+    },
+    {
+      "product_id": 11103,
+      "name": "Dr Organic Activated Charcoal Toothpaste 100ml",
+      "sku": "UN - DC217",
+      "slow_orders": 32,
+      "fast_orders": 3,
+      "total_orders": 35,
+      "slow_rate": 91.42857142857143,
+      "avg_dispatch_days": 5.21875,
+      "impact_score": 29.257142857142856,
+      "sample_order_ids": [
+        169628,
+        168961,
+        168923,
+        168629,
+        168535
+      ]
+    },
+    {
+      "product_id": 34462,
+      "name": "Oxygen Whitener (Lime & Eucalyptus) 2.5kg By Kin Kin Naturals",
+      "sku": "GBN - KIKI105",
+      "slow_orders": 30,
+      "fast_orders": 1,
+      "total_orders": 31,
+      "slow_rate": 96.7741935483871,
+      "avg_dispatch_days": 6.133333333333334,
+      "impact_score": 29.03225806451613,
+      "sample_order_ids": [
+        170175,
+        169815,
+        166546,
+        166232,
+        165164
+      ]
+    },
+    {
+      "product_id": 722,
+      "name": "Bragg Apple Cider Vinegar 946ml",
+      "sku": "UN - BR05",
+      "slow_orders": 29,
+      "fast_orders": 0,
+      "total_orders": 29,
+      "slow_rate": 100,
+      "avg_dispatch_days": 5.586206896551724,
+      "impact_score": 29,
+      "sample_order_ids": [
+        169610,
+        169494,
+        167977,
+        167885,
+        167676
+      ]
+    },
+    {
+      "product_id": 3577,
+      "name": "Lotus Sea Salt Celtic Fine 500g",
+      "sku": "KAD - 63885",
+      "slow_orders": 39,
+      "fast_orders": 14,
+      "total_orders": 53,
+      "slow_rate": 73.58490566037736,
+      "avg_dispatch_days": 6.743589743589744,
+      "impact_score": 28.69811320754717,
+      "sample_order_ids": [
+        170343,
+        170186,
+        168201,
+        166266,
+        165303
+      ]
+    },
+    {
+      "product_id": 20080,
+      "name": "Eucalyptus Laundry Liquid 5L By Kin Kin Naturals",
+      "sku": "GBN - KIKI112",
+      "slow_orders": 29,
+      "fast_orders": 2,
+      "total_orders": 31,
+      "slow_rate": 93.54838709677419,
+      "avg_dispatch_days": 9.172413793103448,
+      "impact_score": 27.129032258064516,
+      "sample_order_ids": [
+        167958,
+        166696,
+        166603,
+        166232,
+        166063
+      ]
+    },
+    {
+      "product_id": 8136,
+      "name": "Dr Organic Rose Otto Shampoo 265ml.",
+      "sku": "UN - DC58",
+      "slow_orders": 26,
+      "fast_orders": 1,
+      "total_orders": 27,
+      "slow_rate": 96.29629629629629,
+      "avg_dispatch_days": 6,
+      "impact_score": 25.037037037037035,
+      "sample_order_ids": [
+        169256,
+        169160,
+        168934,
+        167661,
+        167032
+      ]
+    },
+    {
+      "product_id": 1561,
+      "name": "Dishwasher Powder 1.1kg By Kin Kin Naturals",
+      "sku": "GBN - KIKI106",
+      "slow_orders": 26,
+      "fast_orders": 1,
+      "total_orders": 27,
+      "slow_rate": 96.29629629629629,
+      "avg_dispatch_days": 6.5,
+      "impact_score": 25.037037037037035,
+      "sample_order_ids": [
+        166546,
+        166356,
+        165802,
+        163043,
+        162030
+      ]
+    },
+    {
+      "product_id": 61472,
+      "name": "Sea Salt Celtic Coarse Dry (Grinder) 80g",
+      "sku": "KAD - 491363",
+      "slow_orders": 25,
+      "fast_orders": 0,
+      "total_orders": 25,
+      "slow_rate": 100,
+      "avg_dispatch_days": 7,
+      "impact_score": 25,
+      "sample_order_ids": [
+        164656,
+        164119,
+        163207,
+        162645,
+        162457
+      ]
+    },
+    {
+      "product_id": 677,
+      "name": "Apricare Bitter Apricot Kernels 1kg",
+      "sku": "UN - AQ01",
+      "slow_orders": 29,
+      "fast_orders": 7,
+      "total_orders": 36,
+      "slow_rate": 80.55555555555556,
+      "avg_dispatch_days": 4.620689655172414,
+      "impact_score": 23.361111111111114,
+      "sample_order_ids": [
+        169163,
+        169146,
+        168765,
+        167468,
+        166796
+      ]
+    },
+    {
+      "product_id": 567,
+      "name": "Dr Organic Aloe Vera Roll On Deodorant 50ml",
+      "sku": "UN - DC05",
+      "slow_orders": 31,
+      "fast_orders": 11,
+      "total_orders": 42,
+      "slow_rate": 73.80952380952381,
+      "avg_dispatch_days": 7.354838709677419,
+      "impact_score": 22.88095238095238,
+      "sample_order_ids": [
+        169831,
+        168849,
+        168448,
+        168414,
+        168324
+      ]
+    },
+    {
+      "product_id": 7473,
+      "name": "Lotus Bicarb Soda 500g",
+      "sku": "KAD - 455134",
+      "slow_orders": 24,
+      "fast_orders": 2,
+      "total_orders": 26,
+      "slow_rate": 92.3076923076923,
+      "avg_dispatch_days": 7.083333333333333,
+      "impact_score": 22.153846153846153,
+      "sample_order_ids": [
+        170248,
+        169151,
+        168724,
+        167516,
+        164755
+      ]
+    },
+    {
+      "product_id": 20079,
+      "name": "Kin Kin Naturals Lavender Laundry Liquid 5L",
+      "sku": "GBN - KIKI111",
+      "slow_orders": 24,
+      "fast_orders": 2,
+      "total_orders": 26,
+      "slow_rate": 92.3076923076923,
+      "avg_dispatch_days": 7.25,
+      "impact_score": 22.153846153846153,
+      "sample_order_ids": [
+        170175,
+        165409,
+        165044,
+        164922,
+        162346
+      ]
+    },
+    {
+      "product_id": 1562,
+      "name": "Kin Kin Naturals Lime Dishwash Liquid 1050ml",
+      "sku": "GBN - KIKI100",
+      "slow_orders": 21,
+      "fast_orders": 0,
+      "total_orders": 21,
+      "slow_rate": 100,
+      "avg_dispatch_days": 6.333333333333333,
+      "impact_score": 21,
+      "sample_order_ids": [
+        166657,
+        166546,
+        166373,
+        166356,
+        166240
+      ]
+    },
+    {
+      "product_id": 46900,
+      "name": "Nature's Shield Organic Black Seed Oil 200ml",
+      "sku": "OB - NSXBSOOXL",
+      "slow_orders": 25,
+      "fast_orders": 5,
+      "total_orders": 30,
+      "slow_rate": 83.33333333333334,
+      "avg_dispatch_days": 6.6,
+      "impact_score": 20.833333333333336,
+      "sample_order_ids": [
+        169526,
+        167488,
+        167269,
+        166921,
+        166784
+      ]
+    },
+    {
+      "product_id": 6919,
+      "name": "Dr Organic Rose Otto Roll On Deodorant 50ml",
+      "sku": "UN - DO11",
+      "slow_orders": 24,
+      "fast_orders": 6,
+      "total_orders": 30,
+      "slow_rate": 80,
+      "avg_dispatch_days": 4.708333333333333,
+      "impact_score": 19.2,
+      "sample_order_ids": [
+        167974,
+        166564,
+        166558,
+        166533,
+        165356
+      ]
+    },
+    {
+      "product_id": 46878,
+      "name": "Salt of the Earth Celtic Sea Salt Fine 250g",
+      "sku": "OB - SESSFS",
+      "slow_orders": 19,
+      "fast_orders": 0,
+      "total_orders": 19,
+      "slow_rate": 100,
+      "avg_dispatch_days": 8.105263157894736,
+      "impact_score": 19,
+      "sample_order_ids": [
+        168408,
+        167897,
+        166921,
+        164551,
+        164420
+      ]
+    },
+    {
+      "product_id": 3922,
+      "name": "Fructose Powder 1kg Lotus",
+      "sku": "KAD - 6062",
+      "slow_orders": 50,
+      "fast_orders": 87,
+      "total_orders": 137,
+      "slow_rate": 36.496350364963504,
+      "avg_dispatch_days": 10.84,
+      "impact_score": 18.248175182481752,
+      "sample_order_ids": [
+        169558,
+        169527,
+        168945,
+        168848,
+        168818
+      ]
+    },
+    {
+      "product_id": 7089,
+      "name": "Dr Bronner Pure Castile Liquid Soap Peppermint 946ml",
+      "sku": "OB - DBCSPL",
+      "slow_orders": 20,
+      "fast_orders": 2,
+      "total_orders": 22,
+      "slow_rate": 90.9090909090909,
+      "avg_dispatch_days": 8.1,
+      "impact_score": 18.18181818181818,
+      "sample_order_ids": [
+        168691,
+        167774,
+        167380,
+        167011,
+        166700
+      ]
+    }
+  ],
+  "always_slow_products": [
+    {
+      "product_id": 722,
+      "name": "Bragg Apple Cider Vinegar 946ml",
+      "sku": "UN - BR05",
+      "slow_orders": 29,
+      "fast_orders": 0,
+      "total_orders": 29,
+      "slow_rate": 100,
+      "avg_dispatch_days": 5.586206896551724,
+      "impact_score": 29,
+      "sample_order_ids": [
+        169610,
+        169494,
+        167977,
+        167885,
+        167676
+      ]
+    },
+    {
+      "product_id": 61472,
+      "name": "Sea Salt Celtic Coarse Dry (Grinder) 80g",
+      "sku": "KAD - 491363",
+      "slow_orders": 25,
+      "fast_orders": 0,
+      "total_orders": 25,
+      "slow_rate": 100,
+      "avg_dispatch_days": 7,
+      "impact_score": 25,
+      "sample_order_ids": [
+        164656,
+        164119,
+        163207,
+        162645,
+        162457
+      ]
+    },
+    {
+      "product_id": 1562,
+      "name": "Kin Kin Naturals Lime Dishwash Liquid 1050ml",
+      "sku": "GBN - KIKI100",
+      "slow_orders": 21,
+      "fast_orders": 0,
+      "total_orders": 21,
+      "slow_rate": 100,
+      "avg_dispatch_days": 6.333333333333333,
+      "impact_score": 21,
+      "sample_order_ids": [
+        166657,
+        166546,
+        166373,
+        166356,
+        166240
+      ]
+    },
+    {
+      "product_id": 46878,
+      "name": "Salt of the Earth Celtic Sea Salt Fine 250g",
+      "sku": "OB - SESSFS",
+      "slow_orders": 19,
+      "fast_orders": 0,
+      "total_orders": 19,
+      "slow_rate": 100,
+      "avg_dispatch_days": 8.105263157894736,
+      "impact_score": 19,
+      "sample_order_ids": [
+        168408,
+        167897,
+        166921,
+        164551,
+        164420
+      ]
+    },
+    {
+      "product_id": 11047,
+      "name": "Dr Organic Hemp Oil Skin Lotion 200ml",
+      "sku": "UN - DC184",
+      "slow_orders": 18,
+      "fast_orders": 0,
+      "total_orders": 18,
+      "slow_rate": 100,
+      "avg_dispatch_days": 5.055555555555555,
+      "impact_score": 18,
+      "sample_order_ids": [
+        168952,
+        168535,
+        167740,
+        166295,
+        165365
+      ]
+    },
+    {
+      "product_id": 11753,
+      "name": "Kin Kin Naturals Bulk Laundry Lavender Ylang Ylang 20L",
+      "sku": "GBN - KIKI116",
+      "slow_orders": 15,
+      "fast_orders": 0,
+      "total_orders": 15,
+      "slow_rate": 100,
+      "avg_dispatch_days": 5.333333333333333,
+      "impact_score": 15,
+      "sample_order_ids": [
+        167546,
+        166912,
+        165164,
+        164140,
+        161385
+      ]
+    },
+    {
+      "product_id": 9888,
+      "name": "Every Bit Organic Raw Avocado Oil 250ml",
+      "sku": "UN - EV20",
+      "slow_orders": 14,
+      "fast_orders": 0,
+      "total_orders": 14,
+      "slow_rate": 100,
+      "avg_dispatch_days": 5.571428571428571,
+      "impact_score": 14,
+      "sample_order_ids": [
+        169854,
+        165565,
+        164784,
+        164637,
+        164092
+      ]
+    },
+    {
+      "product_id": 10651,
+      "name": "The Whole Foodies Kelp Noodles Original 340g",
+      "sku": "UN - TWF01",
+      "slow_orders": 13,
+      "fast_orders": 0,
+      "total_orders": 13,
+      "slow_rate": 100,
+      "avg_dispatch_days": 4.230769230769231,
+      "impact_score": 13,
+      "sample_order_ids": [
+        170363,
+        168479,
+        166206,
+        165904,
+        162043
+      ]
+    },
+    {
+      "product_id": 1674,
+      "name": "Mt Retour Rosemary Oil 10ml",
+      "sku": "UN - MR05",
+      "slow_orders": 13,
+      "fast_orders": 0,
+      "total_orders": 13,
+      "slow_rate": 100,
+      "avg_dispatch_days": 4.615384615384615,
+      "impact_score": 13,
+      "sample_order_ids": [
+        170299,
+        167300,
+        164888,
+        160990,
+        158990
+      ]
+    },
+    {
+      "product_id": 1984,
+      "name": "Organic Times Full Cream Milk Powder 300g",
+      "sku": "UN - OG51",
+      "slow_orders": 13,
+      "fast_orders": 0,
+      "total_orders": 13,
+      "slow_rate": 100,
+      "avg_dispatch_days": 9,
+      "impact_score": 13,
+      "sample_order_ids": [
+        169274,
+        168667,
+        166899,
+        166587,
+        163846
+      ]
+    },
+    {
+      "product_id": 8567,
+      "name": "Coconut Oil Raw Cold Pressed Organic 920g Global Organics",
+      "sku": "KAD - 462158",
+      "slow_orders": 13,
+      "fast_orders": 0,
+      "total_orders": 13,
+      "slow_rate": 100,
+      "avg_dispatch_days": 13.923076923076923,
+      "impact_score": 13,
+      "sample_order_ids": [
+        168802,
+        167760,
+        167562,
+        167466,
+        161878
+      ]
+    },
+    {
+      "product_id": 33578,
+      "name": "Sol Organics Grass Fed Ghee 1kg",
+      "sku": "UN - SG64",
+      "slow_orders": 12,
+      "fast_orders": 0,
+      "total_orders": 12,
+      "slow_rate": 100,
+      "avg_dispatch_days": 5.25,
+      "impact_score": 12,
+      "sample_order_ids": [
+        169971,
+        169709,
+        169610,
+        169535,
+        169239
+      ]
+    },
+    {
+      "product_id": 3912,
+      "name": "Lotus Pumpkin Kernels (Pepitas) Organic 500g",
+      "sku": "KAD - 426151",
+      "slow_orders": 12,
+      "fast_orders": 0,
+      "total_orders": 12,
+      "slow_rate": 100,
+      "avg_dispatch_days": 6.083333333333333,
+      "impact_score": 12,
+      "sample_order_ids": [
+        169245,
+        167381,
+        165858,
+        165129,
+        164937
+      ]
+    },
+    {
+      "product_id": 1044,
+      "name": "Dr Superfoods Super Cherries 125g",
+      "sku": "UN - DS06",
+      "slow_orders": 12,
+      "fast_orders": 0,
+      "total_orders": 12,
+      "slow_rate": 100,
+      "avg_dispatch_days": 6.333333333333333,
+      "impact_score": 12,
+      "sample_order_ids": [
+        169049,
+        164452,
+        163247,
+        162537,
+        160928
+      ]
+    },
+    {
+      "product_id": 7120,
+      "name": "Dr Bronner Pure Castile Bar Soap Unscented Baby 140g",
+      "sku": "OB - DBCBSU",
+      "slow_orders": 12,
+      "fast_orders": 0,
+      "total_orders": 12,
+      "slow_rate": 100,
+      "avg_dispatch_days": 4.666666666666667,
+      "impact_score": 12,
+      "sample_order_ids": [
+        168937,
+        166957,
+        166696,
+        164968,
+        163127
+      ]
+    },
+    {
+      "product_id": 47548,
+      "name": "Nature's Shield Organic Castor Oil 100ml",
+      "sku": "OB - NSXCASOOL",
+      "slow_orders": 12,
+      "fast_orders": 0,
+      "total_orders": 12,
+      "slow_rate": 100,
+      "avg_dispatch_days": 5.166666666666667,
+      "impact_score": 12,
+      "sample_order_ids": [
+        168443,
+        165402,
+        163567,
+        163302,
+        160600
+      ]
+    },
+    {
+      "product_id": 20082,
+      "name": "Kin Kin Naturals Lime & Eucalypt Dishwash Liquid 5L",
+      "sku": "GBN - KIKI109",
+      "slow_orders": 12,
+      "fast_orders": 0,
+      "total_orders": 12,
+      "slow_rate": 100,
+      "avg_dispatch_days": 6.416666666666667,
+      "impact_score": 12,
+      "sample_order_ids": [
+        166063,
+        165837,
+        165167,
+        158637,
+        157776
+      ]
+    },
+    {
+      "product_id": 32788,
+      "name": "Dandies Vegan Vanilla Marshmallows Regular size 283g",
+      "sku": "UN - DD01",
+      "slow_orders": 11,
+      "fast_orders": 0,
+      "total_orders": 11,
+      "slow_rate": 100,
+      "avg_dispatch_days": 5,
+      "impact_score": 11,
+      "sample_order_ids": [
+        170426,
+        168139,
+        168006,
+        164429,
+        162645
+      ]
+    },
+    {
+      "product_id": 9304,
+      "name": "Niugini Organics Lemongrass Coconut Oil Soap 100g",
+      "sku": "UN - NG20",
+      "slow_orders": 11,
+      "fast_orders": 0,
+      "total_orders": 11,
+      "slow_rate": 100,
+      "avg_dispatch_days": 6.909090909090909,
+      "impact_score": 11,
+      "sample_order_ids": [
+        170340,
+        168181,
+        167343,
+        167333,
+        167110
+      ]
+    },
+    {
+      "product_id": 908,
+      "name": "Chai Tea Spiced Dandelion 175g",
+      "sku": "UN - CH56",
+      "slow_orders": 11,
+      "fast_orders": 0,
+      "total_orders": 11,
+      "slow_rate": 100,
+      "avg_dispatch_days": 5.818181818181818,
+      "impact_score": 11,
+      "sample_order_ids": [
+        170010,
+        168937,
+        167695,
+        166696,
+        164968
+      ]
+    }
+  ],
+  "problem_skus": [
+    {
+      "sku": "UN - BR05",
+      "product_names": [
+        "Bragg Apple Cider Vinegar 946ml"
+      ],
+      "slow_orders": 29,
+      "fast_orders": 0,
+      "total_orders": 29,
+      "slow_rate": 100,
+      "avg_dispatch_days": 5.586206896551724
+    },
+    {
+      "sku": "KAD - 491363",
+      "product_names": [
+        "Sea Salt Celtic Coarse Dry (Grinder) 80g"
+      ],
+      "slow_orders": 25,
+      "fast_orders": 0,
+      "total_orders": 25,
+      "slow_rate": 100,
+      "avg_dispatch_days": 7
+    },
+    {
+      "sku": "GBN - KIKI100",
+      "product_names": [
+        "Kin Kin Naturals Lime Dishwash Liquid 1050ml",
+        "Kin Kin Naturals Lime Dishwash Liquid 550ml"
+      ],
+      "slow_orders": 22,
+      "fast_orders": 0,
+      "total_orders": 22,
+      "slow_rate": 100,
+      "avg_dispatch_days": 6.2727272727272725
+    },
+    {
+      "sku": "OB - SESSFS",
+      "product_names": [
+        "Salt of the Earth Celtic Sea Salt Fine 250g"
+      ],
+      "slow_orders": 19,
+      "fast_orders": 0,
+      "total_orders": 19,
+      "slow_rate": 100,
+      "avg_dispatch_days": 8.105263157894736
+    },
+    {
+      "sku": "UN - DC184",
+      "product_names": [
+        "Dr Organic Hemp Oil Skin Lotion 200ml"
+      ],
+      "slow_orders": 18,
+      "fast_orders": 0,
+      "total_orders": 18,
+      "slow_rate": 100,
+      "avg_dispatch_days": 5.055555555555555
+    },
+    {
+      "sku": "GBN - KIKI116",
+      "product_names": [
+        "Kin Kin Naturals Bulk Laundry Lavender Ylang Ylang 20L"
+      ],
+      "slow_orders": 15,
+      "fast_orders": 0,
+      "total_orders": 15,
+      "slow_rate": 100,
+      "avg_dispatch_days": 5.333333333333333
+    },
+    {
+      "sku": "UN - EV20",
+      "product_names": [
+        "Every Bit Organic Raw Avocado Oil 250ml"
+      ],
+      "slow_orders": 14,
+      "fast_orders": 0,
+      "total_orders": 14,
+      "slow_rate": 100,
+      "avg_dispatch_days": 5.571428571428571
+    },
+    {
+      "sku": "UN - TWF01",
+      "product_names": [
+        "The Whole Foodies Kelp Noodles Original 340g"
+      ],
+      "slow_orders": 13,
+      "fast_orders": 0,
+      "total_orders": 13,
+      "slow_rate": 100,
+      "avg_dispatch_days": 4.230769230769231
+    },
+    {
+      "sku": "UN - MR05",
+      "product_names": [
+        "Mt Retour Rosemary Oil 10ml"
+      ],
+      "slow_orders": 13,
+      "fast_orders": 0,
+      "total_orders": 13,
+      "slow_rate": 100,
+      "avg_dispatch_days": 4.615384615384615
+    },
+    {
+      "sku": "UN - OG51",
+      "product_names": [
+        "Organic Times Full Cream Milk Powder 300g"
+      ],
+      "slow_orders": 13,
+      "fast_orders": 0,
+      "total_orders": 13,
+      "slow_rate": 100,
+      "avg_dispatch_days": 9
+    },
+    {
+      "sku": "KAD - 462158",
+      "product_names": [
+        "Coconut Oil Raw Cold Pressed Organic 920g Global Organics"
+      ],
+      "slow_orders": 13,
+      "fast_orders": 0,
+      "total_orders": 13,
+      "slow_rate": 100,
+      "avg_dispatch_days": 13.923076923076923
+    },
+    {
+      "sku": "UN - SG64",
+      "product_names": [
+        "Sol Organics Grass Fed Ghee 1kg"
+      ],
+      "slow_orders": 12,
+      "fast_orders": 0,
+      "total_orders": 12,
+      "slow_rate": 100,
+      "avg_dispatch_days": 5.25
+    },
+    {
+      "sku": "KAD - 426151",
+      "product_names": [
+        "Lotus Pumpkin Kernels (Pepitas) Organic 500g"
+      ],
+      "slow_orders": 12,
+      "fast_orders": 0,
+      "total_orders": 12,
+      "slow_rate": 100,
+      "avg_dispatch_days": 6.083333333333333
+    },
+    {
+      "sku": "UN - DS06",
+      "product_names": [
+        "Dr Superfoods Super Cherries 125g"
+      ],
+      "slow_orders": 12,
+      "fast_orders": 0,
+      "total_orders": 12,
+      "slow_rate": 100,
+      "avg_dispatch_days": 6.333333333333333
+    },
+    {
+      "sku": "OB - DBCBSU",
+      "product_names": [
+        "Dr Bronner Pure Castile Bar Soap Unscented Baby 140g"
+      ],
+      "slow_orders": 12,
+      "fast_orders": 0,
+      "total_orders": 12,
+      "slow_rate": 100,
+      "avg_dispatch_days": 4.666666666666667
+    },
+    {
+      "sku": "OB - NSXCASOOL",
+      "product_names": [
+        "Nature's Shield Organic Castor Oil 100ml"
+      ],
+      "slow_orders": 12,
+      "fast_orders": 0,
+      "total_orders": 12,
+      "slow_rate": 100,
+      "avg_dispatch_days": 5.166666666666667
+    },
+    {
+      "sku": "GBN - KIKI109",
+      "product_names": [
+        "Kin Kin Naturals Lime & Eucalypt Dishwash Liquid 5L"
+      ],
+      "slow_orders": 12,
+      "fast_orders": 0,
+      "total_orders": 12,
+      "slow_rate": 100,
+      "avg_dispatch_days": 6.416666666666667
+    },
+    {
+      "sku": "GBN - BONE102",
+      "product_names": [
+        "Gevity Rx Bone Broth Body Glue Natural 390g",
+        "Gevity RX Bone Broth Body Glue Natural 390g"
+      ],
+      "slow_orders": 12,
+      "fast_orders": 0,
+      "total_orders": 12,
+      "slow_rate": 100,
+      "avg_dispatch_days": 6.166666666666667
+    },
+    {
+      "sku": "UN - DD01",
+      "product_names": [
+        "Dandies Vegan Vanilla Marshmallows Regular size 283g"
+      ],
+      "slow_orders": 11,
+      "fast_orders": 0,
+      "total_orders": 11,
+      "slow_rate": 100,
+      "avg_dispatch_days": 5
+    },
+    {
+      "sku": "UN - NG20",
+      "product_names": [
+        "Niugini Organics Lemongrass Coconut Oil Soap 100g"
+      ],
+      "slow_orders": 11,
+      "fast_orders": 0,
+      "total_orders": 11,
+      "slow_rate": 100,
+      "avg_dispatch_days": 6.909090909090909
+    }
+  ],
+  "summary": {
+    "total_unique_products_in_slow_orders": 3847,
+    "products_with_100pct_slow": 20,
+    "avg_dispatch_slow_orders": 7.332470892626132
+  }
+}
