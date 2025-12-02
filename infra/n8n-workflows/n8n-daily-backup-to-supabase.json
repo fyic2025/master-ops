@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-02T11:37:21.016Z",
+  "updatedAt": "2025-12-02T11:50:49.557Z",
   "createdAt": "2025-12-02T11:29:19.769Z",
   "id": "CdENdCkCmSQpnbDG",
   "name": "📦 n8n Daily Backup to Supabase",
@@ -53,28 +53,12 @@
     },
     {
       "parameters": {
-        "url": "https://automation.growthcohq.com/api/v1/workflows",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "X-N8N-API-KEY",
-              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjZmJmYmQ0ZS1lYmUxLTQzMzMtYjNkMi01ZWFkYThiNzI2NDQiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzYzODUyMDAxfQ.sncjYpQTtaeK9t1cssVSv0GrMdm4kJ8ei4hYS9y4dq8"
-            }
-          ]
-        },
-        "options": {
-          "response": {
-            "response": {
-              "neverError": true
-            }
-          }
-        }
+        "jsCode": "// Fetch ALL workflows with pagination\nconst apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjZmJmYmQ0ZS1lYmUxLTQzMzMtYjNkMi01ZWFkYThiNzI2NDQiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzYzODUyMDAxfQ.sncjYpQTtaeK9t1cssVSv0GrMdm4kJ8ei4hYS9y4dq8';\nconst baseUrl = 'https://automation.growthcohq.com/api/v1/workflows';\n\nlet allWorkflows = [];\nlet cursor = null;\nlet pageNum = 0;\n\ndo {\n  pageNum++;\n  const url = cursor \n    ? `${baseUrl}?limit=250&cursor=${cursor}`\n    : `${baseUrl}?limit=250`;\n  \n  console.log(`Fetching page ${pageNum}...`);\n  \n  const response = await this.helpers.httpRequest({\n    method: 'GET',\n    url: url,\n    headers: {\n      'X-N8N-API-KEY': apiKey\n    }\n  });\n  \n  const workflows = response.data || [];\n  allWorkflows = allWorkflows.concat(workflows);\n  cursor = response.nextCursor;\n  \n  console.log(`Page ${pageNum}: ${workflows.length} workflows (total: ${allWorkflows.length})`);\n  \n} while (cursor);\n\nconsole.log(`Fetched ${allWorkflows.length} total workflows`);\n\nreturn [{ json: { data: allWorkflows } }];"
       },
       "id": "get-workflows",
       "name": "📋 Get All Workflows",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         700,
         280
@@ -82,41 +66,12 @@
     },
     {
       "parameters": {
-        "url": "https://automation.growthcohq.com/api/v1/executions",
-        "sendQuery": true,
-        "queryParameters": {
-          "parameters": [
-            {
-              "name": "limit",
-              "value": "500"
-            },
-            {
-              "name": "status",
-              "value": "error,success,waiting"
-            }
-          ]
-        },
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "X-N8N-API-KEY",
-              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjZmJmYmQ0ZS1lYmUxLTQzMzMtYjNkMi01ZWFkYThiNzI2NDQiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzYzODUyMDAxfQ.sncjYpQTtaeK9t1cssVSv0GrMdm4kJ8ei4hYS9y4dq8"
-            }
-          ]
-        },
-        "options": {
-          "response": {
-            "response": {
-              "neverError": true
-            }
-          }
-        }
+        "jsCode": "// Fetch ALL executions with pagination\nconst apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjZmJmYmQ0ZS1lYmUxLTQzMzMtYjNkMi01ZWFkYThiNzI2NDQiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzYzODUyMDAxfQ.sncjYpQTtaeK9t1cssVSv0GrMdm4kJ8ei4hYS9y4dq8';\nconst baseUrl = 'https://automation.growthcohq.com/api/v1/executions';\n\nlet allExecutions = [];\nlet cursor = null;\nlet pageNum = 0;\nconst maxPages = 10;\n\ndo {\n  pageNum++;\n  const url = cursor \n    ? `${baseUrl}?limit=250&cursor=${cursor}`\n    : `${baseUrl}?limit=250`;\n  \n  console.log(`Fetching executions page ${pageNum}...`);\n  \n  const response = await this.helpers.httpRequest({\n    method: 'GET',\n    url: url,\n    headers: {\n      'X-N8N-API-KEY': apiKey\n    }\n  });\n  \n  const executions = response.data || [];\n  allExecutions = allExecutions.concat(executions);\n  cursor = response.nextCursor;\n  \n  console.log(`Page ${pageNum}: ${executions.length} executions (total: ${allExecutions.length})`);\n  \n} while (cursor && pageNum < maxPages);\n\nconsole.log(`Fetched ${allExecutions.length} total executions`);\n\nreturn [{ json: { data: allExecutions } }];"
       },
       "id": "get-executions",
       "name": "📊 Get Recent Executions",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         700,
         480
@@ -475,9 +430,9 @@
   ],
   "tags": [],
   "activeVersion": {
-    "updatedAt": "2025-12-02T11:37:21.004Z",
-    "createdAt": "2025-12-02T11:37:21.004Z",
-    "versionId": "d2f9c803-5b21-4030-8426-707e2821b651",
+    "updatedAt": "2025-12-02T11:50:49.546Z",
+    "createdAt": "2025-12-02T11:50:49.546Z",
+    "versionId": "bd64365a-99b6-45b0-aed9-e9f721483264",
     "workflowId": "CdENdCkCmSQpnbDG",
     "nodes": [
       {
@@ -526,28 +481,12 @@
       },
       {
         "parameters": {
-          "url": "https://automation.growthcohq.com/api/v1/workflows",
-          "sendHeaders": true,
-          "headerParameters": {
-            "parameters": [
-              {
-                "name": "X-N8N-API-KEY",
-                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjZmJmYmQ0ZS1lYmUxLTQzMzMtYjNkMi01ZWFkYThiNzI2NDQiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzYzODUyMDAxfQ.sncjYpQTtaeK9t1cssVSv0GrMdm4kJ8ei4hYS9y4dq8"
-              }
-            ]
-          },
-          "options": {
-            "response": {
-              "response": {
-                "neverError": true
-              }
-            }
-          }
+          "jsCode": "// Fetch ALL workflows with pagination\nconst apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjZmJmYmQ0ZS1lYmUxLTQzMzMtYjNkMi01ZWFkYThiNzI2NDQiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzYzODUyMDAxfQ.sncjYpQTtaeK9t1cssVSv0GrMdm4kJ8ei4hYS9y4dq8';\nconst baseUrl = 'https://automation.growthcohq.com/api/v1/workflows';\n\nlet allWorkflows = [];\nlet cursor = null;\nlet pageNum = 0;\n\ndo {\n  pageNum++;\n  const url = cursor \n    ? `${baseUrl}?limit=250&cursor=${cursor}`\n    : `${baseUrl}?limit=250`;\n  \n  console.log(`Fetching page ${pageNum}...`);\n  \n  const response = await this.helpers.httpRequest({\n    method: 'GET',\n    url: url,\n    headers: {\n      'X-N8N-API-KEY': apiKey\n    }\n  });\n  \n  const workflows = response.data || [];\n  allWorkflows = allWorkflows.concat(workflows);\n  cursor = response.nextCursor;\n  \n  console.log(`Page ${pageNum}: ${workflows.length} workflows (total: ${allWorkflows.length})`);\n  \n} while (cursor);\n\nconsole.log(`Fetched ${allWorkflows.length} total workflows`);\n\nreturn [{ json: { data: allWorkflows } }];"
         },
         "id": "get-workflows",
         "name": "📋 Get All Workflows",
-        "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 4.2,
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
         "position": [
           700,
           280
@@ -555,41 +494,12 @@
       },
       {
         "parameters": {
-          "url": "https://automation.growthcohq.com/api/v1/executions",
-          "sendQuery": true,
-          "queryParameters": {
-            "parameters": [
-              {
-                "name": "limit",
-                "value": "500"
-              },
-              {
-                "name": "status",
-                "value": "error,success,waiting"
-              }
-            ]
-          },
-          "sendHeaders": true,
-          "headerParameters": {
-            "parameters": [
-              {
-                "name": "X-N8N-API-KEY",
-                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjZmJmYmQ0ZS1lYmUxLTQzMzMtYjNkMi01ZWFkYThiNzI2NDQiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzYzODUyMDAxfQ.sncjYpQTtaeK9t1cssVSv0GrMdm4kJ8ei4hYS9y4dq8"
-              }
-            ]
-          },
-          "options": {
-            "response": {
-              "response": {
-                "neverError": true
-              }
-            }
-          }
+          "jsCode": "// Fetch ALL executions with pagination\nconst apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjZmJmYmQ0ZS1lYmUxLTQzMzMtYjNkMi01ZWFkYThiNzI2NDQiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzYzODUyMDAxfQ.sncjYpQTtaeK9t1cssVSv0GrMdm4kJ8ei4hYS9y4dq8';\nconst baseUrl = 'https://automation.growthcohq.com/api/v1/executions';\n\nlet allExecutions = [];\nlet cursor = null;\nlet pageNum = 0;\nconst maxPages = 10;\n\ndo {\n  pageNum++;\n  const url = cursor \n    ? `${baseUrl}?limit=250&cursor=${cursor}`\n    : `${baseUrl}?limit=250`;\n  \n  console.log(`Fetching executions page ${pageNum}...`);\n  \n  const response = await this.helpers.httpRequest({\n    method: 'GET',\n    url: url,\n    headers: {\n      'X-N8N-API-KEY': apiKey\n    }\n  });\n  \n  const executions = response.data || [];\n  allExecutions = allExecutions.concat(executions);\n  cursor = response.nextCursor;\n  \n  console.log(`Page ${pageNum}: ${executions.length} executions (total: ${allExecutions.length})`);\n  \n} while (cursor && pageNum < maxPages);\n\nconsole.log(`Fetched ${allExecutions.length} total executions`);\n\nreturn [{ json: { data: allExecutions } }];"
         },
         "id": "get-executions",
         "name": "📊 Get Recent Executions",
-        "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 4.2,
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
         "position": [
           700,
           480
