@@ -1,0 +1,42 @@
+{
+  "name": "boo-optimisation-team",
+  "version": "1.0.0",
+  "description": "Website optimization team for Buy Organics Online (BigCommerce)",
+  "main": "agents/coordinator.js",
+  "type": "module",
+  "scripts": {
+    "audit": "node scripts/run-audit.js",
+    "compare": "node scripts/run-comparison.js",
+    "optimize": "node scripts/run-optimization.js",
+    "report": "node scripts/generate-report.js",
+    "setup-cron": "node scripts/setup-cron.js",
+    "migrate": "node scripts/run-migrations.js",
+    "test": "node --test",
+    "monitor": "node agents/coordinator.js --mode=monitor",
+    "analyze": "node tools/full-analysis.js"
+  },
+  "keywords": [
+    "optimisation",
+    "optimization",
+    "lighthouse",
+    "performance",
+    "bigcommerce",
+    "boo",
+    "buy-organics-online",
+    "core-web-vitals"
+  ],
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "lighthouse": "^11.4.0",
+    "puppeteer": "^21.6.0",
+    "node-cron": "^3.0.3",
+    "dotenv": "^16.3.1",
+    "chalk": "^5.3.0",
+    "ora": "^8.0.1",
+    "cli-table3": "^0.6.3",
+    "date-fns": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

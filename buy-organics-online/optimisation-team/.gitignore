@@ -1,0 +1,27 @@
+# Environment files
+.env
+.env.local
+
+# Dependencies
+node_modules/
+
+# Reports (generated)
+reports/*.md
+reports/*.json
+reports/*.html
+reports/logs/
+
+# Keep the reports directory
+!reports/.gitkeep
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*

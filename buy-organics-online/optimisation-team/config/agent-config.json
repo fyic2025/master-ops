@@ -1,0 +1,85 @@
+{
+  "team": {
+    "name": "BOO Optimisation Team",
+    "version": "1.0.0",
+    "platform": "bigcommerce",
+    "store": {
+      "name": "Buy Organics Online",
+      "domain": "www.buyorganicsonline.com.au",
+      "storeHash": "from_env"
+    }
+  },
+  "agents": {
+    "lighthouseAudit": {
+      "enabled": true,
+      "name": "Lighthouse Audit Agent",
+      "description": "Runs Lighthouse audits and tracks Core Web Vitals",
+      "retryAttempts": 3,
+      "retryDelay": 5000,
+      "timeout": 120000,
+      "devices": ["desktop", "mobile"],
+      "categories": ["performance", "accessibility", "best-practices", "seo"]
+    },
+    "performanceMonitor": {
+      "enabled": true,
+      "name": "Performance Monitor Agent",
+      "description": "Compares performance against previous periods",
+      "comparisonPeriods": ["day", "week", "month"],
+      "trendWindowDays": 30,
+      "minDataPointsForTrend": 5
+    },
+    "autoFixer": {
+      "enabled": true,
+      "name": "Auto-Fixer Agent",
+      "description": "Generates and applies performance fixes",
+      "autoApply": false,
+      "requireApproval": true,
+      "fixCategories": [
+        "images",
+        "scripts",
+        "styles",
+        "fonts",
+        "thirdParty",
+        "resourceHints"
+      ]
+    },
+    "reportGenerator": {
+      "enabled": true,
+      "name": "Report Generator Agent",
+      "description": "Generates performance reports",
+      "formats": ["markdown", "json", "html"],
+      "defaultFormat": "markdown",
+      "includeScreenshots": true
+    },
+    "coordinator": {
+      "enabled": true,
+      "name": "Coordinator Agent",
+      "description": "Orchestrates optimization workflows",
+      "defaultWorkflow": "full-audit",
+      "alertOnRegression": true,
+      "regressionThreshold": 5
+    }
+  },
+  "supabase": {
+    "url": "from_env",
+    "serviceKey": "from_env",
+    "tables": {
+      "audits": "boo_lighthouse_audits",
+      "trends": "boo_performance_trends",
+      "alerts": "boo_optimisation_alerts",
+      "fixes": "boo_fix_history",
+      "comparisons": "boo_comparison_reports"
+    }
+  },
+  "bigcommerce": {
+    "apiUrl": "from_env",
+    "accessToken": "from_env",
+    "storeHash": "from_env"
+  },
+  "logging": {
+    "level": "info",
+    "console": true,
+    "file": true,
+    "logDir": "./reports/logs"
+  }
+}
