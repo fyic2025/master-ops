@@ -58,6 +58,8 @@ interface RecentEmail {
 interface UnengagedPool {
   total: number
   last_synced: string | null
+  already_contacted: number
+  available: number
 }
 
 export default function WinbackPage() {
@@ -282,7 +284,8 @@ export default function WinbackPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
         <StatCard
           label="Unengaged Pool"
-          value={unengagedPool?.total ?? 0}
+          value={unengagedPool?.available ?? unengagedPool?.total ?? 0}
+          subtext={unengagedPool?.already_contacted ? `${unengagedPool.already_contacted} contacted` : undefined}
           icon={Users}
           color="blue"
         />
