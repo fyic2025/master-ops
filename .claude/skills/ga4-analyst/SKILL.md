@@ -1,3 +1,9 @@
+---
+name: ga4-analyst
+description: Google Analytics 4 reporting, conversion tracking, user behavior analysis, and e-commerce insights for all 4 stores (BOO, Teelixir, Elevate, RHF). Use for traffic analysis, conversion optimization, and attribution.
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Task
+---
+
 # GA4 Analyst Skill
 
 Google Analytics 4 reporting, conversion tracking, user behavior analysis, and e-commerce insights for all 4 stores.

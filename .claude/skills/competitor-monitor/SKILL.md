@@ -1,3 +1,9 @@
+---
+name: competitor-monitor
+description: Competitive intelligence, market monitoring, and strategic positioning analysis. Tracks competitor pricing, products, promotions, and market trends. Use for competitive analysis and market positioning.
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Task
+---
+
 # Competitor Monitor Skill
 
 > Competitive intelligence, market monitoring, and strategic positioning analysis.

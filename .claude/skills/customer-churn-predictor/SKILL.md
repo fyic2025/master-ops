@@ -1,3 +1,9 @@
+---
+name: customer-churn-predictor
+description: Predicts customer churn risk and recommends retention interventions across all 4 businesses. Uses RFM analysis, behavioral signals, and Klaviyo integration. Use for at-risk customer identification and retention campaigns.
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Task
+---
+
 # Customer Churn Predictor Skill
 
 Predicts customer churn risk and recommends retention interventions across all 4 businesses.

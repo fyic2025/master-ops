@@ -1,3 +1,9 @@
+---
+name: shipping-optimizer
+description: Shipping strategy and fulfillment optimization across all businesses. Manages carrier selection (Australia Post, Sendle), zones, rates, and free shipping thresholds. Use for shipping configuration and optimization.
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Task
+---
+
 # Shipping Optimizer Skill
 
 > Expert-level shipping strategy and fulfillment optimization across all businesses.

@@ -1,3 +1,9 @@
+---
+name: email-copywriter
+description: Expert email copywriting for campaigns, automations, and transactional emails across all businesses. Creates welcome series, abandoned cart, post-purchase, and promotional content with brand voice consistency.
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Task
+---
+
 # Email Copywriter Skill
 
 > Expert email copywriting for campaigns, automations, and transactional emails across all businesses.

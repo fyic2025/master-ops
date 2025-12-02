@@ -1,3 +1,9 @@
+---
+name: shopify-expert
+description: Expert-level Shopify platform management for Teelixir and Elevate Wholesale. Handles products, orders, metafields, themes, REST and GraphQL APIs. Use for any Teelixir or Elevate e-commerce operations.
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Task
+---
+
 # Shopify Expert Skill
 
 > Expert-level Shopify platform management for Teelixir and Elevate Wholesale.

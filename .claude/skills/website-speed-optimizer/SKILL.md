@@ -1,3 +1,9 @@
+---
+name: website-speed-optimizer
+description: Core Web Vitals monitoring, Lighthouse auditing, and performance optimization across all 4 e-commerce stores. Tracks LCP, FID, CLS, INP, and provides optimization recommendations. Use for page speed and performance issues.
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Task
+---
+
 # Website Speed Optimizer Skill
 
 Core Web Vitals monitoring, Lighthouse auditing, and performance optimization across all 4 e-commerce stores.

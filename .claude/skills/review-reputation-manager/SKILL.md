@@ -1,3 +1,9 @@
+---
+name: review-reputation-manager
+description: Online reputation and review management across all businesses. Manages Google Business Profile, product reviews, UGC aggregation, and review responses. Use for reputation monitoring and review management.
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Task
+---
+
 # Review & Reputation Manager Skill
 
 > Expert-level online reputation and review management across all businesses.

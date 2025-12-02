@@ -1,3 +1,9 @@
+---
+name: bigcommerce-expert
+description: Expert-level BigCommerce platform management for Buy Organics Online (BOO). Handles product management, orders, inventory, API operations, and store configuration. Use for any BOO e-commerce operations.
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Task
+---
+
 # BigCommerce Expert Skill
 
 > Expert-level BigCommerce platform management for Buy Organics Online (BOO).

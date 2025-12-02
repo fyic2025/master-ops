@@ -1,3 +1,9 @@
+---
+name: product-description-generator
+description: AI-powered product description generation for all 4 e-commerce stores with brand voice consistency and SEO optimization. Handles bulk and single product descriptions. Use for writing or improving product copy.
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Task
+---
+
 # Product Description Generator Skill
 
 AI-powered product description generation for all 4 e-commerce stores with brand voice consistency and SEO optimization.
