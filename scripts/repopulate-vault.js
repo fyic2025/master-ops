@@ -196,6 +196,11 @@ const CREDENTIAL_MAPPINGS = {
   'XERO_TEELIXIR_CLIENT_SECRET': { project: 'teelixir', name: 'xero_client_secret', desc: 'Teelixir Xero Client Secret' },
   'XERO_TEELIXIR_REFRESH_TOKEN': { project: 'teelixir', name: 'xero_refresh_token', desc: 'Teelixir Xero Refresh Token' },
   'XERO_TEELIXIR_TENANT_ID': { project: 'teelixir', name: 'xero_tenant_id', desc: 'Teelixir Xero Tenant ID' },
+  'TEELIXIR_UNLEASHED_API_ID': { project: 'teelixir', name: 'unleashed_api_id', desc: 'Teelixir Unleashed API ID' },
+  'TEELIXIR_UNLEASHED_API_KEY': { project: 'teelixir', name: 'unleashed_api_key', desc: 'Teelixir Unleashed API Key' },
+  'TEELIXIR_SHOPIFY_ACCESS_TOKEN': { project: 'teelixir', name: 'shopify_access_token', desc: 'Teelixir Shopify Access Token' },
+  'TEELIXIR_SHOPIFY_SHOP_DOMAIN': { project: 'teelixir', name: 'shopify_shop_domain', desc: 'Teelixir Shopify Shop Domain' },
+  'TEELIXIR_SHOPIFY_LOCATION_ID': { project: 'teelixir', name: 'shopify_location_id', desc: 'Teelixir Shopify Location ID' },
 
   // Additional from backup - BOO
   'BOO_SUPABASE_DB_PASSWORD': { project: 'boo', name: 'supabase_db_password', desc: 'BOO Supabase DB Password' },
