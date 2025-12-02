@@ -1,4 +1,4 @@
-// Nav config v2025-11-30T12:22
+// Nav config v2025-12-02T10:00
 import {
   Home,
   TrendingUp,
@@ -20,6 +20,7 @@ import {
   BarChart3,
   Send,
   Zap,
+  Cloud,
   type LucideIcon
 } from 'lucide-react'
 
@@ -55,6 +56,7 @@ export const BUSINESSES: Record<BusinessCode, Business> = {
       { name: 'SEO', href: '/seo', icon: Search },
       { name: 'Sync', href: '/sync', icon: RefreshCw },
       { name: 'Finance', href: '/finance', icon: DollarSign },
+      { name: 'AWS Migration', href: '/aws-migration', icon: Cloud },
       { name: 'Health', href: '/health', icon: Activity },
       { name: 'Settings', href: '/settings', icon: Settings },
     ]
