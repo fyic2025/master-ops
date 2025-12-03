@@ -17,7 +17,9 @@ import {
   X,
   Lightbulb,
   RefreshCw,
-  Database
+  Database,
+  MessageSquare,
+  Send
 } from 'lucide-react'
 import { getAllowedBusinesses, isAdmin } from '@/lib/user-permissions'
 
@@ -116,7 +118,7 @@ interface Task {
   id: string
   title: string
   description?: string
-  status: 'pending_input' | 'scheduled' | 'in_progress' | 'completed' | 'blocked' | 'pending'
+  status: 'pending_input' | 'scheduled' | 'in_progress' | 'completed' | 'blocked' | 'pending' | 'awaiting_clarification'
   priority: 1 | 2 | 3 | 4
   instructions?: string
   plan?: string // Claude's detailed implementation plan
@@ -126,6 +128,9 @@ interface Task {
   category?: string
   fromDb?: boolean
   created_at?: string
+  created_by?: string // Who created the task (username or email prefix)
+  clarification_request?: string // Question from Claude needing answer
+  clarification_response?: string // Response from task creator
 }
 
 // Skills mapping for each category
@@ -149,6 +154,125 @@ const CATEGORY_SKILLS: Record<string, { skills: string[], focus: string }> = {
   shipping: { skills: ['shipping-optimizer'], focus: 'carriers, labels, rates' },
   dashboard: { skills: ['supabase-expert', 'dashboard-automation'], focus: 'UI, API, database' },
   deployment: { skills: ['shopify-expert'], focus: 'theme deployment, validation' },
+}
+
+// Generate comprehensive prompt for Claude Code planning
+function generateClaudePrompt(task: Task): string {
+  const businessName = task.business
+    ? TASK_FRAMEWORK[task.business as keyof typeof TASK_FRAMEWORK]?.name || task.business
+    : 'Overall'
+
+  const categoryName = task.category && task.business
+    ? (TASK_FRAMEWORK[task.business as keyof typeof TASK_FRAMEWORK] as any)?.categories?.[task.category]?.name || task.category
+    : task.category || 'General'
+
+  const skillInfo = task.category ? CATEGORY_SKILLS[task.category] : null
+  const skillList = skillInfo?.skills?.map(s => `- /skill ${s}`).join('\n') || ''
+
+  const priorityLabels: Record<number, string> = {
+    1: 'CRITICAL - Urgent',
+    2: 'HIGH - This week',
+    3: 'MEDIUM - Soon',
+    4: 'LOW - Backlog'
+  }
+
+  // Determine who created the task and how to follow up
+  const createdBy = task.created_by?.toLowerCase() || 'unknown'
+  const isPeterTask = createdBy === 'peter' || createdBy.includes('peter')
+  const isJasonTask = createdBy === 'jayson' || createdBy === 'dashboard' || createdBy.includes('jayson')
+
+  // Generate unique reference for email tracking
+  const taskRef = `TASK-${task.id?.slice(0, 8) || Date.now().toString(36).toUpperCase()}`
+
+  let followUpInstructions = ''
+  if (isPeterTask) {
+    followUpInstructions = `
+## Follow-up Process (Peter's Task)
+This task was created by Peter. If you need clarification or more details:
+
+### Option 1: Request via Dashboard (Preferred)
+Update the task to request clarification directly in the dashboard:
+\`\`\`
+PATCH /api/tasks/${task.id || '{task_id}'}
+{
+  "status": "awaiting_clarification",
+  "clarification_request": "Your question here - what do you need Peter to clarify?"
+}
+\`\`\`
+Peter will see the question in the dashboard and can respond directly. His response will appear in \`clarification_response\`.
+
+### Option 2: Email Peter
+If dashboard clarification isn't suitable:
+1. **Email Peter** at peter@teelixir.com
+2. **Subject line must include**: [${taskRef}] - Question about: ${task.title.slice(0, 50)}
+3. **Keep questions focused** on process and clarity (not technical details)
+4. **Log the email** in task_logs table with:
+   - task_id: ${task.id || 'this task ID'}
+   - source: 'claude'
+   - status: 'email_sent'
+   - message: Brief summary of what was asked
+5. **When Peter replies**, the reference [${taskRef}] will help match it to this task
+
+Example subject: [${taskRef}] - Question about: ${task.title.slice(0, 30)}...`
+  } else if (isJasonTask) {
+    followUpInstructions = `
+## Follow-up Process (Jason's Task)
+This task was created by Jason (admin). If you need clarification:
+- **Ask directly** in this conversation window
+- No email required - discuss questions here`
+  } else {
+    followUpInstructions = `
+## Follow-up Process
+If you need more details about this task:
+- **Request via Dashboard**: Update task with status "awaiting_clarification" and set "clarification_request"
+- Task created by: ${createdBy || 'Unknown'}
+- Ask in this conversation if unclear`
+  }
+
+  return `## Task Planning Request
+
+**Task ID:** ${task.id || 'Not saved yet'}
+**Reference:** ${taskRef}
+**Title:** ${task.title}
+**Business:** ${businessName}
+**Category:** ${categoryName}
+**Priority:** P${task.priority} (${priorityLabels[task.priority] || 'Unknown'})
+**Status:** ${task.status}
+**Created By:** ${task.created_by || 'Unknown'}
+
+## Description
+${task.description || 'No description provided.'}
+
+## Current Instructions
+${task.instructions || 'No detailed instructions yet - this task needs planning.'}
+
+${task.source ? `## Source Reference\n${task.source}\n` : ''}
+${task.needsResearch ? '## Note\nThis task is marked as needing research before implementation.\n' : ''}
+
+${skillList ? `## Relevant Skills\nActivate these skills for context:\n${skillList}\n\nFocus areas: ${skillInfo?.focus || 'General implementation'}\n` : ''}
+
+## What Claude Code Should Do
+
+1. **Understand the task** - Review all details above
+2. **Research if needed** - Use relevant skills to understand current state
+3. **Create a detailed plan** with:
+   - Step-by-step implementation approach
+   - Files that need to be created or modified
+   - Dependencies or blockers to address
+   - Success criteria / how to verify completion
+4. **If anything is unclear** - Follow the process below to get clarification
+5. **Update the task** in the dashboard with your implementation plan
+
+${followUpInstructions}
+
+## After Planning
+Once you have a clear plan:
+1. Update this task's \`instructions\` field with the detailed plan
+2. Change status from 'pending_input' to 'scheduled' (ready for implementation)
+3. If blocked, change status to 'blocked' and note the blocker
+
+---
+Task Reference: ${taskRef}`
 }
 
 // Generate a "build plan" task for empty categories
@@ -602,6 +726,7 @@ function getStatusIcon(status: Task['status']) {
     case 'blocked': return <AlertCircle className="w-4 h-4 text-red-500" />
     case 'scheduled': return <Circle className="w-4 h-4 text-purple-500" />
     case 'pending_input': return <Circle className="w-4 h-4 text-yellow-500" />
+    case 'awaiting_clarification': return <AlertCircle className="w-4 h-4 text-orange-500" />
     default: return <Circle className="w-4 h-4 text-gray-500" />
   }
 }
@@ -628,6 +753,7 @@ function getStatusBadge(status: Task['status']) {
     in_progress: 'bg-blue-500/20 text-blue-400',
     completed: 'bg-green-500/20 text-green-400',
     blocked: 'bg-red-500/20 text-red-400',
+    awaiting_clarification: 'bg-orange-500/20 text-orange-400',
   }
   const labels: Record<string, string> = {
     pending: 'pending',
@@ -636,6 +762,7 @@ function getStatusBadge(status: Task['status']) {
     in_progress: 'in progress',
     completed: 'completed',
     blocked: 'blocked',
+    awaiting_clarification: 'needs your input',
   }
   return (
     <span className={`text-xs px-1.5 py-0.5 rounded ${config[status] || config.pending}`}>
@@ -644,13 +771,17 @@ function getStatusBadge(status: Task['status']) {
   )
 }
 
-function TaskCard({ task }: { task: Task }) {
+function TaskCard({ task, onClarificationSubmit }: { task: Task, onClarificationSubmit?: () => void }) {
   const [showDetails, setShowDetails] = useState(false)
   const [copied, setCopied] = useState(false)
   const [copiedResearch, setCopiedResearch] = useState(false)
+  const [clarificationResponse, setClarificationResponse] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState('')
 
   const copyToClipboard = () => {
-    const text = task.instructions || task.description || task.title
+    // Use comprehensive prompt for Claude Code planning
+    const text = generateClaudePrompt(task)
     navigator.clipboard.writeText(text)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
@@ -679,8 +810,42 @@ After research, update this task in the dashboard with your findings.`
     setTimeout(() => setCopiedResearch(false), 2000)
   }
 
+  const handleSubmitClarification = async () => {
+    if (!clarificationResponse.trim() || !task.id) return
+
+    setSubmitting(true)
+    setSubmitError('')
+
+    try {
+      const response = await fetch(`/api/tasks/${task.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clarification_response: clarificationResponse,
+          status: 'pending_input', // Move back to pending for Claude to review
+        }),
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to submit response')
+      }
+
+      setClarificationResponse('')
+      onClarificationSubmit?.()
+    } catch (err: any) {
+      setSubmitError(err.message || 'Failed to submit')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const hasClarificationRequest = task.status === 'awaiting_clarification' && task.clarification_request
+
   return (
-    <div className="bg-gray-800/50 border border-gray-700 rounded-lg overflow-hidden">
+    <div className={`bg-gray-800/50 border rounded-lg overflow-hidden ${
+      hasClarificationRequest ? 'border-orange-500/50' : 'border-gray-700'
+    }`}>
       <div className="p-3">
         <div className="flex items-start gap-3">
           {getStatusIcon(task.status)}
@@ -751,6 +916,57 @@ After research, update this task in the dashboard with your findings.`
         </div>
       </div>
 
+      {/* Clarification Request Panel */}
+      {hasClarificationRequest && (
+        <div className="border-t border-orange-500/30 bg-orange-500/5 p-3">
+          <div className="flex items-start gap-2 mb-3">
+            <MessageSquare className="w-4 h-4 text-orange-400 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-orange-400 text-sm font-medium mb-1">Clarification Needed</p>
+              <p className="text-gray-300 text-sm whitespace-pre-wrap">{task.clarification_request}</p>
+            </div>
+          </div>
+
+          {submitError && (
+            <div className="mb-2 text-xs text-red-400 bg-red-500/10 px-2 py-1 rounded">
+              {submitError}
+            </div>
+          )}
+
+          <div className="flex gap-2">
+            <textarea
+              value={clarificationResponse}
+              onChange={(e) => setClarificationResponse(e.target.value)}
+              placeholder="Type your response here..."
+              rows={2}
+              className="flex-1 bg-gray-800 border border-gray-600 rounded px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-orange-500"
+            />
+            <button
+              onClick={handleSubmitClarification}
+              disabled={!clarificationResponse.trim() || submitting}
+              className="px-3 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded flex items-center gap-1 text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {submitting ? (
+                <span className="animate-spin">...</span>
+              ) : (
+                <>
+                  <Send className="w-4 h-4" />
+                  Submit
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Previous clarification response (if any) */}
+      {task.clarification_response && !hasClarificationRequest && (
+        <div className="border-t border-gray-700 bg-gray-900/30 p-3">
+          <p className="text-xs text-gray-500 mb-1">Previous response:</p>
+          <p className="text-gray-400 text-sm">{task.clarification_response}</p>
+        </div>
+      )}
+
       {showDetails && task.instructions && (
         <div className="border-t border-gray-700 bg-gray-900/50 p-3">
           <pre className="text-xs text-gray-300 whitespace-pre-wrap font-mono leading-relaxed">
@@ -767,13 +983,15 @@ function CategorySection({
   businessName,
   categoryKey,
   category,
-  tasks
+  tasks,
+  onRefetch
 }: {
   businessKey: string
   businessName: string
   categoryKey: string
   category: { name: string }
   tasks: Task[]
+  onRefetch?: () => void
 }) {
   const [expanded, setExpanded] = useState(tasks.length > 0)
 
@@ -799,7 +1017,7 @@ function CategorySection({
 
       {expanded && (
         <div className="space-y-3 mt-2 ml-6">
-          {displayTasks.map(task => <TaskCard key={task.id} task={task} />)}
+          {displayTasks.map(task => <TaskCard key={task.id} task={task} onClarificationSubmit={onRefetch} />)}
         </div>
       )}
     </div>
@@ -809,11 +1027,13 @@ function CategorySection({
 function BusinessSection({
   businessKey,
   business,
-  dbTasks
+  dbTasks,
+  onRefetch
 }: {
   businessKey: string
   business: typeof TASK_FRAMEWORK.teelixir
   dbTasks?: Record<string, Task[]>
+  onRefetch?: () => void
 }) {
   const [expanded, setExpanded] = useState(true)
 
@@ -856,6 +1076,7 @@ function BusinessSection({
               categoryKey={catKey}
               category={category}
               tasks={tasksSource[`${businessKey}.${catKey}`] || []}
+              onRefetch={onRefetch}
             />
           ))}
         </div>
@@ -1101,6 +1322,10 @@ async function fetchDbTasks(): Promise<Task[]> {
       business: t.business,
       category: t.category,
       fromDb: true, // Mark as from database
+      created_at: t.created_at,
+      created_by: t.created_by,
+      clarification_request: t.clarification_request,
+      clarification_response: t.clarification_response,
     }))
   } catch {
     return []
@@ -1241,17 +1466,36 @@ export default function TasksPage() {
     refetch()
   }, [refetch])
 
+  // Check if viewing as Peter for custom header
+  const isPeterView = userEmail?.toLowerCase().includes('peter')
+
   return (
     <div className="space-y-6">
       <header className="flex justify-between items-start">
         <div>
-          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-            <ClipboardList className="w-8 h-8" />
-            Task Framework
-          </h1>
-          <p className="text-gray-400 mt-1">
-            Priority-driven task management
-          </p>
+          {isPeterView ? (
+            <>
+              <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+                <span className="text-3xl">💡</span>
+                Growth Hacking HQ
+              </h1>
+              <p className="text-gray-400 mt-1 flex items-center gap-2">
+                <span className="px-2 py-0.5 bg-gradient-to-r from-purple-500/20 to-blue-500/20 border border-purple-500/30 rounded-full text-xs text-purple-300">
+                  Authorised Business Strategist Access Only
+                </span>
+              </p>
+            </>
+          ) : (
+            <>
+              <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+                <ClipboardList className="w-8 h-8" />
+                Task Framework
+              </h1>
+              <p className="text-gray-400 mt-1">
+                Priority-driven task management
+              </p>
+            </>
+          )}
         </div>
         <div className="flex gap-2">
           <button
@@ -1349,11 +1593,29 @@ export default function TasksPage() {
           </div>
           <div className="space-y-2">
             {displayedTasks.map(task => (
-              <TaskCard key={task.id} task={task} />
+              <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} />
             ))}
             {displayedTasks.length === 0 && (
               <p className="text-gray-500 text-sm">No P{priorityFilter} tasks</p>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Awaiting Clarification Section - Tasks needing user input */}
+      {filteredDbTasks.filter(t => t.status === 'awaiting_clarification').length > 0 && (
+        <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-4">
+          <h3 className="text-orange-400 font-medium mb-2 flex items-center gap-2">
+            <MessageSquare className="w-5 h-5" />
+            Awaiting Your Response ({filteredDbTasks.filter(t => t.status === 'awaiting_clarification').length})
+          </h3>
+          <p className="text-sm text-gray-400 mb-3">
+            Claude needs more information to proceed with these tasks
+          </p>
+          <div className="space-y-2">
+            {filteredDbTasks.filter(t => t.status === 'awaiting_clarification').map(task => (
+              <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} />
+            ))}
           </div>
         </div>
       )}
@@ -1370,7 +1632,7 @@ export default function TasksPage() {
           </p>
           <div className="space-y-2">
             {pendingInputTasks.slice(0, 5).map(task => (
-              <TaskCard key={task.id} task={task} />
+              <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} />
             ))}
             {pendingInputTasks.length > 5 && (
               <p className="text-gray-500 text-sm text-center pt-2">
@@ -1393,7 +1655,7 @@ export default function TasksPage() {
           </p>
           <div className="space-y-2">
             {readyToActionTasks.map(task => (
-              <TaskCard key={task.id} task={task} />
+              <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} />
             ))}
           </div>
         </div>
@@ -1411,7 +1673,7 @@ export default function TasksPage() {
           </p>
           <div className="space-y-2">
             {filteredDbTasks.filter(t => t.category === 'unsure').map(task => (
-              <TaskCard key={task.id} task={task} />
+              <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} />
             ))}
           </div>
         </div>
@@ -1444,6 +1706,7 @@ export default function TasksPage() {
               businessKey={key}
               business={business as any}
               dbTasks={allTasksGrouped}
+              onRefetch={refetch}
             />
           ))}
         </div>

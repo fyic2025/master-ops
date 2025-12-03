@@ -70,7 +70,8 @@ export async function PATCH(
       'status', 'instructions', 'source_file', 'needs_research',
       'plan_json', 'current_step', 'supervisor_summary',
       'supervisor_recommendation', 'repair_instruction',
-      'retry_count', 'next_action_after'
+      'retry_count', 'next_action_after',
+      'clarification_request', 'clarification_response'
     ]
 
     for (const field of allowedFields) {
@@ -102,6 +103,26 @@ export async function PATCH(
         source: body.updated_by || 'dashboard',
         status: 'info',
         message: `Status changed: ${currentTask.status} → ${body.status}`,
+      })
+    }
+
+    // Log clarification request
+    if (body.clarification_request) {
+      await supabase.from('task_logs').insert({
+        task_id: id,
+        source: body.updated_by || 'claude',
+        status: 'info',
+        message: `Clarification requested: ${body.clarification_request.slice(0, 200)}${body.clarification_request.length > 200 ? '...' : ''}`,
+      })
+    }
+
+    // Log clarification response
+    if (body.clarification_response) {
+      await supabase.from('task_logs').insert({
+        task_id: id,
+        source: body.updated_by || 'user',
+        status: 'info',
+        message: `Clarification provided: ${body.clarification_response.slice(0, 200)}${body.clarification_response.length > 200 ? '...' : ''}`,
       })
     }
 

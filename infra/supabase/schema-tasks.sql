@@ -56,8 +56,12 @@ CREATE TABLE IF NOT EXISTS tasks (
     needs_research BOOLEAN DEFAULT false,  -- True if task needs investigation before implementation
     created_by TEXT,  -- User who created the task (e.g., 'peter', 'claude_code', 'n8n')
 
+    -- Clarification workflow (for getting input from task creators)
+    clarification_request TEXT,  -- Question from Claude Code needing clarification
+    clarification_response TEXT,  -- Response from task creator to the clarification request
+
     -- Execution status
-    -- Values: 'pending', 'in_progress', 'failed', 'needs_fix', 'completed', 'cancelled', 'blocked'
+    -- Values: 'pending', 'pending_input', 'awaiting_clarification', 'scheduled', 'in_progress', 'failed', 'needs_fix', 'completed', 'cancelled', 'blocked'
     status TEXT NOT NULL DEFAULT 'pending',
 
     -- Task plan and progress
