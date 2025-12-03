@@ -19,7 +19,8 @@ import {
   RefreshCw,
   Database,
   MessageSquare,
-  Send
+  Send,
+  Archive
 } from 'lucide-react'
 import { getAllowedBusinesses, isAdmin } from '@/lib/user-permissions'
 
@@ -131,6 +132,7 @@ interface Task {
   created_by?: string // Who created the task (username or email prefix)
   clarification_request?: string // Question from Claude needing answer
   clarification_response?: string // Response from task creator
+  task_type?: 'one_off' | 'recurring' | 'ongoing' | null // Task type for filtering
 }
 
 // Skills mapping for each category
@@ -320,39 +322,24 @@ const SAMPLE_TASKS: Record<string, Task[]> = {
       id: 'dash-1',
       title: 'Enable task storage in database',
       description: 'Deploy the tasks schema to Supabase so tasks persist across sessions.',
-      status: 'pending',
+      status: 'completed',
       priority: 1,
       source: 'infra/supabase/schema-tasks.sql',
-      instructions: `## What this does
-Creates database tables (tasks, task_logs) to store tasks persistently.
-
-## Steps for Claude Code
-1. Read the schema: infra/supabase/schema-tasks.sql
-2. Deploy using: node infra/supabase/deploy-sql-direct.js
-3. Verify tables exist in Supabase dashboard
-4. Test by inserting a sample task via SQL
-
-## Why it matters
-Without this, all tasks are hardcoded in the UI. Once deployed, tasks can be created/edited from the dashboard.`
+      instructions: `## COMPLETED
+Schema deployed to teelixir-leads project (qcvfxxsnqvdfmpbcgdni).
+Tables created: tasks, task_logs
+Dashboard API connected and functional.`
     },
     {
       id: 'dash-2',
       title: 'Build task management API',
       description: 'Create REST API endpoints for CRUD operations on tasks.',
-      status: 'pending',
+      status: 'completed',
       priority: 2,
-      instructions: `## What this does
-Adds API routes to create, read, update, and delete tasks.
-
-## Steps for Claude Code
-1. Create dashboard/src/app/api/tasks/route.ts (GET list, POST create)
-2. Create dashboard/src/app/api/tasks/[id]/route.ts (PATCH update, DELETE)
-3. Use existing Supabase client from lib/supabase.ts
-4. Test each endpoint with curl or browser
-
-## Endpoints
-- GET /api/tasks - List all tasks (with filters)
-- POST /api/tasks - Create new task
+      instructions: `## COMPLETED
+API routes implemented:
+- GET /api/tasks - List all tasks with filters
+- POST /api/tasks - Create new task with logging
 - PATCH /api/tasks/:id - Update status/details
 - DELETE /api/tasks/:id - Remove task`
     },
@@ -1326,6 +1313,7 @@ async function fetchDbTasks(): Promise<Task[]> {
       created_by: t.created_by,
       clarification_request: t.clarification_request,
       clarification_response: t.clarification_response,
+      task_type: t.task_type,
     }))
   } catch {
     return []
@@ -1356,6 +1344,7 @@ export default function TasksPage() {
   const [showAddModal, setShowAddModal] = useState(false)
   const [priorityFilter, setPriorityFilter] = useState<number | null>(null)
   const [showAllBusiness, setShowAllBusiness] = useState(false)
+  const [showArchive, setShowArchive] = useState(false)
   const { data: session } = useSession()
 
   // DEV: Allow ?viewAs=peter@teelixir.com to test other user views
@@ -1411,6 +1400,16 @@ export default function TasksPage() {
 
   const allTasks = Object.values(allTasksGrouped).flat()
 
+  // Separate archived tasks (completed one-off tasks)
+  const archivedTasks = useMemo(() => {
+    return allTasks.filter(t => t.status === 'completed' && t.task_type === 'one_off')
+  }, [allTasks])
+
+  // Active tasks (excludes completed one-off tasks)
+  const activeTasks = useMemo(() => {
+    return allTasks.filter(t => !(t.status === 'completed' && t.task_type === 'one_off'))
+  }, [allTasks])
+
   // Filter TASK_FRAMEWORK by allowed businesses
   const filteredFramework = useMemo(() => {
     if (userIsAdmin) return TASK_FRAMEWORK
@@ -1423,11 +1422,11 @@ export default function TasksPage() {
     return filtered as typeof TASK_FRAMEWORK
   }, [allowedBusinesses, userIsAdmin])
 
-  // Priority counts
-  const p1Count = allTasks.filter(t => t.priority === 1 && t.status !== 'completed').length
-  const p2Count = allTasks.filter(t => t.priority === 2 && t.status !== 'completed').length
-  const p3Count = allTasks.filter(t => t.priority === 3 && t.status !== 'completed').length
-  const p4Count = allTasks.filter(t => t.priority === 4 && t.status !== 'completed').length
+  // Priority counts (excludes archived one-off tasks)
+  const p1Count = activeTasks.filter(t => t.priority === 1 && t.status !== 'completed').length
+  const p2Count = activeTasks.filter(t => t.priority === 2 && t.status !== 'completed').length
+  const p3Count = activeTasks.filter(t => t.priority === 3 && t.status !== 'completed').length
+  const p4Count = activeTasks.filter(t => t.priority === 4 && t.status !== 'completed').length
 
   // Tasks needing planning (pending_input status or new db tasks without a plan)
   const pendingInputTasks = useMemo(() => {
@@ -1439,7 +1438,7 @@ export default function TasksPage() {
 
   // Ready to action tasks (scheduled or pending with instructions, sorted by priority)
   const readyToActionTasks = useMemo(() => {
-    return allTasks
+    return activeTasks
       .filter(t =>
         t.status !== 'completed' &&
         t.status !== 'pending_input' &&
@@ -1448,19 +1447,19 @@ export default function TasksPage() {
       )
       .sort((a, b) => a.priority - b.priority)
       .slice(0, 5)
-  }, [allTasks])
+  }, [activeTasks])
 
-  // Filter tasks by priority when clicked
+  // Filter tasks by priority when clicked (excludes archived)
   const displayedTasks = useMemo(() => {
     if (!priorityFilter) return null
-    return allTasks
+    return activeTasks
       .filter(t => t.priority === priorityFilter && t.status !== 'completed')
       .sort((a, b) => {
         // Sort by status: in_progress first, then scheduled, then pending
         const statusOrder = { in_progress: 0, scheduled: 1, pending: 2, pending_input: 3, blocked: 4 }
         return (statusOrder[a.status as keyof typeof statusOrder] || 3) - (statusOrder[b.status as keyof typeof statusOrder] || 3)
       })
-  }, [allTasks, priorityFilter])
+  }, [activeTasks, priorityFilter])
 
   const handleTaskAdded = useCallback(() => {
     refetch()
@@ -1676,6 +1675,39 @@ export default function TasksPage() {
               <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} />
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Archive Section - Completed one-off tasks */}
+      {archivedTasks.length > 0 && (
+        <div className="bg-gray-800/30 border border-gray-700 rounded-lg">
+          <button
+            onClick={() => setShowArchive(!showArchive)}
+            className="w-full flex items-center justify-between p-4 hover:bg-gray-800/50 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <Archive className="w-5 h-5 text-gray-400" />
+              <span className="text-gray-300 font-medium">Archive</span>
+              <span className="text-xs bg-gray-600 text-gray-300 px-2 py-0.5 rounded">
+                {archivedTasks.length} completed
+              </span>
+            </div>
+            <div className="flex items-center gap-2 text-gray-500 text-sm">
+              <span>One-off tasks</span>
+              {showArchive ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+            </div>
+          </button>
+
+          {showArchive && (
+            <div className="p-4 pt-0 space-y-2 border-t border-gray-700">
+              <p className="text-xs text-gray-500 mb-3">
+                Completed setup tasks preserved for reference. These don't appear in active task counts.
+              </p>
+              {archivedTasks.map(task => (
+                <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} />
+              ))}
+            </div>
+          )}
         </div>
       )}
 
