@@ -1148,7 +1148,7 @@ export default function TasksPage() {
     if (userIsAdmin) return dbTasks
     return dbTasks.filter(t => {
       const taskBusiness = t.business || 'overall'
-      return allowedBusinesses.includes(taskBusiness)
+      return allowedBusinesses.includes(taskBusiness as any)
     })
   }, [dbTasks, allowedBusinesses, userIsAdmin])
 
@@ -1161,7 +1161,7 @@ export default function TasksPage() {
     const filtered: Record<string, Task[]> = {}
     for (const [key, tasks] of Object.entries(merged)) {
       const [business] = key.split('.')
-      if (allowedBusinesses.includes(business)) {
+      if (allowedBusinesses.includes(business as any)) {
         filtered[key] = tasks
       }
     }
@@ -1173,13 +1173,13 @@ export default function TasksPage() {
   // Filter TASK_FRAMEWORK by allowed businesses
   const filteredFramework = useMemo(() => {
     if (userIsAdmin) return TASK_FRAMEWORK
-    const filtered: typeof TASK_FRAMEWORK = {} as any
+    const filtered: Record<string, any> = {}
     for (const [key, value] of Object.entries(TASK_FRAMEWORK)) {
-      if (allowedBusinesses.includes(key)) {
-        filtered[key as keyof typeof TASK_FRAMEWORK] = value
+      if (allowedBusinesses.includes(key as any)) {
+        filtered[key] = value
       }
     }
-    return filtered
+    return filtered as typeof TASK_FRAMEWORK
   }, [allowedBusinesses, userIsAdmin])
 
   const pendingCount = allTasks.filter(t => t.status === 'pending').length
