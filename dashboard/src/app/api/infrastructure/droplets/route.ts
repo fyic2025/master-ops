@@ -127,11 +127,66 @@ async function fetchDOMetric(dropletId: string, metric: string): Promise<number 
   }
 }
 
+// Fetch CPU usage as percentage (requires calculating delta between idle/total)
+async function fetchCpuPercent(dropletId: string): Promise<number | null> {
+  if (!DO_TOKEN) return null
+
+  const now = Math.floor(Date.now() / 1000)
+  const fiveMinutesAgo = now - 300
+
+  try {
+    const response = await fetch(
+      `https://api.digitalocean.com/v2/monitoring/metrics/droplet/cpu?host_id=${dropletId}&start=${fiveMinutesAgo}&end=${now}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${DO_TOKEN}`,
+          'Content-Type': 'application/json',
+        },
+        cache: 'no-store',
+      }
+    )
+
+    if (!response.ok) return null
+
+    const data = await response.json()
+    const results = data.data?.result || []
+
+    // Find idle and total CPU time
+    let idleOld = 0, idleNew = 0
+    let totalOld = 0, totalNew = 0
+
+    for (const result of results) {
+      const values = result.values
+      if (!values || values.length < 2) continue
+
+      const oldVal = parseFloat(values[0][1])
+      const newVal = parseFloat(values[values.length - 1][1])
+
+      if (result.metric.mode === 'idle') {
+        idleOld = oldVal
+        idleNew = newVal
+      }
+      totalOld += oldVal
+      totalNew += newVal
+    }
+
+    const idleDelta = idleNew - idleOld
+    const totalDelta = totalNew - totalOld
+
+    if (totalDelta <= 0) return 0
+
+    const usedPercent = ((totalDelta - idleDelta) / totalDelta) * 100
+    return Math.max(0, Math.min(100, Math.round(usedPercent)))
+  } catch (error) {
+    return null
+  }
+}
+
 async function getMetricsFromDO(dropletId: string, memoryMb: number, diskGb: number): Promise<DropletMetrics | null> {
   try {
     // Fetch all metrics in parallel
-    const [cpuIdle, memFree, memTotal, diskFree, diskTotal, load1] = await Promise.all([
-      fetchDOMetric(dropletId, 'cpu'),           // CPU idle %
+    const [cpuPercent, memFree, memTotal, diskFree, diskTotal, load1] = await Promise.all([
+      fetchCpuPercent(dropletId),               // CPU usage %
       fetchDOMetric(dropletId, 'memory_free'),   // bytes
       fetchDOMetric(dropletId, 'memory_total'),  // bytes
       fetchDOMetric(dropletId, 'filesystem_free'), // bytes
@@ -150,11 +205,8 @@ async function getMetricsFromDO(dropletId: string, memoryMb: number, diskGb: num
     const diskUsedGb = diskTotal && diskFree ? Math.round((diskTotal - diskFree) / (1024 * 1024 * 1024)) : 0
     const diskPercent = diskTotalGb > 0 ? Math.round((diskUsedGb / diskTotalGb) * 100) : 0
 
-    // CPU: DO returns idle %, we want usage %
-    const cpuPercent = cpuIdle !== null ? Math.round(100 - cpuIdle) : 0
-
     return {
-      cpuPercent,
+      cpuPercent: cpuPercent ?? 0,
       memoryUsedMb: memUsedMb,
       memoryTotalMb: memTotalMb,
       memoryPercent: memPercent,
