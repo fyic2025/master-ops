@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server'
 import { exec } from 'child_process'
 import { promisify } from 'util'
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 const execAsync = promisify(exec)
 
 // DO API token from environment
