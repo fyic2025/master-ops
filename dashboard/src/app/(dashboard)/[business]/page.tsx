@@ -7,6 +7,7 @@ import ApiUsageWidget from '@/components/ApiUsageWidget'
 import { JobMonitoringWidget } from '@/components/JobMonitoringWidget'
 import AwsMigrationWidget from '@/components/AwsMigrationWidget'
 import { DispatchProblemsWidget } from '@/components/DispatchProblemsWidget'
+import { DropletCapacityWidget } from '@/components/DropletCapacityWidget'
 
 export default function BusinessDashboard({
   params,
@@ -86,10 +87,13 @@ function HomeDashboard() {
         </div>
       </section>
 
-      {/* AWS Migration Status */}
+      {/* Infrastructure */}
       <section>
-        <h2 className="text-xl font-semibold text-white mb-4">Infrastructure Migration</h2>
-        <AwsMigrationWidget />
+        <h2 className="text-xl font-semibold text-white mb-4">Infrastructure</h2>
+        <div className="space-y-4">
+          <DropletCapacityWidget />
+          <AwsMigrationWidget />
+        </div>
       </section>
 
       {/* API Usage */}
