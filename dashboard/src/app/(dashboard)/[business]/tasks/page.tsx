@@ -1498,11 +1498,16 @@ export default function TasksPage() {
         </div>
         <div className="flex gap-2">
           <button
-            onClick={() => refetch()}
-            className="flex items-center gap-2 px-3 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600"
+            onClick={() => {
+              console.log('Refresh clicked, refetching...')
+              refetch()
+            }}
+            disabled={isLoading}
+            className="flex items-center gap-2 px-3 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 disabled:opacity-50"
             title="Refresh tasks"
           >
             <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+            {isLoading && <span className="text-xs">Loading...</span>}
           </button>
           <button
             onClick={() => setShowAddModal(true)}
