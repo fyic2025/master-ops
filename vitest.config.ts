@@ -5,6 +5,14 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
+    exclude: [
+      'node_modules/**',
+      'buy-organics-online/theme*/**',
+      'buy-organics-online/live-theme*/**',
+      'archive/**',
+      'brand-connections/**',
+      'agents/**',
+    ],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],

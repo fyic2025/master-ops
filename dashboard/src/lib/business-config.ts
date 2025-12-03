@@ -22,6 +22,7 @@ import {
   Zap,
   Cloud,
   ClipboardList,
+  GitBranch,
   type LucideIcon
 } from 'lucide-react'
 
@@ -53,6 +54,7 @@ export const BUSINESSES: Record<BusinessCode, Business> = {
     navigation: [
       { name: 'Dashboard', href: '', icon: Home },
       { name: 'Tasks', href: '/tasks', icon: ClipboardList },
+      { name: 'CI/CD', href: '/cicd', icon: GitBranch },
       { name: 'Shipping', href: '/shipping', icon: Send },
       { name: 'PPC', href: '/ppc', icon: TrendingUp },
       { name: 'SEO', href: '/seo', icon: Search },

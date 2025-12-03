@@ -28,6 +28,12 @@
   ],
   "exclude": [
     "node_modules",
-    "dist"
+    "dist",
+    "archive",
+    "agents",
+    "brand-connections",
+    "buy-organics-online/theme*",
+    "buy-organics-online/live-theme*",
+    "**/supabase/functions/**"
   ]
 }
