@@ -21,8 +21,10 @@ import {
   Calendar,
   ChevronLeft,
   ChevronRight,
-  ListTodo
+  ListTodo,
+  Copy
 } from 'lucide-react'
+import { AutomationCopyButton } from '@/components/automations/CopyToClaudeButton'
 
 interface WinbackConfig {
   enabled: boolean
@@ -279,6 +281,12 @@ export default function WinbackPage() {
         </div>
 
         <div className="flex items-center gap-3">
+          {/* Copy to Claude Button */}
+          <AutomationCopyButton
+            automationType="winback_40"
+            business={business}
+          />
+
           {/* Refresh Button */}
           <button
             onClick={() => fetchData()}

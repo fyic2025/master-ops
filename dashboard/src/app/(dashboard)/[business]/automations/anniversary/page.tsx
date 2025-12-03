@@ -24,8 +24,10 @@ import {
   TrendingUp,
   Package,
   UserPlus,
-  ArrowRight
+  ArrowRight,
+  Copy
 } from 'lucide-react'
+import { AutomationCopyButton } from '@/components/automations/CopyToClaudeButton'
 
 interface AnniversaryConfig {
   enabled: boolean
@@ -248,6 +250,11 @@ export default function AnniversaryPage() {
         </div>
 
         <div className="flex items-center gap-3">
+          <AutomationCopyButton
+            automationType="anniversary_upsell"
+            business={business}
+          />
+
           <button
             onClick={() => fetchData()}
             disabled={loading}
