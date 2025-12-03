@@ -35,6 +35,7 @@ interface DropletMetrics {
 interface DropletInfo {
   id: string;
   name: string;
+  displayName: string;
   ip: string;
   vcpus: number;
   memoryMb: number;
@@ -202,7 +203,7 @@ export function DropletCapacityWidget() {
                     <div className={`w-2 h-2 rounded-full ${
                       droplet.status === 'active' ? 'bg-green-400' : 'bg-red-400'
                     }`} />
-                    <span className="text-white font-medium">{droplet.name}</span>
+                    <span className="text-white font-medium">{droplet.displayName}</span>
                     <span className="text-xs px-1.5 py-0.5 bg-gray-700 rounded text-gray-400">
                       {droplet.ip}
                     </span>
