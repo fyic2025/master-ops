@@ -157,7 +157,7 @@ async function getMetricsFromDO(dropletId: string, memoryMb: number, diskGb: num
       cpuPercent,
       memoryUsedMb: memUsedMb,
       memoryTotalMb: memTotalMb,
-      memoryPercent,
+      memoryPercent: memPercent,
       diskUsedGb,
       diskTotalGb,
       diskPercent,
