@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { AlertTriangle, Package, TrendingDown, RefreshCw, CheckCircle } from 'lucide-react'
+import { AlertTriangle, Package, TrendingDown, RefreshCw, CheckCircle, Copy, Check } from 'lucide-react'
 
 interface ProblemProduct {
   id: number
@@ -31,6 +31,15 @@ export function DispatchProblemsWidget() {
   const [summary, setSummary] = useState<Summary | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [copiedSku, setCopiedSku] = useState<string | null>(null)
+
+  const copyToClipboard = async (sku: string) => {
+    // Extract just the SKU code (after the " - ")
+    const skuCode = sku?.split(' - ')[1] || sku
+    await navigator.clipboard.writeText(skuCode)
+    setCopiedSku(sku)
+    setTimeout(() => setCopiedSku(null), 2000)
+  }
 
   const fetchData = async () => {
     setLoading(true)
@@ -162,30 +171,42 @@ export function DispatchProblemsWidget() {
             <tr className="text-left text-gray-400 border-b border-gray-800">
               <th className="pb-2 font-medium">SKU</th>
               <th className="pb-2 font-medium">Product</th>
-              <th className="pb-2 font-medium text-right">Keep in Stock</th>
-              <th className="pb-2 font-medium text-right">Orders/Wk</th>
+              <th className="pb-2 font-medium">Supplier</th>
+              <th className="pb-2 font-medium text-right">Stock</th>
               <th className="pb-2 font-medium text-center">Done</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-800/50">
             {products.slice(0, 10).map((product) => (
               <tr key={product.id} className="hover:bg-gray-800/30">
-                <td className="py-2 text-gray-300 font-mono text-xs">
-                  {product.sku?.split(' - ')[1] || product.sku}
+                <td className="py-2">
+                  <button
+                    onClick={() => copyToClipboard(product.sku)}
+                    className="flex items-center gap-1 text-gray-300 font-mono text-xs hover:text-white group"
+                    title="Click to copy SKU"
+                  >
+                    {product.sku?.split(' - ')[1] || product.sku}
+                    {copiedSku === product.sku ? (
+                      <Check className="w-3 h-3 text-green-400" />
+                    ) : (
+                      <Copy className="w-3 h-3 text-gray-500 opacity-0 group-hover:opacity-100" />
+                    )}
+                  </button>
                 </td>
-                <td className="py-2 text-white max-w-[200px] truncate" title={product.product_name}>
-                  {product.product_name.length > 35
-                    ? product.product_name.substring(0, 35) + '...'
-                    : product.product_name}
+                <td className="py-2 text-white max-w-[280px]" title={product.product_name}>
+                  <span className="block truncate">
+                    {product.product_name.length > 50
+                      ? product.product_name.substring(0, 50) + '...'
+                      : product.product_name}
+                  </span>
+                </td>
+                <td className="py-2 text-gray-400 text-xs">
+                  {product.supplier_name?.replace(' Health Supplies', '').replace('Unknown/', '')}
                 </td>
                 <td className="py-2 text-right">
                   <span className="text-lg font-bold text-green-400">
                     {product.recommended_stock}
                   </span>
-                  <span className="text-gray-500 text-xs ml-1">units</span>
-                </td>
-                <td className="py-2 text-right text-gray-300">
-                  {product.orders_per_week}
                 </td>
                 <td className="py-2 text-center">
                   <button
