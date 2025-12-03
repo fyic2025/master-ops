@@ -116,14 +116,16 @@ interface Task {
   id: string
   title: string
   description?: string
-  status: 'pending' | 'in_progress' | 'completed' | 'blocked'
+  status: 'pending_input' | 'scheduled' | 'in_progress' | 'completed' | 'blocked' | 'pending'
   priority: 1 | 2 | 3 | 4
   instructions?: string
+  plan?: string // Claude's detailed implementation plan
   needsResearch?: boolean
   source?: string
   business?: string
   category?: string
   fromDb?: boolean
+  created_at?: string
 }
 
 // Skills mapping for each category
@@ -598,6 +600,8 @@ function getStatusIcon(status: Task['status']) {
     case 'completed': return <CheckCircle className="w-4 h-4 text-green-500" />
     case 'in_progress': return <Clock className="w-4 h-4 text-blue-500" />
     case 'blocked': return <AlertCircle className="w-4 h-4 text-red-500" />
+    case 'scheduled': return <Circle className="w-4 h-4 text-purple-500" />
+    case 'pending_input': return <Circle className="w-4 h-4 text-yellow-500" />
     default: return <Circle className="w-4 h-4 text-gray-500" />
   }
 }
@@ -617,15 +621,25 @@ function getPriorityBadge(priority: number) {
 }
 
 function getStatusBadge(status: Task['status']) {
-  const config = {
+  const config: Record<string, string> = {
     pending: 'bg-gray-500/20 text-gray-400',
+    pending_input: 'bg-yellow-500/20 text-yellow-400',
+    scheduled: 'bg-purple-500/20 text-purple-400',
     in_progress: 'bg-blue-500/20 text-blue-400',
     completed: 'bg-green-500/20 text-green-400',
     blocked: 'bg-red-500/20 text-red-400',
   }
+  const labels: Record<string, string> = {
+    pending: 'pending',
+    pending_input: 'needs planning',
+    scheduled: 'ready',
+    in_progress: 'in progress',
+    completed: 'completed',
+    blocked: 'blocked',
+  }
   return (
-    <span className={`text-xs px-1.5 py-0.5 rounded ${config[status]}`}>
-      {status.replace('_', ' ')}
+    <span className={`text-xs px-1.5 py-0.5 rounded ${config[status] || config.pending}`}>
+      {labels[status] || status.replace('_', ' ')}
     </span>
   )
 }
@@ -902,7 +916,7 @@ function AddTaskModal({
           business,
           category,
           priority,
-          status: 'pending',
+          status: 'pending_input', // New tasks await Claude planning
           created_by: userEmail?.split('@')[0] || 'dashboard'
         }),
       })
@@ -1115,6 +1129,8 @@ function mergeTasksWithDb(dbTasks: Task[]): Record<string, Task[]> {
 export default function TasksPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [showAddModal, setShowAddModal] = useState(false)
+  const [priorityFilter, setPriorityFilter] = useState<number | null>(null)
+  const [showAllBusiness, setShowAllBusiness] = useState(false)
   const { data: session } = useSession()
 
   // DEV: Allow ?viewAs=peter@teelixir.com to test other user views
@@ -1182,11 +1198,44 @@ export default function TasksPage() {
     return filtered as typeof TASK_FRAMEWORK
   }, [allowedBusinesses, userIsAdmin])
 
-  const pendingCount = allTasks.filter(t => t.status === 'pending').length
-  const inProgressCount = allTasks.filter(t => t.status === 'in_progress').length
-  const blockedCount = allTasks.filter(t => t.status === 'blocked').length
-  const completedCount = allTasks.filter(t => t.status === 'completed').length
-  const dbTaskCount = filteredDbTasks.length
+  // Priority counts
+  const p1Count = allTasks.filter(t => t.priority === 1 && t.status !== 'completed').length
+  const p2Count = allTasks.filter(t => t.priority === 2 && t.status !== 'completed').length
+  const p3Count = allTasks.filter(t => t.priority === 3 && t.status !== 'completed').length
+  const p4Count = allTasks.filter(t => t.priority === 4 && t.status !== 'completed').length
+
+  // Tasks needing planning (pending_input status or new db tasks without a plan)
+  const pendingInputTasks = useMemo(() => {
+    return filteredDbTasks.filter(t =>
+      t.status === 'pending_input' ||
+      (t.status === 'pending' && !t.instructions && t.fromDb)
+    ).sort((a, b) => a.priority - b.priority)
+  }, [filteredDbTasks])
+
+  // Ready to action tasks (scheduled or pending with instructions, sorted by priority)
+  const readyToActionTasks = useMemo(() => {
+    return allTasks
+      .filter(t =>
+        t.status !== 'completed' &&
+        t.status !== 'pending_input' &&
+        t.status !== 'blocked' &&
+        (t.instructions || t.status === 'scheduled')
+      )
+      .sort((a, b) => a.priority - b.priority)
+      .slice(0, 5)
+  }, [allTasks])
+
+  // Filter tasks by priority when clicked
+  const displayedTasks = useMemo(() => {
+    if (!priorityFilter) return null
+    return allTasks
+      .filter(t => t.priority === priorityFilter && t.status !== 'completed')
+      .sort((a, b) => {
+        // Sort by status: in_progress first, then scheduled, then pending
+        const statusOrder = { in_progress: 0, scheduled: 1, pending: 2, pending_input: 3, blocked: 4 }
+        return (statusOrder[a.status as keyof typeof statusOrder] || 3) - (statusOrder[b.status as keyof typeof statusOrder] || 3)
+      })
+  }, [allTasks, priorityFilter])
 
   const handleTaskAdded = useCallback(() => {
     refetch()
@@ -1201,7 +1250,7 @@ export default function TasksPage() {
             Task Framework
           </h1>
           <p className="text-gray-400 mt-1">
-            Cross-business task management and priorities
+            Priority-driven task management
           </p>
         </div>
         <div className="flex gap-2">
@@ -1225,69 +1274,140 @@ export default function TasksPage() {
       {error && (
         <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4 text-yellow-400 text-sm">
           <strong>Note:</strong> Could not load tasks from database. Showing hardcoded tasks only.
-          {' '}Run the SQL schema in Supabase to enable task storage.
         </div>
       )}
 
-      <div className="grid grid-cols-6 gap-4">
+      {/* Priority Stats - Clickable to filter */}
+      <div className="grid grid-cols-4 gap-4">
+        <button
+          onClick={() => setPriorityFilter(priorityFilter === 1 ? null : 1)}
+          className={`bg-gray-900 border rounded-lg p-4 text-left transition-all hover:border-red-500/50 ${
+            priorityFilter === 1 ? 'border-red-500 ring-2 ring-red-500/20' : 'border-gray-800'
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <p className="text-red-400 text-sm font-medium">P1 Critical</p>
+            <span className="text-xs bg-red-500/20 text-red-400 px-2 py-0.5 rounded">urgent</span>
+          </div>
+          <p className="text-3xl font-bold text-red-400 mt-1">{p1Count}</p>
+          <p className="text-xs text-gray-500 mt-1">Click to view</p>
+        </button>
+        <button
+          onClick={() => setPriorityFilter(priorityFilter === 2 ? null : 2)}
+          className={`bg-gray-900 border rounded-lg p-4 text-left transition-all hover:border-orange-500/50 ${
+            priorityFilter === 2 ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-800'
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <p className="text-orange-400 text-sm font-medium">P2 High</p>
+            <span className="text-xs bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded">this week</span>
+          </div>
+          <p className="text-3xl font-bold text-orange-400 mt-1">{p2Count}</p>
+          <p className="text-xs text-gray-500 mt-1">Click to view</p>
+        </button>
+        <button
+          onClick={() => setPriorityFilter(priorityFilter === 3 ? null : 3)}
+          className={`bg-gray-900 border rounded-lg p-4 text-left transition-all hover:border-yellow-500/50 ${
+            priorityFilter === 3 ? 'border-yellow-500 ring-2 ring-yellow-500/20' : 'border-gray-800'
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <p className="text-yellow-400 text-sm font-medium">P3 Medium</p>
+            <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded">soon</span>
+          </div>
+          <p className="text-3xl font-bold text-yellow-400 mt-1">{p3Count}</p>
+          <p className="text-xs text-gray-500 mt-1">Click to view</p>
+        </button>
+        <button
+          onClick={() => setPriorityFilter(priorityFilter === 4 ? null : 4)}
+          className={`bg-gray-900 border rounded-lg p-4 text-left transition-all hover:border-gray-500/50 ${
+            priorityFilter === 4 ? 'border-gray-500 ring-2 ring-gray-500/20' : 'border-gray-800'
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <p className="text-gray-400 text-sm font-medium">P4 Low</p>
+            <span className="text-xs bg-gray-500/20 text-gray-400 px-2 py-0.5 rounded">backlog</span>
+          </div>
+          <p className="text-3xl font-bold text-gray-400 mt-1">{p4Count}</p>
+          <p className="text-xs text-gray-500 mt-1">Click to view</p>
+        </button>
+      </div>
+
+      {/* Priority Filter Results */}
+      {priorityFilter && displayedTasks && (
         <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
-          <p className="text-gray-400 text-sm">Total</p>
-          <p className="text-2xl font-bold text-white">{allTasks.length}</p>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-white font-medium">
+              P{priorityFilter} Tasks ({displayedTasks.length})
+            </h3>
+            <button
+              onClick={() => setPriorityFilter(null)}
+              className="text-gray-400 hover:text-white text-sm flex items-center gap-1"
+            >
+              <X className="w-4 h-4" /> Close
+            </button>
+          </div>
+          <div className="space-y-2">
+            {displayedTasks.map(task => (
+              <TaskCard key={task.id} task={task} />
+            ))}
+            {displayedTasks.length === 0 && (
+              <p className="text-gray-500 text-sm">No P{priorityFilter} tasks</p>
+            )}
+          </div>
         </div>
-        <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
-          <p className="text-gray-400 text-sm">Pending</p>
-          <p className="text-2xl font-bold text-gray-400">{pendingCount}</p>
-        </div>
-        <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
-          <p className="text-gray-400 text-sm">In Progress</p>
-          <p className="text-2xl font-bold text-blue-400">{inProgressCount}</p>
-        </div>
-        <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
-          <p className="text-gray-400 text-sm">Blocked</p>
-          <p className="text-2xl font-bold text-red-400">{blockedCount}</p>
-        </div>
-        <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
-          <p className="text-gray-400 text-sm">Completed</p>
-          <p className="text-2xl font-bold text-green-400">{completedCount}</p>
-        </div>
-        <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
-          <p className="text-gray-400 text-sm flex items-center gap-1">
-            <Database className="w-3 h-3" /> Saved
+      )}
+
+      {/* Pending Input Section - New tasks awaiting planning */}
+      {pendingInputTasks.length > 0 && (
+        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
+          <h3 className="text-yellow-400 font-medium mb-2 flex items-center gap-2">
+            <Lightbulb className="w-5 h-5" />
+            Awaiting Planning ({pendingInputTasks.length})
+          </h3>
+          <p className="text-sm text-gray-400 mb-3">
+            Copy to Claude Code to create a detailed implementation plan, then update the task
           </p>
-          <p className="text-2xl font-bold text-purple-400">{dbTaskCount}</p>
+          <div className="space-y-2">
+            {pendingInputTasks.slice(0, 5).map(task => (
+              <TaskCard key={task.id} task={task} />
+            ))}
+            {pendingInputTasks.length > 5 && (
+              <p className="text-gray-500 text-sm text-center pt-2">
+                +{pendingInputTasks.length - 5} more tasks need planning
+              </p>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-        <input
-          type="text"
-          placeholder="Search tasks..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
-        />
-      </div>
-
-      <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
-        <h3 className="text-blue-400 font-medium mb-2">How to use</h3>
-        <ol className="text-sm text-gray-300 space-y-1 list-decimal list-inside">
-          <li><strong>Add Task</strong> - saves task to database for Peter and Claude Code to see</li>
-          <li><strong>Copy for Claude</strong> - copies task instructions to paste into Claude Code</li>
-          <li><strong>Research this</strong> - for unclear tasks, copies a research prompt</li>
-          <li><strong>View details</strong> - shows step-by-step instructions</li>
-        </ol>
-      </div>
+      {/* Ready to Action Section - Top 5 highest priority tasks */}
+      {readyToActionTasks.length > 0 && !priorityFilter && (
+        <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4">
+          <h3 className="text-purple-400 font-medium mb-2 flex items-center gap-2">
+            <CheckCircle className="w-5 h-5" />
+            Ready to Action (Top 5)
+          </h3>
+          <p className="text-sm text-gray-400 mb-3">
+            Highest priority tasks with plans ready to execute
+          </p>
+          <div className="space-y-2">
+            {readyToActionTasks.map(task => (
+              <TaskCard key={task.id} task={task} />
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Needs Triage Section - tasks with "unsure" category */}
       {filteredDbTasks.filter(t => t.category === 'unsure').length > 0 && (
-        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
-          <h3 className="text-yellow-400 font-medium mb-3 flex items-center gap-2">
+        <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-4">
+          <h3 className="text-orange-400 font-medium mb-3 flex items-center gap-2">
             <AlertCircle className="w-5 h-5" />
             Needs Triage ({filteredDbTasks.filter(t => t.category === 'unsure').length})
           </h3>
           <p className="text-sm text-gray-400 mb-3">
-            These tasks need to be assigned to a category by Claude Code
+            These tasks need to be assigned to a business/category
           </p>
           <div className="space-y-2">
             {filteredDbTasks.filter(t => t.category === 'unsure').map(task => (
@@ -1297,16 +1417,37 @@ export default function TasksPage() {
         </div>
       )}
 
-      <div className="space-y-4">
-        {Object.entries(filteredFramework).map(([key, business]) => (
-          <BusinessSection
-            key={key}
-            businessKey={key}
-            business={business as any}
-            dbTasks={allTasksGrouped}
-          />
-        ))}
+      {/* Show All Business Tasks Toggle */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-white">All Tasks by Business</h2>
+        <button
+          onClick={() => setShowAllBusiness(!showAllBusiness)}
+          className="text-sm text-gray-400 hover:text-white flex items-center gap-1"
+        >
+          {showAllBusiness ? (
+            <>
+              <ChevronDown className="w-4 h-4" /> Hide business breakdown
+            </>
+          ) : (
+            <>
+              <ChevronRight className="w-4 h-4" /> Show business breakdown
+            </>
+          )}
+        </button>
       </div>
+
+      {showAllBusiness && (
+        <div className="space-y-4">
+          {Object.entries(filteredFramework).map(([key, business]) => (
+            <BusinessSection
+              key={key}
+              businessKey={key}
+              business={business as any}
+              dbTasks={allTasksGrouped}
+            />
+          ))}
+        </div>
+      )}
 
       <AddTaskModal
         isOpen={showAddModal}
