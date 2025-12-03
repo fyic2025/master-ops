@@ -1,4 +1,4 @@
-// Nav config v2025-12-02T10:00
+// Nav config v2025-12-03T10:00
 import {
   Home,
   TrendingUp,
@@ -21,6 +21,7 @@ import {
   Send,
   Zap,
   Cloud,
+  ClipboardList,
   type LucideIcon
 } from 'lucide-react'
 
@@ -51,6 +52,7 @@ export const BUSINESSES: Record<BusinessCode, Business> = {
     bgColor: 'bg-gray-500',
     navigation: [
       { name: 'Dashboard', href: '', icon: Home },
+      { name: 'Tasks', href: '/tasks', icon: ClipboardList },
       { name: 'Shipping', href: '/shipping', icon: Send },
       { name: 'PPC', href: '/ppc', icon: TrendingUp },
       { name: 'SEO', href: '/seo', icon: Search },

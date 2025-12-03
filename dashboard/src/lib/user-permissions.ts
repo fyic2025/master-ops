@@ -37,8 +37,8 @@ export const USER_PERMISSIONS: UserPermissions[] = [
   },
   {
     email: 'peter@teelixir.com',
-    role: 'admin',
-    businesses: 'all',
+    role: 'operations',
+    businesses: ['home', 'teelixir', 'elevate', 'brandco'],
     allowedPages: 'all',
   },
   {

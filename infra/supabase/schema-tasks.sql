@@ -47,8 +47,17 @@ CREATE TABLE IF NOT EXISTS tasks (
     title TEXT NOT NULL,
     description TEXT,
 
+    -- Dashboard organization (for UI grouping)
+    business TEXT,  -- 'teelixir', 'boo', 'elevate', 'rhf', 'overall'
+    category TEXT,  -- 'automations', 'seo', 'inventory', 'email', 'googleAds', 'analytics', etc.
+    priority INTEGER DEFAULT 2,  -- 1=Urgent, 2=Important, 3=Normal, 4=Backlog
+    instructions TEXT,  -- Detailed instructions for Claude Code
+    source_file TEXT,  -- File reference where task was found (e.g., 'buy-organics-online/TODO.md')
+    needs_research BOOLEAN DEFAULT false,  -- True if task needs investigation before implementation
+    created_by TEXT,  -- User who created the task (e.g., 'peter', 'claude_code', 'n8n')
+
     -- Execution status
-    -- Values: 'pending', 'in_progress', 'failed', 'needs_fix', 'completed', 'cancelled'
+    -- Values: 'pending', 'in_progress', 'failed', 'needs_fix', 'completed', 'cancelled', 'blocked'
     status TEXT NOT NULL DEFAULT 'pending',
 
     -- Task plan and progress
@@ -73,6 +82,10 @@ CREATE TABLE IF NOT EXISTS tasks (
 CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
 CREATE INDEX IF NOT EXISTS idx_tasks_next_action ON tasks(next_action_after) WHERE next_action_after IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_tasks_created_at ON tasks(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_tasks_business ON tasks(business);
+CREATE INDEX IF NOT EXISTS idx_tasks_category ON tasks(category);
+CREATE INDEX IF NOT EXISTS idx_tasks_priority ON tasks(priority);
+CREATE INDEX IF NOT EXISTS idx_tasks_business_category ON tasks(business, category);
 
 -- Add trigger to auto-update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -197,7 +210,14 @@ CREATE OR REPLACE FUNCTION create_task_with_log(
   p_title TEXT,
   p_description TEXT DEFAULT NULL,
   p_plan_json JSONB DEFAULT NULL,
-  p_source TEXT DEFAULT 'system'
+  p_source TEXT DEFAULT 'system',
+  p_business TEXT DEFAULT NULL,
+  p_category TEXT DEFAULT NULL,
+  p_priority INTEGER DEFAULT 2,
+  p_instructions TEXT DEFAULT NULL,
+  p_source_file TEXT DEFAULT NULL,
+  p_needs_research BOOLEAN DEFAULT false,
+  p_created_by TEXT DEFAULT 'system'
 )
 RETURNS TABLE(task_id UUID, log_id UUID)
 LANGUAGE plpgsql
@@ -208,8 +228,14 @@ DECLARE
   v_log_id UUID;
 BEGIN
   -- Insert task
-  INSERT INTO tasks (title, description, plan_json, status)
-  VALUES (p_title, p_description, p_plan_json, 'pending')
+  INSERT INTO tasks (
+    title, description, plan_json, status,
+    business, category, priority, instructions, source_file, needs_research, created_by
+  )
+  VALUES (
+    p_title, p_description, p_plan_json, 'pending',
+    p_business, p_category, p_priority, p_instructions, p_source_file, p_needs_research, p_created_by
+  )
   RETURNING id INTO v_task_id;
 
   -- Log the creation
