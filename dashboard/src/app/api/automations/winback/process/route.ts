@@ -1,5 +1,142 @@
 import { NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
+import https from 'https'
+import crypto from 'crypto'
+
+// Vault configuration
+const VAULT_CONFIG = {
+  host: 'usibnysqelovfuctmkqw.supabase.co',
+  serviceKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzaWJueXNxZWxvdmZ1Y3Rta3F3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDQ4ODA4OCwiZXhwIjoyMDY2MDY0MDg4fQ.B9uihsaUvwkJWFAuKAtu7uij1KiXVoiHPHa9mm-Tz1s',
+  encryptionKey: 'mstr-ops-vault-2024-secure-key'
+}
+
+function decryptVaultValue(encryptedValue: string): string | null {
+  try {
+    const buffer = Buffer.from(encryptedValue, 'base64')
+    const iv = buffer.subarray(0, 16)
+    const encrypted = buffer.subarray(16)
+    const key = crypto.createHash('sha256').update(VAULT_CONFIG.encryptionKey).digest()
+    const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv)
+    let decrypted = decipher.update(encrypted)
+    decrypted = Buffer.concat([decrypted, decipher.final()])
+    return decrypted.toString('utf8')
+  } catch (e) {
+    return null
+  }
+}
+
+function fetchVaultCred(name: string): Promise<string | null> {
+  return new Promise((resolve) => {
+    const options = {
+      hostname: VAULT_CONFIG.host,
+      port: 443,
+      path: `/rest/v1/secure_credentials?project=eq.teelixir&name=eq.${name}&select=encrypted_value`,
+      method: 'GET',
+      headers: {
+        'apikey': VAULT_CONFIG.serviceKey,
+        'Authorization': `Bearer ${VAULT_CONFIG.serviceKey}`,
+      }
+    }
+    const req = https.request(options, (res) => {
+      let data = ''
+      res.on('data', (chunk) => data += chunk)
+      res.on('end', () => {
+        try {
+          const rows = JSON.parse(data)
+          if (rows.length > 0 && rows[0].encrypted_value) {
+            resolve(decryptVaultValue(rows[0].encrypted_value))
+          } else {
+            resolve(null)
+          }
+        } catch (e) {
+          resolve(null)
+        }
+      })
+    })
+    req.on('error', () => resolve(null))
+    req.end()
+  })
+}
+
+async function getGmailCredentials(): Promise<{ clientId: string; clientSecret: string; refreshToken: string } | null> {
+  const [clientId, clientSecret, refreshToken] = await Promise.all([
+    fetchVaultCred('gmail_client_id'),
+    fetchVaultCred('gmail_client_secret'),
+    fetchVaultCred('gmail_refresh_token')
+  ])
+  if (clientId && clientSecret && refreshToken) {
+    return { clientId, clientSecret, refreshToken }
+  }
+  return null
+}
+
+async function sendGmailEmail(
+  creds: { clientId: string; clientSecret: string; refreshToken: string },
+  to: string,
+  from: string,
+  fromName: string,
+  subject: string,
+  html: string
+): Promise<{ success: boolean; messageId?: string; error?: string }> {
+  try {
+    const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_id: creds.clientId,
+        client_secret: creds.clientSecret,
+        refresh_token: creds.refreshToken,
+        grant_type: 'refresh_token',
+      }),
+    })
+    if (!tokenResponse.ok) {
+      return { success: false, error: 'Token refresh failed' }
+    }
+    const tokenData = await tokenResponse.json()
+    const accessToken = tokenData.access_token
+
+    // Build MIME message
+    const boundary = `boundary_${Date.now()}`
+    const mimeMessage = [
+      `From: ${fromName} <${from}>`,
+      `To: ${to}`,
+      `Subject: ${subject}`,
+      'MIME-Version: 1.0',
+      `Content-Type: multipart/alternative; boundary="${boundary}"`,
+      '',
+      `--${boundary}`,
+      'Content-Type: text/html; charset="UTF-8"',
+      '',
+      html,
+      `--${boundary}--`,
+    ].join('\r\n')
+
+    const encodedMessage = Buffer.from(mimeMessage)
+      .toString('base64')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '')
+
+    const sendResponse = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ raw: encodedMessage }),
+    })
+
+    if (!sendResponse.ok) {
+      const errorBody = await sendResponse.text()
+      return { success: false, error: `Gmail API error: ${errorBody}` }
+    }
+
+    const result = await sendResponse.json()
+    return { success: true, messageId: result.id }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+}
 
 // Process queue for current hour - called by n8n hourly
 export async function POST() {
@@ -97,20 +234,23 @@ export async function POST() {
 </body>
 </html>`
 
-        // Send via GSuite API
-        const response = await fetch(`${baseUrl}/api/email/send`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            to: item.email,
-            from: config.sender_email || 'colette@teelixir.com',
-            fromName: config.sender_name || 'Colette from Teelixir',
-            subject: config.subject_template?.replace('{first_name}', firstName) || `${firstName}, we miss you! Here's ${discountPercent}% off`,
-            html: emailHtml
-          })
-        })
+        // Get Gmail credentials from vault (cached per request)
+        const gmailCreds = await getGmailCredentials()
+        if (!gmailCreds) {
+          throw new Error('Gmail credentials not available')
+        }
 
-        if (response.ok) {
+        // Send via Gmail API directly
+        const result = await sendGmailEmail(
+          gmailCreds,
+          item.email,
+          config.sender_email || 'colette@teelixir.com',
+          config.sender_name || 'Colette from Teelixir',
+          config.subject_template?.replace('{first_name}', firstName) || `${firstName}, we miss you! Here's ${discountPercent}% off`,
+          emailHtml
+        )
+
+        if (result.success) {
           // Update queue status to sent
           await supabase
             .from('tlx_winback_queue')
@@ -131,8 +271,7 @@ export async function POST() {
 
           results.sent++
         } else {
-          const errorData = await response.json().catch(() => ({}))
-          throw new Error(errorData.error || 'Email send failed')
+          throw new Error(result.error || 'Email send failed')
         }
       } catch (err: any) {
         console.error(`Failed to send to ${item.email}:`, err.message)

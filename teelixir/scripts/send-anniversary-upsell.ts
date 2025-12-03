@@ -391,7 +391,7 @@ function generateUpsellEmailHtml(
 
   // Build shop URL - if upsell available, link to that product
   const productHandle = upsellData.upsell?.product_handle || upsellData.original.product_handle
-  const targetUrl = `https://teelixir.com.au/products/${productHandle}?utm_source=anniversary&utm_campaign=upsell15&utm_medium=email`
+  const targetUrl = `https://teelixir.com.au/products/${productHandle}?discount=${discountCode}&utm_source=anniversary&utm_campaign=upsell15&utm_medium=email`
   const encodedTargetUrl = Buffer.from(targetUrl).toString('base64')
 
   const openTrackUrl = `${TRACKING_BASE_URL}/api/track/open?id=${encodedEmail}&t=anniversary`
@@ -417,110 +417,245 @@ function generateUpsellEmailHtml(
   }
 
   const savingsText = upsellData.savingsPercent
-    ? `Save ${Math.round(upsellData.savingsPercent)}% per ${unitShort}!`
+    ? `Save ${Math.round(upsellData.savingsPercent)}% per ${unitShort}`
     : ''
+
+  // Correct Teelixir logo URLs
+  const logoWhite = 'https://teelixir.com.au/cdn/shop/files/teelixir_white_1.png?v=1708180588'
+  const logoBlack = 'https://teelixir.com.au/cdn/shop/files/teelixir_black.png?v=1708180698'
+
+  // Preheader text - Second purchase / upgrade focused
+  const preheader = `${firstName}, ready to level up your ${orig.product_type}? Get ${discountPercent}% off the smarter size. Code: ${discountCode}`
 
   return `
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="x-apple-disable-message-reformatting">
   <title>Time to upgrade your ${orig.product_type}!</title>
+  <!--[if mso]>
+  <style type="text/css">
+    table { border-collapse: collapse; }
+    td { font-family: Arial, sans-serif; }
+  </style>
+  <![endif]-->
+  <style type="text/css">
+    /* Responsive styles */
+    @media only screen and (max-width: 820px) {
+      .email-container { width: 100% !important; max-width: 100% !important; }
+      .stack-column { display: block !important; width: 100% !important; max-width: 100% !important; }
+      .responsive-padding { padding-left: 20px !important; padding-right: 20px !important; }
+      .product-card { width: 48% !important; }
+    }
+    @media only screen and (max-width: 480px) {
+      .product-card { width: 100% !important; display: block !important; margin-bottom: 15px !important; }
+      h1 { font-size: 26px !important; }
+    }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; background-color: #f5f5f5;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 20px;">
+<body style="margin: 0; padding: 0; font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #ffffff; -webkit-text-size-adjust: 100%;">
+  <!-- Preheader -->
+  <div style="display: none; max-height: 0; overflow: hidden; mso-hide: all;">
+    ${preheader}
+    &zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;
+  </div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff;">
     <tr>
-      <td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden;">
-          <!-- Header -->
+      <td align="center" style="padding: 0 10px;">
+        <!--[if mso]>
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="800"><tr><td>
+        <![endif]-->
+        <table role="presentation" class="email-container" width="800" cellpadding="0" cellspacing="0" style="max-width: 800px; width: 100%;">
+
+          <!-- Logo Header - Clean White -->
           <tr>
-            <td style="background-color: #2c5530; padding: 30px; text-align: center;">
-              <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Teelixir</h1>
+            <td style="padding: 30px 40px 20px; text-align: center;">
+              <a href="https://teelixir.com.au?utm_source=anniversary&utm_campaign=upsell15" style="text-decoration: none;">
+                <img src="${logoBlack}" alt="Teelixir" width="180" style="max-width: 180px; height: auto; border: 0;">
+              </a>
             </td>
           </tr>
 
-          <!-- Content -->
+          <!-- Hero Section - Ready for More -->
           <tr>
-            <td style="padding: 40px 30px;">
-              <p style="font-size: 18px; color: #333; margin: 0 0 20px;">Hi ${firstName},</p>
+            <td style="padding: 10px 40px 20px;">
+              <p style="font-size: 13px; color: #C4A052; margin: 0 0 8px; text-transform: uppercase; letter-spacing: 2px; font-weight: 600;">Ready to Level Up?</p>
+              <h1 style="font-family: Georgia, 'Times New Roman', serif; font-size: 32px; color: #1a1a1a; margin: 0; font-weight: 400; line-height: 1.2;">
+                ${firstName}, you made a great choice
+              </h1>
+            </td>
+          </tr>
 
-              <p style="font-size: 16px; color: #555; line-height: 1.6; margin: 0 0 20px;">
-                Ready to restock your ${orig.product_type}? Here's why customers love upgrading to the larger size:
+          <!-- Thank You + Smart Upgrade Value Proposition -->
+          <tr>
+            <td style="padding: 0 40px 30px;">
+              <p style="font-size: 16px; color: #444; line-height: 1.8; margin: 0 0 16px;">
+                Thank you for trying <strong style="color: #1a1a1a;">${orig.product_type}</strong> - it means so much that you trusted us with your wellness journey. I hope you're already feeling the difference!
               </p>
+              <p style="font-size: 16px; color: #444; line-height: 1.8; margin: 0;">
+                Here's what our most committed customers do: <strong style="color: #1a1a1a;">they upgrade to a larger size</strong>.
+                Not just for the savings (though you'll love those!) - but because with adaptogens, <strong style="color: #1a1a1a;">consistency is everything</strong>.
+                The bigger size means you'll never run out mid-journey:
+              </p>
+            </td>
+          </tr>
 
-              <!-- Product Comparison -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
+          <!-- Product Comparison - More Visual -->
+          <tr>
+            <td style="padding: 0 30px 35px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td width="50%" style="padding: 20px; background-color: #f8f8f8; vertical-align: top; border-right: 1px solid #e0e0e0;">
-                    <p style="margin: 0 0 10px; font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 1px;">Your Previous Size</p>
-                    ${orig.image_url ? `<img src="${orig.image_url}" alt="${orig.product_title}" style="width: 100%; max-width: 150px; height: auto; margin: 10px auto; display: block; border-radius: 4px;">` : ''}
-                    <p style="margin: 10px 0 5px; font-size: 16px; font-weight: bold; color: #333;">${orig.size_grams}${unit}</p>
-                    <p style="margin: 0 0 5px; font-size: 18px; color: #333;">${formatPrice(orig.price)}</p>
-                    <p style="margin: 0; font-size: 14px; color: #666;">${formatPricePerGram(upsellData.originalPricePerGram, orig.size_unit)}</p>
-                  </td>
-                  <td width="50%" style="padding: 20px; background-color: #f0f7f0; vertical-align: top;">
-                    <p style="margin: 0 0 10px; font-size: 12px; color: #2c5530; text-transform: uppercase; letter-spacing: 1px; font-weight: bold;">Upgrade & Save</p>
-                    ${ups.image_url ? `<img src="${ups.image_url}" alt="${ups.product_title}" style="width: 100%; max-width: 150px; height: auto; margin: 10px auto; display: block; border-radius: 4px;">` : ''}
-                    <p style="margin: 10px 0 5px; font-size: 16px; font-weight: bold; color: #333;">${ups.size_grams}${unit}</p>
-                    <p style="margin: 0 0 5px; font-size: 14px; color: #888; text-decoration: line-through;">${formatPrice(ups.price)}</p>
-                    <p style="margin: 0 0 5px; font-size: 20px; color: #2c5530; font-weight: bold;">${formatPrice(upsellData.discountedPrice!)}</p>
-                    <p style="margin: 0 0 5px; font-size: 14px; color: #2c5530; font-weight: bold;">${formatPricePerGram(upsellData.discountedPricePerGram!, ups.size_unit)}</p>
-                    <p style="margin: 10px 0 0; padding: 5px 10px; background-color: #2c5530; color: white; display: inline-block; border-radius: 4px; font-size: 12px; font-weight: bold;">${savingsText}</p>
-                  </td>
-                </tr>
-              </table>
-
-              <!-- Discount Code -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
-                <tr>
-                  <td align="center">
-                    <table cellpadding="0" cellspacing="0" style="background-color: #f8f4e8; border: 2px dashed #2c5530; border-radius: 8px; padding: 20px 40px;">
+                  <!-- Your Size (dimmed) -->
+                  <td width="44%" style="vertical-align: top;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background: #f0f0f0; border-radius: 16px; overflow: hidden; opacity: 0.7;">
                       <tr>
-                        <td style="text-align: center;">
-                          <p style="margin: 0 0 10px; font-size: 14px; color: #666;">Your exclusive ${discountPercent}% off code:</p>
-                          <p style="margin: 0; font-size: 28px; font-weight: bold; color: #2c5530; letter-spacing: 2px;">${discountCode}</p>
-                          <p style="margin: 10px 0 0; font-size: 12px; color: #888;">Expires ${expiryDate}</p>
+                        <td style="padding: 20px; text-align: center;">
+                          <p style="margin: 0 0 12px; font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 1px;">You bought</p>
+                          ${orig.image_url ? `<img src="${orig.image_url}" alt="${orig.product_title}" style="width: 100%; max-width: 80px; height: auto; margin: 0 auto 12px; display: block; filter: grayscale(30%);">` : ''}
+                          <p style="margin: 0 0 4px; font-size: 16px; font-weight: 500; color: #666;">${orig.size_grams}${unit}</p>
+                          <p style="margin: 0 0 4px; font-size: 18px; color: #666;">${formatPrice(orig.price)}</p>
+                          <p style="margin: 0; font-size: 13px; color: #999;">${formatPricePerGram(upsellData.originalPricePerGram, orig.size_unit)}</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                  <!-- Arrow (more prominent) -->
+                  <td width="12%" style="text-align: center; vertical-align: middle;">
+                    <div style="background: #C4A052; color: #fff; width: 36px; height: 36px; border-radius: 50%; display: inline-block; line-height: 36px; font-size: 20px; font-weight: bold;">→</div>
+                  </td>
+                  <!-- Upgrade Size (highlighted) -->
+                  <td width="44%" style="vertical-align: top;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background: linear-gradient(180deg, #fdf9f0 0%, #f5edd8 100%); border-radius: 16px; overflow: hidden; border: 3px solid #C4A052; box-shadow: 0 4px 12px rgba(196, 160, 82, 0.25);">
+                      <tr>
+                        <td style="padding: 22px; text-align: center;">
+                          <p style="margin: 0 0 10px; font-size: 12px; color: #C4A052; text-transform: uppercase; letter-spacing: 2px; font-weight: 700;">★ Best Value ★</p>
+                          ${ups.image_url ? `<img src="${ups.image_url}" alt="${ups.product_title}" style="width: 100%; max-width: 100px; height: auto; margin: 0 auto 12px; display: block;">` : ''}
+                          <p style="margin: 0 0 4px; font-size: 20px; font-weight: 700; color: #1a1a1a;">${ups.size_grams}${unit}</p>
+                          <p style="margin: 0 0 2px; font-size: 14px; color: #999; text-decoration: line-through;">${formatPrice(ups.price)}</p>
+                          <p style="margin: 0 0 6px; font-size: 28px; color: #1a1a1a; font-weight: 700;">${formatPrice(upsellData.discountedPrice!)}</p>
+                          <p style="margin: 0 0 12px; font-size: 14px; color: #555; font-weight: 500;">${formatPricePerGram(upsellData.discountedPricePerGram!, ups.size_unit)}</p>
+                          <span style="display: inline-block; background: #C4A052; color: #fff; padding: 8px 20px; border-radius: 20px; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">${savingsText}</span>
                         </td>
                       </tr>
                     </table>
                   </td>
                 </tr>
               </table>
+            </td>
+          </tr>
 
-              <!-- CTA Button -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
+          <!-- Anniversary Gift Code -->
+          <tr>
+            <td style="padding: 0 40px 30px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background: #1a1a1a; border-radius: 16px; overflow: hidden;">
                 <tr>
-                  <td align="center">
-                    <a href="${clickTrackUrl}" style="display: inline-block; background-color: #2c5530; color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 6px; font-size: 18px; font-weight: bold;">
-                      Upgrade Now - Save ${Math.round(upsellData.savingsPercent || 0)}%
-                    </a>
+                  <td style="padding: 30px; text-align: center;">
+                    <p style="margin: 0 0 12px; font-size: 13px; color: #C4A052; text-transform: uppercase; letter-spacing: 2px;">Your Exclusive Upgrade - ${discountPercent}% Off</p>
+                    <p style="margin: 0 0 12px; font-size: 36px; font-weight: 700; color: #ffffff; letter-spacing: 4px; font-family: 'Courier New', monospace;">${discountCode}</p>
+                    <p style="margin: 0; font-size: 14px; color: #888;">Expires ${expiryDate}</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- CTA Button -->
+          <tr>
+            <td style="padding: 0 40px 40px;" align="center">
+              <!--[if mso]>
+              <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${clickTrackUrl}" style="height: 60px; v-text-anchor: middle; width: 320px;" arcsize="50%" strokecolor="#C4A052" fillcolor="#C4A052">
+              <w:anchorlock/>
+              <center style="color: #ffffff; font-family: Arial, sans-serif; font-size: 18px; font-weight: bold;">Upgrade &amp; Save Now</center>
+              </v:roundrect>
+              <![endif]-->
+              <!--[if !mso]><!-->
+              <a href="${clickTrackUrl}" style="display: inline-block; background: #C4A052; color: #ffffff; text-decoration: none; padding: 18px 60px; border-radius: 50px; font-size: 18px; font-weight: 600; letter-spacing: 0.5px;">
+                Upgrade &amp; Save Now
+              </a>
+              <!--<![endif]-->
+            </td>
+          </tr>
+
+          <!-- Personal Note - Upgrade Encouragement -->
+          <tr>
+            <td style="padding: 0 40px 40px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top: 1px solid #eee; padding-top: 30px;">
+                <tr>
+                  <td>
+                    <p style="font-size: 15px; color: #666; line-height: 1.7; margin: 0 0 16px; font-style: italic;">
+                      "The bigger size is how I personally use our products - consistency is where the magic happens!"
+                    </p>
+                    <p style="font-size: 16px; color: #1a1a1a; margin: 0; font-weight: 500;">
+                      — Colette, Founder
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer - Premium Dark -->
+          <tr>
+            <td style="background: linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%); padding: 40px 40px 30px; text-align: center;">
+              <!-- Logo -->
+              <a href="https://teelixir.com.au?utm_source=anniversary&utm_campaign=upsell15" style="text-decoration: none;">
+                <img src="${logoWhite}" alt="Teelixir" width="120" style="max-width: 120px; height: auto; border: 0; margin-bottom: 16px;">
+              </a>
+
+              <!-- Brand Tagline -->
+              <p style="font-size: 13px; color: #C4A052; margin: 0 0 24px; letter-spacing: 2px; text-transform: uppercase; font-weight: 500;">
+                Ancient Wisdom · Modern Wellness
+              </p>
+
+              <!-- Social Icons -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin-bottom: 24px;">
+                <tr>
+                  <td style="padding: 0 8px;">
+                    <a href="https://www.instagram.com/teelixir/" style="text-decoration: none; display: inline-block; width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 50%; line-height: 40px; text-align: center; color: #C4A052; font-size: 14px;">IG</a>
+                  </td>
+                  <td style="padding: 0 8px;">
+                    <a href="https://www.facebook.com/teelixir/" style="text-decoration: none; display: inline-block; width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 50%; line-height: 40px; text-align: center; color: #C4A052; font-size: 14px;">FB</a>
+                  </td>
+                  <td style="padding: 0 8px;">
+                    <a href="https://www.tiktok.com/@teelixir" style="text-decoration: none; display: inline-block; width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 50%; line-height: 40px; text-align: center; color: #C4A052; font-size: 14px;">TT</a>
+                  </td>
+                  <td style="padding: 0 8px;">
+                    <a href="https://teelixir.com.au" style="text-decoration: none; display: inline-block; width: 40px; height: 40px; background: #C4A052; border-radius: 50%; line-height: 40px; text-align: center; color: #1a1a1a; font-size: 16px; font-weight: bold;">→</a>
                   </td>
                 </tr>
               </table>
 
-              <p style="font-size: 16px; color: #555; line-height: 1.6; margin: 30px 0 0;">
-                Looking forward to seeing you back!
+              <!-- Divider -->
+              <table role="presentation" width="60" align="center" cellpadding="0" cellspacing="0" style="margin-bottom: 20px;">
+                <tr><td style="height: 1px; background: rgba(196, 160, 82, 0.3);"></td></tr>
+              </table>
+
+              <!-- Company Info -->
+              <p style="font-size: 12px; color: #666; margin: 0 0 8px; line-height: 1.6;">
+                Teelixir Pty Ltd · Melbourne, Australia
+              </p>
+              <p style="font-size: 12px; color: #555; margin: 0 0 16px;">
+                <a href="mailto:hello@teelixir.com" style="color: #C4A052; text-decoration: none;">hello@teelixir.com</a>
               </p>
 
-              <p style="font-size: 16px; color: #333; margin: 20px 0 0;">
-                <strong>Colette</strong><br>
-                <span style="color: #666;">Teelixir Team</span>
+              <!-- Unsubscribe -->
+              <p style="font-size: 11px; color: #555; margin: 0;">
+                <a href="mailto:hello@teelixir.com?subject=Unsubscribe" style="color: #666; text-decoration: underline;">Unsubscribe</a>
+                <span style="color: #444; padding: 0 8px;">·</span>
+                <a href="https://teelixir.com.au/pages/privacy-policy" style="color: #666; text-decoration: underline;">Privacy</a>
               </p>
-            </td>
-          </tr>
 
-          <!-- Footer -->
-          <tr>
-            <td style="background-color: #f8f8f8; padding: 20px 30px; text-align: center;">
-              <p style="font-size: 12px; color: #999; margin: 0;">
-                Teelixir Pty Ltd | Melbourne, Australia<br>
-                <a href="https://teelixir.com.au" style="color: #2c5530;">teelixir.com.au</a>
-              </p>
-              <img src="${openTrackUrl}" width="1" height="1" alt="" style="display:block;width:1px;height:1px;border:0;" />
+              <img src="${openTrackUrl}" width="1" height="1" alt="" style="display:block;width:1px;height:1px;border:0;margin-top:10px;" />
             </td>
           </tr>
         </table>
+        <!--[if mso]>
+        </td></tr></table>
+        <![endif]-->
       </td>
     </tr>
   </table>
@@ -542,94 +677,176 @@ function generateRepeatPurchaseHtml(
   const orig = upsellData.original
   const unit = orig.size_unit === 'caps' ? 'capsules' : 'g'
 
+  // Correct Teelixir logo URLs
+  const logoWhite = 'https://teelixir.com.au/cdn/shop/files/teelixir_white_1.png?v=1708180588'
+  const logoBlack = 'https://teelixir.com.au/cdn/shop/files/teelixir_black.png?v=1708180698'
+
+  // Preheader text
+  const preheader = `${firstName}, your exclusive ${discountPercent}% off code for ${orig.product_type} is waiting! Use code ${discountCode} before it expires.`
+
   return `
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="x-apple-disable-message-reformatting">
   <title>Time to restock your ${orig.product_type}!</title>
+  <!--[if mso]>
+  <style type="text/css">
+    table { border-collapse: collapse; }
+    td { font-family: Arial, sans-serif; }
+  </style>
+  <![endif]-->
 </head>
-<body style="margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; background-color: #f5f5f5;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 20px;">
+<body style="margin: 0; padding: 0; font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #ffffff; -webkit-text-size-adjust: 100%;">
+  <!-- Preheader -->
+  <div style="display: none; max-height: 0; overflow: hidden; mso-hide: all;">
+    ${preheader}
+    &zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;
+  </div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff;">
     <tr>
       <td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden;">
-          <!-- Header -->
+        <!--[if mso]>
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600"><tr><td>
+        <![endif]-->
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width: 600px;">
+
+          <!-- Logo Header - Clean White -->
           <tr>
-            <td style="background-color: #2c5530; padding: 30px; text-align: center;">
-              <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Teelixir</h1>
+            <td style="padding: 30px 40px 20px; text-align: center;">
+              <a href="https://teelixir.com.au?utm_source=anniversary&utm_campaign=restock15" style="text-decoration: none;">
+                <img src="${logoBlack}" alt="Teelixir" width="180" style="max-width: 180px; height: auto; border: 0;">
+              </a>
             </td>
           </tr>
 
-          <!-- Content -->
+          <!-- Hero Section with Warm Greeting -->
           <tr>
-            <td style="padding: 40px 30px;">
-              <p style="font-size: 18px; color: #333; margin: 0 0 20px;">Hi ${firstName},</p>
-
-              <p style="font-size: 16px; color: #555; line-height: 1.6; margin: 0 0 20px;">
-                You're already enjoying our biggest size - the ${orig.product_type} ${orig.size_grams}${unit}! Ready for another?
+            <td style="padding: 10px 40px 30px;">
+              <h1 style="font-family: Georgia, 'Times New Roman', serif; font-size: 32px; color: #1a1a1a; margin: 0 0 8px; font-weight: 400; line-height: 1.2;">
+                Hey ${firstName}!
+              </h1>
+              <p style="font-size: 20px; color: #C4A052; margin: 0; font-weight: 500;">
+                Time to restock your favourite?
               </p>
+            </td>
+          </tr>
 
-              <!-- Product Image -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="margin: 20px 0;">
+          <!-- Friendly Intro Text -->
+          <tr>
+            <td style="padding: 0 40px 30px;">
+              <p style="font-size: 16px; color: #444; line-height: 1.8; margin: 0;">
+                You're already enjoying our biggest size - the <strong style="color: #1a1a1a;">${orig.product_type} ${orig.size_grams}${unit}</strong>!
+                Here's a special thank you code to use on your next order.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Product Image -->
+          <tr>
+            <td style="padding: 0 40px 30px;" align="center">
+              ${orig.image_url ? `
+              <table role="presentation" cellpadding="0" cellspacing="0" style="background: #f9f9f9; border-radius: 16px;">
                 <tr>
-                  <td align="center">
-                    ${orig.image_url ? `<img src="${orig.image_url}" alt="${orig.product_title}" style="width: 100%; max-width: 200px; height: auto; border-radius: 8px;">` : ''}
+                  <td style="padding: 25px;" align="center">
+                    <img src="${orig.image_url}" alt="${orig.product_title}" style="width: 100%; max-width: 150px; height: auto; margin-bottom: 12px;">
+                    <p style="margin: 0; font-size: 18px; font-weight: 600; color: #1a1a1a;">${orig.product_type}</p>
+                    <p style="margin: 4px 0 0; font-size: 14px; color: #888;">${orig.size_grams}${unit}</p>
                   </td>
                 </tr>
               </table>
+              ` : ''}
+            </td>
+          </tr>
 
-              <!-- Discount Code -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
+          <!-- Your Special Code -->
+          <tr>
+            <td style="padding: 0 40px 30px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background: #1a1a1a; border-radius: 16px; overflow: hidden;">
                 <tr>
-                  <td align="center">
-                    <table cellpadding="0" cellspacing="0" style="background-color: #f8f4e8; border: 2px dashed #2c5530; border-radius: 8px; padding: 20px 40px;">
-                      <tr>
-                        <td style="text-align: center;">
-                          <p style="margin: 0 0 10px; font-size: 14px; color: #666;">Your exclusive ${discountPercent}% off:</p>
-                          <p style="margin: 0; font-size: 28px; font-weight: bold; color: #2c5530; letter-spacing: 2px;">${discountCode}</p>
-                          <p style="margin: 10px 0 0; font-size: 12px; color: #888;">Expires ${expiryDate}</p>
-                        </td>
-                      </tr>
-                    </table>
+                  <td style="padding: 30px; text-align: center;">
+                    <p style="margin: 0 0 12px; font-size: 13px; color: #C4A052; text-transform: uppercase; letter-spacing: 2px;">Your ${discountPercent}% off code</p>
+                    <p style="margin: 0 0 12px; font-size: 36px; font-weight: 700; color: #ffffff; letter-spacing: 4px; font-family: 'Courier New', monospace;">${discountCode}</p>
+                    <p style="margin: 0; font-size: 14px; color: #888;">Expires ${expiryDate}</p>
                   </td>
                 </tr>
               </table>
+            </td>
+          </tr>
 
-              <!-- CTA Button -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
+          <!-- CTA Button -->
+          <tr>
+            <td style="padding: 0 40px 40px;" align="center">
+              <!--[if mso]>
+              <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${clickTrackUrl}" style="height: 60px; v-text-anchor: middle; width: 280px;" arcsize="50%" strokecolor="#C4A052" fillcolor="#C4A052">
+              <w:anchorlock/>
+              <center style="color: #ffffff; font-family: Arial, sans-serif; font-size: 18px; font-weight: bold;">Restock Now</center>
+              </v:roundrect>
+              <![endif]-->
+              <!--[if !mso]><!-->
+              <a href="${clickTrackUrl}" style="display: inline-block; background: #C4A052; color: #ffffff; text-decoration: none; padding: 18px 60px; border-radius: 50px; font-size: 18px; font-weight: 600; letter-spacing: 0.5px;">
+                Restock Now
+              </a>
+              <!--<![endif]-->
+            </td>
+          </tr>
+
+          <!-- Personal Note -->
+          <tr>
+            <td style="padding: 0 40px 40px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top: 1px solid #eee; padding-top: 30px;">
                 <tr>
-                  <td align="center">
-                    <a href="${clickTrackUrl}" style="display: inline-block; background-color: #2c5530; color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 6px; font-size: 18px; font-weight: bold;">
-                      Restock Now
-                    </a>
+                  <td>
+                    <p style="font-size: 15px; color: #666; line-height: 1.7; margin: 0 0 20px; font-style: italic;">
+                      "Thank you for being one of our loyal customers who loves the value of our biggest sizes. This code is just for you!"
+                    </p>
+                    <p style="font-size: 16px; color: #1a1a1a; margin: 0; font-weight: 500;">
+                      Colette
+                    </p>
+                    <p style="font-size: 14px; color: #888; margin: 4px 0 0;">
+                      Founder, Teelixir
+                    </p>
                   </td>
                 </tr>
               </table>
-
-              <p style="font-size: 16px; color: #555; line-height: 1.6; margin: 30px 0 0;">
-                Looking forward to seeing you back!
-              </p>
-
-              <p style="font-size: 16px; color: #333; margin: 20px 0 0;">
-                <strong>Colette</strong><br>
-                <span style="color: #666;">Teelixir Team</span>
-              </p>
             </td>
           </tr>
 
           <!-- Footer -->
           <tr>
-            <td style="background-color: #f8f8f8; padding: 20px 30px; text-align: center;">
-              <p style="font-size: 12px; color: #999; margin: 0;">
-                Teelixir Pty Ltd | Melbourne, Australia<br>
-                <a href="https://teelixir.com.au" style="color: #2c5530;">teelixir.com.au</a>
+            <td style="background-color: #f5f5f5; padding: 30px 40px; text-align: center;">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin-bottom: 15px;">
+                <tr>
+                  <td style="padding: 0 12px;">
+                    <a href="https://www.instagram.com/teelixir/" style="text-decoration: none; color: #666; font-size: 13px;">Instagram</a>
+                  </td>
+                  <td style="color: #ccc;">|</td>
+                  <td style="padding: 0 12px;">
+                    <a href="https://www.facebook.com/teelixir/" style="text-decoration: none; color: #666; font-size: 13px;">Facebook</a>
+                  </td>
+                  <td style="color: #ccc;">|</td>
+                  <td style="padding: 0 12px;">
+                    <a href="https://teelixir.com.au" style="text-decoration: none; color: #666; font-size: 13px;">Shop</a>
+                  </td>
+                </tr>
+              </table>
+              <p style="font-size: 12px; color: #999; margin: 0 0 10px;">
+                Teelixir Pty Ltd | Melbourne, Australia
+              </p>
+              <p style="font-size: 11px; color: #aaa; margin: 0;">
+                <a href="mailto:hello@teelixir.com?subject=Unsubscribe" style="color: #999; text-decoration: underline;">Unsubscribe</a>
               </p>
               <img src="${openTrackUrl}" width="1" height="1" alt="" style="display:block;width:1px;height:1px;border:0;" />
             </td>
           </tr>
         </table>
+        <!--[if mso]>
+        </td></tr></table>
+        <![endif]-->
       </td>
     </tr>
   </table>

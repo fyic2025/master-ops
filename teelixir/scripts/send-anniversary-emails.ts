@@ -158,50 +158,86 @@ function generateEmailHtml(
     ? `your ${productType}`
     : 'your favourite mushroom products'
 
+  // Teelixir brand colors
+  const brandColors = {
+    primary: '#1B4D3E',      // Forest Green (official)
+    secondary: '#D4AF37',    // Gold accent
+    lightBg: '#F5F7F4',      // Light green-tinted background
+    warmBg: '#FBF9F3',       // Warm cream for discount box
+    text: '#2C3E2D',         // Dark green text
+    lightText: '#5A6B5C'     // Muted green for secondary text
+  }
+
+  // Preheader text for email preview
+  const preheaderText = `${firstName}, your exclusive ${discountPercent}% off code is waiting! Use code ${discountCode} before it expires.`
+
   return `
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Happy Anniversary from Teelixir!</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="x-apple-disable-message-reformatting">
+  <title>Your Teelixir Anniversary Gift</title>
+  <!--[if mso]>
+  <style type="text/css">
+    table { border-collapse: collapse; }
+    .button-td { padding: 16px 40px !important; }
+  </style>
+  <![endif]-->
 </head>
-<body style="margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; background-color: #f5f5f5;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 20px;">
+<body style="margin: 0; padding: 0; font-family: 'Lato', Arial, Helvetica, sans-serif; background-color: ${brandColors.lightBg}; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;">
+  <!-- Preheader (hidden preview text) -->
+  <div style="display: none; max-height: 0; overflow: hidden; mso-hide: all;">
+    ${preheaderText}
+    &zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;
+  </div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: ${brandColors.lightBg}; padding: 20px 0;">
     <tr>
       <td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden;">
-          <!-- Header -->
+        <!--[if mso]>
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600">
+        <tr><td>
+        <![endif]-->
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(27, 77, 62, 0.08);">
+
+          <!-- Header with Logo -->
           <tr>
-            <td style="background-color: #2c5530; padding: 30px; text-align: center;">
-              <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Teelixir</h1>
-              <p style="color: #c4dfc7; margin: 10px 0 0; font-size: 16px;">Happy Anniversary! 🎉</p>
+            <td style="background: linear-gradient(135deg, ${brandColors.primary} 0%, #245546 100%); padding: 35px 30px; text-align: center;">
+              <a href="https://teelixir.com.au?utm_source=anniversary&utm_campaign=anniv15" style="text-decoration: none;">
+                <img src="https://teelixir.com.au/cdn/shop/files/Teelixir_Logo_White.png" alt="Teelixir" width="160" style="max-width: 160px; height: auto; border: 0;">
+              </a>
+              <p style="color: ${brandColors.secondary}; margin: 15px 0 0; font-size: 18px; font-weight: 500; letter-spacing: 1px;">ANNIVERSARY GIFT</p>
             </td>
           </tr>
 
-          <!-- Content -->
+          <!-- Main Content -->
           <tr>
-            <td style="padding: 40px 30px;">
-              <p style="font-size: 18px; color: #333; margin: 0 0 20px;">Hi ${firstName},</p>
+            <td style="padding: 45px 35px 35px;">
+              <h1 style="font-family: 'Playfair Display', Georgia, serif; font-size: 26px; color: ${brandColors.primary}; margin: 0 0 25px; font-weight: 600;">
+                Hi ${firstName} 👋
+              </h1>
 
-              <p style="font-size: 16px; color: #555; line-height: 1.6; margin: 0 0 20px;">
-                It's been about a month since you joined the Teelixir family, and I wanted to check in!
+              <p style="font-size: 16px; color: ${brandColors.text}; line-height: 1.7; margin: 0 0 20px;">
+                Time flies when you're feeling good! Based on your purchase, you might be running low on ${productMessage}.
               </p>
 
-              <p style="font-size: 16px; color: #555; line-height: 1.6; margin: 0 0 20px;">
-                If you're ready to restock ${productMessage}, I'd love to offer you <strong>${discountPercent}% off</strong> as a thank you for being part of our community.
+              <p style="font-size: 16px; color: ${brandColors.text}; line-height: 1.7; margin: 0 0 25px;">
+                As a thank you for being part of the Teelixir community, I'd love to offer you an exclusive <strong style="color: ${brandColors.primary};">${discountPercent}% discount</strong> on your next order.
               </p>
 
               <!-- Discount Code Box -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
                 <tr>
                   <td align="center">
-                    <table cellpadding="0" cellspacing="0" style="background-color: #f8f4e8; border: 2px dashed #2c5530; border-radius: 8px; padding: 20px 40px;">
+                    <table role="presentation" cellpadding="0" cellspacing="0" style="background-color: ${brandColors.warmBg}; border: 2px solid ${brandColors.secondary}; border-radius: 12px; padding: 25px 45px; width: auto;">
                       <tr>
                         <td style="text-align: center;">
-                          <p style="margin: 0 0 10px; font-size: 14px; color: #666;">Your exclusive code:</p>
-                          <p style="margin: 0; font-size: 28px; font-weight: bold; color: #2c5530; letter-spacing: 2px;">${discountCode}</p>
-                          <p style="margin: 10px 0 0; font-size: 12px; color: #888;">Expires ${expiryDate}</p>
+                          <p style="margin: 0 0 8px; font-size: 13px; color: ${brandColors.lightText}; text-transform: uppercase; letter-spacing: 1px;">Your exclusive code</p>
+                          <p style="margin: 0; font-size: 32px; font-weight: 700; color: ${brandColors.primary}; letter-spacing: 3px; font-family: 'Courier New', monospace;">${discountCode}</p>
+                          <p style="margin: 12px 0 0; font-size: 13px; color: ${brandColors.secondary}; font-weight: 600;">Valid until ${expiryDate}</p>
                         </td>
                       </tr>
                     </table>
@@ -210,42 +246,88 @@ function generateEmailHtml(
               </table>
 
               <!-- CTA Button -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin: 35px 0;">
                 <tr>
                   <td align="center">
-                    <a href="https://teelixir.com.au/collections/all?utm_email=${encodedEmail}&utm_source=anniversary&utm_campaign=anniv15"
-                       style="display: inline-block; background-color: #2c5530; color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 6px; font-size: 18px; font-weight: bold;">
-                      Shop Now
+                    <!--[if mso]>
+                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="https://teelixir.com.au/collections/all?discount=${discountCode}&utm_source=anniversary&utm_campaign=anniv15&utm_medium=email" style="height: 52px; v-text-anchor: middle; width: 220px;" arcsize="8%" strokecolor="${brandColors.primary}" fillcolor="${brandColors.primary}">
+                    <w:anchorlock/>
+                    <center style="color: #ffffff; font-family: Arial, sans-serif; font-size: 17px; font-weight: bold;">Shop Now →</center>
+                    </v:roundrect>
+                    <![endif]-->
+                    <!--[if !mso]><!-->
+                    <a href="https://teelixir.com.au/collections/all?discount=${discountCode}&utm_source=anniversary&utm_campaign=anniv15&utm_medium=email"
+                       style="display: inline-block; background-color: ${brandColors.primary}; color: #ffffff; text-decoration: none; padding: 16px 45px; border-radius: 6px; font-size: 17px; font-weight: bold; letter-spacing: 0.5px; transition: background-color 0.2s;">
+                      Shop Now →
                     </a>
+                    <!--<![endif]-->
                   </td>
                 </tr>
               </table>
 
-              <p style="font-size: 14px; color: #888; line-height: 1.6; margin: 20px 0 0;">
-                This code is just for you — single use only. Can't be combined with other offers.
+              <p style="font-size: 14px; color: ${brandColors.lightText}; line-height: 1.6; margin: 25px 0 0; text-align: center;">
+                Single use only. Cannot be combined with other offers.
               </p>
 
-              <p style="font-size: 16px; color: #555; line-height: 1.6; margin: 30px 0 0;">
-                Thanks for being part of the Teelixir family!
-              </p>
-
-              <p style="font-size: 16px; color: #333; margin: 20px 0 0;">
-                <strong>Colette</strong><br>
-                <span style="color: #666;">Teelixir Team</span>
-              </p>
+              <!-- Signature -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin: 35px 0 0; border-top: 1px solid #E8EDE9; padding-top: 25px;">
+                <tr>
+                  <td>
+                    <p style="font-size: 16px; color: ${brandColors.text}; line-height: 1.6; margin: 0 0 15px;">
+                      Wishing you wellness,
+                    </p>
+                    <p style="font-size: 16px; color: ${brandColors.primary}; margin: 0; font-weight: 600;">
+                      Colette
+                    </p>
+                    <p style="font-size: 14px; color: ${brandColors.lightText}; margin: 5px 0 0;">
+                      Founder, Teelixir
+                    </p>
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
 
           <!-- Footer -->
           <tr>
-            <td style="background-color: #f8f8f8; padding: 20px 30px; text-align: center;">
-              <p style="font-size: 12px; color: #999; margin: 0;">
-                Teelixir Pty Ltd | Melbourne, Australia<br>
-                <a href="https://teelixir.com.au" style="color: #2c5530;">teelixir.com.au</a>
+            <td style="background-color: ${brandColors.primary}; padding: 30px; text-align: center;">
+              <!-- Social Icons -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin-bottom: 20px;">
+                <tr>
+                  <td style="padding: 0 8px;">
+                    <a href="https://www.instagram.com/teelixir/" style="text-decoration: none;">
+                      <img src="https://cdn-icons-png.flaticon.com/32/2111/2111463.png" alt="Instagram" width="24" height="24" style="border: 0;">
+                    </a>
+                  </td>
+                  <td style="padding: 0 8px;">
+                    <a href="https://www.facebook.com/teelixir/" style="text-decoration: none;">
+                      <img src="https://cdn-icons-png.flaticon.com/32/733/733547.png" alt="Facebook" width="24" height="24" style="border: 0;">
+                    </a>
+                  </td>
+                  <td style="padding: 0 8px;">
+                    <a href="https://www.tiktok.com/@teelixir" style="text-decoration: none;">
+                      <img src="https://cdn-icons-png.flaticon.com/32/3046/3046121.png" alt="TikTok" width="24" height="24" style="border: 0;">
+                    </a>
+                  </td>
+                </tr>
+              </table>
+              <p style="font-size: 13px; color: rgba(255,255,255,0.8); margin: 0 0 10px;">
+                <a href="https://teelixir.com.au" style="color: ${brandColors.secondary}; text-decoration: none;">teelixir.com.au</a>
+              </p>
+              <p style="font-size: 11px; color: rgba(255,255,255,0.6); margin: 0;">
+                Teelixir Pty Ltd | Melbourne, Australia
+              </p>
+              <p style="font-size: 11px; color: rgba(255,255,255,0.5); margin: 15px 0 0;">
+                You're receiving this because you made a purchase from Teelixir.<br>
+                <a href="mailto:hello@teelixir.com?subject=Unsubscribe" style="color: rgba(255,255,255,0.6); text-decoration: underline;">Unsubscribe</a>
               </p>
             </td>
           </tr>
         </table>
+        <!--[if mso]>
+        </td></tr>
+        </table>
+        <![endif]-->
       </td>
     </tr>
   </table>
@@ -273,21 +355,29 @@ function generateEmailText(
   return `
 Hi ${firstName},
 
-It's been about a month since you joined the Teelixir family, and I wanted to check in!
+Time flies when you're feeling good! Based on your purchase, you might be running low on ${productMessage}.
 
-If you're ready to restock ${productMessage}, I'd love to offer you ${discountPercent}% off as a thank you for being part of our community.
+As a thank you for being part of the Teelixir community, I'd love to offer you an exclusive ${discountPercent}% discount on your next order.
 
-Your exclusive code: ${discountCode}
-Expires: ${expiryDate}
+═══════════════════════════════
+YOUR EXCLUSIVE CODE: ${discountCode}
+Valid until: ${expiryDate}
+═══════════════════════════════
 
-Shop now: https://teelixir.com.au/collections/all
+Shop now: https://teelixir.com.au/collections/all?discount=${discountCode}
 
-This code is just for you — single use only. Can't be combined with other offers.
+Single use only. Cannot be combined with other offers.
 
-Thanks for being part of the Teelixir family!
+Wishing you wellness,
 
 Colette
-Teelixir Team
+Founder, Teelixir
+
+---
+Teelixir Pty Ltd | Melbourne, Australia
+teelixir.com.au
+
+To unsubscribe, reply to this email with "Unsubscribe" in the subject line.
 `.trim()
 }
 
@@ -524,7 +614,7 @@ async function sendAnniversaryEmails(config: SendConfig): Promise<SendResult> {
 
       console.log(`   ✅ Created test code: ${discountResult.code}`)
 
-      const subject = `${testName}, here's 15% off for your anniversary! 🎉`
+      const subject = `${testName}, your exclusive 15% off is waiting inside ✨`
       const html = generateEmailHtml(
         testName,
         config.testEmail,
@@ -674,7 +764,7 @@ async function sendAnniversaryEmails(config: SendConfig): Promise<SendResult> {
       result.codesCreated++
 
       // Generate email content
-      const subject = `${firstName}, here's 15% off for your anniversary! 🎉`
+      const subject = `${firstName}, your exclusive 15% off is waiting inside ✨`
       const html = generateEmailHtml(
         firstName,
         candidate.customer_email,

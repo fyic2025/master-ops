@@ -4,25 +4,45 @@
  * Run this script after creating the dispatch_problem_products table in Supabase
  */
 
-const { execSync } = require('child_process');
+const https = require('https');
 const fs = require('fs');
+const path = require('path');
 
 const SUPABASE_URL = 'https://usibnysqelovfuctmkqw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzaWJueXNxZWxvdmZ1Y3Rta3F3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDQ4ODA4OCwiZXhwIjoyMDY2MDY0MDg4fQ.B9uihsaUvwkJWFAuKAtu7uij1KiXVoiHPHa9mm-Tz1s';
 
-function curlPost(url, headers, data) {
-  const headerArgs = Object.entries(headers)
-    .map(([k, v]) => `-H "${k}: ${v}"`)
-    .join(' ');
-  const jsonData = JSON.stringify(data).replace(/'/g, "'\\''");
-  const cmd = `curl -s -X POST "${url}" ${headerArgs} -d '${jsonData}'`;
-  try {
-    const result = execSync(cmd, { encoding: 'utf-8', maxBuffer: 50 * 1024 * 1024 });
-    return result ? JSON.parse(result) : null;
-  } catch (e) {
-    console.error('Error:', e.message);
-    return null;
-  }
+function httpsPost(url, headers, data) {
+  return new Promise((resolve, reject) => {
+    const urlObj = new URL(url);
+    const postData = JSON.stringify(data);
+
+    const options = {
+      hostname: urlObj.hostname,
+      port: 443,
+      path: urlObj.pathname,
+      method: 'POST',
+      headers: {
+        ...headers,
+        'Content-Length': Buffer.byteLength(postData)
+      }
+    };
+
+    const req = https.request(options, (res) => {
+      let body = '';
+      res.on('data', chunk => body += chunk);
+      res.on('end', () => {
+        try {
+          resolve({ status: res.statusCode, data: body ? JSON.parse(body) : null });
+        } catch (e) {
+          resolve({ status: res.statusCode, data: body });
+        }
+      });
+    });
+
+    req.on('error', reject);
+    req.write(postData);
+    req.end();
+  });
 }
 
 async function importProducts() {
@@ -30,7 +50,7 @@ async function importProducts() {
 
   // Read the problem products JSON
   const problemProducts = JSON.parse(
-    fs.readFileSync('/home/user/master-ops/buy-organics-online/problem-products-for-supabase.json', 'utf-8')
+    fs.readFileSync(path.join(__dirname, 'problem-products-for-supabase.json'), 'utf-8')
   );
 
   console.log(`Found ${problemProducts.length} products to import\n`);
@@ -40,7 +60,7 @@ async function importProducts() {
     'OB': 'Oborne Health Supplies',
     'KAD': 'Kadac',
     'UN': 'Unknown/Direct',
-    'GBN': 'Green Beauty Network',
+    'GBN': 'Vitalus',
     'KIK': 'Teelixir'
   };
 
@@ -55,31 +75,38 @@ async function importProducts() {
   // Insert into Supabase
   console.log('Inserting into dispatch_problem_products table...\n');
 
-  const result = curlPost(
-    `${SUPABASE_URL}/rest/v1/dispatch_problem_products`,
-    {
-      'apikey': SUPABASE_KEY,
-      'Authorization': `Bearer ${SUPABASE_KEY}`,
-      'Content-Type': 'application/json',
-      'Prefer': 'return=representation'
-    },
-    enrichedProducts
-  );
+  try {
+    const result = await httpsPost(
+      `${SUPABASE_URL}/rest/v1/dispatch_problem_products`,
+      {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      enrichedProducts
+    );
 
-  if (result && !result.error) {
-    console.log(`Successfully imported ${enrichedProducts.length} products!`);
-    console.log('\nYou can view them at:');
-    console.log('https://supabase.com/dashboard/project/usibnysqelovfuctmkqw/editor/table/dispatch_problem_products');
-  } else if (result && result.error) {
-    console.log('Error importing:', result.message || result.error);
-    console.log('\nMake sure you have created the table first. See TODO-DISPATCH-ANALYSIS.md for the SQL.');
-  } else {
-    console.log('Import completed (check Supabase for results)');
+    if (result.status === 201 || result.status === 200) {
+      const inserted = Array.isArray(result.data) ? result.data.length : enrichedProducts.length;
+      console.log(`Successfully imported ${inserted} products!`);
+      console.log('\nYou can view them at:');
+      console.log('https://supabase.com/dashboard/project/usibnysqelovfuctmkqw/editor/table/dispatch_problem_products');
+    } else if (result.data && result.data.message) {
+      console.log('Error importing:', result.data.message);
+      console.log('Status:', result.status);
+      console.log('\nMake sure you have created the table first. See TODO-DISPATCH-ANALYSIS.md for the SQL.');
+    } else {
+      console.log('Response status:', result.status);
+      console.log('Response:', JSON.stringify(result.data, null, 2));
+    }
+  } catch (err) {
+    console.error('Request failed:', err.message);
   }
 
   // Also save the enriched data
   fs.writeFileSync(
-    '/home/user/master-ops/buy-organics-online/problem-products-enriched.json',
+    path.join(__dirname, 'problem-products-enriched.json'),
     JSON.stringify(enrichedProducts, null, 2)
   );
   console.log('\nSaved enriched data to problem-products-enriched.json');

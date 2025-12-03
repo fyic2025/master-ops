@@ -48,7 +48,9 @@ Premium adaptogens and medicinal mushrooms.
 ### Automations
 > n8n workflows, scheduled jobs, sync processes
 
-- [ ]
+- [ ] **P2** Anniversary Upsell: Enable automation in dashboard
+- [ ] **P2** Anniversary Upsell: Schedule queue-anniversary-emails.ts in n8n (daily)
+- [ ] **P2** Anniversary Upsell: Schedule send-anniversary-upsell.ts in n8n (hourly 9am-6pm AEST)
 
 ### SEO
 > Rankings, content optimization, technical SEO, GSC
@@ -194,11 +196,19 @@ Local fresh produce delivery.
 
 Tasks moved here after completion for reference.
 
-- [x] **2025-12-03** Added DigitalOcean droplet capacity widget to dashboard | Shows CPU, memory, disk, containers for n8n-primary/secondary droplets. Uses DO Monitoring API.
-- [x] **2025-12-03** Fixed BOO bc-product-sync job | Deployed cron to PM2, synced 8,203 products, job now runs daily at 3am AEST
-- [x] **2025-12-03** Fixed BOO gmc-sync cron job | Deployed to PM2 on DigitalOcean droplet, synced 3,059 products
+- [x] **2025-12-03** CI/CD monitoring dashboard | Created cicd_issues tracking, scan history, health check scripts
+- [x] **2025-12-03** BOO dispatch widget | Added dispatch problem products widget showing stock-out risks
+- [x] **2025-12-03** Anniversary upsell email redesign | Improved HTML, responsive design, discount code in URLs
+- [x] **2025-12-03** Winback email automation API | Created queue-daily and process routes for winback campaigns
+- [x] **2025-12-03** Apify expert skill | Created skill for Google Maps scraping, lead generation
+- [x] **2025-12-03** Added DigitalOcean droplet capacity widget | CPU, memory, disk, containers for n8n droplets
+- [x] **2025-12-03** Fixed BOO bc-product-sync job | Deployed cron to PM2, synced 8,203 products
+- [x] **2025-12-03** Fixed BOO gmc-sync cron job | Deployed to PM2 on DigitalOcean droplet
 - [x] **2025-12-03** Added Tasks nav item to dashboard sidebar
 - [x] **2025-12-03** Created Tasks page UI with framework structure
+- [x] **2025-12-03** Copy to Claude button for automations | One-click copy of automation prompts
+- [x] **2025-12-03** Teelixir Unleashed inventory sync | Added cron jobs for inventory sync
+- [x] **2025-12-03** n8n workflow audit and cleanup scripts | Batch HTTP auth fixes, inactive workflow detection
 
 ---
 
@@ -279,3 +289,28 @@ Move to "Completed Tasks" section at bottom.
 **Droplet Infrastructure Tasks:**
 - [ ] P2 Install DO monitoring agent on n8n-secondary: `curl -sSL https://repos.insights.digitalocean.com/install.sh | bash`
 - [ ] P3 Evaluate load sharing: Consider n8n worker mode or dedicated task routing
+
+---
+
+## CI/CD Monitoring Notes
+
+**Status:** Live on ops.growthcohq.com/[business]/cicd
+
+**Implementation Details (2025-12-03):**
+- Dashboard page shows TypeScript errors, test failures, lint issues, build errors
+- Issues tracked in cicd_issues table with occurrence counts and auto-fix flags
+- Health check script scans codebase and posts to API
+- Auto-fix script applies common fixes (unused imports, type errors)
+
+**Files Created:**
+- `dashboard/src/app/(dashboard)/[business]/cicd/page.tsx` - CI/CD dashboard UI
+- `dashboard/src/app/api/cicd/route.ts` - API for issues CRUD
+- `scripts/cicd-health-check.ts` - Scans codebase for issues
+- `scripts/cicd-auto-fix.ts` - Auto-fixes common issues
+- `infra/supabase/migrations/20251203_cicd_issues.sql` - Database schema
+
+**Database Tables:**
+- `cicd_issues` - Tracks individual issues with severity, file path, auto-fixable flag
+- `cicd_scan_history` - Logs scan runs with issue counts
+
+---
