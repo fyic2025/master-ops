@@ -64,23 +64,28 @@ interface DODroplet {
 
 async function fetchDropletsFromDO(): Promise<DODroplet[]> {
   if (!DO_TOKEN) {
-    console.error('DO_API_TOKEN not configured')
+    console.error('DO_API_TOKEN not configured - token is:', DO_TOKEN ? 'SET' : 'NOT SET')
     return []
   }
 
   try {
+    console.log('Fetching droplets from DO API...')
     const response = await fetch('https://api.digitalocean.com/v2/droplets', {
       headers: {
         'Authorization': `Bearer ${DO_TOKEN}`,
         'Content-Type': 'application/json',
       },
+      cache: 'no-store',
     })
 
     if (!response.ok) {
+      const text = await response.text()
+      console.error(`DO API error: ${response.status}`, text)
       throw new Error(`DO API error: ${response.status}`)
     }
 
     const data = await response.json()
+    console.log(`Fetched ${data.droplets?.length || 0} droplets`)
     return data.droplets || []
   } catch (error) {
     console.error('Failed to fetch from DO API:', error)
