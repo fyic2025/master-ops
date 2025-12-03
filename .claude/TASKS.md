@@ -1,6 +1,6 @@
 # Master Operations Task Framework
 
-> **Last Updated:** 2025-12-03
+> **Last Updated:** 2025-12-04
 > **Usage:** Reference this file when starting a new Claude Code session. Say "what's next" to review priorities.
 
 ---
@@ -209,6 +209,7 @@ Tasks moved here after completion for reference.
 - [x] **2025-12-03** Copy to Claude button for automations | One-click copy of automation prompts
 - [x] **2025-12-03** Teelixir Unleashed inventory sync | Added cron jobs for inventory sync
 - [x] **2025-12-03** n8n workflow audit and cleanup scripts | Batch HTTP auth fixes, inactive workflow detection
+- [x] **2025-12-04** Session exit automation | SessionEnd hook to auto-save tasks, commit, and push to git
 
 ---
 
