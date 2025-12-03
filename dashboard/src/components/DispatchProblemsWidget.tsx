@@ -44,7 +44,7 @@ export function DispatchProblemsWidget() {
   const fetchData = async () => {
     setLoading(true)
     try {
-      const res = await fetch('/api/dispatch/problem-products?minSlowRate=80&limit=20&needsReview=true')
+      const res = await fetch('/api/dispatch/problem-products?minSlowRate=80&limit=50&needsReview=true')
       const data = await res.json()
 
       if (data.error) {
@@ -177,19 +177,19 @@ export function DispatchProblemsWidget() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-800/50">
-            {products.slice(0, 10).map((product) => (
+            {products.slice(0, 50).map((product) => (
               <tr key={product.id} className="hover:bg-gray-800/30">
                 <td className="py-2">
                   <button
                     onClick={() => copyToClipboard(product.sku)}
-                    className="flex items-center gap-1 text-gray-300 font-mono text-xs hover:text-white group"
+                    className="flex items-center gap-1.5 px-2 py-1 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 font-mono text-xs hover:text-white transition-colors"
                     title="Click to copy SKU"
                   >
-                    {product.sku?.split(' - ')[1] || product.sku}
+                    <Copy className={`w-3.5 h-3.5 ${copiedSku === product.sku ? 'text-green-400' : 'text-blue-400'}`} />
                     {copiedSku === product.sku ? (
-                      <Check className="w-3 h-3 text-green-400" />
+                      <span className="text-green-400">Copied!</span>
                     ) : (
-                      <Copy className="w-3 h-3 text-gray-500 opacity-0 group-hover:opacity-100" />
+                      <span>{product.sku?.split(' - ')[1] || product.sku}</span>
                     )}
                   </button>
                 </td>
@@ -224,7 +224,7 @@ export function DispatchProblemsWidget() {
       </div>
 
       {/* View All Link */}
-      {products.length > 10 && (
+      {products.length > 50 && (
         <div className="mt-4 text-center">
           <a
             href="/boo/inventory?tab=dispatch"
