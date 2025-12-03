@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { AlertTriangle, Package, TrendingDown, RefreshCw } from 'lucide-react'
+import { AlertTriangle, Package, TrendingDown, RefreshCw, CheckCircle } from 'lucide-react'
 
 interface ProblemProduct {
   id: number
@@ -13,12 +13,15 @@ interface ProblemProduct {
   avg_dispatch_days: number
   needs_review: boolean
   review_status: string
-  recommended_stock: number | null
+  recommended_stock: number
+  orders_per_week: number
+  calculated_stock: number
 }
 
 interface Summary {
   total: number
   needsReview: number
+  resolved: number
   avgSlowRate: number
   bySupplier: Record<string, number>
 }
@@ -32,7 +35,7 @@ export function DispatchProblemsWidget() {
   const fetchData = async () => {
     setLoading(true)
     try {
-      const res = await fetch('/api/dispatch/problem-products?minSlowRate=80&limit=20')
+      const res = await fetch('/api/dispatch/problem-products?minSlowRate=80&limit=20&needsReview=true')
       const data = await res.json()
 
       if (data.error) {
@@ -46,6 +49,25 @@ export function DispatchProblemsWidget() {
       setError(err.message)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const markResolved = async (id: number) => {
+    try {
+      const res = await fetch('/api/dispatch/problem-products', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, review_status: 'resolved' }),
+      })
+      if (res.ok) {
+        // Remove from list immediately
+        setProducts(prev => prev.filter(p => p.id !== id))
+        if (summary) {
+          setSummary({ ...summary, needsReview: Math.max(0, summary.needsReview - 1) })
+        }
+      }
+    } catch (err) {
+      console.error('Failed to mark resolved:', err)
     }
   }
 
@@ -104,12 +126,12 @@ export function DispatchProblemsWidget() {
             <p className="text-2xl font-bold text-orange-400">{summary.total}</p>
           </div>
           <div className="bg-gray-800/50 rounded-lg p-3">
-            <p className="text-gray-400 text-xs">Needs Review</p>
+            <p className="text-gray-400 text-xs">Need Stocking</p>
             <p className="text-2xl font-bold text-red-400">{summary.needsReview}</p>
           </div>
           <div className="bg-gray-800/50 rounded-lg p-3">
-            <p className="text-gray-400 text-xs">Avg Slow Rate</p>
-            <p className="text-2xl font-bold text-yellow-400">{summary.avgSlowRate}%</p>
+            <p className="text-gray-400 text-xs">Resolved</p>
+            <p className="text-2xl font-bold text-green-400">{summary.resolved || 0}</p>
           </div>
         </div>
       )}
@@ -140,9 +162,9 @@ export function DispatchProblemsWidget() {
             <tr className="text-left text-gray-400 border-b border-gray-800">
               <th className="pb-2 font-medium">SKU</th>
               <th className="pb-2 font-medium">Product</th>
-              <th className="pb-2 font-medium text-right">Slow %</th>
-              <th className="pb-2 font-medium text-right">Orders</th>
-              <th className="pb-2 font-medium text-right">Avg Days</th>
+              <th className="pb-2 font-medium text-right">Keep in Stock</th>
+              <th className="pb-2 font-medium text-right">Orders/Wk</th>
+              <th className="pb-2 font-medium text-center">Done</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-800/50">
@@ -157,21 +179,22 @@ export function DispatchProblemsWidget() {
                     : product.product_name}
                 </td>
                 <td className="py-2 text-right">
-                  <span className={`px-2 py-0.5 rounded text-xs font-medium ${
-                    product.slow_rate_percent >= 95
-                      ? 'bg-red-500/20 text-red-400'
-                      : product.slow_rate_percent >= 90
-                      ? 'bg-orange-500/20 text-orange-400'
-                      : 'bg-yellow-500/20 text-yellow-400'
-                  }`}>
-                    {product.slow_rate_percent.toFixed(0)}%
+                  <span className="text-lg font-bold text-green-400">
+                    {product.recommended_stock}
                   </span>
+                  <span className="text-gray-500 text-xs ml-1">units</span>
                 </td>
                 <td className="py-2 text-right text-gray-300">
-                  {product.slow_order_count}
+                  {product.orders_per_week}
                 </td>
-                <td className="py-2 text-right text-gray-300">
-                  {product.avg_dispatch_days.toFixed(1)}d
+                <td className="py-2 text-center">
+                  <button
+                    onClick={() => markResolved(product.id)}
+                    className="p-1.5 rounded hover:bg-green-500/20 text-gray-400 hover:text-green-400 transition-colors"
+                    title="Mark as stocked/resolved"
+                  >
+                    <CheckCircle className="w-4 h-4" />
+                  </button>
                 </td>
               </tr>
             ))}

@@ -46,24 +46,45 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
+    // Analysis period: 20,000 orders over ~13 weeks
+    const ANALYSIS_PERIOD_WEEKS = 13
+    const SAFETY_FACTOR = 1.5
+
+    // Calculate recommended stock for each product
+    const enrichedProducts = (products || []).map(p => {
+      const totalOrders = p.slow_order_count + (p.fast_order_count || 0)
+      const ordersPerWeek = Math.round((totalOrders / ANALYSIS_PERIOD_WEEKS) * 10) / 10
+      const weeksBuffer = Math.max(2, Math.ceil(p.avg_dispatch_days / 7) * SAFETY_FACTOR)
+      const calculatedStock = Math.ceil(ordersPerWeek * weeksBuffer)
+
+      return {
+        ...p,
+        orders_per_week: ordersPerWeek,
+        calculated_stock: calculatedStock,
+        // Use saved recommended_stock if set, otherwise use calculated
+        recommended_stock: p.recommended_stock || calculatedStock
+      }
+    })
+
     // Calculate summary stats
     const summary = {
-      total: products?.length || 0,
-      needsReview: products?.filter(p => p.needs_review).length || 0,
-      avgSlowRate: products?.length
-        ? Math.round(products.reduce((acc, p) => acc + p.slow_rate_percent, 0) / products.length * 10) / 10
+      total: enrichedProducts.length,
+      needsReview: enrichedProducts.filter(p => p.needs_review).length || 0,
+      resolved: enrichedProducts.filter(p => p.review_status === 'resolved').length || 0,
+      avgSlowRate: enrichedProducts.length
+        ? Math.round(enrichedProducts.reduce((acc, p) => acc + p.slow_rate_percent, 0) / enrichedProducts.length * 10) / 10
         : 0,
       bySupplier: {} as Record<string, number>
     }
 
     // Group by supplier
-    for (const product of products || []) {
+    for (const product of enrichedProducts) {
       const supplier = product.supplier_name || 'Unknown'
       summary.bySupplier[supplier] = (summary.bySupplier[supplier] || 0) + 1
     }
 
     return NextResponse.json({
-      products: products || [],
+      products: enrichedProducts,
       summary,
       lastUpdated: new Date().toISOString()
     })

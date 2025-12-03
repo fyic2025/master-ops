@@ -23,6 +23,7 @@ Ask yourself for EVERY task:
 - Does this involve content? → Check copywriter, description-generator, seo-content-writer skills
 - Does this involve automation? → Check n8n-workflow-manager, dashboard-automation
 - Does this involve customers? → Check segmentation-engine, churn-predictor skills
+- Does this involve web scraping/leads? → Check apify-expert
 
 ### Skill Activation Command
 
@@ -39,7 +40,7 @@ Example: Before writing email copy, activate:
 
 ---
 
-## Complete Skills Registry (37 Skills)
+## Complete Skills Registry (38 Skills)
 
 ### E-Commerce Platforms
 | Skill | Use When |
@@ -108,6 +109,7 @@ Example: Before writing email copy, activate:
 |-------|----------|
 | `supabase-expert` | Database queries, migrations, RLS, performance |
 | `n8n-workflow-manager` | Automation workflows, n8n troubleshooting |
+| `apify-expert` | Web scraping, Google Maps leads, business data extraction |
 | `webhook-event-router` | Webhook handling, event routing, replays |
 | `integration-tester` | API testing, connection validation |
 | `dashboard-automation` | Dashboard metrics, alerts, reports |
@@ -169,6 +171,14 @@ Testing integrations → integration-tester
 Checking stock levels → stock-alert-predictor + supplier-performance-scorecard
 ```
 
+### Lead Generation Tasks
+```
+Scraping Google Maps leads → apify-expert + supabase-expert
+Checking Apify usage → apify-expert
+Running lead scrapes → apify-expert + n8n-workflow-manager
+Processing scraped data → apify-expert + supabase-expert
+```
+
 ---
 
 ## Business Context
@@ -198,6 +208,43 @@ Common keys:
 - `bigcommerce_access_token` - BigCommerce API
 - `klaviyo_api_key` - Klaviyo API
 - `google_refresh_token` - Google APIs (GA4, GSC, Ads)
+- `apify_token` - Apify web scraping API (global)
+
+---
+
+## ⚠️ CRITICAL: Infrastructure & Deployment
+
+### Dashboard (ops.growthcohq.com)
+
+**The dashboard runs on DigitalOcean App Platform - NOT on a droplet!**
+
+| What | Value |
+|------|-------|
+| Platform | DigitalOcean App Platform |
+| App ID | `1a0eed70-aef6-415e-953f-d2b7f0c7c832` |
+| URL | https://ops.growthcohq.com |
+
+**To deploy dashboard changes:**
+```bash
+doctl apps create-deployment 1a0eed70-aef6-415e-953f-d2b7f0c7c832 --force-rebuild
+```
+
+**NEVER do this for the dashboard:**
+- ❌ Deploy via SCP to droplet (170.64.223.141)
+- ❌ Use PM2 on the droplet
+- ❌ Restart nginx for this app
+- ❌ SSH into droplet to deploy
+
+The droplet at 170.64.223.141 runs OTHER services (n8n, etc), not the dashboard.
+
+### Other Services on Droplet (170.64.223.141)
+
+| Service | Port | Managed By |
+|---------|------|------------|
+| n8n | 5678 | PM2/Docker |
+| Other automations | Various | PM2 |
+
+For these services, SCP + PM2 restart is correct.
 
 ---
 

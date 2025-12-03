@@ -1,5 +1,28 @@
 # Dashboard Deployment Guide
 
+## ⚠️ CRITICAL: How to Deploy
+
+**The dashboard runs on DigitalOcean App Platform, NOT on a droplet.**
+
+### ❌ NEVER DO THIS:
+- DO NOT deploy via SCP to any droplet
+- DO NOT use PM2 on the droplet for this app
+- DO NOT try to restart nginx for this app
+- The droplet (170.64.223.141) is for OTHER services, not this dashboard
+
+### ✅ CORRECT Deployment:
+```bash
+# Deploy latest code (auto-deploys from GitHub or force rebuild)
+doctl apps create-deployment 1a0eed70-aef6-415e-953f-d2b7f0c7c832 --force-rebuild
+
+# Monitor deployment progress
+doctl apps list-deployments 1a0eed70-aef6-415e-953f-d2b7f0c7c832 --format ID,Phase,Progress
+```
+
+Deployments typically take 3-5 minutes.
+
+---
+
 ## Production URL
 https://ops.growthcohq.com
 
@@ -10,7 +33,10 @@ https://ops.growthcohq.com
 
 ### Deployment Commands
 ```bash
-# Check status
+# Deploy (MAIN COMMAND - use this!)
+doctl apps create-deployment 1a0eed70-aef6-415e-953f-d2b7f0c7c832 --force-rebuild
+
+# Check deployment status
 doctl apps list-deployments 1a0eed70-aef6-415e-953f-d2b7f0c7c832 --format ID,Phase,Progress
 
 # View logs
