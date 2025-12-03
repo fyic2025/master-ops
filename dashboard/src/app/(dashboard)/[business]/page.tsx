@@ -6,6 +6,7 @@ import { AlertsPanel } from '@/components/AlertsPanel'
 import ApiUsageWidget from '@/components/ApiUsageWidget'
 import { JobMonitoringWidget } from '@/components/JobMonitoringWidget'
 import AwsMigrationWidget from '@/components/AwsMigrationWidget'
+import { DispatchProblemsWidget } from '@/components/DispatchProblemsWidget'
 
 export default function BusinessDashboard({
   params,
@@ -121,33 +122,45 @@ function SingleBusinessDashboard({ businessCode }: { businessCode: BusinessCode 
         )}
       </header>
 
-      {/* Quick Stats - Placeholder */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
-          <p className="text-gray-400 text-sm">Coming Soon</p>
-          <p className="text-2xl font-bold text-white mt-1">—</p>
-        </div>
-        <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
-          <p className="text-gray-400 text-sm">Coming Soon</p>
-          <p className="text-2xl font-bold text-white mt-1">—</p>
-        </div>
-        <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
-          <p className="text-gray-400 text-sm">Coming Soon</p>
-          <p className="text-2xl font-bold text-white mt-1">—</p>
-        </div>
-        <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
-          <p className="text-gray-400 text-sm">Coming Soon</p>
-          <p className="text-2xl font-bold text-white mt-1">—</p>
-        </div>
-      </div>
+      {/* BOO-specific widgets */}
+      {businessCode === 'boo' && (
+        <section>
+          <h2 className="text-xl font-semibold text-white mb-4">Stock Alerts</h2>
+          <DispatchProblemsWidget />
+        </section>
+      )}
 
-      {/* Placeholder content */}
-      <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
-        <p className="text-gray-400">
-          Business-specific features for {business.name} will appear here.
-          Use the sidebar to navigate to specific features.
-        </p>
-      </div>
+      {/* Quick Stats - Placeholder for non-BOO */}
+      {businessCode !== 'boo' && (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
+              <p className="text-gray-400 text-sm">Coming Soon</p>
+              <p className="text-2xl font-bold text-white mt-1">—</p>
+            </div>
+            <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
+              <p className="text-gray-400 text-sm">Coming Soon</p>
+              <p className="text-2xl font-bold text-white mt-1">—</p>
+            </div>
+            <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
+              <p className="text-gray-400 text-sm">Coming Soon</p>
+              <p className="text-2xl font-bold text-white mt-1">—</p>
+            </div>
+            <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
+              <p className="text-gray-400 text-sm">Coming Soon</p>
+              <p className="text-2xl font-bold text-white mt-1">—</p>
+            </div>
+          </div>
+
+          {/* Placeholder content */}
+          <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
+            <p className="text-gray-400">
+              Business-specific features for {business.name} will appear here.
+              Use the sidebar to navigate to specific features.
+            </p>
+          </div>
+        </>
+      )}
     </div>
   )
 }
