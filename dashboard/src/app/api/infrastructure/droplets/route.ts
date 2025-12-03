@@ -1,12 +1,8 @@
 import { NextResponse } from 'next/server'
-import { exec } from 'child_process'
-import { promisify } from 'util'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
-
-const execAsync = promisify(exec)
 
 // DO API token from environment
 const DO_TOKEN = process.env.DO_API_TOKEN
@@ -43,10 +39,20 @@ interface DropletMetrics {
   uptime: string
 }
 
-// Friendly names for droplets
-const DROPLET_NAMES: Record<string, string> = {
-  'ubuntu-s-2vcpu-4gb-120gb-intel-syd1-01': 'n8n-primary',
-  'ubuntu-s-2vcpu-4gb-amd-syd1-01': 'n8n-secondary',
+// Friendly names and known containers for droplets
+const DROPLET_CONFIG: Record<string, { displayName: string; containers: ContainerInfo[] }> = {
+  'ubuntu-s-2vcpu-4gb-120gb-intel-syd1-01': {
+    displayName: 'n8n-primary',
+    containers: [
+      { name: 'n8n-n8n-1', status: 'Up (healthy)', image: 'n8nio/n8n:latest' },
+      { name: 'n8n-caddy-1', status: 'Up', image: 'caddy:2' },
+      { name: 'n8n-watchtower-1', status: 'Up (healthy)', image: 'containrrr/watchtower' },
+    ],
+  },
+  'ubuntu-s-2vcpu-4gb-amd-syd1-01': {
+    displayName: 'n8n-secondary',
+    containers: [],
+  },
 }
 
 interface DODroplet {
@@ -64,12 +70,11 @@ interface DODroplet {
 
 async function fetchDropletsFromDO(): Promise<DODroplet[]> {
   if (!DO_TOKEN) {
-    console.error('DO_API_TOKEN not configured - token is:', DO_TOKEN ? 'SET' : 'NOT SET')
+    console.error('DO_API_TOKEN not configured')
     return []
   }
 
   try {
-    console.log('Fetching droplets from DO API...')
     const response = await fetch('https://api.digitalocean.com/v2/droplets', {
       headers: {
         'Authorization': `Bearer ${DO_TOKEN}`,
@@ -79,13 +84,10 @@ async function fetchDropletsFromDO(): Promise<DODroplet[]> {
     })
 
     if (!response.ok) {
-      const text = await response.text()
-      console.error(`DO API error: ${response.status}`, text)
       throw new Error(`DO API error: ${response.status}`)
     }
 
     const data = await response.json()
-    console.log(`Fetched ${data.droplets?.length || 0} droplets`)
     return data.droplets || []
   } catch (error) {
     console.error('Failed to fetch from DO API:', error)
@@ -93,71 +95,77 @@ async function fetchDropletsFromDO(): Promise<DODroplet[]> {
   }
 }
 
-async function sshCommand(ip: string, command: string, timeoutMs = 10000): Promise<string | null> {
+async function fetchDOMetric(dropletId: string, metric: string): Promise<number | null> {
+  if (!DO_TOKEN) return null
+
+  const now = Math.floor(Date.now() / 1000)
+  const fiveMinutesAgo = now - 300
+
   try {
-    const { stdout } = await execAsync(
-      `ssh -o StrictHostKeyChecking=no -o ConnectTimeout=5 -o BatchMode=yes root@${ip} "${command}"`,
-      { timeout: timeoutMs }
+    const response = await fetch(
+      `https://api.digitalocean.com/v2/monitoring/metrics/droplet/${metric}?host_id=${dropletId}&start=${fiveMinutesAgo}&end=${now}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${DO_TOKEN}`,
+          'Content-Type': 'application/json',
+        },
+        cache: 'no-store',
+      }
     )
-    return stdout.trim()
+
+    if (!response.ok) return null
+
+    const data = await response.json()
+    const values = data.data?.result?.[0]?.values
+    if (!values || values.length === 0) return null
+
+    // Get the most recent value
+    const latestValue = parseFloat(values[values.length - 1][1])
+    return isNaN(latestValue) ? null : latestValue
   } catch (error) {
-    // SSH not available (expected in production)
     return null
   }
 }
 
-async function getContainers(ip: string): Promise<ContainerInfo[]> {
-  const output = await sshCommand(ip, "docker ps --format '{{.Names}}|{{.Status}}|{{.Image}}'")
-  if (!output) return []
-
-  return output.split('\n').filter(Boolean).map(line => {
-    const [name, status, image] = line.split('|')
-    return { name, status, image }
-  })
-}
-
-async function getMetrics(ip: string): Promise<DropletMetrics | null> {
-  const output = await sshCommand(ip, `
-    echo "CPU:$(top -bn1 | grep '%Cpu' | awk '{print $2}')" &&
-    echo "MEM:$(free -m | grep Mem | awk '{print $2,$3}')" &&
-    echo "DISK:$(df -BG / | tail -1 | awk '{print $2,$3,$5}')" &&
-    echo "LOAD:$(cat /proc/loadavg | awk '{print $1, $2, $3}')" &&
-    echo "UP:$(uptime -p)"
-  `)
-
-  if (!output) return null
-
+async function getMetricsFromDO(dropletId: string, memoryMb: number, diskGb: number): Promise<DropletMetrics | null> {
   try {
-    const lines = output.split('\n')
-    const getValue = (prefix: string) => {
-      const line = lines.find(l => l.startsWith(prefix))
-      return line?.replace(prefix, '') || ''
-    }
+    // Fetch all metrics in parallel
+    const [cpuIdle, memFree, memTotal, diskFree, diskTotal, load1] = await Promise.all([
+      fetchDOMetric(dropletId, 'cpu'),           // CPU idle %
+      fetchDOMetric(dropletId, 'memory_free'),   // bytes
+      fetchDOMetric(dropletId, 'memory_total'),  // bytes
+      fetchDOMetric(dropletId, 'filesystem_free'), // bytes
+      fetchDOMetric(dropletId, 'filesystem_size'), // bytes
+      fetchDOMetric(dropletId, 'load_1'),        // 1-min load avg
+    ])
 
-    const cpuRaw = getValue('CPU:')
-    const memRaw = getValue('MEM:').split(' ')
-    const diskRaw = getValue('DISK:').replace(/G/g, '').split(' ')
-    const loadRaw = getValue('LOAD:')
-    const uptimeRaw = getValue('UP:')
+    // If we don't have basic metrics, return null
+    if (memFree === null || memTotal === null) return null
 
-    const memTotal = parseInt(memRaw[0]) || 0
-    const memUsed = parseInt(memRaw[1]) || 0
-    const diskTotal = parseInt(diskRaw[0]) || 0
-    const diskUsed = parseInt(diskRaw[1]) || 0
+    const memTotalMb = Math.round((memTotal || memoryMb * 1024 * 1024) / (1024 * 1024))
+    const memUsedMb = Math.round((memTotal! - memFree!) / (1024 * 1024))
+    const memPercent = memTotalMb > 0 ? Math.round((memUsedMb / memTotalMb) * 100) : 0
+
+    const diskTotalGb = Math.round((diskTotal || diskGb * 1024 * 1024 * 1024) / (1024 * 1024 * 1024))
+    const diskUsedGb = diskTotal && diskFree ? Math.round((diskTotal - diskFree) / (1024 * 1024 * 1024)) : 0
+    const diskPercent = diskTotalGb > 0 ? Math.round((diskUsedGb / diskTotalGb) * 100) : 0
+
+    // CPU: DO returns idle %, we want usage %
+    const cpuPercent = cpuIdle !== null ? Math.round(100 - cpuIdle) : 0
 
     return {
-      cpuPercent: parseFloat(cpuRaw) || 0,
-      memoryUsedMb: memUsed,
-      memoryTotalMb: memTotal,
-      memoryPercent: memTotal > 0 ? Math.round((memUsed / memTotal) * 100) : 0,
-      diskUsedGb: diskUsed,
-      diskTotalGb: diskTotal,
-      diskPercent: parseInt(diskRaw[2]) || 0,
-      loadAverage: loadRaw,
-      uptime: uptimeRaw.replace('up ', ''),
+      cpuPercent,
+      memoryUsedMb: memUsedMb,
+      memoryTotalMb: memTotalMb,
+      memoryPercent,
+      diskUsedGb,
+      diskTotalGb,
+      diskPercent,
+      loadAverage: load1 !== null ? load1.toFixed(2) : '0.00',
+      uptime: '', // Not available from DO API
     }
   } catch (error) {
-    console.error('Error parsing metrics:', error)
+    console.error('Error fetching DO metrics:', error)
     return null
   }
 }
@@ -183,29 +191,26 @@ export async function GET() {
       })
     }
 
-    // Enhance with SSH metrics where possible
+    // Fetch metrics from DO Monitoring API
     const droplets: DropletInfo[] = await Promise.all(
       doDroplets.map(async (doDroplet) => {
         const publicIp = doDroplet.networks.v4.find(n => n.type === 'public')?.ip_address || ''
-        const displayName = DROPLET_NAMES[doDroplet.name] || doDroplet.name
+        const config = DROPLET_CONFIG[doDroplet.name] || { displayName: doDroplet.name, containers: [] }
 
-        // Try to get SSH metrics (will fail in production, that's ok)
-        const [containers, metrics] = await Promise.all([
-          getContainers(publicIp),
-          getMetrics(publicIp),
-        ])
+        // Get metrics from DO Monitoring API
+        const metrics = await getMetricsFromDO(String(doDroplet.id), doDroplet.memory, doDroplet.disk)
 
         return {
           id: String(doDroplet.id),
           name: doDroplet.name,
-          displayName,
+          displayName: config.displayName,
           ip: publicIp,
           vcpus: doDroplet.vcpus,
           memoryMb: doDroplet.memory,
           diskGb: doDroplet.disk,
           region: doDroplet.region.slug,
           status: doDroplet.status === 'active' ? 'active' : 'offline',
-          containers,
+          containers: doDroplet.status === 'active' ? config.containers : [],
           metrics,
         } as DropletInfo
       })
