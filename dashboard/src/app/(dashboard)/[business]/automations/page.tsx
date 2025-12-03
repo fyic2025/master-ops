@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import {
@@ -28,8 +28,11 @@ export default function AutomationsPage() {
   const [stats, setStats] = useState<Record<string, AutomationStats>>({})
   const [error, setError] = useState<string | null>(null)
 
-  // Get automations available for this business
-  const availableAutomations = getAutomationsForBusiness(business)
+  // Memoize automations to prevent infinite loop
+  const availableAutomations = useMemo(
+    () => getAutomationsForBusiness(business),
+    [business]
+  )
 
   const fetchData = useCallback(async () => {
     setLoading(true)
@@ -68,7 +71,7 @@ export default function AutomationsPage() {
     } finally {
       setLoading(false)
     }
-  }, [business, availableAutomations])
+  }, [availableAutomations])
 
   useEffect(() => {
     if (availableAutomations.length > 0) {
