@@ -127,6 +127,15 @@ export async function syncInventory(
 
       result.stats.matched++
 
+      // Respect Shopify oversell setting - never override products that allow overselling
+      if (shopifyItem.inventoryPolicy === 'continue') {
+        result.stats.skipped++
+        if (verbose) {
+          console.log(`   ⏭️  ${sku}: Skipped (Shopify allows oversell)`)
+        }
+        continue
+      }
+
       // Check if update needed
       if (shopifyItem.currentQuantity === unleashedQty) {
         result.stats.skipped++

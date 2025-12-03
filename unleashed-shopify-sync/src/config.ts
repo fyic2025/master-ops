@@ -50,8 +50,8 @@ export function loadConfig(): SyncConfig {
         name: 'teelixir',
         displayName: 'Teelixir',
         shopify: {
-          shopDomain: process.env.TEELIXIR_SHOPIFY_SHOP_DOMAIN || 'teelixir.com.au',
-          accessToken: process.env.TEELIXIR_SHOPIFY_ACCESS_TOKEN || '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',
+          shopDomain: process.env.TEELIXIR_SHOPIFY_STORE_URL || 'teelixir-au.myshopify.com',
+          accessToken: process.env.TEELIXIR_SHOPIFY_ACCESS_TOKEN || '',
           apiVersion: process.env.TEELIXIR_SHOPIFY_API_VERSION || '2024-01',
           locationId: parseInt(process.env.TEELIXIR_SHOPIFY_LOCATION_ID || '78624784659'),
         },

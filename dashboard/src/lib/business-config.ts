@@ -73,6 +73,7 @@ export const BUSINESSES: Record<BusinessCode, Business> = {
     navigation: [
       { name: 'Dashboard', href: '', icon: Home },
       { name: 'Shipping', href: '/shipping', icon: Send },
+      { name: 'Automations', href: '/automations', icon: Zap },
       { name: 'SEO', href: '/seo', icon: Search },
       { name: 'Merchant Center', href: '/merchant', icon: ShoppingCart },
       { name: 'Stock Sync', href: '/stock', icon: Package },
@@ -91,6 +92,7 @@ export const BUSINESSES: Record<BusinessCode, Business> = {
     navigation: [
       { name: 'Dashboard', href: '', icon: Home },
       { name: 'Orders', href: '/orders', icon: ShoppingCart },
+      { name: 'Automations', href: '/automations', icon: Zap },
       { name: 'Delivery Zones', href: '/delivery', icon: Truck },
       { name: 'Inventory', href: '/inventory', icon: Package },
     ]
@@ -108,6 +110,7 @@ export const BUSINESSES: Record<BusinessCode, Business> = {
       { name: 'Distributors', href: '/distributors', icon: Truck },
       { name: 'Dist. Trends', href: '/distributors/trends', icon: TrendingUp },
       { name: 'Automations', href: '/automations', icon: Zap },
+      { name: 'Cron Jobs', href: '/cron', icon: RefreshCw },
       { name: 'Orders', href: '/orders', icon: ShoppingCart },
       { name: 'Products', href: '/products', icon: Package },
       { name: 'Ads Performance', href: '/ads', icon: BarChart3 },
@@ -123,6 +126,7 @@ export const BUSINESSES: Record<BusinessCode, Business> = {
     navigation: [
       { name: 'Dashboard', href: '', icon: Home },
       { name: 'Shipping', href: '/shipping', icon: Send },
+      { name: 'Automations', href: '/automations', icon: Zap },
       { name: 'Prospecting', href: '/prospecting', icon: Target },
       { name: 'Customers', href: '/customers', icon: Users },
       { name: 'Trials', href: '/trials', icon: Clock },
