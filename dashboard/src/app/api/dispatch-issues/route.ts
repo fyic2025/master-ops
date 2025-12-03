@@ -39,17 +39,22 @@ export async function GET(request: NextRequest) {
 
     // Analysis period: 20,000 orders over ~90 days (approx 3 months of data)
     const ANALYSIS_PERIOD_WEEKS = 13
-    const SAFETY_FACTOR = 1.5 // Keep 1.5x the expected demand
+
+    // Stock Logic:
+    // - Supplier lead time is ~7 days (order placed → stock arrives)
+    // - Keep 1 week of orders on hand to ship same-day while waiting for restock
+    // - Add small buffer (1.2x) for demand spikes
+    const SUPPLIER_LEAD_TIME_WEEKS = 1
+    const DEMAND_BUFFER = 1.2
 
     // Enrich with calculated metrics
     const enrichedData = (data || []).map(item => {
       const totalOrders = item.slow_order_count + item.fast_order_count
       const ordersPerWeek = Math.round((totalOrders / ANALYSIS_PERIOD_WEEKS) * 10) / 10
 
-      // Recommended stock = orders per week * weeks of buffer (based on dispatch delay)
-      // If dispatch takes 7 days avg, keep 2 weeks of stock minimum
-      const weeksBuffer = Math.max(2, Math.ceil(item.avg_dispatch_days / 7) * SAFETY_FACTOR)
-      const recommendedStock = Math.ceil(ordersPerWeek * weeksBuffer)
+      // Stock = 1 week of demand × buffer (enough to cover supplier lead time)
+      const weeksBuffer = SUPPLIER_LEAD_TIME_WEEKS
+      const recommendedStock = Math.ceil(ordersPerWeek * weeksBuffer * DEMAND_BUFFER)
 
       return {
         ...item,
