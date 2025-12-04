@@ -563,7 +563,12 @@ async function syncOrders(
 
         // Upsert line items
         if (order.SalesOrderLines && order.SalesOrderLines.length > 0) {
-          const lineItems = order.SalesOrderLines.map(line => {
+          // Filter out line items without valid product codes
+          const validLines = order.SalesOrderLines.filter(line =>
+            line.Product?.ProductCode && line.Product.ProductCode.trim() !== ''
+          )
+
+          const lineItems = validLines.map(line => {
             const lineNotes = parseOrderNotes(line.Comments || '', [])
 
             return {
@@ -571,7 +576,7 @@ async function syncOrders(
               product_id: productMap.get(line.Product.ProductCode) || null,
               line_number: line.LineNumber,
               product_code: line.Product.ProductCode,
-              product_description: line.Product.ProductDescription,
+              product_description: line.Product.ProductDescription || '',
               quantity_ordered: line.OrderQuantity,
               unit_price: line.UnitPrice,
               discount_percent: line.DiscountRate || 0,
@@ -588,12 +593,15 @@ async function syncOrders(
             .delete()
             .eq('order_id', orderData.id)
 
-          const { error: lineError } = await supabase
-            .from('tlx_order_line_items')
-            .insert(lineItems)
+          // Only insert if there are valid line items
+          if (lineItems.length > 0) {
+            const { error: lineError } = await supabase
+              .from('tlx_order_line_items')
+              .insert(lineItems)
 
-          if (lineError) {
-            errors.push({ error: `Line items failed: ${lineError.message}`, id: order.OrderNumber })
+            if (lineError) {
+              errors.push({ error: `Line items failed: ${lineError.message}`, id: order.OrderNumber })
+            }
           }
         }
 
