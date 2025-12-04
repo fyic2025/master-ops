@@ -16,7 +16,7 @@ const SYNCABLE_JOBS: Record<string, {
 }> = {
   'stock-sync': {
     business: 'boo',
-    script: 'buy-organics-online/sync-all-suppliers.js',
+    script: 'scripts/boo/sync-all-suppliers.js',
     description: 'Sync stock from all suppliers (UHP, Kadac, Oborne, Unleashed)',
     timeout: 300000 // 5 minutes - this job takes ~1 min normally
   },
@@ -66,16 +66,16 @@ export async function POST(request: NextRequest) {
       .eq('job_name', jobName)
       .eq('business', job.business)
 
-    // Run the sync script
-    const projectRoot = path.resolve(process.cwd(), '..')
-    const scriptPath = path.join(projectRoot, job.script)
+    // Run the sync script (scripts are in dashboard/scripts/)
+    const dashboardRoot = process.cwd()
+    const scriptPath = path.join(dashboardRoot, job.script)
     const command = `node "${scriptPath}" ${job.args || ''}`
 
     console.log(`Running sync: ${command}`)
 
     try {
       const { stdout, stderr } = await execAsync(command, {
-        cwd: projectRoot,
+        cwd: dashboardRoot,
         timeout: job.timeout || 300000, // Use job-specific timeout or default 5 minutes
         env: {
           ...process.env,
