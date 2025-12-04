@@ -766,15 +766,53 @@ function TaskCard({ task, onClarificationSubmit }: { task: Task, onClarification
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
 
-  const copyToClipboard = () => {
+  const copyToClipboard = async () => {
     // Use comprehensive prompt for Claude Code planning
     const text = generateClaudePrompt(task)
-    navigator.clipboard.writeText(text)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+
+    try {
+      // Try the modern clipboard API first
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text)
+      } else {
+        // Fallback for older browsers or when clipboard API unavailable
+        const textArea = document.createElement('textarea')
+        textArea.value = text
+        textArea.style.position = 'fixed'
+        textArea.style.left = '-999999px'
+        textArea.style.top = '-999999px'
+        document.body.appendChild(textArea)
+        textArea.focus()
+        textArea.select()
+        document.execCommand('copy')
+        document.body.removeChild(textArea)
+      }
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch (err) {
+      console.error('Failed to copy:', err)
+      // Still try the fallback
+      try {
+        const textArea = document.createElement('textarea')
+        textArea.value = text
+        textArea.style.position = 'fixed'
+        textArea.style.left = '-999999px'
+        textArea.style.top = '-999999px'
+        document.body.appendChild(textArea)
+        textArea.focus()
+        textArea.select()
+        document.execCommand('copy')
+        document.body.removeChild(textArea)
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+      } catch (fallbackErr) {
+        console.error('Fallback copy failed:', fallbackErr)
+        alert('Failed to copy to clipboard. Please try again.')
+      }
+    }
   }
 
-  const copyResearchPrompt = () => {
+  const copyResearchPrompt = async () => {
     const text = `## Research Task: ${task.title}
 
 ${task.description}
@@ -792,9 +830,44 @@ ${task.instructions || 'No detailed instructions yet.'}
 ${task.source || 'Not specified'}
 
 After research, update this task in the dashboard with your findings.`
-    navigator.clipboard.writeText(text)
-    setCopiedResearch(true)
-    setTimeout(() => setCopiedResearch(false), 2000)
+
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text)
+      } else {
+        const textArea = document.createElement('textarea')
+        textArea.value = text
+        textArea.style.position = 'fixed'
+        textArea.style.left = '-999999px'
+        textArea.style.top = '-999999px'
+        document.body.appendChild(textArea)
+        textArea.focus()
+        textArea.select()
+        document.execCommand('copy')
+        document.body.removeChild(textArea)
+      }
+      setCopiedResearch(true)
+      setTimeout(() => setCopiedResearch(false), 2000)
+    } catch (err) {
+      console.error('Failed to copy research prompt:', err)
+      try {
+        const textArea = document.createElement('textarea')
+        textArea.value = text
+        textArea.style.position = 'fixed'
+        textArea.style.left = '-999999px'
+        textArea.style.top = '-999999px'
+        document.body.appendChild(textArea)
+        textArea.focus()
+        textArea.select()
+        document.execCommand('copy')
+        document.body.removeChild(textArea)
+        setCopiedResearch(true)
+        setTimeout(() => setCopiedResearch(false), 2000)
+      } catch (fallbackErr) {
+        console.error('Fallback copy failed:', fallbackErr)
+        alert('Failed to copy to clipboard. Please try again.')
+      }
+    }
   }
 
   const handleSubmitClarification = async () => {
@@ -1145,7 +1218,7 @@ function AddTaskModal({
     }
   }
 
-  const handleCopyOnly = () => {
+  const handleCopyOnly = async () => {
     const taskData = `## New Task to Add
 
 **Business:** ${business}
@@ -1157,8 +1230,26 @@ function AddTaskModal({
 ## Instructions for Claude Code
 Add this task to the dashboard.`
 
-    navigator.clipboard.writeText(taskData)
-    alert('Task copied to clipboard!')
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(taskData)
+      } else {
+        const textArea = document.createElement('textarea')
+        textArea.value = taskData
+        textArea.style.position = 'fixed'
+        textArea.style.left = '-999999px'
+        textArea.style.top = '-999999px'
+        document.body.appendChild(textArea)
+        textArea.focus()
+        textArea.select()
+        document.execCommand('copy')
+        document.body.removeChild(textArea)
+      }
+      alert('Task copied to clipboard!')
+    } catch (err) {
+      console.error('Failed to copy:', err)
+      alert('Failed to copy to clipboard. Please try again.')
+    }
   }
 
   if (!isOpen) return null
