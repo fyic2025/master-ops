@@ -1,0 +1,164 @@
+{
+  "name": "Dashboard Health Check",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Every 15 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [260, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://ops.growthcohq.com/api/monitoring/errors",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "check-errors-api",
+      "name": "Check Error Stats",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.status }}",
+              "operation": "equals",
+              "value2": "critical"
+            }
+          ]
+        }
+      },
+      "id": "check-critical",
+      "name": "Is Critical?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [700, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://qcvfxxsnqvdfmpbcgdni.supabase.co/rest/v1/dashboard_alerts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=minimal"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"business\": \"all\",\n  \"type\": \"error\",\n  \"title\": \"High Error Rate Detected\",\n  \"message\": \"{{ $json.byLevel.error }} errors in last 24h. Top: {{ $json.recentErrors[0]?.message || 'N/A' }}\",\n  \"action_url\": \"/monitoring/errors\",\n  \"action_label\": \"View Errors\"\n}"
+      },
+      "id": "create-alert",
+      "name": "Create Alert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [920, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://qcvfxxsnqvdfmpbcgdni.supabase.co/rest/v1/dashboard_health_checks",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"business\": \"all\",\n  \"integration\": \"dashboard\",\n  \"status\": \"{{ $json.status === 'healthy' ? 'healthy' : ($json.status === 'critical' ? 'down' : 'degraded') }}\",\n  \"last_check\": \"{{ $now.toISO() }}\",\n  \"details\": {{ JSON.stringify($json) }}\n}"
+      },
+      "id": "update-health",
+      "name": "Update Health Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [920, 400]
+    }
+  ],
+  "connections": {
+    "Every 15 Minutes": {
+      "main": [
+        [
+          {
+            "node": "Check Error Stats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Error Stats": {
+      "main": [
+        [
+          {
+            "node": "Is Critical?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update Health Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Critical?": {
+      "main": [
+        [
+          {
+            "node": "Create Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "monitoring"
+    },
+    {
+      "name": "dashboard"
+    }
+  ]
+}
