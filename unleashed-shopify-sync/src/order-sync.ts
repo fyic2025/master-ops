@@ -19,6 +19,37 @@ export interface OrderSyncOptions {
   verbose?: boolean
 }
 
+/**
+ * Title-based SKU mappings for products without SKUs in Shopify
+ * Maps product title patterns to Unleashed product codes
+ */
+const TITLE_TO_SKU_MAPPINGS: Array<{ pattern: RegExp; sku: string }> = [
+  { pattern: /lion'?s?\s*mane.*capsule/i, sku: 'CAPS90LION' },
+  // Add more mappings as needed:
+  // { pattern: /reishi.*capsule/i, sku: 'CAPS90REI' },
+]
+
+/**
+ * Resolve product SKU from item SKU or title
+ * Falls back to title-based mapping if SKU is missing
+ */
+function resolveProductSku(sku: string | undefined | null, title: string): string | null {
+  // If SKU exists and is not empty, use it
+  if (sku && sku.trim() !== '') {
+    return sku.trim()
+  }
+
+  // Try to match title against known patterns
+  for (const mapping of TITLE_TO_SKU_MAPPINGS) {
+    if (mapping.pattern.test(title)) {
+      return mapping.sku
+    }
+  }
+
+  // No SKU and no title match
+  return null
+}
+
 // Proper Unleashed API types (different from types.ts simplified versions)
 interface UnleashedApiSalesOrder {
   Customer: {
@@ -90,9 +121,9 @@ export async function syncOrder(
   console.log(`   Total: $${order.total_price}`)
 
   try {
-    // Check if order already exists in Unleashed (by order number pattern)
+    // Check if order already exists in Unleashed (by CustomerRef = Shopify order ID)
     if (!options.dryRun) {
-      const existingOrder = await checkExistingUnleashedOrder(config, order.order_number)
+      const existingOrder = await checkExistingUnleashedOrder(config, order.id)
       if (existingOrder) {
         console.log(`   ⏭️ Already synced (${existingOrder})`)
         result.status = 'skipped'
@@ -117,12 +148,14 @@ export async function syncOrder(
     let lineNumber = 1
 
     for (const item of order.line_items) {
-      const bundleComponents = bundleMap.get(item.sku)
+      // Resolve SKU - use item.sku or fallback to title-based mapping
+      const resolvedSku = resolveProductSku(item.sku, item.title)
+      const bundleComponents = bundleMap.get(resolvedSku)
 
       if (bundleComponents && bundleComponents.length > 0) {
         // This is a bundle - expand to components
         bundlesExpanded++
-        console.log(`   🎁 Bundle: ${item.title} (${item.sku}) x${item.quantity}`)
+        console.log(`   🎁 Bundle: ${item.title} (${resolvedSku}) x${item.quantity}`)
 
         for (const component of bundleComponents) {
           const componentQty = item.quantity * component.component_quantity
@@ -142,14 +175,14 @@ export async function syncOrder(
           })
           console.log(`      → ${component.unleashed_product_code} x${componentQty}`)
         }
-      } else {
-        // Regular product
+      } else if (resolvedSku) {
+        // Regular product with valid SKU
         const unitPrice = parseFloat(item.price)
         const lineTotal = Math.round(item.quantity * unitPrice * 100) / 100
         expandedLines.push({
           LineNumber: lineNumber++,
           Product: {
-            ProductCode: item.sku,
+            ProductCode: resolvedSku,
           },
           OrderQuantity: item.quantity,
           UnitPrice: unitPrice,
@@ -158,9 +191,12 @@ export async function syncOrder(
           TaxRate: 0,
           LineTax: 0,
         })
-        if (verbose) {
-          console.log(`   📦 ${item.sku}: ${item.title} x${item.quantity}`)
+        if (verbose || resolvedSku !== item.sku) {
+          console.log(`   📦 ${resolvedSku}: ${item.title} x${item.quantity}${resolvedSku !== item.sku ? ' (mapped from title)' : ''}`)
         }
+      } else {
+        // No SKU and no mapping - log warning but continue
+        console.log(`   ⚠️ Skipping item without SKU: ${item.title}`)
       }
     }
 
@@ -179,12 +215,14 @@ export async function syncOrder(
     const customer = await findOrCreateUnleashedCustomer(config, order, dryRun)
 
     // Build Unleashed sales order with proper API structure
+    // Note: Always use 'Parked' status - 'Completed' requires batch allocation
+    // Orders can be completed manually in Unleashed after batch selection
     const salesOrder: UnleashedApiSalesOrder = {
       Customer: customer,
       OrderDate: new Date(order.created_at).toISOString(),
       RequiredDate: new Date(order.created_at).toISOString(),
-      OrderStatus: order.financial_status === 'paid' ? 'Completed' : 'Parked',
-      Comments: `Shopify Order #${order.order_number}. Email: ${order.email}`,
+      OrderStatus: 'Parked',
+      Comments: `Shopify Order #${order.order_number}. Email: ${order.email}. Payment: ${order.financial_status}`,
       CustomerRef: order.id.toString(),
       Tax: {
         TaxCode: 'G.S.T.', // Australian GST (line items have TaxRate: 0)
@@ -290,16 +328,29 @@ async function findOrCreateUnleashedCustomer(
   }
 }
 
+// Cache for recent Unleashed orders to avoid repeated API calls
+let recentOrdersCache: Map<string, string> | null = null
+let recentOrdersCacheTime: number = 0
+const CACHE_TTL = 60000 // 1 minute
+
 /**
  * Check if a Shopify order already exists in Unleashed
- * Searches for order number pattern like "Shopify31695"
+ * Fetches recent orders and filters locally by CustomerRef
+ * (Unleashed API customerRef filter doesn't work properly)
  */
 async function checkExistingUnleashedOrder(
   config: StoreConfig,
-  shopifyOrderNumber: number
+  shopifyOrderId: string | number
 ): Promise<string | null> {
-  const orderNumber = `Shopify${shopifyOrderNumber}`
-  const queryString = `orderNumber=${encodeURIComponent(orderNumber)}`
+  const targetRef = String(shopifyOrderId)
+
+  // Use cache if fresh
+  if (recentOrdersCache && Date.now() - recentOrdersCacheTime < CACHE_TTL) {
+    return recentOrdersCache.get(targetRef) || null
+  }
+
+  // Fetch recent orders (last 100) and build lookup map
+  const queryString = 'pageSize=100'
   const url = `${config.unleashed.apiUrl}/SalesOrders?${queryString}`
   const signature = generateUnleashedSignature(queryString, config.unleashed.apiKey)
 
@@ -319,10 +370,17 @@ async function checkExistingUnleashedOrder(
 
     const data = await response.json()
     const items = data.Items || []
-    if (items.length > 0) {
-      return items[0].OrderNumber || items[0].Guid
+
+    // Build cache: CustomerRef -> OrderNumber
+    recentOrdersCache = new Map()
+    for (const order of items) {
+      if (order.CustomerRef) {
+        recentOrdersCache.set(order.CustomerRef, order.OrderNumber || order.Guid)
+      }
     }
-    return null
+    recentOrdersCacheTime = Date.now()
+
+    return recentOrdersCache.get(targetRef) || null
   } catch {
     return null
   }

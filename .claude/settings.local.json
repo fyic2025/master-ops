@@ -119,7 +119,8 @@
       "Skill(email-campaign-manager)",
       "Skill(supabase-expert)",
       "Bash(powershell \"Get-Content ''c:/Users/jayso/master-ops/infra/supabase/migrations/20251204_cashflow_schema.sql'' | Set-Clipboard\")",
-      "Bash(git diff:*)"
+      "Bash(git diff:*)",
+      "Bash(python:*)"
     ],
     "deny": [],
     "ask": []
