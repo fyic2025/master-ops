@@ -238,12 +238,12 @@ async function fetchAllUnleashedStock(config: StoreConfig): Promise<UnleashedSto
       throw new Error(`Unleashed API error ${response.status}: ${errorText}`)
     }
 
-    const data = await response.json()
+    const data = await response.json() as { Items?: UnleashedStockItem[]; Pagination?: { NumberOfPages: number } }
     const items = data.Items || []
     allStock.push(...items)
 
     const pagination = data.Pagination
-    hasMore = pagination && page < pagination.NumberOfPages
+    hasMore = pagination ? page < pagination.NumberOfPages : false
     page++
   }
 
@@ -273,7 +273,7 @@ async function fetchAllShopifyProducts(config: StoreConfig): Promise<ShopifyProd
       throw new Error(`Shopify API error ${response.status}: ${errorText}`)
     }
 
-    const data = await response.json()
+    const data = await response.json() as { products?: ShopifyProduct[] }
     const products = data.products || []
 
     if (products.length === 0) {

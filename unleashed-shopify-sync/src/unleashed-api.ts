@@ -255,7 +255,7 @@ export class UnleashedClient {
       throw new Error(`Unleashed API error (${response.status}): ${errorText}`)
     }
 
-    return response.json()
+    return response.json() as Promise<T>
   }
 
   // ==========================================================================
@@ -398,7 +398,7 @@ export class UnleashedClient {
 
     order.SalesOrderLines.push(newLine)
 
-    return this.updateSalesOrder(prepareOrderForUpdate(order, order.SalesOrderLines) as SalesOrder)
+    return this.updateSalesOrder(prepareOrderForUpdate(order, order.SalesOrderLines) as Partial<SalesOrder> & { Guid: string })
   }
 
   /**
@@ -424,7 +424,7 @@ export class UnleashedClient {
       throw new Error(`Product not found in order: ${productCode}`)
     }
 
-    return this.updateSalesOrder(prepareOrderForUpdate(order, filteredLines) as SalesOrder)
+    return this.updateSalesOrder(prepareOrderForUpdate(order, filteredLines) as Partial<SalesOrder> & { Guid: string })
   }
 
   /**
@@ -457,7 +457,7 @@ export class UnleashedClient {
     line.OrderQuantity = newQuantity
     line.LineTotal = Math.round(newQuantity * discountedUnitPrice * 100) / 100
 
-    return this.updateSalesOrder(prepareOrderForUpdate(order, order.SalesOrderLines) as SalesOrder)
+    return this.updateSalesOrder(prepareOrderForUpdate(order, order.SalesOrderLines) as Partial<SalesOrder> & { Guid: string })
   }
 
   // ==========================================================================

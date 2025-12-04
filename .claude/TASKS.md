@@ -210,6 +210,10 @@ Tasks moved here after completion for reference.
 - [x] **2025-12-03** Teelixir Unleashed inventory sync | Added cron jobs for inventory sync
 - [x] **2025-12-03** n8n workflow audit and cleanup scripts | Batch HTTP auth fixes, inactive workflow detection
 - [x] **2025-12-04** Session exit automation | SessionEnd hook to auto-save tasks, commit, and push to git
+- [x] **2025-12-04** Fixed gmc-sync path resolution | Scripts moved to dashboard/scripts/, added GMC OAuth credentials to DO App Platform
+- [x] **2025-12-04** Job monitoring UI improvements | Added "Last attempted" date display, stock-sync to syncable jobs
+- [x] **2025-12-04** Teelixir order sync fixes | Fixed duplicate detection, added discount sync, fuzzy matching, B2C filter
+- [x] **2025-12-04** Fixed unleashed-order-sync n8n job | Created HubSpot sync schema, deployed tables, validated workflow
 
 ---
 
@@ -290,6 +294,35 @@ Move to "Completed Tasks" section at bottom.
 **Droplet Infrastructure Tasks:**
 - [ ] P2 Install DO monitoring agent on n8n-secondary: `curl -sSL https://repos.insights.digitalocean.com/install.sh | bash`
 - [ ] P3 Evaluate load sharing: Consider n8n worker mode or dedicated task routing
+
+---
+
+## Teelixir Shopify-Unleashed Order Sync Notes
+
+**Status:** Live and Working (2025-12-04)
+
+**Features Implemented:**
+- Discount sync: Shopify `total_discount` → Unleashed `DiscountRate` (percentage)
+- Order format: `Shopify{order_number}` (e.g., Shopify31694) + CustomerCode = order ID
+- Fuzzy duplicate detection: customer name + date (±1 day) + total (±5%)
+- B2C filter: Distributor sync now skips orders with `Shopify` prefix
+
+**Scripts:**
+- `unleashed-shopify-sync/scripts/run-order-sync.ts` - Syncs Shopify orders to Unleashed
+- `unleashed-shopify-sync/scripts/check-duplicates.ts` - Detects duplicate orders in Unleashed
+- `teelixir/scripts/sync-distributor-orders.ts` - Syncs distributor orders from Unleashed to Supabase
+
+**Key Files Modified:**
+- `unleashed-shopify-sync/src/order-sync.ts` - Added discount calc, fuzzy matching, new order format
+- `unleashed-shopify-sync/src/types.ts` - Added `total_discount`, `discount_allocations` to ShopifyLineItem
+- `teelixir/scripts/sync-distributor-orders.ts` - Fixed B2C filter, empty ProductCode handling
+
+**Duplicate Detection (3 levels):**
+1. Exact CustomerRef match (Shopify order ID)
+2. Exact OrderNumber match (Shopify{order_number})
+3. Fuzzy: same customer name + within 1 day + total within 5%
+
+**Git Commit:** 499fc9a
 
 ---
 
@@ -601,5 +634,9 @@ Move to "Completed Tasks" section at bottom.
 - Pending tasks saved: 0
 
 ### Session fb5348de (2025-12-04 06:05 pm)
+- Exit reason: other
+- Pending tasks saved: 0
+
+### Session 1a67d5d4 (2025-12-04 07:02 pm)
 - Exit reason: other
 - Pending tasks saved: 0

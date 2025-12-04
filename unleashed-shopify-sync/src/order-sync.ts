@@ -152,7 +152,7 @@ export async function syncOrder(
     for (const item of order.line_items) {
       // Resolve SKU - use item.sku or fallback to title-based mapping
       const resolvedSku = resolveProductSku(item.sku, item.title)
-      const bundleComponents = bundleMap.get(resolvedSku)
+      const bundleComponents = resolvedSku ? bundleMap.get(resolvedSku) : undefined
 
       if (bundleComponents && bundleComponents.length > 0) {
         // This is a bundle - expand to components
@@ -407,10 +407,10 @@ async function fetchRecentUnleashedOrders(config: StoreConfig): Promise<CachedUn
       return []
     }
 
-    const data = await response.json()
+    const data = await response.json() as { Items?: any[] }
     const items = data.Items || []
 
-    recentOrdersCache = items.map((order: any) => ({
+    const cachedOrders: CachedUnleashedOrder[] = items.map((order: any) => ({
       orderNumber: order.OrderNumber || '',
       guid: order.Guid || '',
       customerRef: order.CustomerRef || null,
@@ -418,9 +418,10 @@ async function fetchRecentUnleashedOrders(config: StoreConfig): Promise<CachedUn
       orderDate: order.OrderDate || '',
       total: order.Total || 0,
     }))
+    recentOrdersCache = cachedOrders
     recentOrdersCacheTime = Date.now()
 
-    return recentOrdersCache
+    return cachedOrders
   } catch {
     return []
   }
@@ -572,7 +573,7 @@ async function findUnleashedCustomer(
       return null
     }
 
-    const data = await response.json()
+    const data = await response.json() as { Items?: any[] }
     const items = data.Items || []
     return items.length > 0 ? items[0] : null
   } catch {
@@ -664,7 +665,7 @@ export async function fetchRecentShopifyOrders(
     throw new Error(`Shopify API error: ${errorText}`)
   }
 
-  const data = await response.json()
+  const data = await response.json() as { orders?: ShopifyOrder[] }
   return data.orders || []
 }
 
