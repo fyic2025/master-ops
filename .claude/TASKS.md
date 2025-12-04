@@ -196,6 +196,7 @@ Local fresh produce delivery.
 
 Tasks moved here after completion for reference.
 
+- [x] **2025-12-04** Anniversary Upsell re-validation | 8/8 phases passed, test email sent, all integrations verified
 - [x] **2025-12-03** CI/CD monitoring dashboard | Created cicd_issues tracking, scan history, health check scripts
 - [x] **2025-12-03** BOO dispatch widget | Added dispatch problem products widget showing stock-out risks
 - [x] **2025-12-03** Anniversary upsell email redesign | Improved HTML, responsive design, discount code in URLs
@@ -249,12 +250,13 @@ Move to "Completed Tasks" section at bottom.
 
 **Status:** Tested and Ready for Activation
 
-**Test Results (2025-12-03):**
+**Test Results (2025-12-04 - Re-validated):**
 - All 8 phases passed
-- Test email delivered to jayson@fyic.com.au
+- Test email delivered to jayson@fyic.com.au (discount code: JAYSONUSER15)
 - Gmail OAuth working (colette@teelixir.com)
 - Shopify discount code creation working
-- 500 candidates in view, 0 due today (correct - recent customers 26-40 days from send window)
+- 500 candidates in view, 0 due today (customers maturing into send window)
+- Melbourne time 15:20 - within send window (9AM-7PM)
 
 **Scripts:**
 - teelixir/scripts/queue-anniversary-emails.ts - Run daily to queue eligible customers
@@ -670,3 +672,7 @@ Move to "Completed Tasks" section at bottom.
 - Name: "Unleashed → HubSpot Order Sync (Deals)"
 - Schedule: Every 6 hours
 - Syncs: Unleashed sales orders → HubSpot deals
+
+### Session 24d5e364 (2025-12-04 07:08 pm)
+- Exit reason: other
+- Pending tasks saved: 0

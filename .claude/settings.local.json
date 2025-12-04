@@ -125,7 +125,12 @@
       "Bash(cmd /c del:*)",
       "Bash(powershell \"Get-Content ''c:/Users/jayso/master-ops/infra/supabase/migrations/20251203_automation_execution_logs.sql'' | Set-Clipboard\")",
       "Bash(powershell:*)",
-      "Bash(python3 -c \"import json,sys; d=json.load(sys.stdin); c=[n for n in d if n.get(''''name'''')==''''Summarize''''][0]; print(repr(c[''''parameters''''][''''jsCode''''][:100]))\")"
+      "Bash(python3 -c \"import json,sys; d=json.load(sys.stdin); c=[n for n in d if n.get(''''name'''')==''''Summarize''''][0]; print(repr(c[''''parameters''''][''''jsCode''''][:100]))\")",
+      "Bash(git rm:*)",
+      "Bash(del c:/Users/jayso/master-ops/temp-app-spec.yaml)",
+      "Bash(powershell \"Start-Sleep -Seconds 10\")",
+      "Bash(git -C c:/Users/jayso/master-ops diff --cached --stat)",
+      "Bash(git -C c:/Users/jayso/master-ops commit -m \"$(cat <<''EOF''\nFix unleashed-order-sync n8n job with HubSpot sync schema\n\n- Add hubspot_sync_log table for tracking synced records\n- Add integration_logs table for workflow execution logging\n- Add log_hubspot_sync() function for upsert operations\n- Add RLS policies and indexes for performance\n- Update TASKS.md with completion notes\n\nThe workflow was failing since Dec 1st due to missing Supabase tables.\nAll components validated: Unleashed API, tables, function, job status.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []
