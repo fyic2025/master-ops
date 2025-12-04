@@ -203,7 +203,8 @@ function generateClaudePrompt(task: Task): string {
   const requesterName = task.created_by || 'Unknown'
 
   // Generate unique reference for email tracking
-  const taskRef = `TASK-${task.id?.slice(0, 8) || Date.now().toString(36).toUpperCase()}`
+  const taskId = task.id ? String(task.id) : ''
+  const taskRef = `TASK-${taskId.slice(0, 8) || Date.now().toString(36).toUpperCase()}`
 
   let followUpInstructions = ''
   if (isAdminTask) {
@@ -1010,19 +1011,25 @@ function TaskCard({ task, onClarificationSubmit }: { task: Task, onClarification
   const [showCopyModal, setShowCopyModal] = useState(false)
   const [copyModalText, setCopyModalText] = useState('')
 
-  const copyToClipboard = (e: React.MouseEvent) => {
+  const copyToClipboard = async (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-
-    // Debug: alert to verify click handler fires
-    alert('Button clicked! Task: ' + (task.title || 'No title'))
 
     try {
       const text = generateClaudePrompt(task)
       setCopyModalText(text)
       setShowCopyModal(true)
+
+      // Also try to copy to clipboard
+      const success = await copyTextToClipboard(text)
+      if (success) {
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+      }
     } catch (err) {
-      alert('Error generating prompt: ' + String(err))
+      console.error('Error generating prompt:', err)
+      setCopyError(true)
+      setTimeout(() => setCopyError(false), 3000)
     }
   }
 
