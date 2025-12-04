@@ -77,20 +77,24 @@ async function logSyncResult(results, totalDuration) {
 
     const totalProducts = Object.values(supplierCounts).reduce((a, b) => a + b, 0);
 
-    // Log to automation_logs (if table exists)
+    // Log to automation_logs (matching existing schema)
     const logEntry = {
       workflow_name: 'supplier-stock-sync',
+      workflow_type: 'supplier_sync',
       status: failed === 0 ? 'success' : 'partial_failure',
+      records_processed: totalProducts,
+      records_updated: totalProducts,
+      records_created: 0,
+      records_failed: failed,
+      execution_time_ms: Math.round(totalDuration * 1000),
       started_at: new Date(Date.now() - totalDuration * 1000).toISOString(),
       completed_at: new Date().toISOString(),
-      duration_seconds: totalDuration,
-      metadata: {
+      error_details: failed > 0 ? JSON.stringify({
         results,
         supplier_counts: supplierCounts,
-        total_products: totalProducts,
         successful_loaders: successful,
         failed_loaders: failed
-      }
+      }) : null
     };
 
     const { error } = await supabase
