@@ -120,7 +120,7 @@ interface Task {
   id: string
   title: string
   description?: string
-  status: 'pending_input' | 'scheduled' | 'in_progress' | 'completed' | 'blocked' | 'pending' | 'awaiting_clarification'
+  status: 'pending_input' | 'scheduled' | 'in_progress' | 'completed' | 'blocked' | 'pending' | 'awaiting_clarification' | 'pending_completion'
   priority: 1 | 2 | 3 | 4
   instructions?: string
   plan?: string // Claude's detailed implementation plan
@@ -744,6 +744,7 @@ function getStatusBadge(status: Task['status']) {
   const config: Record<string, string> = {
     pending: 'bg-gray-500/20 text-gray-400',
     pending_input: 'bg-yellow-500/20 text-yellow-400',
+    pending_completion: 'bg-emerald-500/20 text-emerald-400',
     scheduled: 'bg-purple-500/20 text-purple-400',
     in_progress: 'bg-blue-500/20 text-blue-400',
     completed: 'bg-green-500/20 text-green-400',
@@ -753,6 +754,7 @@ function getStatusBadge(status: Task['status']) {
   const labels: Record<string, string> = {
     pending: 'pending',
     pending_input: 'needs planning',
+    pending_completion: 'pending completion',
     scheduled: 'ready',
     in_progress: 'in progress',
     completed: 'completed',
@@ -1745,9 +1747,11 @@ export default function TasksPage() {
   const isMariaView = userEmail?.toLowerCase() === 'admin@teelixir.com'
 
   // Tasks needing planning (pending_input status or new db tasks without a plan)
+  // Also includes pending_completion for Peter to review and close
   const pendingInputTasks = useMemo(() => {
     return filteredDbTasks.filter(t =>
       t.status === 'pending_input' ||
+      t.status === 'pending_completion' ||
       (t.status === 'pending' && !t.instructions && t.fromDb)
     ).sort((a, b) => a.priority - b.priority)
   }, [filteredDbTasks])
