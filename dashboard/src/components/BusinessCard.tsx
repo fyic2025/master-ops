@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
 import { useQuery } from '@tanstack/react-query'
@@ -28,9 +28,9 @@ async function fetchBusinessMetrics(code: string): Promise<BusinessMetrics | nul
     .select('orders_today, revenue_today, revenue_mtd, sync_status')
     .eq('business', code)
     .eq('date', today)
-    .single()
+    .maybeSingle()
 
-  if (error && error.code !== 'PGRST116') {
+  if (error) {
     console.error('Error fetching metrics:', error)
     return null
   }
