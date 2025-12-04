@@ -180,7 +180,7 @@ function AutomationCard({ automation, config, stats, business }: AutomationCardP
   return (
     <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 hover:border-gray-700 transition-colors">
       <div className="flex items-start justify-between">
-        <Link href={`/${business}/automations/${automation.slug.replace('_', '-').replace('winback_40', 'winback').replace('anniversary_upsell', 'anniversary')}`} className="flex-1">
+        <Link href={`/${business}/automations/${automation.slug.replace('anniversary_upsell', 'anniversary').replace('winback_40', 'winback').replace(/_/g, '-')}`} className="flex-1">
           <div className="flex items-start gap-4">
             <div className={`p-3 rounded-lg ${isEnabled ? 'bg-green-500/10' : 'bg-gray-800'}`}>
               <Icon className={`w-6 h-6 ${isEnabled ? 'text-green-400' : 'text-gray-500'}`} />
@@ -218,7 +218,7 @@ function AutomationCard({ automation, config, stats, business }: AutomationCardP
             business={business}
             compact
           />
-          <Link href={`/${business}/automations/${automation.slug.replace('_', '-').replace('winback_40', 'winback').replace('anniversary_upsell', 'anniversary')}`}>
+          <Link href={`/${business}/automations/${automation.slug.replace('anniversary_upsell', 'anniversary').replace('winback_40', 'winback').replace(/_/g, '-')}`}>
             <ChevronRight className="w-5 h-5 text-gray-600 hover:text-gray-400" />
           </Link>
         </div>
