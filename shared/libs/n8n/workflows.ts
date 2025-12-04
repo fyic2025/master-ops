@@ -366,7 +366,7 @@ export function analyzeWorkflow(workflow: N8nWorkflow): {
 } {
   const nodeCount = workflow.nodes.length
   const triggerNode = workflow.nodes.find((n) =>
-    n.type.includes('trigger') || n.type.includes('webhook') || n.type.includes('cron')
+    n.type.toLowerCase().includes('trigger') || n.type.toLowerCase().includes('webhook') || n.type.toLowerCase().includes('cron')
   )
 
   const hasErrorHandling = workflow.nodes.some(
@@ -390,9 +390,15 @@ export function analyzeWorkflow(workflow: N8nWorkflow): {
  * Find unused nodes in a workflow
  */
 export function findUnusedNodes(workflow: N8nWorkflow): N8nNode[] {
-  // This is a simplified version - would need full connection analysis
+  // Track both source nodes (connection keys) and target nodes
   const connectedNodeNames = new Set<string>()
 
+  // Add source nodes (nodes that have outgoing connections)
+  Object.keys(workflow.connections).forEach((sourceName) => {
+    connectedNodeNames.add(sourceName)
+  })
+
+  // Add target nodes (nodes that receive connections)
   Object.values(workflow.connections).forEach((connections) => {
     Object.values(connections).forEach((connectionList: any) => {
       connectionList.forEach((conn: any) => {

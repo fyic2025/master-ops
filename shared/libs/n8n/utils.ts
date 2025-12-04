@@ -77,8 +77,13 @@ export function addWorkflowPrefix(
   name: string,
   prefix: '🚀' | '🗄️' | '🎯' | '✅' | '🧪' | '⚠️' | '🔍' | '📊' | '🏋️' | 'PROD' | 'TEST' | 'ARCHIVED'
 ): string {
-  // Remove existing emoji/prefix
-  const cleaned = name.replace(/^(🚀|🗄️|🎯|✅|🧪|⚠️|🔍|📊|🏋️|PROD|TEST|ARCHIVED)\s*/i, '')
+  // Remove all existing emoji/prefix patterns (loop until none left)
+  let cleaned = name
+  let prevCleaned = ''
+  while (cleaned !== prevCleaned) {
+    prevCleaned = cleaned
+    cleaned = cleaned.replace(/^(🚀|🗄️|🎯|✅|🧪|⚠️|🔍|📊|🏋️|PROD|TEST|ARCHIVED)\s*/i, '')
+  }
   return `${prefix} ${cleaned}`
 }
 
@@ -107,13 +112,13 @@ export function validateWorkflow(workflow: Partial<N8nWorkflow>): {
     errors.push('Workflow connections object is required')
   }
 
-  // Check for trigger node
+  // Check for trigger node (case-insensitive)
   const hasTrigger = workflow.nodes?.some(
     (node) =>
-      node.type.includes('trigger') ||
-      node.type.includes('webhook') ||
-      node.type.includes('cron') ||
-      node.type.includes('manual')
+      node.type.toLowerCase().includes('trigger') ||
+      node.type.toLowerCase().includes('webhook') ||
+      node.type.toLowerCase().includes('cron') ||
+      node.type.toLowerCase().includes('manual')
   )
 
   if (!hasTrigger) {
@@ -222,10 +227,10 @@ export function analyzeExecutionPatterns(executions: N8nExecution[]): {
       }
     })
 
-  // Calculate peak hours
+  // Calculate peak hours (use UTC to be consistent)
   const hourCounts = new Map<number, number>()
   executions.forEach((exec) => {
-    const hour = new Date(exec.startedAt).getHours()
+    const hour = new Date(exec.startedAt).getUTCHours()
     hourCounts.set(hour, (hourCounts.get(hour) || 0) + 1)
   })
 
@@ -293,9 +298,9 @@ export function generateWorkflowDocs(workflow: N8nWorkflow): string {
   lines.push(`**Nodes**: ${workflow.nodes.length}`)
   lines.push('')
 
-  // Trigger information
+  // Trigger information (case-insensitive)
   const trigger = workflow.nodes.find(
-    (n) => n.type.includes('trigger') || n.type.includes('webhook') || n.type.includes('cron')
+    (n) => n.type.toLowerCase().includes('trigger') || n.type.toLowerCase().includes('webhook') || n.type.toLowerCase().includes('cron')
   )
 
   if (trigger) {

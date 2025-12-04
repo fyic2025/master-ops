@@ -391,7 +391,10 @@ export class N8nClient {
     workflowId: string,
     newName?: string
   ): Promise<N8nWorkflow> {
-    const workflow = await this.getWorkflow(workflowId)
+    const original = await this.getWorkflow(workflowId)
+
+    // Create a deep copy to avoid mutating the original
+    const workflow: N8nWorkflow = JSON.parse(JSON.stringify(original))
 
     // Remove fields that shouldn't be cloned
     delete workflow.id
@@ -403,7 +406,7 @@ export class N8nClient {
     if (newName) {
       workflow.name = newName
     } else {
-      workflow.name = `${workflow.name} (Copy)`
+      workflow.name = `${original.name} (Copy)`
     }
 
     // Deactivate by default
