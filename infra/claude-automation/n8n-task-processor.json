@@ -1,0 +1,495 @@
+{
+  "name": "Claude Task Processor",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 5
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Every 5 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [200, 300],
+      "notes": "Triggers task processor every 5 minutes"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "claude-task-trigger",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Manual Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 500],
+      "webhookId": "claude-task-trigger",
+      "notes": "Backup webhook trigger: POST /webhook/claude-task-trigger"
+    },
+    {
+      "parameters": {},
+      "id": "merge-triggers",
+      "name": "Merge Triggers",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [400, 400]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://qcvfxxsnqvdfmpbcgdni.supabase.co/rest/v1/tasks",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "select",
+              "value": "id,title,description,business,priority,status,created_at"
+            },
+            {
+              "name": "status",
+              "value": "eq.pending"
+            },
+            {
+              "name": "order",
+              "value": "priority.asc,created_at.asc"
+            },
+            {
+              "name": "limit",
+              "value": "1"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $credentials.supabaseServiceKey }}"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fetch-pending-task",
+      "name": "Fetch Pending Task",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [600, 400],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "SUPABASE_AUTH",
+          "name": "Supabase Service Key"
+        }
+      },
+      "notes": "Query: SELECT pending tasks ORDER BY priority, created_at LIMIT 1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "check-task-exists",
+              "leftValue": "={{ $json.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-task-exists",
+      "name": "Task Exists?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [800, 400],
+      "notes": "Check if a pending task was found"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract first task from array\nconst tasks = $input.all();\nif (tasks.length > 0 && tasks[0].json && Array.isArray(tasks[0].json)) {\n  const task = tasks[0].json[0];\n  return [{ json: task }];\n}\nreturn [{ json: { error: 'No task found' } }];"
+      },
+      "id": "extract-task",
+      "name": "Extract Task",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1000, 300],
+      "notes": "Extract task object from array response"
+    },
+    {
+      "parameters": {
+        "command": "=/var/www/master-ops/infra/claude-automation/process-task.sh {{ $json.id }}"
+      },
+      "id": "execute-ssh",
+      "name": "Execute Task via SSH",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [1200, 300],
+      "credentials": {
+        "sshPassword": {
+          "id": "SSH_SERVER",
+          "name": "n8n-primary SSH"
+        }
+      },
+      "notes": "SSH to 134.199.175.243 and run process-task.sh"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse the JSON result from process-task.sh\nconst items = $input.all();\nconst output = items[0]?.json?.stdout || items[0]?.json?.output || '';\n\ntry {\n  // Find the JSON output line\n  const lines = output.split('\\n');\n  const jsonLine = lines.find(line => line.startsWith('{'));\n  \n  if (jsonLine) {\n    const result = JSON.parse(jsonLine);\n    return [{\n      json: {\n        success: result.status === 'completed',\n        task_id: result.task_id,\n        status: result.status,\n        duration_ms: result.duration_ms,\n        cost_usd: result.cost_usd,\n        raw_output: output\n      }\n    }];\n  }\n  \n  // No JSON found, check exit code\n  return [{\n    json: {\n      success: false,\n      error: 'No JSON output found',\n      raw_output: output\n    }\n  }];\n} catch (e) {\n  return [{\n    json: {\n      success: false,\n      error: e.message,\n      raw_output: output\n    }\n  }];\n}"
+      },
+      "id": "parse-result",
+      "name": "Parse Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1400, 300],
+      "notes": "Parse JSON result from process-task.sh output"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "check-success",
+              "leftValue": "={{ $json.success }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-result",
+      "name": "Task Succeeded?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1600, 300],
+      "notes": "Check if task execution was successful"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://qcvfxxsnqvdfmpbcgdni.supabase.co/rest/v1/integration_logs",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $credentials.supabaseServiceKey }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=minimal"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"source\": \"claude-task-processor\",\n  \"level\": \"info\",\n  \"operation\": \"task_completed\",\n  \"status\": \"success\",\n  \"message\": \"Task completed: {{ $json.task_id }}\",\n  \"duration_ms\": {{ $json.duration_ms || 0 }},\n  \"metadata\": {\n    \"task_id\": \"{{ $json.task_id }}\",\n    \"cost_usd\": {{ $json.cost_usd || 0 }}\n  }\n}",
+        "options": {}
+      },
+      "id": "log-success",
+      "name": "Log Success",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1800, 200],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "SUPABASE_AUTH",
+          "name": "Supabase Service Key"
+        }
+      },
+      "notes": "Log successful task completion to integration_logs"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://qcvfxxsnqvdfmpbcgdni.supabase.co/rest/v1/integration_logs",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $credentials.supabaseServiceKey }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=minimal"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"source\": \"claude-task-processor\",\n  \"level\": \"error\",\n  \"operation\": \"task_failed\",\n  \"status\": \"error\",\n  \"message\": \"Task failed: {{ $json.task_id || 'unknown' }} - {{ $json.error || 'Unknown error' }}\",\n  \"metadata\": {\n    \"task_id\": \"{{ $json.task_id }}\",\n    \"error\": \"{{ $json.error }}\",\n    \"raw_output\": \"{{ $json.raw_output }}\"\n  }\n}",
+        "options": {}
+      },
+      "id": "log-error",
+      "name": "Log Error",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1800, 400],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "SUPABASE_AUTH",
+          "name": "Supabase Service Key"
+        }
+      },
+      "notes": "Log task failure to integration_logs"
+    },
+    {
+      "parameters": {
+        "loopCount": 4,
+        "options": {}
+      },
+      "id": "loop-more-tasks",
+      "name": "Process More Tasks",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [2000, 200],
+      "notes": "Loop up to 4 more times to process additional pending tasks"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "set-done",
+              "name": "status",
+              "value": "no_pending_tasks",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "no-tasks",
+      "name": "No Pending Tasks",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1000, 500],
+      "notes": "No pending tasks found - workflow complete"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true, message: 'Task processor triggered' }) }}",
+        "options": {}
+      },
+      "id": "webhook-response",
+      "name": "Webhook Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [600, 600],
+      "notes": "Respond to webhook trigger"
+    }
+  ],
+  "connections": {
+    "Every 5 Minutes": {
+      "main": [
+        [
+          {
+            "node": "Merge Triggers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Webhook": {
+      "main": [
+        [
+          {
+            "node": "Merge Triggers",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Triggers": {
+      "main": [
+        [
+          {
+            "node": "Fetch Pending Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Pending Task": {
+      "main": [
+        [
+          {
+            "node": "Task Exists?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Task Exists?": {
+      "main": [
+        [
+          {
+            "node": "Extract Task",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Pending Tasks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Task": {
+      "main": [
+        [
+          {
+            "node": "Execute Task via SSH",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Task via SSH": {
+      "main": [
+        [
+          {
+            "node": "Parse Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Result": {
+      "main": [
+        [
+          {
+            "node": "Task Succeeded?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Task Succeeded?": {
+      "main": [
+        [
+          {
+            "node": "Log Success",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Success": {
+      "main": [
+        [
+          {
+            "node": "Process More Tasks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process More Tasks": {
+      "main": [
+        [
+          {
+            "node": "Fetch Pending Task",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": ""
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "automation",
+      "id": "automation"
+    },
+    {
+      "name": "claude",
+      "id": "claude"
+    }
+  ],
+  "pinData": {},
+  "meta": {
+    "templateId": "claude-task-processor",
+    "templateCreatedBy": "master-ops",
+    "instanceId": "",
+    "description": "Continuously processes pending tasks from Supabase using Claude Code headless execution"
+  }
+}

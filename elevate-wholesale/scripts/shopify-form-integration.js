@@ -10,8 +10,8 @@
 (function() {
   'use strict';
 
-  // Configuration
-  const SUPABASE_FUNCTION_URL = 'https://xioudaqfmkdpkgujxehv.supabase.co/functions/v1/form-intake';
+  // Configuration (MIGRATED TO TEELIXIR-LEADS 2025-12-05)
+  const SUPABASE_FUNCTION_URL = 'https://qcvfxxsnqvdfmpbcgdni.supabase.co/functions/v1/form-intake';
   const WEBHOOK_SECRET = 'elevate_wholesale_2025_secure';
 
   // Find the retailer signup form

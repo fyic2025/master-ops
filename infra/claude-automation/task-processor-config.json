@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Claude Task Processor Configuration",
+  "version": "1.0.0",
+
+  "supabase": {
+    "description": "Supabase connection - credentials loaded via creds.js",
+    "credentials_source": "creds.js",
+    "project": "global",
+    "keys": {
+      "url": "supabase_url",
+      "service_key": "supabase_service_key"
+    },
+    "fallback": {
+      "host": "usibnysqelovfuctmkqw.supabase.co",
+      "description": "Fallback extracted from creds.js if vault lookup fails"
+    },
+    "tables": {
+      "tasks": "tasks",
+      "task_logs": "task_logs",
+      "task_results": "task_results"
+    }
+  },
+
+  "execution": {
+    "max_execution_time_seconds": 600,
+    "default_timeout_seconds": 300,
+    "retry": {
+      "max_attempts": 3,
+      "initial_delay_ms": 1000,
+      "max_delay_ms": 30000,
+      "backoff_multiplier": 2
+    },
+    "concurrency": {
+      "max_parallel_tasks": 1,
+      "queue_size": 10
+    }
+  },
+
+  "allowed_tools": {
+    "description": "Tools permitted for automated task execution",
+    "always_allowed": [
+      "Read",
+      "Glob",
+      "Grep",
+      "WebFetch",
+      "WebSearch",
+      "Task"
+    ],
+    "requires_approval": [
+      "Write",
+      "Edit",
+      "Bash",
+      "NotebookEdit"
+    ],
+    "never_allowed": [
+      "mcp__*"
+    ],
+    "bash_patterns": {
+      "allowed": [
+        "git status",
+        "git diff",
+        "git log",
+        "npm ls",
+        "npx tsc --noEmit",
+        "node creds.js get:*",
+        "curl -s"
+      ],
+      "blocked": [
+        "rm -rf",
+        "git push --force",
+        "git reset --hard",
+        "sudo *",
+        "chmod 777"
+      ]
+    }
+  },
+
+  "skills": {
+    "auto_activate": true,
+    "required_for_business": {
+      "boo": ["bigcommerce-expert", "supabase-expert"],
+      "teelixir": ["shopify-expert", "supabase-expert"],
+      "elevate": ["shopify-expert", "supabase-expert"],
+      "rhf": ["woocommerce-expert", "supabase-expert"]
+    },
+    "common": [
+      "brand-asset-manager",
+      "supabase-expert"
+    ]
+  },
+
+  "logging": {
+    "level": "info",
+    "output": {
+      "console": true,
+      "supabase": true,
+      "file": false
+    },
+    "retention_days": 30
+  },
+
+  "notifications": {
+    "on_success": false,
+    "on_failure": true,
+    "on_timeout": true,
+    "channels": ["supabase_log"]
+  },
+
+  "safety": {
+    "require_human_approval_for": [
+      "database_migrations",
+      "production_deployments",
+      "credential_changes",
+      "destructive_operations"
+    ],
+    "auto_rollback_on_error": false,
+    "sandbox_mode": true
+  }
+}

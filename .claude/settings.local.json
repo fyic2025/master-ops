@@ -47,7 +47,12 @@
       "Bash(set:*)",
       "Bash(node infra/scripts/migrate-elevate-products.js:*)",
       "Bash(node:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(dir \"%APPDATA%\\claude\")",
+      "Bash(dir \"%USERPROFILE%\\.claude\")",
+      "Bash(powershell:*)",
+      "Bash(if not exist \"c:\\Users\\jayso\\master-ops\\infra\\claude-automation\" mkdir \"c:\\Users\\jayso\\master-ops\\infra\\claude-automation\")",
+      "Bash(where:*)"
     ],
     "deny": [],
     "ask": []
