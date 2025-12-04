@@ -15,7 +15,9 @@ import {
   Trash2,
   ChevronDown,
   ChevronRight,
-  ExternalLink
+  ExternalLink,
+  Copy,
+  Check
 } from 'lucide-react'
 import { useState } from 'react'
 import { FixSingleButton, FixBatchButton, FixProgressTracker } from '@/components/cicd'
@@ -98,11 +100,58 @@ function formatTimeAgo(dateString: string): string {
   return `${diffDays}d ago`
 }
 
+function generateErrorCodeFixPrompt(code: string, issues: CicdIssue[]): string {
+  const uniqueFiles = [...new Set(issues.map(i => i.file_path).filter(Boolean))]
+  const fileList = issues
+    .map(i => `- ${i.file_path}:${i.line_number} - ${i.message}`)
+    .join('\n')
+
+  return `## CI/CD Fix Request
+
+**Error Code**: ${code}
+**Total Occurrences**: ${issues.length}
+**Files Affected**: ${uniqueFiles.length}
+
+### Error Message
+\`\`\`
+${issues[0]?.message || 'Unknown error'}
+\`\`\`
+
+### All Locations
+${fileList}
+
+---
+
+### Fix Instructions
+
+1. Read the affected files to understand the context
+2. Apply the appropriate fix for ${code} errors:
+${code === 'TS7006' ? '   - Add explicit type annotations to parameters' : ''}
+${code === 'TS2322' ? '   - Fix type mismatches by correcting the assigned value or updating the type' : ''}
+${code === 'TS18046' ? '   - Add type narrowing or type assertions for unknown types' : ''}
+${code === 'TS2339' ? '   - Add missing properties to the type definition or fix property access' : ''}
+${code === 'TS2307' ? '   - Install missing @types packages or add module declarations' : ''}
+${code === 'TS1205' ? '   - Use "export type" for type-only re-exports when isolatedModules is enabled' : ''}
+${code === 'TS2416' ? '   - Fix property type to match the interface/base class' : ''}
+3. Run \`npx tsc --noEmit\` to verify fixes
+4. After fixing, run \`npx tsx scripts/cicd-health-check.ts\` to update the dashboard
+
+**Dashboard Link**: https://ops.growthcohq.com/home/cicd`
+}
+
 export default function CicdDashboard() {
   const queryClient = useQueryClient()
   const [expandedFiles, setExpandedFiles] = useState<Set<string>>(new Set())
   const [expandedErrorCodes, setExpandedErrorCodes] = useState<Set<string>>(new Set())
   const [viewMode, setViewMode] = useState<'byType' | 'byFile' | 'byErrorCode'>('byErrorCode')
+  const [copiedCode, setCopiedCode] = useState<string | null>(null)
+
+  const copyErrorCodePrompt = async (code: string, issues: CicdIssue[]) => {
+    const prompt = generateErrorCodeFixPrompt(code, issues)
+    await navigator.clipboard.writeText(prompt)
+    setCopiedCode(code)
+    setTimeout(() => setCopiedCode(null), 2000)
+  }
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ['cicd-issues'],
@@ -301,23 +350,25 @@ export default function CicdDashboard() {
         <div className="space-y-2">
           {Object.entries(data?.byErrorCode || {}).map(([code, issues]) => (
             <div key={code} className="bg-gray-900 border border-gray-800 rounded-lg">
-              <button
-                onClick={() => toggleErrorCode(code)}
-                className="w-full p-4 flex items-center gap-3 text-left hover:bg-gray-800/50"
-              >
-                {expandedErrorCodes.has(code) ? (
-                  <ChevronDown className="w-4 h-4 text-gray-400" />
-                ) : (
-                  <ChevronRight className="w-4 h-4 text-gray-400" />
-                )}
-                <span className={`px-2 py-0.5 rounded text-xs font-mono ${
-                  code.startsWith('TS') ? 'bg-red-500/20 text-red-400' : 'bg-gray-700 text-gray-300'
-                }`}>
-                  {code}
-                </span>
-                <span className="text-gray-400 text-sm flex-1 truncate">
-                  {issues[0]?.message?.slice(0, 60)}...
-                </span>
+              <div className="p-4 flex items-center gap-3">
+                <button
+                  onClick={() => toggleErrorCode(code)}
+                  className="flex items-center gap-3 flex-1 text-left hover:opacity-80"
+                >
+                  {expandedErrorCodes.has(code) ? (
+                    <ChevronDown className="w-4 h-4 text-gray-400" />
+                  ) : (
+                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                  )}
+                  <span className={`px-2 py-0.5 rounded text-xs font-mono ${
+                    code.startsWith('TS') ? 'bg-red-500/20 text-red-400' : 'bg-gray-700 text-gray-300'
+                  }`}>
+                    {code}
+                  </span>
+                  <span className="text-gray-400 text-sm flex-1 truncate">
+                    {issues[0]?.message?.slice(0, 60)}...
+                  </span>
+                </button>
                 <span className={`px-2 py-1 rounded text-sm font-semibold ${
                   issues.length >= 10 ? 'bg-red-500/20 text-red-400' :
                   issues.length >= 5 ? 'bg-yellow-500/20 text-yellow-400' :
@@ -325,7 +376,28 @@ export default function CicdDashboard() {
                 }`}>
                   {issues.length} {issues.length === 1 ? 'issue' : 'issues'}
                 </span>
-              </button>
+                <button
+                  onClick={() => copyErrorCodePrompt(code, issues)}
+                  className={`ml-2 px-3 py-1.5 rounded text-sm font-medium flex items-center gap-1.5 transition-colors ${
+                    copiedCode === code
+                      ? 'bg-green-500/20 text-green-400'
+                      : 'bg-blue-500/20 text-blue-400 hover:bg-blue-500/30'
+                  }`}
+                  title={`Copy fix prompt for all ${issues.length} ${code} errors`}
+                >
+                  {copiedCode === code ? (
+                    <>
+                      <Check className="w-3.5 h-3.5" />
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      Fix All
+                    </>
+                  )}
+                </button>
+              </div>
               {expandedErrorCodes.has(code) && (
                 <div className="border-t border-gray-800 divide-y divide-gray-800">
                   {issues.map((issue) => (
