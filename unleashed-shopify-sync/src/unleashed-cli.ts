@@ -59,6 +59,7 @@ Store Commands (edit in Supabase, push to Unleashed):
   edit <order>                          Show order from Supabase
   edit-remove <order> <product>         Remove line in Supabase
   edit-qty <order> <product> <qty>      Update qty in Supabase
+  edit-notes <order> <notes>            Update order notes in Supabase
   push <order>                          Push to Unleashed (delete old + create new)
 
 Options:
@@ -438,6 +439,21 @@ async function main(): Promise<void> {
         const orderStore = new OrderStore(store)
         await orderStore.updateLineQty(orderNumber, productCode, quantity)
         console.log(`✅ Updated ${productCode} qty to ${quantity} in ${orderNumber} (in Supabase)`)
+        console.log(`   Use 'push ${orderNumber}' to sync to Unleashed`)
+        break
+      }
+
+      case 'edit-notes': {
+        const orderNumber = filteredArgs[1]
+        const notes = filteredArgs.slice(2).join(' ')
+        if (!orderNumber || !notes) {
+          console.error('Error: Order number and notes required')
+          console.error('Usage: edit-notes <order> <notes text>')
+          process.exit(1)
+        }
+        const orderStore = new OrderStore(store)
+        await orderStore.updateOrder(orderNumber, { comments: notes })
+        console.log(`✅ Updated notes for ${orderNumber} (in Supabase)`)
         console.log(`   Use 'push ${orderNumber}' to sync to Unleashed`)
         break
       }

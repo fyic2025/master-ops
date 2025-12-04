@@ -114,7 +114,12 @@ export class OrderStore {
       .delete()
       .eq('order_id', order.id)
 
-    const lines = unleashedOrder.SalesOrderLines.map(line => ({
+    // Filter out charge lines (freight, etc) that have no product code
+    const productLines = unleashedOrder.SalesOrderLines.filter(
+      line => line.Product?.ProductCode && line.LineType !== 'Charge'
+    )
+
+    const lines = productLines.map(line => ({
       order_id: order.id,
       line_guid: line.Guid,
       line_number: line.LineNumber,
@@ -269,31 +274,24 @@ export class OrderStore {
   }
 
   /**
-   * Push order to Unleashed (delete old, create new)
+   * Push order to Unleashed (create new first, then delete old)
+   * Safe approach: only deletes old order after new one is confirmed working
    */
   async pushOrder(orderNumber: string): Promise<SalesOrder> {
     const stored = await this.getOrder(orderNumber)
     if (!stored) throw new Error(`Order not found in Supabase: ${orderNumber}`)
 
     const { order, lines } = stored
+    const oldGuid = order.unleashed_guid
 
-    // Step 1: Delete from Unleashed if exists
-    if (order.unleashed_guid) {
-      console.log(`Deleting old order ${orderNumber} from Unleashed...`)
-      try {
-        await this.unleashed.updateOrderStatus(order.unleashed_guid, 'Deleted')
-        console.log(`  Marked as Deleted`)
-      } catch (e) {
-        console.log(`  Could not delete (may not exist): ${(e as Error).message}`)
-      }
-    }
-
-    // Step 2: Create new order in Unleashed
+    // Step 1: Create new order in Unleashed FIRST
     console.log(`Creating new order in Unleashed...`)
     const newOrder = this.convertToUnleashed(order, lines)
     const created = await this.unleashed.createSalesOrder(newOrder)
 
-    // Step 3: Update Supabase with new GUID
+    console.log(`✅ Created ${created.OrderNumber} in Unleashed`)
+
+    // Step 2: Update Supabase with new GUID
     await this.supabase
       .from('unleashed_orders')
       .update({
@@ -305,7 +303,18 @@ export class OrderStore {
       })
       .eq('id', order.id)
 
-    console.log(`✅ Created ${created.OrderNumber} in Unleashed`)
+    // Step 3: Delete old order from Unleashed (only after new one confirmed)
+    if (oldGuid) {
+      console.log(`\nNew order confirmed. Marking old ${orderNumber} as Deleted...`)
+      try {
+        await this.unleashed.updateOrderStatus(oldGuid, 'Deleted')
+        console.log(`  ✅ Old order marked as Deleted`)
+      } catch (e) {
+        console.log(`  ⚠️ Could not delete old order: ${(e as Error).message}`)
+        console.log(`  You may need to manually delete ${orderNumber} (GUID: ${oldGuid})`)
+      }
+    }
+
     return created
   }
 
@@ -375,7 +384,8 @@ export class OrderStore {
       SubTotal: order.subtotal,
       TaxTotal: order.tax_total,
       Total: order.total,
-      SalesOrderLines: lines.map(line => ({
+      SalesOrderLines: lines.map((line, idx) => ({
+        LineNumber: idx + 1,
         Product: {
           ProductCode: line.product_code,
           Guid: line.product_guid,
