@@ -536,6 +536,51 @@ ${issueText}`
           </div>
         </button>
 
+        {/* Quick Actions Toolbar */}
+        {showAudit && auditData && (
+          <div className="px-4 py-3 bg-gray-800/50 border-t border-gray-800 flex flex-wrap items-center gap-3">
+            <span className="text-sm text-gray-400 mr-2">Quick Actions:</span>
+            <button
+              onClick={bulkAcceptWarnings}
+              className="flex items-center gap-2 px-3 py-1.5 text-xs bg-yellow-900/50 text-yellow-400 hover:bg-yellow-800/50 rounded transition-colors"
+              title="Accept all warnings as informational"
+            >
+              <CheckCheck className="w-3 h-3" />
+              Accept All Warnings ({auditData.issues.filter(i => i.severity === 'warning' && i.status === 'pending').length})
+            </button>
+            <button
+              onClick={() => {
+                // Mark all auto-fixable as fixed
+                auditData.issues
+                  .filter(i => i.fixability === 'auto' && i.status === 'pending')
+                  .forEach(i => updateResolutionStatus(i.issue_code, 'fixed', 'Auto-fix applied'))
+              }}
+              className="flex items-center gap-2 px-3 py-1.5 text-xs bg-green-900/50 text-green-400 hover:bg-green-800/50 rounded transition-colors"
+              title="Mark auto-fixable issues as fixed"
+            >
+              <Zap className="w-3 h-3" />
+              Auto-Fix All ({auditData.issues.filter(i => i.fixability === 'auto' && i.status === 'pending').length})
+            </button>
+            <button
+              onClick={() => {
+                // Reset all to pending
+                auditData.issues
+                  .filter(i => i.status !== 'pending')
+                  .forEach(i => updateResolutionStatus(i.issue_code, 'pending'))
+              }}
+              className="flex items-center gap-2 px-3 py-1.5 text-xs bg-gray-700 text-gray-400 hover:bg-gray-600 rounded transition-colors"
+              title="Reset all issue statuses"
+            >
+              <RotateCcw className="w-3 h-3" />
+              Reset All
+            </button>
+            <div className="flex-1" />
+            <span className="text-xs text-gray-500">
+              {auditData.summary.by_status.pending} pending · {auditData.summary.by_status.fixed} fixed · {auditData.summary.by_status.verified} verified
+            </span>
+          </div>
+        )}
+
         {showAudit && auditData?.issues && (
           <div className="border-t border-gray-800">
             {/* Audit Table Header */}
