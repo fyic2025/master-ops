@@ -1,0 +1,63 @@
+domains:
+- domain: ops.growthcohq.com
+  type: PRIMARY
+ingress:
+  rules:
+  - component:
+      name: web
+    match:
+      path:
+        prefix: /
+name: master-ops-dashboard
+region: syd
+services:
+- build_command: npm run build
+  environment_slug: node-js
+  envs:
+  - key: NEXT_PUBLIC_SUPABASE_URL
+    scope: RUN_AND_BUILD_TIME
+    value: https://qcvfxxsnqvdfmpbcgdni.supabase.co
+  - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+    scope: RUN_AND_BUILD_TIME
+    value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjdmZ4eHNucXZkZm1wYmNnZG5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg1NjcyMjcsImV4cCI6MjA2NDE0MzIyN30.vnKdEOIq_KE93EktcrlPw7zUqEVUU4aVCYnRE1sBA0U
+  - key: SUPABASE_SERVICE_ROLE_KEY
+    scope: RUN_TIME
+    type: SECRET
+    value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjdmZ4eHNucXZkZm1wYmNnZG5pIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0ODU2NzIyNywiZXhwIjoyMDY0MTQzMjI3fQ.JLTj1pOvZLoWUKfCV5NtctNI-lkEBhCzF7C9Axm6nf8
+  - key: SUPABASE_URL
+    scope: RUN_TIME
+    value: https://qcvfxxsnqvdfmpbcgdni.supabase.co
+  - key: AUTH_SECRET
+    scope: RUN_AND_BUILD_TIME
+    type: SECRET
+    value: EV[1:fDstShQ3ZwJDQv+vKLTSuCCbgVZekPfq:9oKbCEP9gYS2xYPdglUYtPbUJLRzO/TEKiGzy8unZIhGkxXRibBSPe+B5VgYCWT5K/M3BmjYyIFJBL57]
+  - key: AUTH_URL
+    scope: RUN_AND_BUILD_TIME
+    value: https://ops.growthcohq.com
+  - key: NEXTAUTH_URL
+    scope: RUN_AND_BUILD_TIME
+    value: https://ops.growthcohq.com
+  - key: AUTH_TRUST_HOST
+    scope: RUN_AND_BUILD_TIME
+    value: "true"
+  - key: GOOGLE_AUTH_CLIENT_ID
+    scope: RUN_AND_BUILD_TIME
+    value: 204183633386-l8r30d5tgd4luc5pd9vhreeibq7c6287.apps.googleusercontent.com
+  - key: GOOGLE_AUTH_CLIENT_SECRET
+    scope: RUN_AND_BUILD_TIME
+    type: SECRET
+    value: EV[1:9jpQwgnt2+UO+xUwLosAmLFldmQ+/6vc:7d59uPxzeFYkCEp7nbSUsJj8sWWyle/U1GC/N1mVh32hZ/vRxMu9jlGze7yl3A/8woNb]
+  - key: DO_API_TOKEN
+    scope: RUN_TIME
+    type: SECRET
+    value: EV[1:XplaOER8YylHTrhfeqOWLexo+fR8tODz:a55DHtKq0URGvkARFhnQ9KE27LFn6ozJqS+XDfQnqfnscGy4J+sjI5TGZrEicwmVGE7Mt0s1Y6dIXQ4Uvrce2/h89W2WkUbr1eOodVkPhSjRisPwdQxc]
+  github:
+    branch: main
+    deploy_on_push: true
+    repo: fyic2025/master-ops
+  http_port: 3000
+  instance_count: 1
+  instance_size_slug: apps-s-1vcpu-0.5gb
+  name: web
+  run_command: npm start
+  source_dir: dashboard
