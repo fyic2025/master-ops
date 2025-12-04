@@ -66,9 +66,13 @@ export async function POST(request: NextRequest) {
       .eq('job_name', jobName)
       .eq('business', job.business)
 
-    // Run the sync script (scripts are in dashboard/scripts/)
+    // Run the sync script
+    // Scripts in shared/ are at repo root, scripts in scripts/ are in dashboard folder
     const dashboardRoot = process.cwd()
-    const scriptPath = path.join(dashboardRoot, job.script)
+    const repoRoot = path.join(dashboardRoot, '..')
+    const scriptPath = job.script.startsWith('shared/')
+      ? path.join(repoRoot, job.script)
+      : path.join(dashboardRoot, job.script)
     const command = `node "${scriptPath}" ${job.args || ''}`
 
     console.log(`Running sync: ${command}`)
