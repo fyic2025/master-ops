@@ -40,23 +40,19 @@ interface RssFeedConfig {
   defaultType: string
 }
 
+// Primary feed for daily sync (captures all ruling types)
 const RSS_FEEDS: RssFeedConfig[] = [
   {
-    name: 'tax',
-    url: `${ATO_BASE_URL}/law/view/rss?fileid=pbr_tax.rss`,
+    name: 'all',
+    url: `${ATO_BASE_URL}/law/view/rss?fileid=pbr_all.rss`,
     defaultType: 'TR'
-  },
-  {
-    name: 'gst',
-    url: `${ATO_BASE_URL}/law/view/rss?fileid=pbr_gst.rss`,
-    defaultType: 'GSTR'
-  },
-  {
-    name: 'super',
-    url: `${ATO_BASE_URL}/law/view/rss?fileid=pbr_super.rss`,
-    defaultType: 'SGR'
   }
 ]
+
+// Additional feeds available for targeted queries (not used in default sync to avoid duplicates)
+// - pbr_tax.rss: Taxation Rulings (TR, TD)
+// - pbr_gst.rss: GST Rulings (GSTR, GSTD)
+// - pbr_super.rss: Superannuation Rulings (SGR)
 
 interface RssItem {
   title: string

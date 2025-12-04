@@ -1,0 +1,41 @@
+name: Sync ATO Rulings
+
+on:
+  schedule:
+    # Run daily at 6am AEST (8pm UTC previous day)
+    - cron: '0 20 * * *'
+  workflow_dispatch:
+    # Allow manual trigger from GitHub UI
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ATO Rulings Sync
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: npx tsx infra/scripts/sync-ato-rulings.ts
+
+      - name: Report result
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ ATO Rulings sync completed successfully"
+          else
+            echo "❌ ATO Rulings sync failed"
+            exit 1
+          fi
