@@ -294,7 +294,7 @@ export default function DistributorAdminPage() {
 
         <div className="mt-4 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
           <p className="text-sm text-blue-300">
-            <strong>How it works:</strong> Click "Connect" to open Google's authorization page.
+            <strong>How it works:</strong> Click &quot;Connect&quot; to open Google&apos;s authorization page.
             Sign in with the Teelixir account and grant read-only access to emails.
             The system will then be able to scan for distributor PO emails.
           </p>
@@ -356,9 +356,9 @@ export default function DistributorAdminPage() {
       <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
         <h3 className="text-blue-300 font-medium mb-2">SQL Instructions</h3>
         <ol className="text-sm text-gray-300 space-y-1 list-decimal list-inside">
-          <li>Click "Copy SQL" to copy the query</li>
-          <li>Click "Open Supabase" to open the SQL editor</li>
-          <li>Paste the SQL and click "Run"</li>
+          <li>Click &quot;Copy SQL&quot; to copy the query</li>
+          <li>Click &quot;Open Supabase&quot; to open the SQL editor</li>
+          <li>Paste the SQL and click &quot;Run&quot;</li>
           <li>Check the results to verify classification</li>
         </ol>
       </div>

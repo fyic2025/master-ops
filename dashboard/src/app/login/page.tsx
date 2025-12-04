@@ -66,7 +66,7 @@ export default function LoginPage() {
 
         {/* Footer */}
         <p className="mt-8 text-emerald-400/60 text-sm">
-          Guns N' Roses would approve
+          Guns N&apos; Roses would approve
         </p>
       </div>
 

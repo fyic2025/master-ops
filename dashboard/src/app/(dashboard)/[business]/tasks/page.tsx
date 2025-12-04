@@ -1706,7 +1706,7 @@ export default function TasksPage() {
           {showArchive && (
             <div className="p-4 pt-0 space-y-2 border-t border-gray-700">
               <p className="text-xs text-gray-500 mb-3">
-                Completed setup tasks preserved for reference. These don't appear in active task counts.
+                Completed setup tasks preserved for reference. These don&apos;t appear in active task counts.
               </p>
               {archivedTasks.map(task => (
                 <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} />
