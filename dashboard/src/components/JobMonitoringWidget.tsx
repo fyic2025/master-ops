@@ -82,13 +82,17 @@ function generateFixCommand(job: JobStatus): string {
   const businessName = job.business ? businessNames[job.business] || job.business.toUpperCase() : 'Infrastructure'
   const files = job.relevant_files?.join('\n- ') || 'Check the codebase'
 
+  const lastAttempted = job.last_run_at && job.last_run_at !== job.last_success_at
+    ? `\nLast attempted: ${new Date(job.last_run_at).toISOString()}`
+    : ''
+
   return `Investigate and fix the "${job.job_name}" automated job.
 
 Business: ${businessName}
 Type: ${job.job_type}
 Schedule: ${job.schedule}
 Description: ${job.description}
-Last successful run: ${job.last_success_at ? new Date(job.last_success_at).toISOString() : 'NEVER'}
+Last successful run: ${job.last_success_at ? new Date(job.last_success_at).toISOString() : 'NEVER'}${lastAttempted}
 Expected interval: ${job.expected_interval_hours} hours
 ${job.error_message ? `Error: ${job.error_message}` : ''}
 
@@ -136,7 +140,7 @@ async function createFixTasks(): Promise<FixResult> {
 }
 
 // Jobs that support manual sync via dashboard
-const SYNCABLE_JOBS = ['livechat-sync', 'gmc-sync', 'gsc-issues-sync']
+const SYNCABLE_JOBS = ['stock-sync', 'livechat-sync', 'gmc-sync', 'gsc-issues-sync']
 
 export function JobMonitoringWidget() {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -466,8 +470,13 @@ function JobCard({
           <p className="text-sm text-gray-400 mb-2">{job.description}</p>
           <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
             <span>
-              Last run: <span className={config.color}>{formatLastRun(job.last_success_at)}</span>
+              Last success: <span className={config.color}>{formatLastRun(job.last_success_at)}</span>
             </span>
+            {job.last_run_at && job.last_run_at !== job.last_success_at && (
+              <span>
+                Last attempted: <span className="text-gray-400">{formatLastRun(job.last_run_at)}</span>
+              </span>
+            )}
             <span>Expected: every {job.expected_interval_hours}h</span>
             {job.business && (
               <span>{businessNames[job.business] || job.business.toUpperCase()}</span>
