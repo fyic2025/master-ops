@@ -2077,7 +2077,12 @@ export default function TasksPage() {
       {/* Priority Stats - Clickable to filter */}
       <div className="grid grid-cols-4 gap-4">
         <button
-          onClick={() => setPriorityFilter(priorityFilter === 1 ? null : 1)}
+          onClick={() => {
+            setPriorityFilter(priorityFilter === 1 ? null : 1)
+            setPeterFilter(false)
+            setRajaniFilter(false)
+            setMariaFilter(false)
+          }}
           className={`bg-gray-900 border rounded-lg p-4 text-left transition-all hover:border-red-500/50 ${
             priorityFilter === 1 ? 'border-red-500 ring-2 ring-red-500/20' : 'border-gray-800'
           }`}
@@ -2090,7 +2095,12 @@ export default function TasksPage() {
           <p className="text-xs text-gray-500 mt-1">Click to view</p>
         </button>
         <button
-          onClick={() => setPriorityFilter(priorityFilter === 2 ? null : 2)}
+          onClick={() => {
+            setPriorityFilter(priorityFilter === 2 ? null : 2)
+            setPeterFilter(false)
+            setRajaniFilter(false)
+            setMariaFilter(false)
+          }}
           className={`bg-gray-900 border rounded-lg p-4 text-left transition-all hover:border-orange-500/50 ${
             priorityFilter === 2 ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-800'
           }`}
@@ -2103,7 +2113,12 @@ export default function TasksPage() {
           <p className="text-xs text-gray-500 mt-1">Click to view</p>
         </button>
         <button
-          onClick={() => setPriorityFilter(priorityFilter === 3 ? null : 3)}
+          onClick={() => {
+            setPriorityFilter(priorityFilter === 3 ? null : 3)
+            setPeterFilter(false)
+            setRajaniFilter(false)
+            setMariaFilter(false)
+          }}
           className={`bg-gray-900 border rounded-lg p-4 text-left transition-all hover:border-yellow-500/50 ${
             priorityFilter === 3 ? 'border-yellow-500 ring-2 ring-yellow-500/20' : 'border-gray-800'
           }`}
@@ -2116,7 +2131,12 @@ export default function TasksPage() {
           <p className="text-xs text-gray-500 mt-1">Click to view</p>
         </button>
         <button
-          onClick={() => setPriorityFilter(priorityFilter === 4 ? null : 4)}
+          onClick={() => {
+            setPriorityFilter(priorityFilter === 4 ? null : 4)
+            setPeterFilter(false)
+            setRajaniFilter(false)
+            setMariaFilter(false)
+          }}
           className={`bg-gray-900 border rounded-lg p-4 text-left transition-all hover:border-gray-500/50 ${
             priorityFilter === 4 ? 'border-gray-500 ring-2 ring-gray-500/20' : 'border-gray-800'
           }`}
