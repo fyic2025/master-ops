@@ -104,6 +104,99 @@ function createXeroCheck(businessKey, envPrefix) {
 
 // Integration check configurations
 const INTEGRATIONS = {
+  // Global integrations
+  global_smartlead: {
+    business: 'global',
+    integration: 'smartlead',
+    check: async () => {
+      const apiKey = process.env.SMARTLEAD_API_KEY
+      if (!apiKey) return { ok: false, error: 'Missing Smartlead API key' }
+
+      const start = Date.now()
+      const response = await fetch('https://server.smartlead.ai/api/v1/campaigns?api_key=' + apiKey + '&limit=1')
+      return { ok: response.ok, latency: Date.now() - start }
+    },
+  },
+  global_n8n: {
+    business: 'global',
+    integration: 'n8n',
+    check: async () => {
+      const baseUrl = process.env.N8N_BASE_URL
+      const apiKey = process.env.N8N_API_KEY
+      if (!baseUrl || !apiKey) return { ok: false, error: 'Missing n8n credentials' }
+
+      const start = Date.now()
+      const response = await fetch(`${baseUrl}/api/v1/workflows?limit=1`, {
+        headers: { 'X-N8N-API-KEY': apiKey },
+      })
+      return { ok: response.ok, latency: Date.now() - start }
+    },
+  },
+  global_gsc: {
+    business: 'global',
+    integration: 'gsc',
+    check: async () => {
+      const clientId = process.env.GOOGLE_CLIENT_ID
+      const clientSecret = process.env.GOOGLE_CLIENT_SECRET
+      const refreshToken = process.env.GOOGLE_GSC_REFRESH_TOKEN
+      if (!refreshToken) return { ok: false, error: 'Missing GSC refresh token' }
+      if (!clientId || !clientSecret) return { ok: false, error: 'Missing Google OAuth credentials' }
+
+      const start = Date.now()
+      const response = await fetch('https://oauth2.googleapis.com/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          client_id: clientId,
+          client_secret: clientSecret,
+          refresh_token: refreshToken,
+          grant_type: 'refresh_token',
+        }),
+      })
+      return { ok: response.ok, latency: Date.now() - start }
+    },
+  },
+  teelixir_gmail: {
+    business: 'teelixir',
+    integration: 'gmail',
+    check: async () => {
+      const start = Date.now()
+      const response = await fetch('https://ops.growthcohq.com/api/health')
+      return { ok: response.ok, latency: Date.now() - start }
+    },
+  },
+  boo_google_merchant: {
+    business: 'boo',
+    integration: 'google_merchant',
+    check: async () => {
+      const merchantId = process.env.GMC_BOO_MERCHANT_ID
+      const clientId = process.env.GOOGLE_CLIENT_ID
+      const clientSecret = process.env.GOOGLE_CLIENT_SECRET
+      const refreshToken = process.env.GOOGLE_ADS_BOO_REFRESH_TOKEN
+      if (!merchantId) return { ok: false, error: 'Missing Merchant Center ID' }
+      if (!clientId || !clientSecret || !refreshToken) return { ok: false, error: 'Missing Google OAuth credentials' }
+
+      const start = Date.now()
+      const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          client_id: clientId,
+          client_secret: clientSecret,
+          refresh_token: refreshToken,
+          grant_type: 'refresh_token',
+        }),
+      })
+      if (!tokenResponse.ok) return { ok: false, error: 'Token refresh failed', latency: Date.now() - start }
+
+      const tokenData = await tokenResponse.json()
+      const mcResponse = await fetch(`https://shoppingcontent.googleapis.com/content/v2.1/${merchantId}/accounts/${merchantId}`, {
+        headers: { 'Authorization': `Bearer ${tokenData.access_token}` },
+      })
+      return { ok: mcResponse.ok, latency: Date.now() - start }
+    },
+  },
+
   // BOO
   boo_supabase: {
     business: 'boo',
@@ -174,6 +267,21 @@ const INTEGRATIONS = {
       return { ok: response.ok, latency: Date.now() - start }
     },
   },
+  teelixir_shopify: {
+    business: 'teelixir',
+    integration: 'shopify',
+    check: async () => {
+      const shopUrl = process.env.TEELIXIR_SHOPIFY_STORE_URL || 'teelixir.myshopify.com'
+      const accessToken = process.env.TEELIXIR_SHOPIFY_ACCESS_TOKEN
+      if (!accessToken) return { ok: false, error: 'Missing Shopify credentials' }
+
+      const start = Date.now()
+      const response = await fetch(`https://${shopUrl}/admin/api/2024-10/shop.json`, {
+        headers: { 'X-Shopify-Access-Token': accessToken },
+      })
+      return { ok: response.ok, latency: Date.now() - start }
+    },
+  },
   teelixir_xero: {
     business: 'teelixir',
     integration: 'xero',
@@ -201,6 +309,23 @@ const INTEGRATIONS = {
   },
 
   // RHF
+  rhf_woocommerce: {
+    business: 'rhf',
+    integration: 'woocommerce',
+    check: async () => {
+      const url = process.env.RHF_WOO_URL || 'https://www.redhillfresh.com.au'
+      const consumerKey = process.env.RHF_WOO_CONSUMER_KEY || 'ck_22300a7c92eeda90b8f14e509575b21a93627260'
+      const consumerSecret = process.env.RHF_WOO_CONSUMER_SECRET
+      if (!consumerSecret) return { ok: false, error: 'Missing WooCommerce consumer secret' }
+
+      const start = Date.now()
+      const auth = Buffer.from(`${consumerKey}:${consumerSecret}`).toString('base64')
+      const response = await fetch(`${url}/wp-json/wc/v3/system_status`, {
+        headers: { 'Authorization': `Basic ${auth}` },
+      })
+      return { ok: response.ok, latency: Date.now() - start }
+    },
+  },
   rhf_xero: {
     business: 'rhf',
     integration: 'xero',

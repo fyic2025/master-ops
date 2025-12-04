@@ -56,6 +56,11 @@ const integrationNames: Record<string, string> = {
   livechat: 'LiveChat',
   supabase: 'Supabase',
   woocommerce: 'WooCommerce',
+  smartlead: 'Smartlead',
+  n8n: 'n8n',
+  gsc: 'Google Search Console',
+  gmail: 'Gmail (GSuite)',
+  google_merchant: 'Google Merchant',
 }
 
 // Default integrations to show when no data

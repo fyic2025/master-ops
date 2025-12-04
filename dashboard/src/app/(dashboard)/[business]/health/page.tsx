@@ -27,6 +27,11 @@ const integrationNames: Record<string, string> = {
   livechat: 'LiveChat',
   supabase: 'Supabase',
   woocommerce: 'WooCommerce',
+  smartlead: 'Smartlead',
+  n8n: 'n8n',
+  gsc: 'Google Search Console',
+  gmail: 'Gmail (GSuite)',
+  google_merchant: 'Google Merchant',
 }
 
 const businessNames: Record<string, string> = {
@@ -34,6 +39,7 @@ const businessNames: Record<string, string> = {
   teelixir: 'Teelixir',
   elevate: 'Elevate',
   rhf: 'Red Hill Fresh',
+  global: 'Global',
 }
 
 async function fetchHealthChecks(): Promise<HealthCheck[]> {
