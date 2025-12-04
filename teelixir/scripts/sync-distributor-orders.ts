@@ -281,11 +281,23 @@ function parseUnleashedDate(dateStr: string | undefined | null): string | null {
 
 /**
  * Check if an order is from a distributor (not B2C)
- * B2C orders contain "b2c" in the order number
+ * B2C orders are identified by:
+ * - Order number containing "b2c"
+ * - Order number starting with "Shopify"
+ * - Customer code starting with "SHOPIFY-"
  */
 function isDistributorOrder(order: UnleashedSalesOrder): boolean {
   const orderNumber = (order.OrderNumber || '').toLowerCase()
-  return !orderNumber.includes('b2c')
+  const customerCode = (order.Customer?.CustomerCode || '').toLowerCase()
+
+  // Skip B2C orders
+  if (orderNumber.includes('b2c')) return false
+
+  // Skip Shopify B2C orders (created by unleashed-shopify-sync)
+  if (orderNumber.startsWith('shopify')) return false
+  if (customerCode.startsWith('shopify-')) return false
+
+  return true
 }
 
 /**

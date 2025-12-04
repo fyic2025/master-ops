@@ -52,6 +52,7 @@ function resolveProductSku(sku: string | undefined | null, title: string): strin
 
 // Proper Unleashed API types (different from types.ts simplified versions)
 interface UnleashedApiSalesOrder {
+  OrderNumber?: string
   Customer: {
     CustomerCode: string
     CustomerName?: string
@@ -121,9 +122,10 @@ export async function syncOrder(
   console.log(`   Total: $${order.total_price}`)
 
   try {
-    // Check if order already exists in Unleashed (by CustomerRef = Shopify order ID)
+    // Check if order already exists in Unleashed using fuzzy duplicate detection
+    // Matches by: CustomerRef (exact), OrderNumber (exact), or customer+date+total (fuzzy)
     if (!options.dryRun) {
-      const existingOrder = await checkExistingUnleashedOrder(config, order.id)
+      const existingOrder = await checkExistingUnleashedOrder(config, order.id, order)
       if (existingOrder) {
         console.log(`   ⏭️ Already synced (${existingOrder})`)
         result.status = 'skipped'
@@ -178,7 +180,11 @@ export async function syncOrder(
       } else if (resolvedSku) {
         // Regular product with valid SKU
         const unitPrice = parseFloat(item.price)
-        const lineTotal = Math.round(item.quantity * unitPrice * 100) / 100
+        const totalDiscount = parseFloat(item.total_discount || '0')
+        const lineSubtotal = item.quantity * unitPrice
+        // Calculate discount rate as percentage (0-100)
+        const discountRate = lineSubtotal > 0 ? Math.round((totalDiscount / lineSubtotal) * 10000) / 100 : 0
+        const lineTotal = Math.round((lineSubtotal - totalDiscount) * 100) / 100
         expandedLines.push({
           LineNumber: lineNumber++,
           Product: {
@@ -186,13 +192,14 @@ export async function syncOrder(
           },
           OrderQuantity: item.quantity,
           UnitPrice: unitPrice,
-          DiscountRate: 0,
+          DiscountRate: discountRate,
           LineTotal: lineTotal,
           TaxRate: 0,
           LineTax: 0,
         })
-        if (verbose || resolvedSku !== item.sku) {
-          console.log(`   📦 ${resolvedSku}: ${item.title} x${item.quantity}${resolvedSku !== item.sku ? ' (mapped from title)' : ''}`)
+        if (verbose || resolvedSku !== item.sku || discountRate > 0) {
+          const discountInfo = discountRate > 0 ? ` (${discountRate}% discount)` : ''
+          console.log(`   📦 ${resolvedSku}: ${item.title} x${item.quantity}${resolvedSku !== item.sku ? ' (mapped from title)' : ''}${discountInfo}`)
         }
       } else {
         // No SKU and no mapping - log warning but continue
@@ -212,12 +219,15 @@ export async function syncOrder(
     const roundedSubTotal = Math.round(subTotal * 100) / 100
 
     // Find or create customer in Unleashed
+    // Use order.id as CustomerCode to match existing format (e.g., 9411971875091)
     const customer = await findOrCreateUnleashedCustomer(config, order, dryRun)
 
     // Build Unleashed sales order with proper API structure
     // Note: Always use 'Parked' status - 'Completed' requires batch allocation
     // Orders can be completed manually in Unleashed after batch selection
+    // OrderNumber format: Shopify{order_number} to match existing orders (e.g., Shopify31546)
     const salesOrder: UnleashedApiSalesOrder = {
+      OrderNumber: `Shopify${order.order_number}`,
       Customer: customer,
       OrderDate: new Date(order.created_at).toISOString(),
       RequiredDate: new Date(order.created_at).toISOString(),
@@ -276,14 +286,15 @@ interface CustomerRef {
 /**
  * Find existing customer or create new one in Unleashed
  * Returns customer object with Guid for use in sales order
+ * CustomerCode uses Shopify order ID to match existing format (e.g., 9411971875091)
  */
 async function findOrCreateUnleashedCustomer(
   config: StoreConfig,
   order: ShopifyOrder,
   dryRun: boolean
 ): Promise<CustomerRef> {
-  // Generate customer code from Shopify customer ID
-  const customerCode = `SHOPIFY-${order.customer.id}`
+  // Use Shopify order ID as customer code to match existing format
+  const customerCode = order.id.toString()
   const customerName = `${order.customer.first_name} ${order.customer.last_name}`
 
   if (dryRun) {
@@ -329,28 +340,56 @@ async function findOrCreateUnleashedCustomer(
 }
 
 // Cache for recent Unleashed orders to avoid repeated API calls
-let recentOrdersCache: Map<string, string> | null = null
+interface CachedUnleashedOrder {
+  orderNumber: string
+  guid: string
+  customerRef: string | null
+  customerName: string
+  orderDate: string
+  total: number
+}
+let recentOrdersCache: CachedUnleashedOrder[] | null = null
 let recentOrdersCacheTime: number = 0
 const CACHE_TTL = 60000 // 1 minute
 
 /**
- * Check if a Shopify order already exists in Unleashed
- * Fetches recent orders and filters locally by CustomerRef
- * (Unleashed API customerRef filter doesn't work properly)
+ * Normalize customer name for fuzzy matching
  */
-async function checkExistingUnleashedOrder(
-  config: StoreConfig,
-  shopifyOrderId: string | number
-): Promise<string | null> {
-  const targetRef = String(shopifyOrderId)
+function normalizeCustomerName(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9]/g, '')
+}
 
+/**
+ * Check if two dates are within N days of each other
+ */
+function datesWithinDays(date1: string, date2: string, days: number): boolean {
+  const d1 = new Date(date1).getTime()
+  const d2 = new Date(date2).getTime()
+  const diffMs = Math.abs(d1 - d2)
+  const diffDays = diffMs / (1000 * 60 * 60 * 24)
+  return diffDays <= days
+}
+
+/**
+ * Check if two totals are within a percentage of each other
+ */
+function totalsWithinPercent(total1: number, total2: number, percent: number): boolean {
+  if (total1 === 0 && total2 === 0) return true
+  const diff = Math.abs(total1 - total2)
+  const avg = (total1 + total2) / 2
+  return (diff / avg) * 100 <= percent
+}
+
+/**
+ * Fetch recent Unleashed orders for duplicate checking
+ */
+async function fetchRecentUnleashedOrders(config: StoreConfig): Promise<CachedUnleashedOrder[]> {
   // Use cache if fresh
   if (recentOrdersCache && Date.now() - recentOrdersCacheTime < CACHE_TTL) {
-    return recentOrdersCache.get(targetRef) || null
+    return recentOrdersCache
   }
 
-  // Fetch recent orders (last 100) and build lookup map
-  const queryString = 'pageSize=100'
+  const queryString = 'pageSize=200'
   const url = `${config.unleashed.apiUrl}/SalesOrders?${queryString}`
   const signature = generateUnleashedSignature(queryString, config.unleashed.apiKey)
 
@@ -365,25 +404,147 @@ async function checkExistingUnleashedOrder(
     })
 
     if (!response.ok) {
-      return null
+      return []
     }
 
     const data = await response.json()
     const items = data.Items || []
 
-    // Build cache: CustomerRef -> OrderNumber
-    recentOrdersCache = new Map()
-    for (const order of items) {
-      if (order.CustomerRef) {
-        recentOrdersCache.set(order.CustomerRef, order.OrderNumber || order.Guid)
-      }
-    }
+    recentOrdersCache = items.map((order: any) => ({
+      orderNumber: order.OrderNumber || '',
+      guid: order.Guid || '',
+      customerRef: order.CustomerRef || null,
+      customerName: order.Customer?.CustomerName || '',
+      orderDate: order.OrderDate || '',
+      total: order.Total || 0,
+    }))
     recentOrdersCacheTime = Date.now()
 
-    return recentOrdersCache.get(targetRef) || null
+    return recentOrdersCache
   } catch {
-    return null
+    return []
   }
+}
+
+interface DuplicateCheckResult {
+  isDuplicate: boolean
+  matchType: 'exact_ref' | 'exact_order_number' | 'fuzzy_customer_date_total' | null
+  matchedOrder: string | null
+}
+
+/**
+ * Check if a Shopify order already exists in Unleashed using fuzzy logic
+ *
+ * Match priority:
+ * 1. Exact CustomerRef match (Shopify order ID)
+ * 2. Exact OrderNumber match (Shopify{order_number})
+ * 3. Fuzzy: Same customer name + within 1 day + total within 5%
+ */
+async function checkExistingUnleashedOrder(
+  config: StoreConfig,
+  shopifyOrderId: string | number,
+  shopifyOrder?: ShopifyOrder
+): Promise<string | null> {
+  const targetRef = String(shopifyOrderId)
+  const orders = await fetchRecentUnleashedOrders(config)
+
+  // 1. Exact CustomerRef match
+  for (const order of orders) {
+    if (order.customerRef === targetRef) {
+      return order.orderNumber || order.guid
+    }
+  }
+
+  // 2. Exact OrderNumber match (Shopify{order_number})
+  if (shopifyOrder) {
+    const expectedOrderNumber = `Shopify${shopifyOrder.order_number}`.toLowerCase()
+    for (const order of orders) {
+      if (order.orderNumber.toLowerCase() === expectedOrderNumber) {
+        return order.orderNumber
+      }
+    }
+  }
+
+  // 3. Fuzzy match: customer name + date + total
+  if (shopifyOrder) {
+    const shopifyCustomerName = normalizeCustomerName(
+      `${shopifyOrder.customer.first_name} ${shopifyOrder.customer.last_name}`
+    )
+    const shopifyTotal = parseFloat(shopifyOrder.total_price)
+    const shopifyDate = shopifyOrder.created_at
+
+    for (const order of orders) {
+      const unleashedCustomerName = normalizeCustomerName(order.customerName)
+
+      // Check if names match (allowing for small variations)
+      const nameMatch = shopifyCustomerName === unleashedCustomerName ||
+        shopifyCustomerName.includes(unleashedCustomerName) ||
+        unleashedCustomerName.includes(shopifyCustomerName)
+
+      if (nameMatch &&
+          datesWithinDays(shopifyDate, order.orderDate, 1) &&
+          totalsWithinPercent(shopifyTotal, order.total, 5)) {
+        console.log(`   ⚠️ Fuzzy duplicate detected: ${order.orderNumber} (${order.customerName}, $${order.total})`)
+        return order.orderNumber
+      }
+    }
+  }
+
+  return null
+}
+
+/**
+ * Check for duplicate orders within Unleashed (Unleashed ↔ Unleashed)
+ * Returns array of potential duplicate groups
+ */
+export async function findUnleashedDuplicates(
+  config: StoreConfig
+): Promise<Array<{ orders: CachedUnleashedOrder[]; reason: string }>> {
+  const orders = await fetchRecentUnleashedOrders(config)
+  const duplicateGroups: Array<{ orders: CachedUnleashedOrder[]; reason: string }> = []
+  const processedPairs = new Set<string>()
+
+  for (let i = 0; i < orders.length; i++) {
+    for (let j = i + 1; j < orders.length; j++) {
+      const order1 = orders[i]
+      const order2 = orders[j]
+      const pairKey = [order1.guid, order2.guid].sort().join('|')
+
+      if (processedPairs.has(pairKey)) continue
+
+      // Check for potential duplicates
+      const name1 = normalizeCustomerName(order1.customerName)
+      const name2 = normalizeCustomerName(order2.customerName)
+      const nameMatch = name1 === name2 || name1.includes(name2) || name2.includes(name1)
+
+      if (nameMatch &&
+          datesWithinDays(order1.orderDate, order2.orderDate, 1) &&
+          totalsWithinPercent(order1.total, order2.total, 5)) {
+        processedPairs.add(pairKey)
+
+        // Check if this group already exists
+        const existingGroup = duplicateGroups.find(g =>
+          g.orders.some(o => o.guid === order1.guid || o.guid === order2.guid)
+        )
+
+        if (existingGroup) {
+          if (!existingGroup.orders.find(o => o.guid === order1.guid)) {
+            existingGroup.orders.push(order1)
+          }
+          if (!existingGroup.orders.find(o => o.guid === order2.guid)) {
+            existingGroup.orders.push(order2)
+          }
+        } else {
+          duplicateGroups.push({
+            orders: [order1, order2],
+            reason: `Same customer "${order1.customerName}", similar date, similar total ($${order1.total} vs $${order2.total})`
+          })
+        }
+      }
+    }
+  }
+
+  return duplicateGroups
 }
 
 /**

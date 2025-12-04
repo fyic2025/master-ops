@@ -92,6 +92,11 @@ export interface ShopifyLineItem {
   price: string
   product_id: number
   variant_id: number
+  total_discount: string
+  discount_allocations: Array<{
+    amount: string
+    discount_application_index: number
+  }>
 }
 
 export interface ShopifyOrder {
