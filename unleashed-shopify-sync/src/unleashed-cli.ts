@@ -347,6 +347,117 @@ async function main(): Promise<void> {
         break
       }
 
+      // ============================================
+      // Store Commands (Supabase edit workflow)
+      // ============================================
+
+      case 'pull': {
+        const orderNumber = filteredArgs[1]
+        if (!orderNumber) {
+          console.error('Error: Order number required')
+          console.error('Usage: pull <order>')
+          process.exit(1)
+        }
+        const orderStore = new OrderStore(store)
+        const pulled = await orderStore.pullOrder(orderNumber)
+        if (!pulled) {
+          console.error(`Failed to pull order: ${orderNumber}`)
+          process.exit(1)
+        }
+        console.log(`\nOrder stored in Supabase. Use 'edit ${orderNumber}' to view.`)
+        break
+      }
+
+      case 'edit': {
+        const orderNumber = filteredArgs[1]
+        if (!orderNumber) {
+          console.error('Error: Order number required')
+          console.error('Usage: edit <order>')
+          process.exit(1)
+        }
+        const orderStore = new OrderStore(store)
+        const stored = await orderStore.getOrder(orderNumber)
+        if (!stored) {
+          console.error(`Order not found in Supabase: ${orderNumber}`)
+          console.error(`Use 'pull ${orderNumber}' to fetch from Unleashed first.`)
+          process.exit(1)
+        }
+        const { order, lines } = stored
+        if (jsonOutput) {
+          console.log(JSON.stringify({ order, lines }, null, 2))
+        } else {
+          console.log(`\n${'='.repeat(60)}`)
+          console.log(`ORDER: ${order.order_number}`)
+          console.log(`${'='.repeat(60)}`)
+          console.log(`Status:    ${order.order_status} (sync: ${order.sync_status})`)
+          console.log(`Customer:  ${order.customer_name} (${order.customer_code})`)
+          console.log(`Date:      ${order.order_date?.slice(0, 10)}`)
+          if (order.comments) {
+            console.log(`Comments:  ${order.comments}`)
+          }
+          console.log(`\nLines:`)
+          console.log('-'.repeat(60))
+          for (const line of lines) {
+            const desc = (line.product_description || '').slice(0, 35).padEnd(35)
+            console.log(`  ${line.product_code.padEnd(12)} ${desc} ${String(line.order_quantity).padStart(3)} x ${formatCurrency(line.unit_price).padStart(10)} = ${formatCurrency(line.line_total || 0).padStart(10)}`)
+          }
+          console.log('-'.repeat(60))
+          console.log(`${''.padEnd(52)} Total: ${formatCurrency(order.total).padStart(10)}`)
+          console.log(`\nEdit commands:`)
+          console.log(`  edit-remove ${order.order_number} <product-code>`)
+          console.log(`  edit-qty ${order.order_number} <product-code> <qty>`)
+          console.log(`  push ${order.order_number}`)
+        }
+        break
+      }
+
+      case 'edit-remove': {
+        const orderNumber = filteredArgs[1]
+        const productCode = filteredArgs[2]
+        if (!orderNumber || !productCode) {
+          console.error('Error: Order number and product code required')
+          console.error('Usage: edit-remove <order> <product>')
+          process.exit(1)
+        }
+        const orderStore = new OrderStore(store)
+        await orderStore.removeLine(orderNumber, productCode)
+        console.log(`✅ Removed ${productCode} from ${orderNumber} (in Supabase)`)
+        console.log(`   Use 'push ${orderNumber}' to sync to Unleashed`)
+        break
+      }
+
+      case 'edit-qty': {
+        const orderNumber = filteredArgs[1]
+        const productCode = filteredArgs[2]
+        const quantity = parseInt(filteredArgs[3])
+        if (!orderNumber || !productCode || isNaN(quantity)) {
+          console.error('Error: Order number, product code, and quantity required')
+          console.error('Usage: edit-qty <order> <product> <qty>')
+          process.exit(1)
+        }
+        const orderStore = new OrderStore(store)
+        await orderStore.updateLineQty(orderNumber, productCode, quantity)
+        console.log(`✅ Updated ${productCode} qty to ${quantity} in ${orderNumber} (in Supabase)`)
+        console.log(`   Use 'push ${orderNumber}' to sync to Unleashed`)
+        break
+      }
+
+      case 'push': {
+        const orderNumber = filteredArgs[1]
+        if (!orderNumber) {
+          console.error('Error: Order number required')
+          console.error('Usage: push <order>')
+          process.exit(1)
+        }
+        const orderStore = new OrderStore(store)
+        console.log(`\nPushing ${orderNumber} to Unleashed...`)
+        console.log(`(This will delete the old order and create a new one)\n`)
+        const created = await orderStore.pushOrder(orderNumber)
+        console.log(`\nNew order number: ${created.OrderNumber}`)
+        console.log(`Total: ${formatCurrency(created.Total || 0)}`)
+        break
+      }
+
       default:
         console.error(`Unknown command: ${command}`)
         usage()
