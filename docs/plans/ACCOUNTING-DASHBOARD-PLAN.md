@@ -1,4 +1,4 @@
-# Accounting Dashboard Automation Plan
+# Bookkeeping Automation Plan
 
 **Created**: 2025-12-04
 **Updated**: 2025-12-04
@@ -10,17 +10,19 @@
 
 ## Executive Summary
 
-This plan outlines the implementation of an **Accounting** tab on the master dashboard (ops.growthcohq.com) to automate bookkeeping processes across all 4 businesses. The goal is to:
+This plan outlines **full bookkeeping automation** to replace manual staff tasks across all 4 businesses. This is NOT just a dashboard - it's an **activity-based automation system** that handles:
 
-1. Create a centralized accounting view in the dashboard
-2. Automate transaction categorization and reconciliation
-3. Leverage ATO rulings for tax compliance
-4. Generate BAS-ready reports
-5. Integrate with Xero (all 4 businesses use Xero)
+1. **Bank Reconciliation** - Auto-match bank transactions to invoices/orders
+2. **Accounts Receivable (AR)** - Automated debt collection and payment follow-up
+3. **Accounts Payable (AP)** - Receive invoices, create Xero transactions, attach documents
+4. **Document Management** - Attach invoices/receipts to Xero transactions automatically
+5. **BAS Preparation** - Automated GST calculations and reporting
 
-**Success Criteria**: One business (BOO or RHF) fully automated within the proof of concept phase.
+**Goal**: Strip staff costs by automating day-to-day bookkeeping activities.
 
-**KEY SIMPLIFICATION**: All 4 businesses use Xero, and we already have a complete Xero integration built!
+**Success Criteria**: BOO bookkeeping fully automated with minimal human intervention.
+
+**KEY ADVANTAGE**: All 4 businesses use Xero, and we have a complete Xero integration ready!
 
 ---
 
@@ -54,70 +56,275 @@ This plan outlines the implementation of an **Accounting** tab on the master das
 
 ## Architecture Overview
 
+### Bookkeeping Automation Workflow
+
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                        ACCOUNTING DASHBOARD                              │
-│                     (ops.growthcohq.com/accounting)                      │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                          │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐ │
-│  │   Overview   │  │ Transactions │  │     BAS      │  │  ATO Rules   │ │
-│  │  (Dashboard) │  │   & Recon    │  │   Reports    │  │  Reference   │ │
-│  └──────────────┘  └──────────────┘  └──────────────┘  └──────────────┘ │
-│                                                                          │
-├─────────────────────────────────────────────────────────────────────────┤
-│                            DATA LAYER                                    │
-├───────────────────┬───────────────────┬─────────────────────────────────┤
-│                   │                   │                                  │
-│  E-COMMERCE       │  ACCOUNTING       │  TAX COMPLIANCE                  │
-│  ────────────     │  ──────────       │  ──────────────                  │
-│  • bc_orders      │  • Xero/MYOB API  │  • ato_rulings                  │
-│  • wc_orders      │  • Bank feeds     │  • ato_ruling_topics            │
-│  • Payment data   │  • Chart of accts │  • GST calculations             │
-│                   │                   │                                  │
-└───────────────────┴───────────────────┴─────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                     BOOKKEEPING AUTOMATION SYSTEM                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐          │
+│  │ ACCOUNTS PAYABLE│    │ BANK RECON      │    │ ACCOUNTS RECEIV │          │
+│  │ (Bills/Expenses)│    │ (Matching)      │    │ (Debt Collection)│          │
+│  └────────┬────────┘    └────────┬────────┘    └────────┬────────┘          │
+│           │                      │                      │                    │
+│           ▼                      ▼                      ▼                    │
+│  ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐          │
+│  │ 1. Receive email│    │ 1. Fetch bank   │    │ 1. Identify     │          │
+│  │ 2. Extract data │    │    transactions │    │    overdue      │          │
+│  │ 3. Create bill  │    │ 2. Match to     │    │ 2. Send reminders│         │
+│  │ 4. Attach PDF   │    │    invoices     │    │ 3. Escalate if  │          │
+│  │ 5. Submit Xero  │    │ 3. Auto-reconcile│   │    unpaid       │          │
+│  └─────────────────┘    └─────────────────┘    └─────────────────┘          │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                         DATA SOURCES                                         │
+├────────────────────┬────────────────────┬───────────────────────────────────┤
+│                    │                    │                                    │
+│  INCOMING INVOICES │  BANK FEEDS        │  SALES DATA                       │
+│  ──────────────────│  ─────────────     │  ──────────                       │
+│  • Email inbox     │  • Xero bank feeds │  • bc_orders (BOO)                │
+│  • Supplier portal │  • Bank statements │  • wc_orders (RHF)                │
+│  • Manual upload   │                    │  • Shopify orders (Teelixir)      │
+│                    │                    │                                    │
+└────────────────────┴────────────────────┴───────────────────────────────────┘
+```
+
+### Dashboard Structure (ops.growthcohq.com/home/accounting)
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        ACCOUNTING DASHBOARD                                  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  Tab 1: WORK QUEUE         Tab 2: BANK RECON       Tab 3: AR (Debtors)      │
+│  ┌─────────────────┐       ┌─────────────────┐     ┌─────────────────┐      │
+│  │ Unprocessed     │       │ Unmatched txns  │     │ Overdue invoices│      │
+│  │ invoices: 12    │       │ to reconcile: 8 │     │ to follow up: 5 │      │
+│  │ [Process Next]  │       │ [Match Now]     │     │ [Send Reminders]│      │
+│  └─────────────────┘       └─────────────────┘     └─────────────────┘      │
+│                                                                              │
+│  Tab 4: AP (Bills)         Tab 5: BAS PREP         Tab 6: ATO RULES         │
+│  ┌─────────────────┐       ┌─────────────────┐     ┌─────────────────┐      │
+│  │ Bills due this  │       │ GST collected   │     │ Relevant rulings│      │
+│  │ week: $12,500   │       │ GST credits     │     │ for compliance  │      │
+│  │ [Review Bills]  │       │ Net GST position│     │ [Search Rules]  │      │
+│  └─────────────────┘       └─────────────────┘     └─────────────────┘      │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Accounting Tab Structure
+## Automation Modules
 
-The new Accounting section will be accessible from the **Home** business (global view) with sub-tabs:
+### Module 1: Accounts Payable (AP) - Invoice Processing
 
-### Tab 1: Overview Dashboard
-- Revenue summary by business (daily/weekly/monthly)
-- Outstanding invoices count and value
-- Bank account balances (if connected)
-- GST liability estimate (running total)
-- Upcoming BAS lodgement deadlines
+**Goal**: Receive supplier invoices via email, extract data, create bills in Xero with attachments.
 
-### Tab 2: Transactions
-- All e-commerce transactions (orders, refunds)
-- Bank feed transactions (if connected)
-- Categorization status (auto/manual/pending)
-- Reconciliation status
-- Filters by business, date range, status
+**Workflow**:
+```
+Email received → Parse PDF → Extract invoice data → Match supplier → Create Xero bill → Attach PDF
+```
 
-### Tab 3: BAS Preparation
+**Components**:
+1. **Email Monitor** (n8n workflow)
+   - Watch dedicated email inbox (e.g., invoices@buyorganicsonline.com.au)
+   - Trigger on new email with PDF attachment
+   - Forward to processing queue
+
+2. **Invoice Parser** (AI-powered)
+   - Extract: Supplier name, ABN, invoice number, date, due date, line items, GST, total
+   - Use Claude API or document OCR
+   - Store extracted data in Supabase `pending_invoices` table
+
+3. **Supplier Matcher**
+   - Match extracted supplier to Xero contacts
+   - Create new contact if not found
+   - Flag for review if uncertain match
+
+4. **Xero Bill Creator**
+   - Create bill in Xero via API (`xeroClient.invoices.create()`)
+   - Attach original PDF
+   - Auto-categorize based on supplier or keywords
+
+5. **Dashboard Queue**
+   - Show pending invoices requiring approval
+   - One-click approve or edit
+   - Bulk processing option
+
+**Xero API Methods**:
+```typescript
+// Create a bill (accounts payable)
+await xeroClient.invoices.create({
+  Type: 'ACCPAY',
+  Contact: { ContactID: supplierId },
+  Date: invoiceDate,
+  DueDate: dueDate,
+  LineItems: extractedLineItems,
+  Status: 'DRAFT' // or 'SUBMITTED' for auto-approve
+})
+
+// Attach PDF to invoice
+await xeroClient.attachments.upload(invoiceId, pdfBuffer, 'invoice.pdf')
+```
+
+---
+
+### Module 2: Bank Reconciliation
+
+**Goal**: Auto-match bank transactions to invoices and orders.
+
+**Workflow**:
+```
+Fetch bank feed → Match to invoices/orders → Auto-reconcile matches → Flag unmatched for review
+```
+
+**Components**:
+1. **Bank Feed Sync** (n8n daily job)
+   - Fetch bank transactions from Xero bank feed
+   - Store in Supabase `bank_transactions` table
+   - Track reconciliation status
+
+2. **Matching Engine**
+   - Match by: Amount, date, reference number, contact name
+   - Scoring system: Exact match (100%), partial match (50-99%)
+   - Confidence threshold for auto-reconcile (e.g., 95%)
+
+3. **Auto-Reconciliation**
+   - High-confidence matches reconciled automatically
+   - Create reconciliation record in Xero
+
+4. **Manual Review Queue**
+   - Dashboard shows unmatched transactions
+   - Suggest possible matches
+   - One-click reconcile or split
+
+**Xero API Methods**:
+```typescript
+// Get bank transactions
+const transactions = await xeroClient.bankTransactions.list({
+  where: 'Status=="AUTHORISED"',
+  order: 'Date DESC'
+})
+
+// Reconcile a bank transaction to an invoice
+// This is done via Xero's bank statement lines API
+```
+
+---
+
+### Module 3: Accounts Receivable (AR) - Debt Collection
+
+**Goal**: Automated follow-up on overdue invoices to collect money owed.
+
+**Workflow**:
+```
+Identify overdue → Send reminder email → Wait → Escalate → Flag for human intervention
+```
+
+**Components**:
+1. **Overdue Scanner** (n8n daily job)
+   - Query Xero for overdue invoices
+   - Calculate days overdue
+   - Segment by age (7 days, 14 days, 30 days, 60+ days)
+
+2. **Reminder Templates**
+   - Friendly reminder (7 days overdue)
+   - Firm reminder (14 days overdue)
+   - Final notice (30 days overdue)
+   - Escalation notice (60+ days)
+
+3. **Email Automation** (Klaviyo or direct SMTP)
+   - Send templated emails with invoice details
+   - Include payment link
+   - Track opens and clicks
+
+4. **Escalation Workflow**
+   - 60+ days: Flag for phone call
+   - 90+ days: Consider debt collection or write-off
+   - Dashboard shows escalation queue
+
+5. **Payment Recording**
+   - When payment received, mark invoice paid in Xero
+   - Record payment method and date
+
+**Xero API Methods**:
+```typescript
+// Get overdue invoices
+const overdue = await xeroClient.invoices.list({
+  where: 'Status=="AUTHORISED" AND DueDate<DateTime(2024,12,01)'
+})
+
+// Send reminder (Xero can send emails)
+await xeroClient.invoices.email(invoiceId, {
+  emailAddress: contact.Email,
+  subject: 'Payment Reminder',
+  message: 'Your invoice is now 7 days overdue...'
+})
+```
+
+---
+
+### Module 4: Document Management
+
+**Goal**: Attach source documents to all Xero transactions for audit trail.
+
+**Components**:
+1. **Receipt Capture**
+   - Email forwarding for receipts
+   - Mobile upload via dashboard
+   - Supplier portal downloads
+
+2. **Auto-Attachment**
+   - Match receipt to expense transaction
+   - Attach via Xero API
+   - Log attachment status
+
+3. **Audit Trail**
+   - Track all attachments
+   - Missing attachment alerts
+   - Compliance reporting
+
+---
+
+## Dashboard Tab Structure
+
+### Tab 1: Work Queue (Inbox)
+- **Unprocessed Invoices**: Bills waiting to be reviewed
+- **Suggested Matches**: Bank transactions with probable matches
+- **Approval Queue**: Items needing human approval
+- **Today's Tasks**: Priority actions
+
+### Tab 2: Bank Reconciliation
+- **Unmatched Transactions**: Bank entries without matches
+- **Match Suggestions**: AI-suggested matches to review
+- **Recent Reconciliations**: Audit log
+- **Reconciliation Rate**: % auto-matched
+
+### Tab 3: Accounts Receivable (Debtors)
+- **Overdue by Age**: 7/14/30/60+ days buckets
+- **Total Outstanding**: Sum owed to us
+- **Reminder Status**: Last contact per customer
+- **Escalation Queue**: Needs human follow-up
+
+### Tab 4: Accounts Payable (Bills)
+- **Bills Due This Week**: Upcoming payments
+- **Bills Awaiting Approval**: Draft bills
+- **Payment Schedule**: Cash flow forecast
+- **Supplier Balances**: What we owe
+
+### Tab 5: BAS Preparation
 - GST collected (from sales)
 - GST credits (from expenses)
 - Net GST position
 - PAYG withholding summary
-- PAYG instalment calculation
-- Export to accounting software
+- Export to ATO
 
-### Tab 4: ATO Rules Reference
+### Tab 6: ATO Rules Reference
 - Searchable ATO rulings database
-- Rulings marked as relevant to our businesses
-- Quick reference for common scenarios
-- Links to full ATO source documents
-
-### Tab 5: Reports
-- Profit & Loss by business
-- Balance Sheet snapshots
-- Cash flow statements
-- Bank reconciliation reports
-- GST audit trail
+- Rulings marked as relevant
+- Quick compliance reference
 
 ---
 
@@ -214,12 +421,178 @@ dashboard/src/app/api/accounting/
 └── reports/route.ts            # Financial report generation
 ```
 
-### 2.2 Create Accounting Database Schema
+### 2.2 Create Bookkeeping Automation Database Schema
+
+**File**: `infra/supabase/migrations/20251204_bookkeeping_schema.sql`
+
+```sql
+-- =============================================================================
+-- BOOKKEEPING AUTOMATION SCHEMA
+-- =============================================================================
+
+-- Pending invoices queue (AP inbox)
+CREATE TABLE IF NOT EXISTS pending_invoices (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    business_key TEXT NOT NULL,
+
+    -- Source
+    source_type TEXT NOT NULL CHECK (source_type IN ('email', 'upload', 'api')),
+    source_email TEXT,                       -- Original email address
+    source_subject TEXT,                     -- Email subject
+    received_at TIMESTAMPTZ DEFAULT NOW(),
+
+    -- Extracted data (from AI/OCR)
+    supplier_name TEXT,
+    supplier_abn TEXT,
+    invoice_number TEXT,
+    invoice_date DATE,
+    due_date DATE,
+    subtotal DECIMAL(10,2),
+    gst_amount DECIMAL(10,2),
+    total_amount DECIMAL(10,2),
+    line_items JSONB DEFAULT '[]'::jsonb,
+
+    -- Matching
+    matched_contact_id TEXT,                 -- Xero contact ID
+    match_confidence INTEGER,                -- 0-100%
+
+    -- Document
+    pdf_url TEXT,                            -- Stored PDF location
+    pdf_filename TEXT,
+
+    -- Processing status
+    status TEXT DEFAULT 'pending' CHECK (status IN (
+        'pending',       -- Awaiting review
+        'processing',    -- AI extraction in progress
+        'ready',         -- Extracted, ready for approval
+        'approved',      -- User approved
+        'submitted',     -- Sent to Xero
+        'failed',        -- Processing failed
+        'rejected'       -- User rejected
+    )),
+    processing_error TEXT,
+
+    -- Xero reference
+    xero_invoice_id TEXT,                    -- After submission
+    submitted_at TIMESTAMPTZ,
+    submitted_by TEXT,
+
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- AR reminder tracking
+CREATE TABLE IF NOT EXISTS ar_reminders (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    business_key TEXT NOT NULL,
+
+    -- Invoice reference
+    xero_invoice_id TEXT NOT NULL,
+    xero_contact_id TEXT NOT NULL,
+    invoice_number TEXT,
+    invoice_amount DECIMAL(10,2),
+    due_date DATE,
+
+    -- Contact details
+    contact_name TEXT,
+    contact_email TEXT,
+
+    -- Reminder tracking
+    days_overdue INTEGER,
+    reminder_level INTEGER DEFAULT 1,        -- 1=7day, 2=14day, 3=30day, 4=60day+
+    last_reminder_sent_at TIMESTAMPTZ,
+    next_reminder_due_at TIMESTAMPTZ,
+    total_reminders_sent INTEGER DEFAULT 0,
+
+    -- Status
+    status TEXT DEFAULT 'active' CHECK (status IN (
+        'active',        -- Still following up
+        'paid',          -- Invoice paid
+        'escalated',     -- Needs human intervention
+        'written_off',   -- Decided not to pursue
+        'disputed'       -- Customer dispute
+    )),
+    escalation_reason TEXT,
+    escalated_at TIMESTAMPTZ,
+
+    -- Response tracking
+    last_response_at TIMESTAMPTZ,
+    last_response_type TEXT,                 -- 'email_reply', 'phone', 'payment'
+    notes TEXT,
+
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+
+    UNIQUE(business_key, xero_invoice_id)
+);
+
+-- Bank transaction cache (for reconciliation)
+CREATE TABLE IF NOT EXISTS bank_transactions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    business_key TEXT NOT NULL,
+
+    -- Xero reference
+    xero_transaction_id TEXT NOT NULL,
+    xero_bank_account_id TEXT,
+    bank_account_name TEXT,
+
+    -- Transaction details
+    transaction_date DATE NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    description TEXT,
+    reference TEXT,
+    transaction_type TEXT,                   -- RECEIVE, SPEND
+
+    -- Reconciliation
+    is_reconciled BOOLEAN DEFAULT false,
+    reconciled_to_type TEXT,                 -- 'invoice', 'bill', 'manual'
+    reconciled_to_id TEXT,                   -- Xero invoice/bill ID
+    reconciled_at TIMESTAMPTZ,
+    reconciled_by TEXT,
+
+    -- Matching suggestions
+    suggested_match_id TEXT,
+    suggested_match_type TEXT,
+    match_confidence INTEGER,                -- 0-100%
+
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+
+    UNIQUE(business_key, xero_transaction_id)
+);
+
+-- Reconciliation audit log
+CREATE TABLE IF NOT EXISTS reconciliation_log (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    business_key TEXT NOT NULL,
+    bank_transaction_id UUID REFERENCES bank_transactions(id),
+    action TEXT NOT NULL,                    -- 'matched', 'unmatched', 'manual'
+    matched_to_type TEXT,
+    matched_to_id TEXT,
+    performed_by TEXT,
+    performed_at TIMESTAMPTZ DEFAULT NOW(),
+    notes TEXT
+);
+
+-- Indexes
+CREATE INDEX IF NOT EXISTS idx_pending_invoices_business ON pending_invoices(business_key, status);
+CREATE INDEX IF NOT EXISTS idx_pending_invoices_status ON pending_invoices(status);
+CREATE INDEX IF NOT EXISTS idx_ar_reminders_business ON ar_reminders(business_key, status);
+CREATE INDEX IF NOT EXISTS idx_ar_reminders_overdue ON ar_reminders(days_overdue, status);
+CREATE INDEX IF NOT EXISTS idx_ar_reminders_next ON ar_reminders(next_reminder_due_at);
+CREATE INDEX IF NOT EXISTS idx_bank_txns_business ON bank_transactions(business_key, is_reconciled);
+CREATE INDEX IF NOT EXISTS idx_bank_txns_date ON bank_transactions(transaction_date);
+CREATE INDEX IF NOT EXISTS idx_bank_txns_unreconciled ON bank_transactions(business_key) WHERE NOT is_reconciled;
+```
+
+---
+
+### 2.3 Create Legacy Accounting Transactions Schema (Optional)
 
 **File**: `infra/supabase/migrations/20251204_accounting_schema.sql`
 
 ```sql
--- Accounting transactions unified view
+-- Unified accounting transactions view (optional - for reporting)
 CREATE TABLE IF NOT EXISTS accounting_transactions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     business_key TEXT NOT NULL CHECK (business_key IN ('boo', 'rhf', 'teelixir', 'elevate')),
@@ -543,42 +916,60 @@ Features:
 
 ## Implementation Checklist
 
-### Day 1: Xero Setup & Navigation
+### Phase 1: Foundation (Day 1)
 - [ ] **Run Xero OAuth for BOO** - `npx tsx scripts/financials/setup-xero-auth-direct.ts`
 - [ ] **Get BOO Xero tenant ID** - From OAuth callback
 - [ ] **Add BOO to xero_organizations table** - SQL insert
-- [ ] **Sync BOO chart of accounts** - `npx tsx scripts/financials/sync-xero-to-supabase.ts --business=boo`
+- [ ] **Create bookkeeping database schema** - Tables for pending_invoices, ar_reminders, etc.
 - [ ] **Add Accounting to navigation** - Edit `business-config.ts`
-- [ ] **Create accounting page structure** - mkdir + page.tsx files
-- [ ] **Deploy dashboard** - `doctl apps create-deployment 1a0eed70-aef6-415e-953f-d2b7f0c7c832 --force-rebuild`
+- [ ] **Create basic page structure** - Work Queue, Bank Recon, AR, AP tabs
+- [ ] **Deploy dashboard** - Initial deployment
 
-### Day 2: BOO Financial Data
-- [ ] **Create API route for P&L** - `/api/accounting/pnl`
-- [ ] **Fetch BOO P&L from Xero** - Use existing xeroClient
-- [ ] **Create API route for transactions** - `/api/accounting/transactions`
-- [ ] **Fetch BOO bank transactions** - For reconciliation view
-- [ ] **Test P&L display in dashboard** - Verify numbers match Xero
+### Phase 2: Bank Reconciliation (Day 2-3)
+- [ ] **Create bank_transactions table** - Store Xero bank feed data
+- [ ] **Build n8n workflow: Sync bank feed** - Daily pull from Xero
+- [ ] **Build matching engine** - Amount, date, reference matching
+- [ ] **Create API: Get unmatched transactions** - `/api/accounting/unmatched`
+- [ ] **Create API: Reconcile transaction** - `/api/accounting/reconcile`
+- [ ] **Build Bank Recon UI** - Match suggestions, one-click reconcile
+- [ ] **Test with BOO bank data** - Verify matching accuracy
 
-### Day 3: UI Implementation
-- [ ] **Build AccountingTabs component** - Overview, Transactions, BAS, ATO Rules
-- [ ] **Build Overview dashboard** - All 4 businesses P&L summary
-- [ ] **Build Transactions page** - Bank transactions list with filters
-- [ ] **Build ATO Rulings search** - Query ato_rulings table
-- [ ] **Test on staging** - Verify data loads correctly
+### Phase 3: Accounts Receivable - Debt Collection (Day 3-4)
+- [ ] **Create ar_tracking table** - Track reminder status per invoice
+- [ ] **Build n8n workflow: Overdue scanner** - Daily query for overdue invoices
+- [ ] **Create email templates** - 7/14/30/60 day reminders
+- [ ] **Build n8n workflow: Send reminders** - Automated email dispatch
+- [ ] **Create API: Get overdue invoices** - `/api/accounting/ar/overdue`
+- [ ] **Create API: Send reminder** - `/api/accounting/ar/remind`
+- [ ] **Build AR Dashboard UI** - Aging buckets, escalation queue
+- [ ] **Test reminder flow** - Verify emails send correctly
 
-### Day 4: BAS & RHF
+### Phase 4: Accounts Payable - Invoice Processing (Day 4-5)
+- [ ] **Create pending_invoices table** - Queue for processing
+- [ ] **Set up invoice email inbox** - invoices@buyorganicsonline.com.au
+- [ ] **Build n8n workflow: Email monitor** - Watch inbox for PDFs
+- [ ] **Build invoice parser** - Claude API or OCR for data extraction
+- [ ] **Create API: Process invoice** - Extract data, match supplier
+- [ ] **Create API: Create Xero bill** - Submit to Xero with attachment
+- [ ] **Build AP Queue UI** - Review, approve, bulk process
+- [ ] **Test invoice flow** - Forward test invoice, verify Xero entry
+
+### Phase 5: RHF + Polish (Day 5-6)
 - [ ] **Run Xero OAuth for RHF** - Same process as BOO
 - [ ] **Add RHF to xero_organizations** - SQL insert
-- [ ] **Sync RHF chart of accounts** - Extend sync script
-- [ ] **Build BAS Preparation page** - GST summary + export
-- [ ] **Create GST calculation logic** - From Xero reports
+- [ ] **Verify all flows work for RHF** - Bank recon, AR, AP
+- [ ] **Build BAS Preparation UI** - GST summary from Xero
+- [ ] **Add ATO Rulings search** - Query ato_rulings table
+- [ ] **Create monitoring/alerts** - Failed jobs, stuck items
 
-### Day 5: Automation & Polish
-- [ ] **Create n8n workflow for daily Xero sync** - All 4 businesses
-- [ ] **Create BAS reminder workflow** - 7 days before due
-- [ ] **Test full flow end-to-end** - BOO + RHF complete
-- [ ] **Deploy final version** - Production deployment
-- [ ] **Update documentation** - Usage guide for accounting tab
+### Phase 6: Automation & Scaling (Ongoing)
+- [ ] **n8n workflow: Daily bank sync** - All 4 businesses
+- [ ] **n8n workflow: AR reminder automation** - Send reminders automatically
+- [ ] **n8n workflow: Invoice email monitor** - Process incoming invoices
+- [ ] **n8n workflow: BAS reminder** - 7 days before due date
+- [ ] **Add Teelixir and Elevate** - Extend to all businesses
+- [ ] **Performance optimization** - Caching, batch processing
+- [ ] **Staff training documentation** - How to use the system
 
 ---
 
