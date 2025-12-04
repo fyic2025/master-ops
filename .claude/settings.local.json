@@ -114,7 +114,8 @@
       "Bash(start \"\" \"c:\\Users\\jayso\\master-ops\\teelixir\\scripts\\email-preview.html\")",
       "Bash(del \"c:\\Users\\jayso\\master-ops\\temp-get-images.js\")",
       "Bash(cmd /c del \"c:\\Users\\jayso\\master-ops\\temp-get-images.js\")",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(powershell \"Start-Sleep -Seconds 150; doctl apps list-deployments 1a0eed70-aef6-415e-953f-d2b7f0c7c832 --format ID,Phase,Progress --no-header 2>&1 | Select-Object -First 1\")"
     ],
     "deny": [],
     "ask": []

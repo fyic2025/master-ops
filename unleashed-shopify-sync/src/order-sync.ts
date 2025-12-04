@@ -90,6 +90,17 @@ export async function syncOrder(
   console.log(`   Total: $${order.total_price}`)
 
   try {
+    // Check if order already exists in Unleashed (by order number pattern)
+    if (!options.dryRun) {
+      const existingOrder = await checkExistingUnleashedOrder(config, order.order_number)
+      if (existingOrder) {
+        console.log(`   ⏭️ Already synced (${existingOrder})`)
+        result.status = 'skipped'
+        result.unleashedOrderGuid = existingOrder
+        return result
+      }
+    }
+
     // Build bundle lookup map
     const bundleMap = new Map<string, BundleMapping[]>()
     for (const mapping of bundleMappings) {
@@ -176,7 +187,7 @@ export async function syncOrder(
       Comments: `Shopify Order #${order.order_number}. Email: ${order.email}`,
       CustomerRef: order.id.toString(),
       Tax: {
-        TaxCode: 'Exempt', // No additional tax (prices already include GST)
+        TaxCode: 'G.S.T.', // Australian GST (line items have TaxRate: 0)
       },
       Currency: {
         CurrencyCode: 'AUD',
