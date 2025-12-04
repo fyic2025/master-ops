@@ -7,7 +7,8 @@ import {
   Package, CheckCircle, XCircle, Clock,
   Eye, MousePointerClick, AlertTriangle, AlertCircle,
   ExternalLink, Copy, ChevronDown, ChevronRight,
-  Search, Filter, Wrench, FileCheck, ClipboardList
+  Search, Filter, Wrench, FileCheck, ClipboardList,
+  Play, Zap, CheckCheck, RotateCcw
 } from 'lucide-react'
 import DateRangeSelector, { DateRange, getDatePresets, getCompareRange } from '@/components/DateRangeSelector'
 
@@ -161,6 +162,10 @@ export default function MerchantCenterPage() {
   const [expandedIssue, setExpandedIssue] = useState<string | null>(null)
   const [showAudit, setShowAudit] = useState(true)
 
+  // Sync state
+  const [syncing, setSyncing] = useState(false)
+  const [syncMessage, setSyncMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+
   // Date range (for future trend comparison)
   const presets = getDatePresets()
   const [dateRange, setDateRange] = useState<DateRange>(presets.find(p => p.key === 'last_30') || presets[3])
@@ -205,6 +210,42 @@ export default function MerchantCenterPage() {
     } finally {
       setAuditLoading(false)
     }
+  }
+
+  // Trigger GMC sync from dashboard
+  const triggerSync = async () => {
+    setSyncing(true)
+    setSyncMessage(null)
+    try {
+      const res = await fetch('/api/jobs/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jobName: 'gmc-sync' }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        setSyncMessage({ type: 'success', text: `Synced successfully! ${data.output?.match(/Total: \d+/)?.[0] || ''}` })
+        // Refresh data after sync
+        fetchData()
+        fetchAudit()
+      } else {
+        setSyncMessage({ type: 'error', text: data.error || 'Sync failed' })
+      }
+    } catch (err: any) {
+      setSyncMessage({ type: 'error', text: err.message })
+    } finally {
+      setSyncing(false)
+    }
+  }
+
+  // Bulk mark all pending issues as accepted (for informational warnings)
+  const bulkAcceptWarnings = async () => {
+    if (!auditData?.issues) return
+    const warningIssues = auditData.issues.filter(i => i.severity === 'warning' && i.status === 'pending')
+    for (const issue of warningIssues) {
+      await updateResolutionStatus(issue.issue_code, 'verified', 'Bulk accepted - informational warning')
+    }
+    fetchAudit()
   }
 
   useEffect(() => {
@@ -310,6 +351,19 @@ ${issueText}`
             onCompareChange={setCompareRange}
           />
           <button
+            onClick={triggerSync}
+            disabled={syncing}
+            className="flex items-center gap-2 px-4 py-2 bg-green-700 hover:bg-green-600 text-white rounded-lg transition-colors disabled:opacity-50"
+            title="Sync from Google Merchant Center"
+          >
+            {syncing ? (
+              <RefreshCw className="w-4 h-4 animate-spin" />
+            ) : (
+              <Play className="w-4 h-4" />
+            )}
+            {syncing ? 'Syncing...' : 'Sync Now'}
+          </button>
+          <button
             onClick={fetchData}
             disabled={loading}
             className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors disabled:opacity-50"
@@ -317,8 +371,29 @@ ${issueText}`
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </button>
+          <a
+            href="https://merchants.google.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors"
+            title="Open Google Merchant Center"
+          >
+            <ExternalLink className="w-4 h-4" />
+          </a>
         </div>
       </header>
+
+      {/* Sync Status Message */}
+      {syncMessage && (
+        <div className={`px-4 py-3 rounded-lg flex items-center justify-between ${
+          syncMessage.type === 'success'
+            ? 'bg-green-900/50 border border-green-700 text-green-200'
+            : 'bg-red-900/50 border border-red-700 text-red-200'
+        }`}>
+          <span>{syncMessage.text}</span>
+          <button onClick={() => setSyncMessage(null)} className="text-white/70 hover:text-white">×</button>
+        </div>
+      )}
 
       {error && (
         <div className="bg-red-900/50 border border-red-700 text-red-200 px-4 py-3 rounded-lg">
