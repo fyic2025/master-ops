@@ -227,14 +227,14 @@ PATCH /api/tasks/${task.id || '{task_id}'}
   "clarification_request": "Your question here"
 }
 \`\`\`
-2. **Email:** Send to ${requesterEmail || 'requester'} with subject: [${taskRef}] - Question about: ${task.title.slice(0, 40)}...
+2. **Email:** Send to ${requesterEmail || 'requester'} with subject: [${taskRef}] - Question about: ${(task.title || 'Untitled').slice(0, 40)}...
 
 ### On Completion:
 1. **Update dashboard:** PATCH /api/tasks/${task.id || '{task_id}'} with:
    - status: "completed"
    - completion_notes: "Summary of what was done"
 2. **Email ${requesterEmail || 'requester'}** with:
-   - Subject: [${taskRef}] Completed: ${task.title.slice(0, 40)}
+   - Subject: [${taskRef}] Completed: ${(task.title || 'Untitled').slice(0, 40)}
    - Summary of what was accomplished
    - Any follow-up items or notes
 3. **Log in task_logs** table with source: 'claude', status: 'completed'`
