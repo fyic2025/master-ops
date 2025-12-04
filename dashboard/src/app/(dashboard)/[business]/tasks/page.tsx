@@ -1010,24 +1010,19 @@ function TaskCard({ task, onClarificationSubmit }: { task: Task, onClarification
   const [showCopyModal, setShowCopyModal] = useState(false)
   const [copyModalText, setCopyModalText] = useState('')
 
-  const copyToClipboard = async (e: React.MouseEvent) => {
+  const copyToClipboard = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
 
-    // Always generate text and show modal first
-    const text = generateClaudePrompt(task)
-    setCopyModalText(text)
-    setShowCopyModal(true)
+    // Debug: alert to verify click handler fires
+    alert('Button clicked! Task: ' + (task.title || 'No title'))
 
-    // Try to copy to clipboard in background
     try {
-      const success = await copyTextToClipboard(text)
-      if (success) {
-        setCopied(true)
-        setTimeout(() => setCopied(false), 2000)
-      }
-    } catch {
-      // Ignore clipboard errors - modal is already showing
+      const text = generateClaudePrompt(task)
+      setCopyModalText(text)
+      setShowCopyModal(true)
+    } catch (err) {
+      alert('Error generating prompt: ' + String(err))
     }
   }
 
