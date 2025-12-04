@@ -655,5 +655,60 @@ HighMonthlySales = max(slot1Sales, slot2Sales, ...)
 
 ---
 
+---
+
+## Phase 2: Unleashed Replacement (Future)
+
+After the ordering dashboard is operational, expand to full inventory management:
+
+### Supplier Management
+- Supplier profiles with MOQs, lead times, order frequency
+- Contact details, payment terms
+- Performance tracking
+
+### Predictive Ordering
+- Auto-calculate reorder points based on sales velocity + lead time
+- Safety stock calculations
+- Seasonal demand adjustments
+
+### Purchase Orders
+- Generate POs grouped by supplier to meet minimums
+- Track PO status: Draft → Sent → Acknowledged → Shipped → Received
+- Supplier reference numbers
+
+### Receiving Workflow
+- Mark items received against POs
+- Partial receiving support
+- Discrepancy handling
+
+### Full Inventory (Unleashed Replacement)
+- Stock levels by location
+- Stock adjustments
+- Stock transfers
+- Full audit trail
+
+### Proposed Navigation Structure
+
+```
+Ordering (Left Nav)
+├── Dashboard           ← Overview/summary
+├── Stock Analysis      ← What's selling, what's low
+├── Stock Needs         ← What to order (raw materials/packaging)
+├── Bill of Materials   ← Recipe/production planning
+├── ─────────────────
+├── Suppliers           ← Supplier profiles, MOQs, lead times
+├── Purchase Orders     ← Create/track POs
+├── Receiving           ← Mark stock received
+└── Inventory           ← Full stock management (replaces Unleashed)
+```
+
+### Reference: BOO Operations Hub Plan
+See `buy-organics-online/BOO-OPERATIONS-HUB-PLAN.md` for the broader vision including:
+- Customer service module
+- Shipping module
+- LiveChat integration
+
+---
+
 **Document Created:** 2024-12-04
 **Based On:** FYIC Portal extraction from `C:\Users\jayso\fyic-portal`
