@@ -23,6 +23,7 @@ interface ContainerInfo {
 interface DropletMetrics {
   cpuPercent: number;
   memoryUsedMb: number;
+  memoryAvailableMb: number;
   memoryTotalMb: number;
   memoryPercent: number;
   diskUsedGb: number;
@@ -237,7 +238,7 @@ export function DropletCapacityWidget() {
                       <div className="flex justify-between text-sm mb-1">
                         <span className="text-gray-400">Memory</span>
                         <span className="text-white">
-                          {(droplet.metrics.memoryUsedMb / 1024).toFixed(1)}GB / {(droplet.metrics.memoryTotalMb / 1024).toFixed(1)}GB ({droplet.metrics.memoryPercent}%)
+                          {(droplet.metrics.memoryUsedMb / 1024).toFixed(1)}GB used, {(droplet.metrics.memoryAvailableMb / 1024).toFixed(1)}GB available ({droplet.metrics.memoryPercent}%)
                         </span>
                       </div>
                       <ProgressBar

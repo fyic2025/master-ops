@@ -29,9 +29,10 @@ interface ContainerInfo {
 
 interface DropletMetrics {
   cpuPercent: number
-  memoryUsedMb: number
+  memoryUsedMb: number      // Actual application memory (total - available)
+  memoryAvailableMb: number // Memory available for applications (includes reclaimable cache)
   memoryTotalMb: number
-  memoryPercent: number
+  memoryPercent: number     // Based on actual usage (total - available), not raw free
   diskUsedGb: number
   diskTotalGb: number
   diskPercent: number
@@ -184,21 +185,23 @@ async function fetchCpuPercent(dropletId: string): Promise<number | null> {
 
 async function getMetricsFromDO(dropletId: string, memoryMb: number, diskGb: number): Promise<DropletMetrics | null> {
   try {
-    // Fetch all metrics in parallel
-    const [cpuPercent, memFree, memTotal, diskFree, diskTotal, load1] = await Promise.all([
-      fetchCpuPercent(dropletId),               // CPU usage %
-      fetchDOMetric(dropletId, 'memory_free'),   // bytes
-      fetchDOMetric(dropletId, 'memory_total'),  // bytes
-      fetchDOMetric(dropletId, 'filesystem_free'), // bytes
-      fetchDOMetric(dropletId, 'filesystem_size'), // bytes
-      fetchDOMetric(dropletId, 'load_1'),        // 1-min load avg
+    // Fetch all metrics in parallel - using memory_available for accurate usage
+    const [cpuPercent, memAvailable, memTotal, diskFree, diskTotal, load1] = await Promise.all([
+      fetchCpuPercent(dropletId),                    // CPU usage %
+      fetchDOMetric(dropletId, 'memory_available'),  // bytes - includes reclaimable cache
+      fetchDOMetric(dropletId, 'memory_total'),      // bytes
+      fetchDOMetric(dropletId, 'filesystem_free'),   // bytes
+      fetchDOMetric(dropletId, 'filesystem_size'),   // bytes
+      fetchDOMetric(dropletId, 'load_1'),            // 1-min load avg
     ])
 
     // If we don't have basic metrics, return null
-    if (memFree === null || memTotal === null) return null
+    if (memAvailable === null || memTotal === null) return null
 
     const memTotalMb = Math.round((memTotal || memoryMb * 1024 * 1024) / (1024 * 1024))
-    const memUsedMb = Math.round((memTotal! - memFree!) / (1024 * 1024))
+    const memAvailableMb = Math.round(memAvailable / (1024 * 1024))
+    // Actual usage = total - available (not total - free, which inflates the number)
+    const memUsedMb = Math.max(0, memTotalMb - memAvailableMb)
     const memPercent = memTotalMb > 0 ? Math.round((memUsedMb / memTotalMb) * 100) : 0
 
     const diskTotalGb = Math.round((diskTotal || diskGb * 1024 * 1024 * 1024) / (1024 * 1024 * 1024))
@@ -208,6 +211,7 @@ async function getMetricsFromDO(dropletId: string, memoryMb: number, diskGb: num
     return {
       cpuPercent: cpuPercent ?? 0,
       memoryUsedMb: memUsedMb,
+      memoryAvailableMb: memAvailableMb,
       memoryTotalMb: memTotalMb,
       memoryPercent: memPercent,
       diskUsedGb,
