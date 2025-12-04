@@ -68,10 +68,21 @@ Cross-business initiatives that take precedence.
 - [ ] **P4** Build Voice AI tab in dashboard
 - [ ] **P4** Implement inbound/outbound call handling
 
+### AWS Migration Tracking (Branch: audit-aws-migration)
+> BOO migration from AWS to Supabase - Dashboard tracking feature ready
+
+- [ ] **P2** Review and merge AWS migration dashboard (1,386 lines ready)
+- [ ] **P2** Deploy migration schema: `20251202_aws_migration_tracking.sql`
+- [ ] **P2** Add AWS Migration nav item to sidebar
+- [ ] **P3** Seed initial migration component data (BOO products, orders, suppliers)
+
 ### Migration
 > Platform migrations and major infrastructure changes
 
-- [ ]
+- [ ] **P3** Migrate GSC tables from boo → teelixir-leads (with dual-write)
+- [ ] **P3** Migrate bc_orders from boo → teelixir-leads
+- [ ] **P3** Migrate elevate_products to teelixir-leads
+- [ ] **P3** Update 15+ hardcoded Supabase URLs to env vars
 
 ### System Checks
 > Health monitoring, integrations, and reliability
@@ -846,7 +857,7 @@ We currently operate **3 separate Supabase projects** with significant fragmenta
 | Table | Rows |
 |-------|------|
 | tlx_shopify_orders | 30,661 |
-| businesses | 14,008 (ANOMALY - should be 4) |
+| businesses | 14,008 (B2B prospect leads - NOT an anomaly) |
 | cicd_issues | 11,025 |
 | livechat_messages | 3,189 |
 | intercompany_transactions | 1,487 |
@@ -878,11 +889,12 @@ We currently operate **3 separate Supabase projects** with significant fragmenta
 
 ### Issues Identified
 
-1. **CRITICAL:** Duplicate tables (livechat_*, businesses) in teelixir-leads AND boo
-2. **CRITICAL:** businesses table has 14,008 rows (should be 4)
-3. **HIGH:** Data fragmentation - GSC in boo, dashboard in teelixir-leads
-4. **MEDIUM:** Elevate project nearly empty - wasted resource
-5. **LOW:** 16 empty agent tables in teelixir-leads
+1. **HIGH:** Duplicate tables (livechat_*) in teelixir-leads AND boo
+2. **HIGH:** Data fragmentation - GSC in boo, dashboard in teelixir-leads
+3. **MEDIUM:** 15+ hardcoded Supabase URLs across codebase
+4. **MEDIUM:** Elevate project nearly empty (1 table) - wasted resource
+5. **LOW:** 16 empty agent tables in teelixir-leads (prepared for future)
+6. **RESOLVED:** businesses table 14K rows = B2B prospect leads (correct data)
 
 ---
 
@@ -920,11 +932,29 @@ We currently operate **3 separate Supabase projects** with significant fragmenta
 
 ---
 
-### Next Steps (Add to Task List)
+### Next Steps (Safe Migration Plan)
 
-- [ ] **P2** Investigate businesses table (14,008 rows anomaly)
-- [ ] **P2** Migrate GSC tables from boo to teelixir-leads
-- [ ] **P3** Migrate elevate_products to teelixir-leads
-- [ ] **P3** Remove duplicate tables from boo
-- [ ] **P3** Update hardcoded Supabase URLs
+**Phase 1: Prep (No Changes)**
+- [x] Complete dependency audit
+- [x] businesses table resolved - it's B2B leads, not core businesses
+- [x] Created ACCESS-GUIDE.md for multi-device access
+- [x] Created setup-new-machine.sh for portable setup
+
+**Phase 2: Low-Risk Migrations**
+- [ ] **P3** Migrate elevate_products to teelixir-leads (lowest risk, 1 app)
+- [ ] **P3** Migrate n8n_workflows backup table (read-only)
+
+**Phase 3: Medium-Risk Migrations (with parallel sync)**
+- [ ] **P2** Migrate GSC tables with dual-write period
+- [ ] **P2** Migrate bc_orders with dual-write period
+- [ ] **P3** Remove duplicate livechat_* tables from boo
+
+**Phase 4: Cleanup**
+- [ ] **P3** Update 15+ hardcoded Supabase URLs to use env vars
 - [ ] **P4** Evaluate shutting down elevate project
+
+**NEVER MIGRATE:** secure_credentials stays in boo (security isolation)
+
+### Session 1f819eb8 (2025-12-04 09:48 am)
+- Exit reason: other
+- Pending tasks saved: 0

@@ -37,7 +37,17 @@
       "Bash(doctl compute droplet delete:*)",
       "Bash(powershell \"Start-Sleep -Seconds 90; doctl apps list-deployments 1a0eed70-aef6-415e-953f-d2b7f0c7c832 --format ID,Progress,Phase --no-header 2>&1 | Select-Object -First 1\")",
       "Bash(doctl apps logs:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Skill(supabase-expert)",
+      "Bash(powershell \"Start-Sleep -Seconds 30; doctl apps list-deployments 1a0eed70-aef6-415e-953f-d2b7f0c7c832 --format ID,Phase,Progress --no-header 2>&1 | Select-Object -First 1\")",
+      "Bash(for branch in claude/accounting-dashboard-plan-019xgcmvRa54e7L74wzAcMYj claude/inventory-dashboard-setup-019uEwsRC98hioKqSXnx7BW9 claude/voice-ai-integration-plan-01FhxdFk8WXtRjVeR48oNwFb claude/shipping-label-launch-plan-01KWA1EkU6Y1nKJSyewN4362 claude/restore-ordering-dashboard-01FsCHye3QoE1wbE3rZfgRvr)",
+      "Bash(do echo '=== $branch ===' git -C c:/Users/jayso/master-ops diff main...origin/$branch -- dashboard/src/components/Sidebar.tsx dashboard/src/lib/business-config.ts)",
+      "Bash(node creds.js:*)",
+      "Bash(findstr:*)",
+      "Bash(set:*)",
+      "Bash(node infra/scripts/migrate-elevate-products.js:*)",
+      "Bash(node:*)",
+      "Bash(mkdir:*)"
     ],
     "deny": [],
     "ask": []
