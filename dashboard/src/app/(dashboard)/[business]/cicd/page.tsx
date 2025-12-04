@@ -18,7 +18,7 @@ import {
   ExternalLink
 } from 'lucide-react'
 import { useState } from 'react'
-import { FixSingleButton, FixBatchButton } from '@/components/cicd'
+import { FixSingleButton, FixBatchButton, FixProgressTracker } from '@/components/cicd'
 
 interface CicdIssue {
   id: string
@@ -230,6 +230,25 @@ export default function CicdDashboard() {
           color={stats.auto_fixable > 0 ? 'text-blue-400' : 'text-gray-400'}
         />
       </div>
+
+      {/* Progress Tracker - Shows when there are issues */}
+      {data && data.issues.length > 0 && (
+        <FixProgressTracker
+          issues={data.issues.map(issue => ({
+            id: issue.id,
+            issue_type: issue.issue_type,
+            file_path: issue.file_path,
+            line_number: issue.line_number,
+            message: issue.message,
+            code: issue.code
+          }))}
+          title="Fix Progress Tracker"
+          onAllFixed={() => {
+            // Refresh data when all fixed
+            refetch()
+          }}
+        />
+      )}
 
       {/* View Toggle */}
       <div className="flex gap-2">
