@@ -1626,6 +1626,7 @@ export default function TasksPage() {
   const [showArchive, setShowArchive] = useState(false)
   const [peterFilter, setPeterFilter] = useState(false)
   const [rajaniFilter, setRajaniFilter] = useState(false)
+  const [mariaFilter, setMariaFilter] = useState(false)
   const { data: session } = useSession()
 
   // DEV: Allow ?viewAs=peter@teelixir.com to test other user views
@@ -1730,6 +1731,18 @@ export default function TasksPage() {
 
   // Check if current user is Rajani for simplified view
   const isRajaniView = userEmail?.toLowerCase() === 'rajani@teelixir.com'
+
+  // Maria's assigned tasks
+  const mariaTasks = useMemo(() => {
+    return filteredDbTasks.filter(t =>
+      t.assigned_to?.toLowerCase() === 'admin@teelixir.com'
+    )
+  }, [filteredDbTasks])
+
+  const mariaTasksCount = mariaTasks.filter(t => t.status !== 'completed').length
+
+  // Check if current user is Maria for simplified view
+  const isMariaView = userEmail?.toLowerCase() === 'admin@teelixir.com'
 
   // Tasks needing planning (pending_input status or new db tasks without a plan)
   const pendingInputTasks = useMemo(() => {
@@ -1847,6 +1860,82 @@ export default function TasksPage() {
     )
   }
 
+  // Maria's simplified view - show only her assigned tasks
+  if (isMariaView) {
+    const activeMariaTasks = mariaTasks.filter(t => t.status !== 'completed')
+    const completedMariaTasks = mariaTasks.filter(t => t.status === 'completed')
+
+    return (
+      <div className="space-y-6">
+        <header className="flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+              <ClipboardList className="w-8 h-8 text-pink-400" />
+              My Tasks
+            </h1>
+            <p className="text-gray-400 mt-1">
+              {activeMariaTasks.length} active task{activeMariaTasks.length !== 1 ? 's' : ''}
+            </p>
+          </div>
+          <button
+            onClick={() => refetch()}
+            disabled={isLoading}
+            className="flex items-center gap-2 px-3 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 disabled:opacity-50"
+          >
+            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+          </button>
+        </header>
+
+        {/* Active Tasks */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-medium text-white">Active Tasks</h2>
+          {activeMariaTasks.length > 0 ? (
+            activeMariaTasks
+              .sort((a, b) => a.priority - b.priority)
+              .map(task => (
+                <RajaniTaskCard key={task.id} task={task} onUpdate={refetch} />
+              ))
+          ) : (
+            <div className="text-center py-8 text-gray-500 bg-gray-800/50 rounded-lg">
+              No active tasks assigned. Check back later!
+            </div>
+          )}
+        </div>
+
+        {/* Completed Tasks */}
+        {completedMariaTasks.length > 0 && (
+          <div className="border-t border-gray-700 pt-6">
+            <h2 className="text-lg font-medium text-gray-300 mb-4">
+              Completed Tasks ({completedMariaTasks.length})
+            </h2>
+            <div className="space-y-2">
+              {completedMariaTasks.slice(0, 5).map(task => (
+                <div key={task.id} className="bg-gray-800/50 rounded p-3 text-sm text-gray-400">
+                  <span className="text-green-400 mr-2">✓</span>
+                  {task.title}
+                  {task.time_on_task_mins && task.time_on_task_mins > 0 && (
+                    <span className="ml-2 text-gray-500">({task.time_on_task_mins} mins)</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Suggest Task Button */}
+        <div className="border-t border-gray-700 pt-6">
+          <button
+            onClick={() => alert('Suggestion feature coming soon! For now, contact Jayson directly with your automation ideas.')}
+            className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-500"
+          >
+            <Lightbulb className="w-4 h-4" />
+            Suggest Task for Automation
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
       <header className="flex justify-between items-start">
@@ -1922,6 +2011,33 @@ export default function TasksPage() {
                 rajaniFilter ? 'bg-teal-700' : 'bg-teal-500/30'
               }`}>
                 {rajaniTasksCount}
+              </span>
+            </button>
+          )}
+          {/* Maria Filter Button - visible to admins */}
+          {userIsAdmin && mariaTasksCount > 0 && (
+            <button
+              onClick={() => {
+                setMariaFilter(!mariaFilter)
+                if (!mariaFilter) {
+                  setPriorityFilter(null)
+                  setPeterFilter(false)
+                  setRajaniFilter(false)
+                }
+              }}
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
+                mariaFilter
+                  ? 'bg-pink-600 text-white hover:bg-pink-500'
+                  : 'bg-pink-500/20 text-pink-400 hover:bg-pink-500/30 border border-pink-500/30'
+              }`}
+              title="Show tasks assigned to Maria"
+            >
+              <User className="w-4 h-4" />
+              Maria&apos;s Tasks
+              <span className={`text-xs px-1.5 py-0.5 rounded ${
+                mariaFilter ? 'bg-pink-700' : 'bg-pink-500/30'
+              }`}>
+                {mariaTasksCount}
               </span>
             </button>
           )}
@@ -2102,8 +2218,68 @@ export default function TasksPage() {
         </div>
       )}
 
+      {/* Maria Filter Results */}
+      {mariaFilter && (
+        <div className="bg-pink-500/10 border border-pink-500/30 rounded-lg p-4">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-pink-400 font-medium flex items-center gap-2">
+              <User className="w-5 h-5" />
+              Maria&apos;s Tasks ({mariaTasks.filter(t => t.status !== 'completed').length} active)
+            </h3>
+            <button
+              onClick={() => setMariaFilter(false)}
+              className="text-gray-400 hover:text-white text-sm flex items-center gap-1"
+            >
+              <X className="w-4 h-4" /> Close
+            </button>
+          </div>
+          <div className="space-y-3">
+            {mariaTasks
+              .sort((a, b) => {
+                if (a.status === 'completed' && b.status !== 'completed') return 1
+                if (a.status !== 'completed' && b.status === 'completed') return -1
+                return a.priority - b.priority
+              })
+              .map(task => (
+                <div key={task.id} className="bg-gray-800/50 rounded-lg p-3">
+                  <TaskCard task={task} onClarificationSubmit={refetch} />
+                  {/* Show completion feedback for admins */}
+                  {task.status === 'completed' && (task.completion_notes || task.time_on_task_mins) && (
+                    <div className="mt-2 pt-2 border-t border-gray-700 text-sm space-y-1">
+                      {task.time_on_task_mins && task.time_on_task_mins > 0 && (
+                        <p className="text-gray-400 flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          Time: {task.time_on_task_mins} mins
+                        </p>
+                      )}
+                      {task.completion_notes && (
+                        <p className="text-gray-400">
+                          <span className="text-gray-500">Notes:</span> {task.completion_notes}
+                        </p>
+                      )}
+                      {task.completion_screenshot_url && (
+                        <a
+                          href={task.completion_screenshot_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-pink-400 hover:underline text-xs inline-block"
+                        >
+                          View Screenshot
+                        </a>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+            {mariaTasks.length === 0 && (
+              <p className="text-gray-500 text-sm">No tasks assigned to Maria</p>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Priority Filter Results */}
-      {priorityFilter && displayedTasks && !peterFilter && !rajaniFilter && (
+      {priorityFilter && displayedTasks && !peterFilter && !rajaniFilter && !mariaFilter && (
         <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-white font-medium">

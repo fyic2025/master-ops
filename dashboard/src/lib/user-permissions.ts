@@ -63,6 +63,12 @@ export const USER_PERMISSIONS: UserPermissions[] = [
     businesses: ['teelixir', 'elevate'],
     allowedPages: ['/tasks', '/automations', ''],  // Dashboard, Tasks, Automations
   },
+  {
+    email: 'admin@teelixir.com',
+    role: 'operations',
+    businesses: ['teelixir', 'elevate'],
+    allowedPages: ['/tasks', '/automations', ''],  // Dashboard, Tasks, Automations
+  },
 ]
 
 /**
