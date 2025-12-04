@@ -6,7 +6,7 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     exclude: [
-      'node_modules/**',
+      '**/node_modules/**',
       'buy-organics-online/theme*/**',
       'buy-organics-online/live-theme*/**',
       'archive/**',
