@@ -48,19 +48,18 @@ Cross-business initiatives that take precedence.
 - [ ] **P3** Build bank reconciliation: auto-match transactions
 - [ ] **P3** Build AR automation: overdue invoice follow-up
 
-### Inventory Management (Branch: inventory-dashboard-setup)
-> Unleashed inventory replacement - Code ready to merge
+### Inventory & Production Planning (Branches: inventory-dashboard-setup, restore-ordering-dashboard)
+> Unleashed replacement + production/ordering forecasting - Teelixir first, then other businesses
+
+**Context:** Connected systems - inventory management feeds into production planning and input ordering. Teelixir most complex (requires batch records), so once built, simpler for BOO/RHF/Elevate to adopt.
 
 - [ ] **P2** Review and merge inventory dashboard implementation
 - [ ] **P2** Deploy inventory migration: `20251204_inventory_management.sql`
 - [ ] **P2** Test Teelixir Shopify inventory sync
-
-### Ordering Dashboard (Branch: restore-ordering-dashboard)
-> Teelixir production planning from legacy FYIC portal
-
-- [ ] **P3** Deploy ordering dashboard migration
+- [ ] **P3** Deploy ordering dashboard migration (Stock Analysis, BOM, Stock Needs)
 - [ ] **P3** Build Unleashed data sync API routes
-- [ ] **P3** Create Stock Analysis, BOM, Stock Needs views
+- [ ] **P3** Add batch record tracking for Teelixir production
+- [ ] **P4** Extend inventory system for BOO/RHF/Elevate
 
 ### Voice AI Integration (Branch: voice-ai-integration-plan)
 > Ultra-low latency (<200ms) Voice AI for calls
@@ -815,3 +814,117 @@ node shared/libs/integrations/health/sync-health-checks.js
 ### Session 5f6a0b22 (2025-12-04 09:08 am)
 - Exit reason: other
 - Pending tasks saved: 0
+
+---
+
+## Supabase Infrastructure Audit Report
+
+**Generated:** 2025-12-05
+
+### Executive Summary
+
+We currently operate **3 separate Supabase projects** with significant fragmentation. Data is spread across projects without clear ownership.
+
+**Recommendation:** Consolidate to **2 projects** (Master Hub + Credentials Vault).
+
+---
+
+### Current State Overview
+
+| Project | ID | Tables | Rows | Storage | Purpose |
+|---------|-----|--------|------|---------|---------|
+| **teelixir-leads** | qcvfxxsnqvdfmpbcgdni | 34 | 61,130 | 3 buckets | Master Hub (Dashboard, Automations) |
+| **boo** | usibnysqelovfuctmkqw | 14 | 154,340 | 0 | Credentials Vault + GSC Data |
+| **elevate** | xioudaqfmkdpkgujxehv | 1 | 1,213 | 0 | Elevate Products (underutilized) |
+
+---
+
+### Project Details
+
+#### teelixir-leads (Master Hub)
+**Top Tables:**
+| Table | Rows |
+|-------|------|
+| tlx_shopify_orders | 30,661 |
+| businesses | 14,008 (ANOMALY - should be 4) |
+| cicd_issues | 11,025 |
+| livechat_messages | 3,189 |
+| intercompany_transactions | 1,487 |
+
+**Storage:** blueprints, marketing-assets, documents
+**Used by:** Dashboard, n8n, brand-connections
+
+#### boo (Credentials + GSC)
+**Top Tables:**
+| Table | Rows |
+|-------|------|
+| gsc_page_daily_stats | 145,931 |
+| bc_orders | 6,032 |
+| livechat_messages | 1,638 (duplicate!) |
+| n8n_workflows | 372 |
+| secure_credentials | 93 (VAULT) |
+
+**Used by:** creds.js (vault), GSC sync
+
+#### elevate (Underutilized)
+**Tables:**
+| Table | Rows |
+|-------|------|
+| elevate_products | 1,213 |
+
+**Used by:** elevate-wholesale app only
+
+---
+
+### Issues Identified
+
+1. **CRITICAL:** Duplicate tables (livechat_*, businesses) in teelixir-leads AND boo
+2. **CRITICAL:** businesses table has 14,008 rows (should be 4)
+3. **HIGH:** Data fragmentation - GSC in boo, dashboard in teelixir-leads
+4. **MEDIUM:** Elevate project nearly empty - wasted resource
+5. **LOW:** 16 empty agent tables in teelixir-leads
+
+---
+
+### Consolidation Recommendation
+
+**Option A (Recommended): 2 Projects**
+
+| Project | Purpose | Contains |
+|---------|---------|----------|
+| **Master Hub** (teelixir-leads) | All business data | Dashboard, orders, GSC, products, automations |
+| **Credentials Vault** (boo) | Secure storage only | secure_credentials table |
+
+**Migration Steps:**
+1. Fix businesses table anomaly (investigate 14K rows)
+2. Migrate GSC tables from boo → teelixir-leads
+3. Migrate bc_orders from boo → teelixir-leads
+4. Migrate elevate_products from elevate → teelixir-leads
+5. Remove duplicate livechat_* tables from boo
+6. Update all hardcoded URLs to use env vars
+7. Shut down elevate project (cost savings)
+
+**Estimated Effort:** 3-5 days
+**Cost Savings:** ~$25-50/month
+
+---
+
+### Hardcoded URLs to Fix
+
+| File | Current | Should Be |
+|------|---------|-----------|
+| dashboard/src/lib/supabase.ts | Hardcoded both | Use env vars |
+| creds.js | Hardcoded boo | Keep (vault) |
+| brand-connections/src/lib/supabase.ts | Hardcoded | Use env var |
+| infra/xero-financial-sync-cron.js | Hardcoded | Use env var |
+
+---
+
+### Next Steps (Add to Task List)
+
+- [ ] **P2** Investigate businesses table (14,008 rows anomaly)
+- [ ] **P2** Migrate GSC tables from boo to teelixir-leads
+- [ ] **P3** Migrate elevate_products to teelixir-leads
+- [ ] **P3** Remove duplicate tables from boo
+- [ ] **P3** Update hardcoded Supabase URLs
+- [ ] **P4** Evaluate shutting down elevate project
