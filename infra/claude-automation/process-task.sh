@@ -39,7 +39,7 @@ if [ -z "$1" ]; then
     echo "Usage: $0 <task_id> [--dry-run]"
     echo ""
     echo "Arguments:"
-    echo "  task_id     UUID of the task to process"
+    echo "  task_id     ID of the task to process (integer or UUID)"
     echo "  --dry-run   Output prompt without executing"
     echo ""
     echo "Environment:"
@@ -55,9 +55,9 @@ if [ "$2" = "--dry-run" ]; then
     DRY_RUN=1
 fi
 
-# Validate UUID format
-if ! echo "$TASK_ID" | grep -qE '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'; then
-    error_exit "Invalid task_id format. Expected UUID."
+# Validate ID format (UUID or integer)
+if ! echo "$TASK_ID" | grep -qE '^([0-9]+|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$'; then
+    error_exit "Invalid task_id format. Expected integer or UUID."
 fi
 
 log_info "Starting task processing: $TASK_ID"
