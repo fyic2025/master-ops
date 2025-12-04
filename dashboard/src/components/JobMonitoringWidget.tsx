@@ -12,7 +12,9 @@ import {
   ChevronRight,
   X,
   Loader2,
-  Play
+  Play,
+  Wrench,
+  ExternalLink
 } from 'lucide-react'
 
 interface JobStatus {
@@ -117,6 +119,22 @@ async function triggerSync(jobName: string): Promise<{ success: boolean; message
   return res.json()
 }
 
+interface FixResult {
+  success: boolean
+  message: string
+  created: number
+  skipped: number
+  createdTasks: string[]
+  skippedTasks: string[]
+  totalUnhealthy: number
+}
+
+async function createFixTasks(): Promise<FixResult> {
+  const res = await fetch('/api/jobs/fix', { method: 'POST' })
+  if (!res.ok) throw new Error('Failed to create fix tasks')
+  return res.json()
+}
+
 // Jobs that support manual sync via dashboard
 const SYNCABLE_JOBS = ['livechat-sync', 'gmc-sync', 'gsc-issues-sync']
 
@@ -125,6 +143,7 @@ export function JobMonitoringWidget() {
   const [showAllJobs, setShowAllJobs] = useState(false)
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [syncingJob, setSyncingJob] = useState<string | null>(null)
+  const [fixResult, setFixResult] = useState<FixResult | null>(null)
   const queryClient = useQueryClient()
 
   const { data, isLoading, error } = useQuery({
@@ -151,6 +170,17 @@ export function JobMonitoringWidget() {
     },
     onSettled: () => {
       setSyncingJob(null)
+    }
+  })
+
+  const fixMutation = useMutation({
+    mutationFn: createFixTasks,
+    onSuccess: (result) => {
+      setFixResult(result)
+      // Refresh tasks if any were created
+      if (result.created > 0) {
+        queryClient.invalidateQueries({ queryKey: ['tasks'] })
+      }
     }
   })
 
@@ -265,6 +295,23 @@ export function JobMonitoringWidget() {
                 </p>
               </div>
               <div className="flex items-center gap-2">
+                {unhealthyCount > 0 && (
+                  <button
+                    onClick={() => {
+                      setFixResult(null)
+                      fixMutation.mutate()
+                    }}
+                    disabled={fixMutation.isPending}
+                    className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 rounded text-sm text-white flex items-center gap-2 transition-colors"
+                  >
+                    {fixMutation.isPending ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Wrench className="w-4 h-4" />
+                    )}
+                    Fix {unhealthyCount} Issue{unhealthyCount !== 1 ? 's' : ''}
+                  </button>
+                )}
                 <button
                   onClick={() => refreshMutation.mutate()}
                   disabled={refreshMutation.isPending}
@@ -281,6 +328,49 @@ export function JobMonitoringWidget() {
                 </button>
               </div>
             </div>
+
+            {/* Fix Result Feedback */}
+            {fixResult && (
+              <div className={`mx-4 mt-4 p-3 rounded-lg border ${
+                fixResult.created > 0
+                  ? 'bg-green-500/10 border-green-500/30'
+                  : 'bg-yellow-500/10 border-yellow-500/30'
+              }`}>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className={`font-medium ${fixResult.created > 0 ? 'text-green-400' : 'text-yellow-400'}`}>
+                      {fixResult.message}
+                    </p>
+                    {fixResult.created > 0 && (
+                      <p className="text-sm text-gray-400 mt-1">
+                        Tasks created for: {fixResult.createdTasks.join(', ')}
+                      </p>
+                    )}
+                    {fixResult.skipped > 0 && (
+                      <p className="text-sm text-gray-500 mt-1">
+                        Already have tasks: {fixResult.skippedTasks.join(', ')}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {fixResult.created > 0 && (
+                      <a
+                        href="/home/tasks"
+                        className="text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1"
+                      >
+                        View Tasks <ExternalLink className="w-3 h-3" />
+                      </a>
+                    )}
+                    <button
+                      onClick={() => setFixResult(null)}
+                      className="p-1 hover:bg-gray-700 rounded"
+                    >
+                      <X className="w-4 h-4 text-gray-500" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Content */}
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
