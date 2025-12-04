@@ -1027,12 +1027,26 @@ function TaskCard({ task, onClarificationSubmit }: { task: Task, onClarification
         setCopyError(false)
         setTimeout(() => setCopied(false), 2000)
       } else {
-        setCopyError(true)
-        setTimeout(() => setCopyError(false), 3000)
-        // Show the text in a prompt so user can manually copy
-        const confirmed = window.confirm('Clipboard access failed. Click OK to see the text to copy manually.')
-        if (confirmed) {
-          alert(text.substring(0, 500) + '\n\n... (text truncated, full prompt is ' + text.length + ' characters)')
+        // Open a new window with the text for manual copying
+        const win = window.open('', '_blank', 'width=800,height=600,scrollbars=yes')
+        if (win) {
+          win.document.write(`
+            <html>
+            <head><title>Copy for Claude - ${task.title || 'Task'}</title></head>
+            <body style="font-family: monospace; padding: 20px; background: #1a1a1a; color: #fff;">
+              <h3>Select All (Ctrl+A) and Copy (Ctrl+C):</h3>
+              <textarea id="content" style="width: 100%; height: 80vh; background: #2a2a2a; color: #fff; padding: 10px; border: 1px solid #444;">${text.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
+              <script>document.getElementById('content').select();</script>
+            </body>
+            </html>
+          `)
+          win.document.close()
+          setCopied(true)
+          setTimeout(() => setCopied(false), 2000)
+        } else {
+          setCopyError(true)
+          setTimeout(() => setCopyError(false), 3000)
+          alert('Popup blocked. Please allow popups for this site.')
         }
       }
     } catch (err) {
