@@ -139,18 +139,65 @@ ${code === 'TS2416' ? '   - Fix property type to match the interface/base class'
 **Dashboard Link**: https://ops.growthcohq.com/home/cicd`
 }
 
+function generateFileFixPrompt(file: string, issues: CicdIssue[]): string {
+  const errorsByCode: Record<string, CicdIssue[]> = {}
+  for (const issue of issues) {
+    const code = issue.code || 'unknown'
+    if (!errorsByCode[code]) errorsByCode[code] = []
+    errorsByCode[code].push(issue)
+  }
+
+  const issueList = issues
+    .map(i => `- Line ${i.line_number}: [${i.code}] ${i.message}`)
+    .join('\n')
+
+  const errorSummary = Object.entries(errorsByCode)
+    .map(([code, errs]) => `- ${code}: ${errs.length}`)
+    .join('\n')
+
+  return `## CI/CD Fix Request
+
+**File**: ${file}
+**Total Issues**: ${issues.length}
+
+### Error Summary
+${errorSummary}
+
+### All Issues in This File
+${issueList}
+
+---
+
+### Fix Instructions
+
+1. Read the file: \`${file}\`
+2. Fix each issue listed above
+3. Run \`npx tsc --noEmit\` to verify fixes
+4. After fixing, run \`npx tsx scripts/cicd-health-check.ts\` to update the dashboard
+
+**Dashboard Link**: https://ops.growthcohq.com/home/cicd`
+}
+
 export default function CicdDashboard() {
   const queryClient = useQueryClient()
   const [expandedFiles, setExpandedFiles] = useState<Set<string>>(new Set())
   const [expandedErrorCodes, setExpandedErrorCodes] = useState<Set<string>>(new Set())
   const [viewMode, setViewMode] = useState<'byType' | 'byFile' | 'byErrorCode'>('byErrorCode')
   const [copiedCode, setCopiedCode] = useState<string | null>(null)
+  const [copiedFile, setCopiedFile] = useState<string | null>(null)
 
   const copyErrorCodePrompt = async (code: string, issues: CicdIssue[]) => {
     const prompt = generateErrorCodeFixPrompt(code, issues)
     await navigator.clipboard.writeText(prompt)
     setCopiedCode(code)
     setTimeout(() => setCopiedCode(null), 2000)
+  }
+
+  const copyFilePrompt = async (file: string, issues: CicdIssue[]) => {
+    const prompt = generateFileFixPrompt(file, issues)
+    await navigator.clipboard.writeText(prompt)
+    setCopiedFile(file)
+    setTimeout(() => setCopiedFile(null), 2000)
   }
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
@@ -453,19 +500,48 @@ export default function CicdDashboard() {
         <div className="space-y-2">
           {Object.entries(data?.byFile || {}).map(([file, issues]) => (
             <div key={file} className="bg-gray-900 border border-gray-800 rounded-lg">
-              <button
-                onClick={() => toggleFile(file)}
-                className="w-full p-4 flex items-center gap-3 text-left hover:bg-gray-800/50"
-              >
-                {expandedFiles.has(file) ? (
-                  <ChevronDown className="w-4 h-4 text-gray-400" />
-                ) : (
-                  <ChevronRight className="w-4 h-4 text-gray-400" />
-                )}
-                <FileCode className="w-4 h-4 text-gray-400" />
-                <span className="text-white font-mono text-sm flex-1 truncate">{file}</span>
-                <span className="text-gray-400 text-sm">{issues.length} issues</span>
-              </button>
+              <div className="p-4 flex items-center gap-3">
+                <button
+                  onClick={() => toggleFile(file)}
+                  className="flex items-center gap-3 flex-1 text-left hover:opacity-80"
+                >
+                  {expandedFiles.has(file) ? (
+                    <ChevronDown className="w-4 h-4 text-gray-400" />
+                  ) : (
+                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                  )}
+                  <FileCode className="w-4 h-4 text-gray-400" />
+                  <span className="text-white font-mono text-sm flex-1 truncate">{file}</span>
+                </button>
+                <span className={`px-2 py-1 rounded text-sm font-semibold ${
+                  issues.length >= 10 ? 'bg-red-500/20 text-red-400' :
+                  issues.length >= 5 ? 'bg-yellow-500/20 text-yellow-400' :
+                  'bg-gray-700 text-gray-300'
+                }`}>
+                  {issues.length} {issues.length === 1 ? 'issue' : 'issues'}
+                </span>
+                <button
+                  onClick={() => copyFilePrompt(file, issues)}
+                  className={`ml-2 px-3 py-1.5 rounded text-sm font-medium flex items-center gap-1.5 transition-colors ${
+                    copiedFile === file
+                      ? 'bg-green-500/20 text-green-400'
+                      : 'bg-blue-500/20 text-blue-400 hover:bg-blue-500/30'
+                  }`}
+                  title={`Copy fix prompt for all ${issues.length} issues in this file`}
+                >
+                  {copiedFile === file ? (
+                    <>
+                      <Check className="w-3.5 h-3.5" />
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      Fix All
+                    </>
+                  )}
+                </button>
+              </div>
               {expandedFiles.has(file) && (
                 <div className="border-t border-gray-800 divide-y divide-gray-800">
                   {issues.map((issue) => (
