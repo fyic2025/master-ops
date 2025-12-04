@@ -4,7 +4,9 @@
       "Bash(git -C:*)",
       "Bash(timeout 30 npx tsx:*)",
       "Bash(git -C c:/Users/jayso/master-ops commit -m \"$(cat <<''EOF''\nUpdate TASKS.md with health check notes\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
-      "Bash(powershell \"Start-Sleep -Seconds 180; doctl apps list-deployments 1a0eed70-aef6-415e-953f-d2b7f0c7c832 --format ID,Phase,Progress --no-header 2>&1 | Select-Object -First 1\")"
+      "Bash(powershell \"Start-Sleep -Seconds 180; doctl apps list-deployments 1a0eed70-aef6-415e-953f-d2b7f0c7c832 --format ID,Phase,Progress --no-header 2>&1 | Select-Object -First 1\")",
+      "Bash(npx tsc:*)",
+      "Bash(npm ls:*)"
     ],
     "deny": [],
     "ask": []
