@@ -6,7 +6,8 @@
     "dev": "cross-env NODE_ENV=development next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "echo \"No tests configured yet\" && exit 0"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
