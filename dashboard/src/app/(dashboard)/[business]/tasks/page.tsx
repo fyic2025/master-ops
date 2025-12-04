@@ -166,6 +166,14 @@ const CATEGORY_SKILLS: Record<string, { skills: string[], focus: string }> = {
   deployment: { skills: ['shopify-expert'], focus: 'theme deployment, validation' },
 }
 
+// Email addresses for task requesters (for notifications)
+const REQUESTER_EMAILS: Record<string, string> = {
+  peter: 'peter@teelixir.com',
+  maria: 'admin@teelixir.com',
+  rajani: 'rajani@teelixir.com',
+  jayson: 'jayson@fyic.com.au',
+}
+
 // Generate comprehensive prompt for Claude Code planning
 function generateClaudePrompt(task: Task): string {
   const businessName = task.business
@@ -188,55 +196,48 @@ function generateClaudePrompt(task: Task): string {
 
   // Determine who created the task and how to follow up
   const createdBy = task.created_by?.toLowerCase() || 'unknown'
-  const isPeterTask = createdBy === 'peter' || createdBy.includes('peter')
-  const isJasonTask = createdBy === 'jayson' || createdBy === 'dashboard' || createdBy.includes('jayson')
+  const isAdminTask = createdBy === 'jayson' || createdBy === 'dashboard' || createdBy.includes('jayson')
+
+  // Get requester email for notifications
+  const requesterEmail = REQUESTER_EMAILS[createdBy] || null
+  const requesterName = task.created_by || 'Unknown'
 
   // Generate unique reference for email tracking
   const taskRef = `TASK-${task.id?.slice(0, 8) || Date.now().toString(36).toUpperCase()}`
 
   let followUpInstructions = ''
-  if (isPeterTask) {
+  if (isAdminTask) {
     followUpInstructions = `
-## Follow-up Process (Peter's Task)
-This task was created by Peter. If you need clarification or more details:
+## Follow-up Process (Admin Task)
+This task was created by Jayson (admin). If you need clarification:
+- **Ask directly** in this conversation window
+- No email required - discuss questions here`
+  } else {
+    // Unified workflow for Peter, Maria, Rajani, and other requesters
+    followUpInstructions = `
+## Follow-up Process
+**Task requested by:** ${requesterName}${requesterEmail ? ` (${requesterEmail})` : ''}
 
-### Option 1: Request via Dashboard (Preferred)
-Update the task to request clarification directly in the dashboard:
+### For Clarifications:
+1. **Dashboard (Preferred):** Update task with status "awaiting_clarification":
 \`\`\`
 PATCH /api/tasks/${task.id || '{task_id}'}
 {
   "status": "awaiting_clarification",
-  "clarification_request": "Your question here - what do you need Peter to clarify?"
+  "clarification_request": "Your question here"
 }
 \`\`\`
-Peter will see the question in the dashboard and can respond directly. His response will appear in \`clarification_response\`.
+2. **Email:** Send to ${requesterEmail || 'requester'} with subject: [${taskRef}] - Question about: ${task.title.slice(0, 40)}...
 
-### Option 2: Email Peter
-If dashboard clarification isn't suitable:
-1. **Email Peter** at peter@teelixir.com
-2. **Subject line must include**: [${taskRef}] - Question about: ${task.title.slice(0, 50)}
-3. **Keep questions focused** on process and clarity (not technical details)
-4. **Log the email** in task_logs table with:
-   - task_id: ${task.id || 'this task ID'}
-   - source: 'claude'
-   - status: 'email_sent'
-   - message: Brief summary of what was asked
-5. **When Peter replies**, the reference [${taskRef}] will help match it to this task
-
-Example subject: [${taskRef}] - Question about: ${task.title.slice(0, 30)}...`
-  } else if (isJasonTask) {
-    followUpInstructions = `
-## Follow-up Process (Jason's Task)
-This task was created by Jason (admin). If you need clarification:
-- **Ask directly** in this conversation window
-- No email required - discuss questions here`
-  } else {
-    followUpInstructions = `
-## Follow-up Process
-If you need more details about this task:
-- **Request via Dashboard**: Update task with status "awaiting_clarification" and set "clarification_request"
-- Task created by: ${createdBy || 'Unknown'}
-- Ask in this conversation if unclear`
+### On Completion:
+1. **Update dashboard:** PATCH /api/tasks/${task.id || '{task_id}'} with:
+   - status: "completed"
+   - completion_notes: "Summary of what was done"
+2. **Email ${requesterEmail || 'requester'}** with:
+   - Subject: [${taskRef}] Completed: ${task.title.slice(0, 40)}
+   - Summary of what was accomplished
+   - Any follow-up items or notes
+3. **Log in task_logs** table with source: 'claude', status: 'completed'`
   }
 
   return `## Task Planning Request
