@@ -141,6 +141,10 @@ interface Task {
   completion_screenshot_url?: string // Screenshot proof URL
   assigned_at?: string // When task was assigned
   completed_at?: string // When task was completed
+  // Triage workflow fields
+  suggested_assignee?: 'system' | 'maria' | 'rajani' | null // Who the creator suggests
+  triage_status?: 'pending_triage' | 'triaged' | null // Triage workflow status
+  automation_notes?: string // Jayson's notes on what's automated vs manual
 }
 
 // Skills mapping for each category
@@ -1678,6 +1682,14 @@ async function fetchDbTasks(): Promise<Task[]> {
       clarification_request: t.clarification_request,
       clarification_response: t.clarification_response,
       task_type: t.task_type,
+      // Assignment fields
+      assigned_to: t.assigned_to,
+      time_on_task_mins: t.time_on_task_mins,
+      completion_notes: t.completion_notes,
+      // Triage workflow fields
+      suggested_assignee: t.suggested_assignee,
+      triage_status: t.triage_status,
+      automation_notes: t.automation_notes,
     }))
   } catch {
     return []
@@ -1828,6 +1840,15 @@ export default function TasksPage() {
 
   // Check if current user is Maria for simplified view
   const isMariaView = userEmail?.toLowerCase() === 'admin@teelixir.com'
+
+  // Pending triage tasks (visible only to admin - Jayson)
+  const pendingTriageTasks = useMemo(() => {
+    if (!userIsAdmin) return []
+    return filteredDbTasks.filter(t => t.triage_status === 'pending_triage')
+      .sort((a, b) => a.priority - b.priority)
+  }, [filteredDbTasks, userIsAdmin])
+
+  const pendingTriageCount = pendingTriageTasks.length
 
   // Tasks needing planning (pending_input status or new db tasks without a plan)
   // Also includes pending_completion for Peter to review and close
@@ -2075,8 +2096,8 @@ export default function TasksPage() {
               </span>
             </button>
           )}
-          {/* Rajani Filter Button - visible to admins */}
-          {userIsAdmin && rajaniTasksCount > 0 && (
+          {/* Rajani Filter Button - visible to admins and Peter */}
+          {(userIsAdmin || isPeterView) && rajaniTasksCount > 0 && (
             <button
               onClick={() => {
                 setRajaniFilter(!rajaniFilter)
@@ -2101,8 +2122,8 @@ export default function TasksPage() {
               </span>
             </button>
           )}
-          {/* Maria Filter Button - visible to admins */}
-          {userIsAdmin && mariaTasksCount > 0 && (
+          {/* Maria Filter Button - visible to admins and Peter */}
+          {(userIsAdmin || isPeterView) && mariaTasksCount > 0 && (
             <button
               onClick={() => {
                 setMariaFilter(!mariaFilter)
@@ -2231,6 +2252,107 @@ export default function TasksPage() {
           <p className="text-xs text-gray-500 mt-1">Click to view</p>
         </button>
       </div>
+
+      {/* Triage Queue - Admin Only */}
+      {userIsAdmin && pendingTriageCount > 0 && (
+        <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-purple-400 font-medium flex items-center gap-2">
+              <ClipboardList className="w-5 h-5" />
+              Pending Triage ({pendingTriageCount})
+            </h3>
+          </div>
+          <div className="space-y-3">
+            {pendingTriageTasks.map(task => (
+              <div key={task.id} className="bg-gray-800/50 rounded-lg p-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className={`text-xs px-2 py-0.5 rounded ${
+                        task.priority === 1 ? 'bg-red-500/20 text-red-400' :
+                        task.priority === 2 ? 'bg-orange-500/20 text-orange-400' :
+                        task.priority === 3 ? 'bg-yellow-500/20 text-yellow-400' :
+                        'bg-gray-500/20 text-gray-400'
+                      }`}>
+                        P{task.priority}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {task.business} / {task.category}
+                      </span>
+                    </div>
+                    <h4 className="text-white font-medium">{task.title}</h4>
+                    {task.description && (
+                      <p className="text-gray-400 text-sm mt-1">{task.description}</p>
+                    )}
+                    <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                      <span>From: {task.created_by}</span>
+                      {task.suggested_assignee && (
+                        <span className="text-purple-400">
+                          Suggests: {task.suggested_assignee === 'system' ? 'System/Claude' :
+                            task.suggested_assignee === 'maria' ? 'Maria' : 'Rajani'}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <button
+                      onClick={async () => {
+                        await fetch(`/api/tasks/${task.id}`, {
+                          method: 'PATCH',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            triage_status: 'triaged',
+                            assigned_to: null,
+                            updated_by: 'jayson'
+                          })
+                        })
+                        refetch()
+                      }}
+                      className="px-3 py-1.5 bg-blue-600 text-white rounded text-xs hover:bg-blue-500"
+                    >
+                      Route to System
+                    </button>
+                    <button
+                      onClick={async () => {
+                        await fetch(`/api/tasks/${task.id}`, {
+                          method: 'PATCH',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            triage_status: 'triaged',
+                            assigned_to: 'admin@teelixir.com',
+                            updated_by: 'jayson'
+                          })
+                        })
+                        refetch()
+                      }}
+                      className="px-3 py-1.5 bg-pink-600 text-white rounded text-xs hover:bg-pink-500"
+                    >
+                      Assign Maria
+                    </button>
+                    <button
+                      onClick={async () => {
+                        await fetch(`/api/tasks/${task.id}`, {
+                          method: 'PATCH',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            triage_status: 'triaged',
+                            assigned_to: 'rajani@teelixir.com',
+                            updated_by: 'jayson'
+                          })
+                        })
+                        refetch()
+                      }}
+                      className="px-3 py-1.5 bg-teal-600 text-white rounded text-xs hover:bg-teal-500"
+                    >
+                      Assign Rajani
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Peter Filter Results */}
       {peterFilter && (
