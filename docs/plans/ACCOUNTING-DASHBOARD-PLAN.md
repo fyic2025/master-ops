@@ -1033,58 +1033,530 @@ Features:
 
 ---
 
-## Quick Start Guide (Tomorrow)
+## Automation Realism Assessment
 
-### Step 1: Connect BOO to Xero
+### Expected Automation Levels by Task
+
+| Task | Automation % | Human Still Needed For |
+|------|-------------|------------------------|
+| **Bank Reconciliation** | 90-95% | Unusual/split transactions, new suppliers |
+| **AR - Debt Collection** | 95%+ | Phone calls, disputes, legal escalation |
+| **AP - Invoice Processing** | 60-80% | Complex invoices, new suppliers, exceptions |
+| **Document Attachment** | 80-90% | Manual receipts, missing documents |
+
+### Why BOO is a Good Candidate
+
+1. **Limited suppliers** - ~4 main suppliers (Oborne, UHP, Kadac, Unleashed) with consistent invoice formats
+2. **Predictable bank transactions** - PayPal, Stripe, credit card batches follow patterns
+3. **Structured e-commerce data** - BigCommerce orders already in `bc_orders` table
+4. **High volume, low complexity** - Many similar transactions
+
+### Realistic Target
+
+```
+BEFORE: Bookkeeper works 15-20 hours/week on data entry
+AFTER:  Bookkeeper reviews exceptions 2-3 hours/week
+        = 85% time reduction
+```
+
+---
+
+## BOO Implementation Guide (Tomorrow Morning)
+
+### Prerequisites Checklist
+- [ ] BOO Xero login credentials (email + password)
+- [ ] Access to teelixir-leads Supabase project
+- [ ] Master-ops repo pulled and up to date
+- [ ] Node.js 18+ installed
+
+---
+
+### HOUR 1: Xero Connection (30-45 mins)
+
+#### Step 1.1: Run Xero OAuth Setup
 ```bash
 cd /home/user/master-ops
-
-# 1. Run the Xero OAuth setup
 npx tsx scripts/financials/setup-xero-auth-direct.ts
-
-# 2. Follow the URL printed, log in with BOO Xero credentials
-# 3. Authorize the app, copy the callback parameters
-# 4. Script saves tokens automatically
 ```
 
-### Step 2: Add BOO to Database
+The script will print an authorization URL. Open it in your browser.
+
+#### Step 1.2: Authorize BOO Xero Account
+1. Log in with BOO Xero credentials
+2. Select the BOO organization if prompted
+3. Click "Allow access"
+4. You'll be redirected to a callback URL
+5. Copy the FULL callback URL (including the `?code=...` part)
+
+#### Step 1.3: Complete OAuth Flow
+Paste the callback URL when the script prompts. It will:
+- Exchange the code for access + refresh tokens
+- Display the BOO Xero tenant ID
+- Save tokens to Supabase vault
+
+**SAVE THIS**: Note down the `tenant_id` displayed.
+
+#### Step 1.4: Add BOO to xero_organizations Table
+Open Supabase SQL Editor (teelixir-leads project) and run:
 ```sql
--- Run in Supabase SQL editor (teelixir-leads project)
-INSERT INTO xero_organizations (xero_tenant_id, business_key, name, legal_name) VALUES
-  ('<your-boo-tenant-id>', 'boo', 'Buy Organics Online', 'Buy Organics Online Pty Ltd');
+INSERT INTO xero_organizations (
+  xero_tenant_id,
+  business_key,
+  name,
+  legal_name,
+  base_currency,
+  country_code
+) VALUES (
+  '<paste-boo-tenant-id-here>',
+  'boo',
+  'Buy Organics Online',
+  'Buy Organics Online Pty Ltd',
+  'AUD',
+  'AU'
+);
 ```
 
-### Step 3: Sync BOO Data from Xero
+#### Step 1.5: Test Connection
 ```bash
-# Sync chart of accounts and recent transactions
-npx tsx scripts/financials/sync-xero-to-supabase.ts --business=boo
+# Verify we can fetch BOO data from Xero
+npx tsx scripts/financials/test-xero-connection.ts --business=boo
 ```
 
-### Step 4: Add Dashboard Navigation
+Expected output: BOO organization name, chart of accounts count.
+
+---
+
+### HOUR 2: Database Schema (15-20 mins)
+
+#### Step 2.1: Create Bookkeeping Tables
+Run the migration in Supabase SQL Editor:
+```sql
+-- Pending invoices queue (AP inbox)
+CREATE TABLE IF NOT EXISTS pending_invoices (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    business_key TEXT NOT NULL,
+    source_type TEXT NOT NULL CHECK (source_type IN ('email', 'upload', 'api')),
+    source_email TEXT,
+    source_subject TEXT,
+    received_at TIMESTAMPTZ DEFAULT NOW(),
+    supplier_name TEXT,
+    supplier_abn TEXT,
+    invoice_number TEXT,
+    invoice_date DATE,
+    due_date DATE,
+    subtotal DECIMAL(10,2),
+    gst_amount DECIMAL(10,2),
+    total_amount DECIMAL(10,2),
+    line_items JSONB DEFAULT '[]'::jsonb,
+    matched_contact_id TEXT,
+    match_confidence INTEGER,
+    pdf_url TEXT,
+    pdf_filename TEXT,
+    status TEXT DEFAULT 'pending' CHECK (status IN (
+        'pending', 'processing', 'ready', 'approved', 'submitted', 'failed', 'rejected'
+    )),
+    processing_error TEXT,
+    xero_invoice_id TEXT,
+    submitted_at TIMESTAMPTZ,
+    submitted_by TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- AR reminder tracking
+CREATE TABLE IF NOT EXISTS ar_reminders (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    business_key TEXT NOT NULL,
+    xero_invoice_id TEXT NOT NULL,
+    xero_contact_id TEXT NOT NULL,
+    invoice_number TEXT,
+    invoice_amount DECIMAL(10,2),
+    due_date DATE,
+    contact_name TEXT,
+    contact_email TEXT,
+    days_overdue INTEGER,
+    reminder_level INTEGER DEFAULT 1,
+    last_reminder_sent_at TIMESTAMPTZ,
+    next_reminder_due_at TIMESTAMPTZ,
+    total_reminders_sent INTEGER DEFAULT 0,
+    status TEXT DEFAULT 'active' CHECK (status IN (
+        'active', 'paid', 'escalated', 'written_off', 'disputed'
+    )),
+    escalation_reason TEXT,
+    escalated_at TIMESTAMPTZ,
+    last_response_at TIMESTAMPTZ,
+    last_response_type TEXT,
+    notes TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(business_key, xero_invoice_id)
+);
+
+-- Bank transaction cache
+CREATE TABLE IF NOT EXISTS bank_transactions_cache (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    business_key TEXT NOT NULL,
+    xero_transaction_id TEXT NOT NULL,
+    xero_bank_account_id TEXT,
+    bank_account_name TEXT,
+    transaction_date DATE NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    description TEXT,
+    reference TEXT,
+    transaction_type TEXT,
+    is_reconciled BOOLEAN DEFAULT false,
+    reconciled_to_type TEXT,
+    reconciled_to_id TEXT,
+    reconciled_at TIMESTAMPTZ,
+    reconciled_by TEXT,
+    suggested_match_id TEXT,
+    suggested_match_type TEXT,
+    match_confidence INTEGER,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(business_key, xero_transaction_id)
+);
+
+-- Indexes
+CREATE INDEX IF NOT EXISTS idx_pending_invoices_business ON pending_invoices(business_key, status);
+CREATE INDEX IF NOT EXISTS idx_ar_reminders_business ON ar_reminders(business_key, status);
+CREATE INDEX IF NOT EXISTS idx_ar_reminders_overdue ON ar_reminders(days_overdue) WHERE status = 'active';
+CREATE INDEX IF NOT EXISTS idx_bank_txns_unreconciled ON bank_transactions_cache(business_key) WHERE NOT is_reconciled;
+```
+
+---
+
+### HOUR 3: Sync BOO Data (20-30 mins)
+
+#### Step 3.1: Sync Chart of Accounts
 ```bash
-# Edit dashboard/src/lib/business-config.ts
-# Add to 'home' navigation array:
-# { name: 'Accounting', href: '/accounting', icon: Calculator }
+npx tsx scripts/financials/sync-xero-to-supabase.ts --business=boo --accounts
 ```
 
-### Step 5: Create Accounting Page
+#### Step 3.2: Sync Recent Invoices (AR)
+```bash
+npx tsx scripts/financials/sync-xero-to-supabase.ts --business=boo --invoices --days=90
+```
+
+#### Step 3.3: Sync Recent Bills (AP)
+```bash
+npx tsx scripts/financials/sync-xero-to-supabase.ts --business=boo --bills --days=90
+```
+
+#### Step 3.4: Sync Bank Transactions
+```bash
+npx tsx scripts/financials/sync-xero-to-supabase.ts --business=boo --bank --days=30
+```
+
+#### Step 3.5: Verify Data in Supabase
+Check these tables have BOO data:
+- `accounts` - Chart of accounts
+- `bank_transactions_cache` - Recent bank transactions
+- Xero invoices should be queryable via API
+
+---
+
+### HOUR 4: Dashboard UI (45-60 mins)
+
+#### Step 4.1: Add Accounting Navigation
+Edit `dashboard/src/lib/business-config.ts`:
+
+```typescript
+// Add Calculator to imports at top
+import { Calculator } from 'lucide-react'
+
+// Add to 'home' navigation array (around line 54-66)
+{ name: 'Accounting', href: '/accounting', icon: Calculator },
+```
+
+#### Step 4.2: Create Accounting Page Structure
 ```bash
 mkdir -p dashboard/src/app/\(dashboard\)/home/accounting
-# Create page.tsx with business summary cards
 ```
 
-### Step 6: Deploy
+#### Step 4.3: Create Main Accounting Page
+Create `dashboard/src/app/(dashboard)/home/accounting/page.tsx`:
+
+```typescript
+'use client'
+
+import { useState, useEffect } from 'react'
+import { RefreshCw, Building2, AlertCircle, CheckCircle, Clock, DollarSign } from 'lucide-react'
+
+interface BusinessSummary {
+  business: string
+  overdueInvoices: number
+  overdueAmount: number
+  unreconciledTransactions: number
+  pendingBills: number
+}
+
+export default function AccountingDashboard() {
+  const [loading, setLoading] = useState(true)
+  const [summaries, setSummaries] = useState<BusinessSummary[]>([])
+
+  useEffect(() => {
+    loadData()
+  }, [])
+
+  const loadData = async () => {
+    setLoading(true)
+    try {
+      const res = await fetch('/api/accounting/summary')
+      const data = await res.json()
+      setSummaries(data.businesses || [])
+    } catch (err) {
+      console.error('Failed to load accounting data:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      <header className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-white">Accounting</h1>
+          <p className="text-gray-400 mt-1">Bookkeeping automation across all businesses</p>
+        </div>
+        <button
+          onClick={loadData}
+          disabled={loading}
+          className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg"
+        >
+          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          Refresh
+        </button>
+      </header>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <SummaryCard
+          title="Overdue Invoices"
+          value="$12,450"
+          subtitle="5 invoices"
+          icon={<AlertCircle className="w-5 h-5 text-red-400" />}
+          color="red"
+        />
+        <SummaryCard
+          title="To Reconcile"
+          value="23"
+          subtitle="Bank transactions"
+          icon={<Clock className="w-5 h-5 text-yellow-400" />}
+          color="yellow"
+        />
+        <SummaryCard
+          title="Pending Bills"
+          value="8"
+          subtitle="Awaiting approval"
+          icon={<DollarSign className="w-5 h-5 text-blue-400" />}
+          color="blue"
+        />
+        <SummaryCard
+          title="Reconciled Today"
+          value="45"
+          subtitle="98% auto-matched"
+          icon={<CheckCircle className="w-5 h-5 text-green-400" />}
+          color="green"
+        />
+      </div>
+
+      {/* Quick Actions */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <QuickActionCard
+          title="Bank Reconciliation"
+          description="23 unmatched transactions"
+          href="/home/accounting/reconciliation"
+          actionLabel="Start Matching"
+        />
+        <QuickActionCard
+          title="AR - Debtors"
+          description="5 overdue invoices"
+          href="/home/accounting/ar"
+          actionLabel="Send Reminders"
+        />
+        <QuickActionCard
+          title="AP - Bills Queue"
+          description="8 invoices to process"
+          href="/home/accounting/ap"
+          actionLabel="Process Bills"
+        />
+      </div>
+
+      {/* Business Breakdown */}
+      <section className="bg-gray-900 rounded-lg p-6">
+        <h2 className="text-xl font-semibold text-white mb-4">By Business</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {['boo', 'rhf', 'teelixir', 'elevate'].map((biz) => (
+            <BusinessCard key={biz} businessKey={biz} />
+          ))}
+        </div>
+      </section>
+    </div>
+  )
+}
+
+function SummaryCard({ title, value, subtitle, icon, color }: any) {
+  const colorClasses = {
+    red: 'border-red-500/50 bg-red-900/20',
+    yellow: 'border-yellow-500/50 bg-yellow-900/20',
+    blue: 'border-blue-500/50 bg-blue-900/20',
+    green: 'border-green-500/50 bg-green-900/20',
+  }
+  return (
+    <div className={`border rounded-lg p-4 ${colorClasses[color as keyof typeof colorClasses]}`}>
+      <div className="flex items-center justify-between">
+        <span className="text-gray-400 text-sm">{title}</span>
+        {icon}
+      </div>
+      <p className="text-2xl font-bold text-white mt-2">{value}</p>
+      <p className="text-gray-500 text-sm">{subtitle}</p>
+    </div>
+  )
+}
+
+function QuickActionCard({ title, description, href, actionLabel }: any) {
+  return (
+    <div className="bg-gray-800 rounded-lg p-4 flex flex-col justify-between">
+      <div>
+        <h3 className="text-lg font-medium text-white">{title}</h3>
+        <p className="text-gray-400 text-sm mt-1">{description}</p>
+      </div>
+      <a
+        href={href}
+        className="mt-4 inline-flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm"
+      >
+        {actionLabel}
+      </a>
+    </div>
+  )
+}
+
+function BusinessCard({ businessKey }: { businessKey: string }) {
+  const names: Record<string, string> = {
+    boo: 'Buy Organics Online',
+    rhf: 'Red Hill Fresh',
+    teelixir: 'Teelixir',
+    elevate: 'Elevate Wholesale',
+  }
+  return (
+    <div className="bg-gray-800 rounded-lg p-4">
+      <h3 className="text-white font-medium">{names[businessKey]}</h3>
+      <div className="mt-2 grid grid-cols-3 gap-2 text-sm">
+        <div>
+          <p className="text-gray-500">Overdue AR</p>
+          <p className="text-white">$0</p>
+        </div>
+        <div>
+          <p className="text-gray-500">Unreconciled</p>
+          <p className="text-white">0</p>
+        </div>
+        <div>
+          <p className="text-gray-500">Pending AP</p>
+          <p className="text-white">0</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+```
+
+#### Step 4.4: Create API Route for Summary
+Create `dashboard/src/app/api/accounting/summary/route.ts`:
+
+```typescript
+import { NextResponse } from 'next/server'
+
+export async function GET() {
+  // TODO: Fetch real data from Supabase/Xero
+  return NextResponse.json({
+    businesses: [
+      {
+        business: 'boo',
+        overdueInvoices: 5,
+        overdueAmount: 12450,
+        unreconciledTransactions: 23,
+        pendingBills: 8,
+      },
+      {
+        business: 'rhf',
+        overdueInvoices: 0,
+        overdueAmount: 0,
+        unreconciledTransactions: 0,
+        pendingBills: 0,
+      },
+    ],
+  })
+}
+```
+
+---
+
+### HOUR 5: Deploy & Test (15-20 mins)
+
+#### Step 5.1: Commit Changes
+```bash
+git add -A
+git commit -m "Add Accounting tab with BOO Xero integration"
+```
+
+#### Step 5.2: Push to Branch
+```bash
+git push origin claude/accounting-dashboard-plan-019xgcmvRa54e7L74wzAcMYj
+```
+
+#### Step 5.3: Deploy Dashboard
 ```bash
 doctl apps create-deployment 1a0eed70-aef6-415e-953f-d2b7f0c7c832 --force-rebuild
 ```
 
-### Step 7: Verify
-- Visit https://ops.growthcohq.com/home/accounting
-- Confirm BOO P&L data displays correctly
-- Compare numbers to Xero dashboard
+#### Step 5.4: Verify Deployment
+Wait 3-5 minutes for deployment, then:
+1. Visit https://ops.growthcohq.com/home/accounting
+2. Confirm page loads with summary cards
+3. Check BOO data displays correctly
+
+---
+
+### POST-IMPLEMENTATION: Next Steps
+
+After the initial setup is complete, these are the next priorities:
+
+#### Day 2: Bank Reconciliation
+- Build matching engine for BOO bank transactions
+- Create reconciliation UI with one-click matching
+- Test with live BOO data
+
+#### Day 3: AR Automation
+- Set up overdue invoice scanner
+- Create email templates for reminders
+- Build n8n workflow for automated reminders
+
+#### Day 4: AP Invoice Processing
+- Set up invoice email inbox
+- Build AI invoice parser
+- Create approval queue UI
+
+---
+
+## Troubleshooting
+
+### OAuth Fails
+- Ensure Xero app has correct redirect URI configured
+- Check client ID/secret in environment variables
+- Verify Xero app is connected to correct organization
+
+### No Data in Dashboard
+- Confirm xero_organizations table has BOO entry
+- Run sync scripts manually to verify data flow
+- Check Supabase RLS policies allow read access
+
+### Dashboard Won't Deploy
+- Check build logs: `doctl apps logs 1a0eed70-aef6-415e-953f-d2b7f0c7c832 --type=build`
+- Verify no TypeScript errors: `cd dashboard && npm run build`
 
 ---
 
 **Last Updated**: 2025-12-04
 **Author**: Claude Code
-**Next Review**: After POC completion
+**Next Review**: After BOO POC completion
