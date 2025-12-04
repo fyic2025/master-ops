@@ -31,6 +31,8 @@ Cross-business initiatives that take precedence.
 ### Shipping Labels (Branch: shipping-label-launch-plan)
 > Shipping label system launch for BOO, Teelixir, Elevate - 75% complete
 
+**Status:** CODE EXISTS (on main) | Nav: Shipping → BOO, Teelixir, Elevate, Home | Needs config only
+
 - [ ] **P1** Deploy shipping database migration to Supabase projects
 - [ ] **P1** Configure AusPost API credentials in DO App Platform
 - [ ] **P1** Confirm/update warehouse sender addresses
@@ -40,6 +42,8 @@ Cross-business initiatives that take precedence.
 
 ### Accounting Dashboard (Branch: accounting-dashboard-plan)
 > Full bookkeeping automation - All 4 businesses use Xero
+
+**Status:** PLAN ONLY (1,562 lines) | No code yet | Xero client exists in shared/libs
 
 - [ ] **P2** Get BOO Xero tenant OAuth credentials
 - [ ] **P2** Get RHF Xero tenant OAuth credentials
@@ -51,9 +55,11 @@ Cross-business initiatives that take precedence.
 ### Inventory & Production Planning (Branches: inventory-dashboard-setup, restore-ordering-dashboard)
 > Unleashed replacement + production/ordering forecasting - Teelixir first, then other businesses
 
+**Status:** MERGED TO MAIN | Nav: Inventory → Teelixir | Migration: 903 lines (pending deploy)
+
 **Context:** Connected systems - inventory management feeds into production planning and input ordering. Teelixir most complex (requires batch records), so once built, simpler for BOO/RHF/Elevate to adopt.
 
-- [ ] **P2** Review and merge inventory dashboard implementation
+- [x] **P2** Review and merge inventory dashboard | Merged 2025-12-05
 - [ ] **P2** Deploy inventory migration: `20251204_inventory_management.sql`
 - [ ] **P2** Test Teelixir Shopify inventory sync
 - [ ] **P3** Deploy ordering dashboard migration (Stock Analysis, BOM, Stock Needs)
@@ -64,6 +70,8 @@ Cross-business initiatives that take precedence.
 ### Voice AI Integration (Branch: voice-ai-integration-plan)
 > Ultra-low latency (<200ms) Voice AI for calls
 
+**Status:** PLAN ONLY (973 lines) | No code yet
+
 - [ ] **P4** Evaluate Telnyx Sydney vs OpenAI Realtime API
 - [ ] **P4** Build Voice AI tab in dashboard
 - [ ] **P4** Implement inbound/outbound call handling
@@ -71,9 +79,10 @@ Cross-business initiatives that take precedence.
 ### AWS Migration Tracking (Branch: audit-aws-migration)
 > BOO migration from AWS to Supabase - Dashboard tracking feature ready
 
-- [ ] **P2** Review and merge AWS migration dashboard (1,386 lines ready)
+**Status:** MERGED TO MAIN | Nav: AWS Migration → Home | Page: /aws-migration
+
+- [x] **P2** Review and merge AWS migration dashboard | Already on main
 - [ ] **P2** Deploy migration schema: `20251202_aws_migration_tracking.sql`
-- [ ] **P2** Add AWS Migration nav item to sidebar
 - [ ] **P3** Seed initial migration component data (BOO products, orders, suppliers)
 
 ### Migration
@@ -81,7 +90,7 @@ Cross-business initiatives that take precedence.
 
 - [ ] **P3** Migrate GSC tables from boo → teelixir-leads (with dual-write)
 - [ ] **P3** Migrate bc_orders from boo → teelixir-leads
-- [ ] **P3** Migrate elevate_products to teelixir-leads
+- [x] **P3** Migrate elevate_products to teelixir-leads | Completed 2025-12-05
 - [ ] **P3** Update 15+ hardcoded Supabase URLs to env vars
 
 ### System Checks
@@ -941,7 +950,14 @@ We currently operate **3 separate Supabase projects** with significant fragmenta
 - [x] Created setup-new-machine.sh for portable setup
 
 **Phase 2: Low-Risk Migrations**
-- [ ] **P3** Migrate elevate_products to teelixir-leads (lowest risk, 1 app)
+- [x] **P3** Migrate elevate_products to teelixir-leads | COMPLETED 2025-12-05
+  - Table created with has_gst column (additional column found in source)
+  - 1,213 rows copied successfully
+  - 10/10 spot checks passed
+  - elevate-wholesale/.env updated to teelixir-leads
+  - shopify-form-integration.js URL updated
+  - Connection test passed
+  - 48-hour monitoring period started
 - [ ] **P3** Migrate n8n_workflows backup table (read-only)
 
 **Phase 3: Medium-Risk Migrations (with parallel sync)**
