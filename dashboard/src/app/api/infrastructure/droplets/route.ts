@@ -50,10 +50,6 @@ const DROPLET_CONFIG: Record<string, { displayName: string; containers: Containe
       { name: 'n8n-watchtower-1', status: 'Up (healthy)', image: 'containrrr/watchtower' },
     ],
   },
-  'ubuntu-s-2vcpu-4gb-amd-syd1-01': {
-    displayName: 'n8n-secondary',
-    containers: [],
-  },
 }
 
 interface DODroplet {

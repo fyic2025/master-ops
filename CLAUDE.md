@@ -267,21 +267,21 @@ doctl apps create-deployment 1a0eed70-aef6-415e-953f-d2b7f0c7c832 --force-rebuil
 ```
 
 **NEVER do this for the dashboard:**
-- ❌ Deploy via SCP to droplet (170.64.223.141)
+- ❌ Deploy via SCP to droplet
 - ❌ Use PM2 on the droplet
 - ❌ Restart nginx for this app
 - ❌ SSH into droplet to deploy
 
-The droplet at 170.64.223.141 runs OTHER services (n8n, etc), not the dashboard.
-
-### Other Services on Droplet (170.64.223.141)
+### Other Services on Droplet (134.199.175.243 / n8n-primary)
 
 | Service | Port | Managed By |
 |---------|------|------------|
-| n8n | 5678 | PM2/Docker |
-| Other automations | Various | PM2 |
+| n8n | 5678 | Docker |
+| gsc-issues-sync | - | PM2 |
+| bc-product-sync | - | PM2 |
+| boo-gmc-sync | - | PM2 |
 
-For these services, SCP + PM2 restart is correct.
+For these services, SSH + PM2 restart is correct.
 
 ---
 

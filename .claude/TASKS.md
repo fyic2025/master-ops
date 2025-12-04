@@ -36,8 +36,8 @@ Cross-business initiatives that take precedence.
 ### System Checks
 > Health monitoring, integrations, and reliability
 
-- [ ] **P2** Install DO monitoring agent on n8n-secondary (170.64.223.141) | Required for metrics in dashboard widget
-- [ ] **P3** Evaluate load sharing options between droplets | n8n worker mode or other approaches
+- [x] **P2** Fix misleading memory metrics in dashboard | Now uses memory_available
+- [x] **P2** Consolidate infrastructure to single droplet | Deleted n8n-secondary, migrated services to primary
 
 ---
 
@@ -288,12 +288,12 @@ This ensures the dashboard always reflects current codebase state.
 
 **Status:** Live on ops.growthcohq.com/home
 
-**Implementation Details (2025-12-03):**
-- Widget shows both droplets with real-time metrics from DO Monitoring API
-- n8n-primary (134.199.175.243): CPU, memory, disk metrics working, 3 containers (n8n, caddy, watchtower)
-- n8n-secondary (170.64.223.141): Active but no metrics (DO monitoring agent not installed)
+**Implementation Details (2025-12-04):**
+- Single droplet infrastructure after consolidation
+- n8n-primary (134.199.175.243): All services consolidated here
+- Memory metrics now use `memory_available` for accurate readings (not misleading buffer/cache)
 
-**Files Created:**
+**Files:**
 - `dashboard/src/app/api/infrastructure/droplets/route.ts` - API route fetching from DO API + Monitoring API
 - `dashboard/src/components/DropletCapacityWidget.tsx` - React component with expandable details
 
@@ -302,10 +302,7 @@ This ensures the dashboard always reflects current codebase state.
 - Uses `DO_API_TOKEN` env var (added to DO App Platform)
 - Containers are hardcoded in `DROPLET_CONFIG` - update if containers change
 - Refresh interval: 60 seconds
-
-**Droplet Infrastructure Tasks:**
-- [ ] P2 Install DO monitoring agent on n8n-secondary: `curl -sSL https://repos.insights.digitalocean.com/install.sh | bash`
-- [ ] P3 Evaluate load sharing: Consider n8n worker mode or dedicated task routing
+- Uses `memory_available` instead of `memory_free` for accurate memory metrics
 
 ---
 
@@ -759,5 +756,9 @@ node shared/libs/integrations/health/sync-health-checks.js
 - Pending tasks saved: 0
 
 ### Session cd8d073e (2025-12-04 07:40 pm)
+- Exit reason: other
+- Pending tasks saved: 0
+
+### Session 669ef89d (2025-12-04 08:06 pm)
 - Exit reason: other
 - Pending tasks saved: 0
