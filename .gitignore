@@ -11,6 +11,7 @@ pnpm-lock.yaml
 
 # Environment Variables
 .env
+.mcp.json
 .env.local
 .env.development
 .env.development.local

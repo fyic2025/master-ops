@@ -18,6 +18,7 @@ import {
   ExternalLink
 } from 'lucide-react'
 import { useState } from 'react'
+import { FixSingleButton, FixBatchButton } from '@/components/cicd'
 
 interface CicdIssue {
   id: string
@@ -146,6 +147,9 @@ export default function CicdDashboard() {
           <p className="text-gray-400 mt-1">Code quality monitoring and issue tracking</p>
         </div>
         <div className="flex gap-2">
+          {data && data.issues.length > 0 && (
+            <FixBatchButton issues={data.issues} maxBatchSize={10} />
+          )}
           <button
             onClick={() => refetch()}
             disabled={isRefetching}
@@ -421,6 +425,7 @@ function IssueRow({
               <Play className="w-3 h-3" />
             </span>
           )}
+          <FixSingleButton issue={issue} compact />
           <button
             onClick={onResolve}
             className="text-gray-400 hover:text-green-400"
