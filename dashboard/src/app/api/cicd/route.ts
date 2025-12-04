@@ -99,10 +99,29 @@ export async function GET(request: NextRequest) {
       byFile[key].push(issue)
     }
 
+    // Group by error code (e.g., TS7006, TS2307) - sorted by count descending
+    const byErrorCode: Record<string, CicdIssue[]> = {}
+    for (const issue of (issues || []) as CicdIssue[]) {
+      const key = issue.code || 'unknown'
+      if (!byErrorCode[key]) {
+        byErrorCode[key] = []
+      }
+      byErrorCode[key].push(issue)
+    }
+
+    // Sort by count descending for prioritization
+    const sortedByErrorCode = Object.entries(byErrorCode)
+      .sort(([, a], [, b]) => b.length - a.length)
+      .reduce((acc, [key, value]) => {
+        acc[key] = value
+        return acc
+      }, {} as Record<string, CicdIssue[]>)
+
     return NextResponse.json({
       issues: issues || [],
       byType,
       byFile,
+      byErrorCode: sortedByErrorCode,
       stats,
       recentScans: recentScans || [],
       lastUpdated: new Date().toISOString()
@@ -170,7 +189,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Mark old issues of this type as resolved
-    const issueTypes = [...new Set(issues.map((i: any) => i.type))]
+    // Include all standard issue types to ensure stale issues are resolved even when no new issues of that type
+    const issueTypes = [
+      ...new Set([
+        'typescript_error',
+        'test_failure',
+        'lint_error',
+        'build_error',
+        ...issues.map((i: any) => i.type)
+      ])
+    ]
     let resolvedCount = 0
 
     for (const issueType of issueTypes) {

@@ -241,11 +241,8 @@ function applyFixes(): number {
  * Send issues to dashboard API
  */
 async function logToDashboard(): Promise<void> {
-  if (issues.length === 0) {
-    console.log('\nNo issues to log')
-    return
-  }
-
+  // Always POST to the API - even with 0 issues
+  // This triggers resolve_stale_issues() to mark old issues as resolved
   console.log(`\nLogging ${issues.length} issues to dashboard...`)
 
   try {

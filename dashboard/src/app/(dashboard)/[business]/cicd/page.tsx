@@ -59,6 +59,7 @@ interface CicdResponse {
   issues: CicdIssue[]
   byType: Record<string, CicdIssue[]>
   byFile: Record<string, CicdIssue[]>
+  byErrorCode: Record<string, CicdIssue[]>
   stats: CicdStats
   recentScans: ScanHistory[]
   lastUpdated: string
@@ -100,7 +101,8 @@ function formatTimeAgo(dateString: string): string {
 export default function CicdDashboard() {
   const queryClient = useQueryClient()
   const [expandedFiles, setExpandedFiles] = useState<Set<string>>(new Set())
-  const [viewMode, setViewMode] = useState<'byType' | 'byFile'>('byType')
+  const [expandedErrorCodes, setExpandedErrorCodes] = useState<Set<string>>(new Set())
+  const [viewMode, setViewMode] = useState<'byType' | 'byFile' | 'byErrorCode'>('byErrorCode')
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ['cicd-issues'],
@@ -123,6 +125,16 @@ export default function CicdDashboard() {
       newExpanded.add(file)
     }
     setExpandedFiles(newExpanded)
+  }
+
+  const toggleErrorCode = (code: string) => {
+    const newExpanded = new Set(expandedErrorCodes)
+    if (newExpanded.has(code)) {
+      newExpanded.delete(code)
+    } else {
+      newExpanded.add(code)
+    }
+    setExpandedErrorCodes(newExpanded)
   }
 
   const stats = data?.stats || {
@@ -253,6 +265,16 @@ export default function CicdDashboard() {
       {/* View Toggle */}
       <div className="flex gap-2">
         <button
+          onClick={() => setViewMode('byErrorCode')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium ${
+            viewMode === 'byErrorCode'
+              ? 'bg-blue-600 text-white'
+              : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+          }`}
+        >
+          By Error Code
+        </button>
+        <button
           onClick={() => setViewMode('byType')}
           className={`px-4 py-2 rounded-lg text-sm font-medium ${
             viewMode === 'byType'
@@ -275,7 +297,56 @@ export default function CicdDashboard() {
       </div>
 
       {/* Issues List */}
-      {viewMode === 'byType' ? (
+      {viewMode === 'byErrorCode' ? (
+        <div className="space-y-2">
+          {Object.entries(data?.byErrorCode || {}).map(([code, issues]) => (
+            <div key={code} className="bg-gray-900 border border-gray-800 rounded-lg">
+              <button
+                onClick={() => toggleErrorCode(code)}
+                className="w-full p-4 flex items-center gap-3 text-left hover:bg-gray-800/50"
+              >
+                {expandedErrorCodes.has(code) ? (
+                  <ChevronDown className="w-4 h-4 text-gray-400" />
+                ) : (
+                  <ChevronRight className="w-4 h-4 text-gray-400" />
+                )}
+                <span className={`px-2 py-0.5 rounded text-xs font-mono ${
+                  code.startsWith('TS') ? 'bg-red-500/20 text-red-400' : 'bg-gray-700 text-gray-300'
+                }`}>
+                  {code}
+                </span>
+                <span className="text-gray-400 text-sm flex-1 truncate">
+                  {issues[0]?.message?.slice(0, 60)}...
+                </span>
+                <span className={`px-2 py-1 rounded text-sm font-semibold ${
+                  issues.length >= 10 ? 'bg-red-500/20 text-red-400' :
+                  issues.length >= 5 ? 'bg-yellow-500/20 text-yellow-400' :
+                  'bg-gray-700 text-gray-300'
+                }`}>
+                  {issues.length} {issues.length === 1 ? 'issue' : 'issues'}
+                </span>
+              </button>
+              {expandedErrorCodes.has(code) && (
+                <div className="border-t border-gray-800 divide-y divide-gray-800">
+                  {issues.map((issue) => (
+                    <IssueRow
+                      key={issue.id}
+                      issue={issue}
+                      onResolve={() => resolveMutation.mutate(issue.id)}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+          {Object.keys(data?.byErrorCode || {}).length === 0 && !isLoading && (
+            <div className="bg-gray-900 border border-gray-800 rounded-lg p-8 text-center">
+              <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-2" />
+              <p className="text-gray-400">No active issues</p>
+            </div>
+          )}
+        </div>
+      ) : viewMode === 'byType' ? (
         <div className="space-y-4">
           {Object.entries(data?.byType || {}).map(([type, issues]) => {
             const config = issueTypeConfig[type] || issueTypeConfig.typescript_error
