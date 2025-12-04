@@ -21,7 +21,8 @@ import {
   MessageSquare,
   Send,
   Archive,
-  User
+  User,
+  Pencil
 } from 'lucide-react'
 import { getAllowedBusinesses, isAdmin } from '@/lib/user-permissions'
 
@@ -1004,7 +1005,17 @@ function RajaniTaskCard({ task, onUpdate }: { task: Task, onUpdate: () => void }
   )
 }
 
-function TaskCard({ task, onClarificationSubmit }: { task: Task, onClarificationSubmit?: () => void }) {
+function TaskCard({
+  task,
+  onClarificationSubmit,
+  userEmail,
+  userIsAdmin
+}: {
+  task: Task
+  onClarificationSubmit?: () => void
+  userEmail?: string | null
+  userIsAdmin?: boolean
+}) {
   const [showDetails, setShowDetails] = useState(false)
   const [copied, setCopied] = useState(false)
   const [copiedResearch, setCopiedResearch] = useState(false)
@@ -1014,6 +1025,15 @@ function TaskCard({ task, onClarificationSubmit }: { task: Task, onClarification
   const [submitError, setSubmitError] = useState('')
   const [showCopyModal, setShowCopyModal] = useState(false)
   const [copyModalText, setCopyModalText] = useState('')
+  const [showEditModal, setShowEditModal] = useState(false)
+
+  // Permission check: can edit if creator, admin, or assigned to this task
+  const userEmailPrefix = userEmail?.split('@')[0]?.toLowerCase()
+  const canEdit = task.fromDb && (
+    userIsAdmin ||
+    (task.created_by && task.created_by.toLowerCase() === userEmailPrefix) ||
+    (task.assigned_to && task.assigned_to.toLowerCase() === userEmail?.toLowerCase())
+  )
 
   const copyToClipboard = async (e: React.MouseEvent) => {
     e.preventDefault()
@@ -1183,6 +1203,15 @@ After research, update this task in the dashboard with your findings.`
               )}
             </button>
           )}
+          {canEdit && (
+            <button
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowEditModal(true) }}
+              className="text-xs px-2 py-1 bg-gray-600 hover:bg-gray-500 text-white rounded flex items-center gap-1 transition-colors"
+            >
+              <Pencil className="w-3 h-3" />
+              Edit
+            </button>
+          )}
         </div>
       </div>
 
@@ -1286,6 +1315,18 @@ After research, update this task in the dashboard with your findings.`
           </div>
         </div>
       )}
+
+      {/* Edit Task Modal */}
+      {showEditModal && (
+        <EditTaskModal
+          task={task}
+          isOpen={showEditModal}
+          onClose={() => setShowEditModal(false)}
+          onSuccess={onClarificationSubmit}
+          userEmail={userEmail}
+          userIsAdmin={userIsAdmin}
+        />
+      )}
     </div>
   )
 }
@@ -1296,7 +1337,9 @@ function CategorySection({
   categoryKey,
   category,
   tasks,
-  onRefetch
+  onRefetch,
+  userEmail,
+  userIsAdmin
 }: {
   businessKey: string
   businessName: string
@@ -1304,6 +1347,8 @@ function CategorySection({
   category: { name: string }
   tasks: Task[]
   onRefetch?: () => void
+  userEmail?: string | null
+  userIsAdmin?: boolean
 }) {
   const [expanded, setExpanded] = useState(tasks.length > 0)
 
@@ -1329,7 +1374,7 @@ function CategorySection({
 
       {expanded && (
         <div className="space-y-3 mt-2 ml-6">
-          {displayTasks.map(task => <TaskCard key={task.id} task={task} onClarificationSubmit={onRefetch} />)}
+          {displayTasks.map(task => <TaskCard key={task.id} task={task} onClarificationSubmit={onRefetch} userEmail={userEmail} userIsAdmin={userIsAdmin} />)}
         </div>
       )}
     </div>
@@ -1340,12 +1385,16 @@ function BusinessSection({
   businessKey,
   business,
   dbTasks,
-  onRefetch
+  onRefetch,
+  userEmail,
+  userIsAdmin
 }: {
   businessKey: string
   business: typeof TASK_FRAMEWORK.teelixir
   dbTasks?: Record<string, Task[]>
   onRefetch?: () => void
+  userEmail?: string | null
+  userIsAdmin?: boolean
 }) {
   const [expanded, setExpanded] = useState(true)
 
@@ -1389,6 +1438,8 @@ function BusinessSection({
               category={category}
               tasks={tasksSource[`${businessKey}.${catKey}`] || []}
               onRefetch={onRefetch}
+              userEmail={userEmail}
+              userIsAdmin={userIsAdmin}
             />
           ))}
         </div>
@@ -1653,6 +1704,227 @@ Add this task to the dashboard.`
               )}
             </button>
           </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Edit Task Modal - allows staff to edit tasks they created
+function EditTaskModal({
+  task,
+  isOpen,
+  onClose,
+  onSuccess,
+  userEmail,
+  userIsAdmin
+}: {
+  task: Task
+  isOpen: boolean
+  onClose: () => void
+  onSuccess?: () => void
+  userEmail?: string | null
+  userIsAdmin?: boolean
+}) {
+  const [business, setBusiness] = useState(task.business || '')
+  const [category, setCategory] = useState(task.category || '')
+  const [title, setTitle] = useState(task.title || '')
+  const [description, setDescription] = useState(task.description || '')
+  const [priority, setPriority] = useState<1 | 2 | 3 | 4>(task.priority || 2)
+  const [status, setStatus] = useState(task.status || 'pending')
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+
+  // Reset form when task changes
+  useEffect(() => {
+    if (task && isOpen) {
+      setBusiness(task.business || '')
+      setCategory(task.category || '')
+      setTitle(task.title || '')
+      setDescription(task.description || '')
+      setPriority(task.priority || 2)
+      setStatus(task.status || 'pending')
+    }
+  }, [task, isOpen])
+
+  const availableBusinesses = Object.entries(TASK_FRAMEWORK)
+  const categories = business ? Object.entries(TASK_FRAMEWORK[business as keyof typeof TASK_FRAMEWORK]?.categories || {}) : []
+
+  const handleSubmit = async () => {
+    if (!task.id) {
+      setError('Cannot edit task without ID')
+      return
+    }
+
+    setSaving(true)
+    setError('')
+
+    try {
+      const response = await fetch(`/api/tasks/${task.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title,
+          description: description || null,
+          business,
+          category,
+          priority,
+          status,
+        }),
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to update task')
+      }
+
+      onSuccess?.()
+      onClose()
+    } catch (err: any) {
+      setError(err.message || 'Failed to save changes')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (!isOpen) return null
+
+  const statusOptions = [
+    { value: 'pending', label: 'Pending' },
+    { value: 'pending_input', label: 'Awaiting Planning' },
+    { value: 'scheduled', label: 'Scheduled' },
+    { value: 'in_progress', label: 'In Progress' },
+    { value: 'awaiting_clarification', label: 'Awaiting Clarification' },
+    { value: 'blocked', label: 'Blocked' },
+    { value: 'completed', label: 'Completed' },
+  ]
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-gray-900 border border-gray-700 rounded-lg w-full max-w-lg mx-4">
+        <div className="flex items-center justify-between p-4 border-b border-gray-700">
+          <h2 className="text-lg font-semibold text-white">Edit Task</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-white">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {error && (
+          <div className="mx-4 mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded text-red-400 text-sm">
+            {error}
+          </div>
+        )}
+
+        <div className="p-4 space-y-4">
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">Business</label>
+            <select
+              value={business}
+              onChange={(e) => { setBusiness(e.target.value); setCategory('') }}
+              className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white"
+            >
+              <option value="">Select business...</option>
+              {availableBusinesses.map(([key, biz]) => (
+                <option key={key} value={key}>{biz.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">Category</label>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              disabled={!business}
+              className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white disabled:opacity-50"
+            >
+              <option value="">Select category...</option>
+              <option value="unsure">Not sure / Other</option>
+              {categories.map(([key, cat]) => (
+                <option key={key} value={key}>{cat.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">Title</label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="What needs to be done?"
+              className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">Description</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Additional details..."
+              rows={3}
+              className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">Priority</label>
+            <div className="flex gap-2">
+              {[1, 2, 3, 4].map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setPriority(p as 1 | 2 | 3 | 4)}
+                  className={`flex-1 py-2 rounded text-sm font-medium transition-colors ${
+                    priority === p
+                      ? p === 1 ? 'bg-red-500 text-white' :
+                        p === 2 ? 'bg-orange-500 text-white' :
+                        p === 3 ? 'bg-yellow-500 text-black' :
+                        'bg-gray-500 text-white'
+                      : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                  }`}
+                >
+                  P{p}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">Status</label>
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value as Task['status'])}
+              className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white"
+            >
+              {statusOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-3 p-4 border-t border-gray-700">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-gray-400 hover:text-white"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={!title || saving}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            {saving ? (
+              <>
+                <span className="animate-spin">⏳</span>
+                Saving...
+              </>
+            ) : (
+              'Save Changes'
+            )}
+          </button>
         </div>
       </div>
     </div>
@@ -2378,7 +2650,7 @@ export default function TasksPage() {
                 return a.priority - b.priority
               })
               .map(task => (
-                <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} />
+                <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} />
               ))}
             {peterTasks.length === 0 && (
               <p className="text-gray-500 text-sm">No tasks from Peter found</p>
@@ -2411,7 +2683,7 @@ export default function TasksPage() {
               })
               .map(task => (
                 <div key={task.id} className="bg-gray-800/50 rounded-lg p-3">
-                  <TaskCard task={task} onClarificationSubmit={refetch} />
+                  <TaskCard task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} />
                   {/* Show completion feedback for admins */}
                   {task.status === 'completed' && (task.completion_notes || task.time_on_task_mins) && (
                     <div className="mt-2 pt-2 border-t border-gray-700 text-sm space-y-1">
@@ -2471,7 +2743,7 @@ export default function TasksPage() {
               })
               .map(task => (
                 <div key={task.id} className="bg-gray-800/50 rounded-lg p-3">
-                  <TaskCard task={task} onClarificationSubmit={refetch} />
+                  <TaskCard task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} />
                   {/* Show completion feedback for admins */}
                   {task.status === 'completed' && (task.completion_notes || task.time_on_task_mins) && (
                     <div className="mt-2 pt-2 border-t border-gray-700 text-sm space-y-1">
@@ -2523,7 +2795,7 @@ export default function TasksPage() {
           </div>
           <div className="space-y-2">
             {displayedTasks.map(task => (
-              <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} />
+              <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} />
             ))}
             {displayedTasks.length === 0 && (
               <p className="text-gray-500 text-sm">No P{priorityFilter} tasks</p>
@@ -2544,7 +2816,7 @@ export default function TasksPage() {
           </p>
           <div className="space-y-2">
             {filteredDbTasks.filter(t => t.status === 'awaiting_clarification').map(task => (
-              <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} />
+              <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} />
             ))}
           </div>
         </div>
@@ -2562,7 +2834,7 @@ export default function TasksPage() {
           </p>
           <div className="space-y-2">
             {pendingInputTasks.slice(0, 5).map(task => (
-              <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} />
+              <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} />
             ))}
             {pendingInputTasks.length > 5 && (
               <p className="text-gray-500 text-sm text-center pt-2">
@@ -2585,7 +2857,7 @@ export default function TasksPage() {
           </p>
           <div className="space-y-2">
             {readyToActionTasks.map(task => (
-              <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} />
+              <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} />
             ))}
           </div>
         </div>
@@ -2603,7 +2875,7 @@ export default function TasksPage() {
           </p>
           <div className="space-y-2">
             {filteredDbTasks.filter(t => t.category === 'unsure').map(task => (
-              <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} />
+              <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} />
             ))}
           </div>
         </div>
@@ -2635,7 +2907,7 @@ export default function TasksPage() {
                 Completed setup tasks preserved for reference. These don&apos;t appear in active task counts.
               </p>
               {archivedTasks.map(task => (
-                <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} />
+                <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} />
               ))}
             </div>
           )}
@@ -2672,6 +2944,8 @@ export default function TasksPage() {
               business={business as any}
               dbTasks={allTasksGrouped}
               onRefetch={refetch}
+              userEmail={userEmail}
+              userIsAdmin={userIsAdmin}
             />
           ))}
         </div>
