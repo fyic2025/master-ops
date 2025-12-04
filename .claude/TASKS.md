@@ -673,6 +673,42 @@ Move to "Completed Tasks" section at bottom.
 - Schedule: Every 6 hours
 - Syncs: Unleashed sales orders → HubSpot deals
 
+
+
+---
+
+## Health Check Monitoring Notes
+
+**Status:** Live on ops.growthcohq.com/home/health (2025-12-04)
+
+**New Integrations Added:**
+| Integration | Business | Status | Notes |
+|-------------|----------|--------|-------|
+| Smartlead | Global | Degraded | API returning non-200 |
+| n8n | Global | Healthy | Automation platform |
+| GSC | Global | Degraded | Missing GOOGLE_CLIENT_ID/SECRET |
+| Gmail (GSuite) | Teelixir | Healthy | OAuth via vault |
+| Google Merchant | BOO | Degraded | Missing Google OAuth creds |
+| Teelixir Shopify | Teelixir | Healthy | Store access |
+| RHF WooCommerce | RHF | Degraded | Missing RHF_WOO_CONSUMER_SECRET |
+
+**Files Modified:**
+- `shared/libs/integrations/health/sync-health-checks.js` - Added new integration checks
+- `dashboard/src/app/(dashboard)/[business]/health/page.tsx` - Added integration/business name mappings
+- `dashboard/src/components/IntegrationStatus.tsx` - Added integration name mappings
+
+**To Fix Degraded Integrations:**
+1. **GSC & Google Merchant**: Add `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` to .env
+2. **RHF WooCommerce**: Add `RHF_WOO_CONSUMER_SECRET` to .env (get from vault)
+3. **Smartlead**: Check if API key is valid
+
+**Run Health Checks Manually:**
+```bash
+node shared/libs/integrations/health/sync-health-checks.js
+```
+
+**Git Commit:** a87798d
+
 ### Session 24d5e364 (2025-12-04 07:08 pm)
 - Exit reason: other
 - Pending tasks saved: 0
