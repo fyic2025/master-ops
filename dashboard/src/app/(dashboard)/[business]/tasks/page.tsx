@@ -1012,23 +1012,33 @@ function TaskCard({ task, onClarificationSubmit }: { task: Task, onClarification
     e.preventDefault()
     e.stopPropagation()
 
-    // Use comprehensive prompt for Claude Code planning
-    const text = generateClaudePrompt(task)
+    console.log('[Copy for Claude] Button clicked for task:', task.title)
 
-    const success = await copyTextToClipboard(text)
+    try {
+      // Use comprehensive prompt for Claude Code planning
+      const text = generateClaudePrompt(task)
+      console.log('[Copy for Claude] Generated prompt length:', text.length)
 
-    if (success) {
-      setCopied(true)
-      setCopyError(false)
-      setTimeout(() => setCopied(false), 2000)
-    } else {
+      const success = await copyTextToClipboard(text)
+      console.log('[Copy for Claude] Copy result:', success)
+
+      if (success) {
+        setCopied(true)
+        setCopyError(false)
+        setTimeout(() => setCopied(false), 2000)
+      } else {
+        setCopyError(true)
+        setTimeout(() => setCopyError(false), 3000)
+        // Show the text in a prompt so user can manually copy
+        const confirmed = window.confirm('Clipboard access failed. Click OK to see the text to copy manually.')
+        if (confirmed) {
+          alert(text.substring(0, 500) + '\n\n... (text truncated, full prompt is ' + text.length + ' characters)')
+        }
+      }
+    } catch (err) {
+      console.error('[Copy for Claude] Error:', err)
       setCopyError(true)
       setTimeout(() => setCopyError(false), 3000)
-      // Show the text in a prompt so user can manually copy
-      const confirmed = window.confirm('Clipboard access failed. Click OK to see the text to copy manually.')
-      if (confirmed) {
-        alert(text.substring(0, 500) + '\n\n... (text truncated, full prompt is ' + text.length + ' characters)')
-      }
     }
   }
 
