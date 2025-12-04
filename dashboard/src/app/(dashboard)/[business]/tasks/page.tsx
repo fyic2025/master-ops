@@ -20,7 +20,8 @@ import {
   Database,
   MessageSquare,
   Send,
-  Archive
+  Archive,
+  User
 } from 'lucide-react'
 import { getAllowedBusinesses, isAdmin } from '@/lib/user-permissions'
 
@@ -758,61 +759,99 @@ function getStatusBadge(status: Task['status']) {
   )
 }
 
+// Robust clipboard copy utility
+async function copyTextToClipboard(text: string): Promise<boolean> {
+  // Method 1: Modern Clipboard API (works in secure contexts)
+  if (navigator.clipboard && window.isSecureContext) {
+    try {
+      await navigator.clipboard.writeText(text)
+      return true
+    } catch (err) {
+      console.warn('Clipboard API failed, trying fallback:', err)
+    }
+  }
+
+  // Method 2: execCommand fallback (deprecated but widely supported)
+  try {
+    const textArea = document.createElement('textarea')
+    textArea.value = text
+    // Prevent scrolling to bottom
+    textArea.style.cssText = 'position:fixed;top:0;left:0;width:2em;height:2em;padding:0;border:none;outline:none;boxShadow:none;background:transparent;'
+    document.body.appendChild(textArea)
+    textArea.focus()
+    textArea.select()
+
+    // Try to copy
+    const success = document.execCommand('copy')
+    document.body.removeChild(textArea)
+
+    if (success) return true
+    console.warn('execCommand copy returned false')
+  } catch (err) {
+    console.warn('execCommand fallback failed:', err)
+  }
+
+  // Method 3: Selection API fallback
+  try {
+    const range = document.createRange()
+    const tempDiv = document.createElement('div')
+    tempDiv.textContent = text
+    tempDiv.style.cssText = 'position:fixed;top:-9999px;left:-9999px;'
+    document.body.appendChild(tempDiv)
+    range.selectNodeContents(tempDiv)
+    const selection = window.getSelection()
+    if (selection) {
+      selection.removeAllRanges()
+      selection.addRange(range)
+      const success = document.execCommand('copy')
+      selection.removeAllRanges()
+      document.body.removeChild(tempDiv)
+      if (success) return true
+    }
+  } catch (err) {
+    console.warn('Selection API fallback failed:', err)
+  }
+
+  return false
+}
+
 function TaskCard({ task, onClarificationSubmit }: { task: Task, onClarificationSubmit?: () => void }) {
   const [showDetails, setShowDetails] = useState(false)
   const [copied, setCopied] = useState(false)
   const [copiedResearch, setCopiedResearch] = useState(false)
+  const [copyError, setCopyError] = useState(false)
   const [clarificationResponse, setClarificationResponse] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
 
-  const copyToClipboard = async () => {
+  const copyToClipboard = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+
     // Use comprehensive prompt for Claude Code planning
     const text = generateClaudePrompt(task)
 
-    try {
-      // Try the modern clipboard API first
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(text)
-      } else {
-        // Fallback for older browsers or when clipboard API unavailable
-        const textArea = document.createElement('textarea')
-        textArea.value = text
-        textArea.style.position = 'fixed'
-        textArea.style.left = '-999999px'
-        textArea.style.top = '-999999px'
-        document.body.appendChild(textArea)
-        textArea.focus()
-        textArea.select()
-        document.execCommand('copy')
-        document.body.removeChild(textArea)
-      }
+    const success = await copyTextToClipboard(text)
+
+    if (success) {
       setCopied(true)
+      setCopyError(false)
       setTimeout(() => setCopied(false), 2000)
-    } catch (err) {
-      console.error('Failed to copy:', err)
-      // Still try the fallback
-      try {
-        const textArea = document.createElement('textarea')
-        textArea.value = text
-        textArea.style.position = 'fixed'
-        textArea.style.left = '-999999px'
-        textArea.style.top = '-999999px'
-        document.body.appendChild(textArea)
-        textArea.focus()
-        textArea.select()
-        document.execCommand('copy')
-        document.body.removeChild(textArea)
-        setCopied(true)
-        setTimeout(() => setCopied(false), 2000)
-      } catch (fallbackErr) {
-        console.error('Fallback copy failed:', fallbackErr)
-        alert('Failed to copy to clipboard. Please try again.')
+    } else {
+      setCopyError(true)
+      setTimeout(() => setCopyError(false), 3000)
+      // Show the text in a prompt so user can manually copy
+      const confirmed = window.confirm('Clipboard access failed. Click OK to see the text to copy manually.')
+      if (confirmed) {
+        alert(text.substring(0, 500) + '\n\n... (text truncated, full prompt is ' + text.length + ' characters)')
       }
     }
   }
 
-  const copyResearchPrompt = async () => {
+  const copyResearchPrompt = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+
     const text = `## Research Task: ${task.title}
 
 ${task.description}
@@ -831,42 +870,13 @@ ${task.source || 'Not specified'}
 
 After research, update this task in the dashboard with your findings.`
 
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(text)
-      } else {
-        const textArea = document.createElement('textarea')
-        textArea.value = text
-        textArea.style.position = 'fixed'
-        textArea.style.left = '-999999px'
-        textArea.style.top = '-999999px'
-        document.body.appendChild(textArea)
-        textArea.focus()
-        textArea.select()
-        document.execCommand('copy')
-        document.body.removeChild(textArea)
-      }
+    const success = await copyTextToClipboard(text)
+
+    if (success) {
       setCopiedResearch(true)
       setTimeout(() => setCopiedResearch(false), 2000)
-    } catch (err) {
-      console.error('Failed to copy research prompt:', err)
-      try {
-        const textArea = document.createElement('textarea')
-        textArea.value = text
-        textArea.style.position = 'fixed'
-        textArea.style.left = '-999999px'
-        textArea.style.top = '-999999px'
-        document.body.appendChild(textArea)
-        textArea.focus()
-        textArea.select()
-        document.execCommand('copy')
-        document.body.removeChild(textArea)
-        setCopiedResearch(true)
-        setTimeout(() => setCopiedResearch(false), 2000)
-      } catch (fallbackErr) {
-        console.error('Fallback copy failed:', fallbackErr)
-        alert('Failed to copy to clipboard. Please try again.')
-      }
+    } else {
+      alert('Failed to copy to clipboard. Please try again.')
     }
   }
 
@@ -941,9 +951,20 @@ After research, update this task in the dashboard with your findings.`
           )}
           <button
             onClick={copyToClipboard}
-            className="text-xs px-2 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded flex items-center gap-1 transition-colors"
+            className={`text-xs px-2 py-1 text-white rounded flex items-center gap-1 transition-colors ${
+              copyError
+                ? 'bg-red-600 hover:bg-red-500'
+                : copied
+                ? 'bg-green-600 hover:bg-green-500'
+                : 'bg-blue-600 hover:bg-blue-500'
+            }`}
           >
-            {copied ? (
+            {copyError ? (
+              <>
+                <AlertCircle className="w-3 h-3" />
+                Failed
+              </>
+            ) : copied ? (
               <>
                 <CheckCircle className="w-3 h-3" />
                 Copied!
@@ -1230,24 +1251,10 @@ function AddTaskModal({
 ## Instructions for Claude Code
 Add this task to the dashboard.`
 
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(taskData)
-      } else {
-        const textArea = document.createElement('textarea')
-        textArea.value = taskData
-        textArea.style.position = 'fixed'
-        textArea.style.left = '-999999px'
-        textArea.style.top = '-999999px'
-        document.body.appendChild(textArea)
-        textArea.focus()
-        textArea.select()
-        document.execCommand('copy')
-        document.body.removeChild(textArea)
-      }
+    const success = await copyTextToClipboard(taskData)
+    if (success) {
       alert('Task copied to clipboard!')
-    } catch (err) {
-      console.error('Failed to copy:', err)
+    } else {
       alert('Failed to copy to clipboard. Please try again.')
     }
   }
@@ -1436,6 +1443,7 @@ export default function TasksPage() {
   const [priorityFilter, setPriorityFilter] = useState<number | null>(null)
   const [showAllBusiness, setShowAllBusiness] = useState(false)
   const [showArchive, setShowArchive] = useState(false)
+  const [peterFilter, setPeterFilter] = useState(false)
   const { data: session } = useSession()
 
   // DEV: Allow ?viewAs=peter@teelixir.com to test other user views
@@ -1519,6 +1527,16 @@ export default function TasksPage() {
   const p3Count = activeTasks.filter(t => t.priority === 3 && t.status !== 'completed').length
   const p4Count = activeTasks.filter(t => t.priority === 4 && t.status !== 'completed').length
 
+  // Peter's tasks count and filter
+  const peterTasks = useMemo(() => {
+    return filteredDbTasks.filter(t => {
+      const createdBy = t.created_by?.toLowerCase() || ''
+      return createdBy === 'peter' || createdBy.includes('peter')
+    })
+  }, [filteredDbTasks])
+
+  const peterTasksCount = peterTasks.filter(t => t.status !== 'completed').length
+
   // Tasks needing planning (pending_input status or new db tasks without a plan)
   const pendingInputTasks = useMemo(() => {
     return filteredDbTasks.filter(t =>
@@ -1588,6 +1606,29 @@ export default function TasksPage() {
           )}
         </div>
         <div className="flex gap-2">
+          {/* Peter Filter Button */}
+          {peterTasksCount > 0 && (
+            <button
+              onClick={() => {
+                setPeterFilter(!peterFilter)
+                if (!peterFilter) setPriorityFilter(null) // Clear priority filter when enabling Peter filter
+              }}
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
+                peterFilter
+                  ? 'bg-amber-600 text-white hover:bg-amber-500'
+                  : 'bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 border border-amber-500/30'
+              }`}
+              title="Show tasks created by Peter"
+            >
+              <User className="w-4 h-4" />
+              Peter&apos;s Tasks
+              <span className={`text-xs px-1.5 py-0.5 rounded ${
+                peterFilter ? 'bg-amber-700' : 'bg-amber-500/30'
+              }`}>
+                {peterTasksCount}
+              </span>
+            </button>
+          )}
           <button
             onClick={() => {
               console.log('Refresh clicked, refetching...')
@@ -1672,8 +1713,41 @@ export default function TasksPage() {
         </button>
       </div>
 
+      {/* Peter Filter Results */}
+      {peterFilter && (
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-amber-400 font-medium flex items-center gap-2">
+              <User className="w-5 h-5" />
+              Peter&apos;s Tasks ({peterTasks.filter(t => t.status !== 'completed').length} active)
+            </h3>
+            <button
+              onClick={() => setPeterFilter(false)}
+              className="text-gray-400 hover:text-white text-sm flex items-center gap-1"
+            >
+              <X className="w-4 h-4" /> Close
+            </button>
+          </div>
+          <div className="space-y-2">
+            {peterTasks
+              .sort((a, b) => {
+                // Sort by status first (non-completed first), then by priority
+                if (a.status === 'completed' && b.status !== 'completed') return 1
+                if (a.status !== 'completed' && b.status === 'completed') return -1
+                return a.priority - b.priority
+              })
+              .map(task => (
+                <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} />
+              ))}
+            {peterTasks.length === 0 && (
+              <p className="text-gray-500 text-sm">No tasks from Peter found</p>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Priority Filter Results */}
-      {priorityFilter && displayedTasks && (
+      {priorityFilter && displayedTasks && !peterFilter && (
         <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-white font-medium">
@@ -1698,7 +1772,7 @@ export default function TasksPage() {
       )}
 
       {/* Awaiting Clarification Section - Tasks needing user input */}
-      {filteredDbTasks.filter(t => t.status === 'awaiting_clarification').length > 0 && (
+      {!peterFilter && filteredDbTasks.filter(t => t.status === 'awaiting_clarification').length > 0 && (
         <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-4">
           <h3 className="text-orange-400 font-medium mb-2 flex items-center gap-2">
             <MessageSquare className="w-5 h-5" />
@@ -1716,7 +1790,7 @@ export default function TasksPage() {
       )}
 
       {/* Pending Input Section - New tasks awaiting planning */}
-      {pendingInputTasks.length > 0 && (
+      {!peterFilter && pendingInputTasks.length > 0 && (
         <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
           <h3 className="text-yellow-400 font-medium mb-2 flex items-center gap-2">
             <Lightbulb className="w-5 h-5" />
@@ -1739,7 +1813,7 @@ export default function TasksPage() {
       )}
 
       {/* Ready to Action Section - Top 5 highest priority tasks */}
-      {readyToActionTasks.length > 0 && !priorityFilter && (
+      {!peterFilter && readyToActionTasks.length > 0 && !priorityFilter && (
         <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4">
           <h3 className="text-purple-400 font-medium mb-2 flex items-center gap-2">
             <CheckCircle className="w-5 h-5" />
@@ -1757,7 +1831,7 @@ export default function TasksPage() {
       )}
 
       {/* Needs Triage Section - tasks with "unsure" category */}
-      {filteredDbTasks.filter(t => t.category === 'unsure').length > 0 && (
+      {!peterFilter && filteredDbTasks.filter(t => t.category === 'unsure').length > 0 && (
         <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-4">
           <h3 className="text-orange-400 font-medium mb-3 flex items-center gap-2">
             <AlertCircle className="w-5 h-5" />
@@ -1775,7 +1849,7 @@ export default function TasksPage() {
       )}
 
       {/* Archive Section - Completed one-off tasks */}
-      {archivedTasks.length > 0 && (
+      {!peterFilter && archivedTasks.length > 0 && (
         <div className="bg-gray-800/30 border border-gray-700 rounded-lg">
           <button
             onClick={() => setShowArchive(!showArchive)}
@@ -1808,25 +1882,27 @@ export default function TasksPage() {
       )}
 
       {/* Show All Business Tasks Toggle */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-white">All Tasks by Business</h2>
-        <button
-          onClick={() => setShowAllBusiness(!showAllBusiness)}
-          className="text-sm text-gray-400 hover:text-white flex items-center gap-1"
-        >
-          {showAllBusiness ? (
-            <>
-              <ChevronDown className="w-4 h-4" /> Hide business breakdown
-            </>
-          ) : (
-            <>
-              <ChevronRight className="w-4 h-4" /> Show business breakdown
-            </>
-          )}
-        </button>
-      </div>
+      {!peterFilter && (
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-white">All Tasks by Business</h2>
+          <button
+            onClick={() => setShowAllBusiness(!showAllBusiness)}
+            className="text-sm text-gray-400 hover:text-white flex items-center gap-1"
+          >
+            {showAllBusiness ? (
+              <>
+                <ChevronDown className="w-4 h-4" /> Hide business breakdown
+              </>
+            ) : (
+              <>
+                <ChevronRight className="w-4 h-4" /> Show business breakdown
+              </>
+            )}
+          </button>
+        </div>
+      )}
 
-      {showAllBusiness && (
+      {!peterFilter && showAllBusiness && (
         <div className="space-y-4">
           {Object.entries(filteredFramework).map(([key, business]) => (
             <BusinessSection
