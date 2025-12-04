@@ -21,7 +21,34 @@ import {
   startSyncLog,
   completeSyncLog,
   isSupabaseAvailable,
+  getSupabaseClient,
 } from '../src/supabase.js'
+
+// Update dashboard job status
+async function updateDashboardJobStatus(
+  jobName: string,
+  business: string,
+  success: boolean,
+  errorMessage?: string
+) {
+  const client = getSupabaseClient()
+  if (!client) return
+
+  try {
+    const { error } = await client.rpc('update_job_status', {
+      p_job_name: jobName,
+      p_business: business,
+      p_last_run: new Date().toISOString(),
+      p_success: success,
+      p_error_message: errorMessage || null,
+    })
+    if (error) {
+      console.error(`Failed to update dashboard job status: ${error.message}`)
+    }
+  } catch (e) {
+    console.error(`Error updating dashboard job status: ${(e as Error).message}`)
+  }
+}
 
 // Parse command line arguments
 const args = process.argv.slice(2)
@@ -120,11 +147,27 @@ async function syncStoreOrders(storeName: string) {
       })
     }
 
+    // Update dashboard job status (teelixir-order-sync)
+    const hasFailures = failed > 0
+    await updateDashboardJobStatus(
+      `${storeName}-order-sync`,
+      storeName,
+      !hasFailures,
+      hasFailures ? `${failed} orders failed to sync` : undefined
+    )
+
   } catch (error) {
     console.error(`\n❌ Error: ${(error as Error).message}`)
     if (logId) {
       await completeSyncLog(logId, { items_processed: 0, items_succeeded: 0, items_failed: 1 }, undefined, (error as Error).message)
     }
+    // Update dashboard job status on error
+    await updateDashboardJobStatus(
+      `${storeName}-order-sync`,
+      storeName,
+      false,
+      (error as Error).message
+    )
   }
 }
 
