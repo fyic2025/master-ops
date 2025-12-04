@@ -404,12 +404,12 @@ function generateUpsellEmailHtml(
   })
 
   const formatPrice = (p: number) => `$${p.toFixed(2)}`
-  const formatPricePerGram = (p: number, unit: string) => `$${p.toFixed(2)}/${unit === 'caps' ? 'cap' : 'g'}`
+  const formatPricePerGram = (p: number, unit: string) => `$${p.toFixed(2)}/${unit === 'caps' ? 'cap' : 'gram'}`
 
   const orig = upsellData.original
   const ups = upsellData.upsell
   const unit = orig.size_unit === 'caps' ? 'capsules' : 'g'
-  const unitShort = orig.size_unit === 'caps' ? 'cap' : 'g'
+  const unitShort = orig.size_unit === 'caps' ? 'cap' : 'gram'
 
   // If customer already has largest size, show repeat purchase email
   if (upsellData.isLargestSize || !ups) {

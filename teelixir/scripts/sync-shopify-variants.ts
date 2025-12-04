@@ -50,6 +50,7 @@ interface ShopifyProduct {
     sku: string
     inventory_quantity: number
     inventory_management: string | null
+    inventory_policy: 'deny' | 'continue'
     image_id: number | null
   }>
 }
@@ -339,7 +340,10 @@ async function syncVariants(): Promise<SyncStats> {
         compare_at_price: variant.compare_at_price ? parseFloat(variant.compare_at_price) : null,
         image_url: imageUrl,
         inventory_quantity: variant.inventory_quantity || 0,
-        is_available: variant.inventory_quantity > 0 || variant.inventory_management === null
+        // Available if: in stock, OR no inventory tracking, OR "continue selling when out of stock"
+        is_available: variant.inventory_quantity > 0 ||
+                      variant.inventory_management === null ||
+                      variant.inventory_policy === 'continue'
       }
 
       variantsToUpsert.push(variantRecord)
