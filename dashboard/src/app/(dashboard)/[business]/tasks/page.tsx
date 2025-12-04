@@ -134,6 +134,13 @@ interface Task {
   clarification_request?: string // Question from Claude needing answer
   clarification_response?: string // Response from task creator
   task_type?: 'one_off' | 'recurring' | 'ongoing' | null // Task type for filtering
+  // Task assignment and feedback fields
+  assigned_to?: string // Email of assigned contractor
+  time_on_task_mins?: number // Time spent in minutes
+  completion_notes?: string // Feedback notes from assignee
+  completion_screenshot_url?: string // Screenshot proof URL
+  assigned_at?: string // When task was assigned
+  completed_at?: string // When task was completed
 }
 
 // Skills mapping for each category
@@ -815,6 +822,180 @@ async function copyTextToClipboard(text: string): Promise<boolean> {
   return false
 }
 
+// Simplified task card for Rajani to update status, time, notes
+function RajaniTaskCard({ task, onUpdate }: { task: Task, onUpdate: () => void }) {
+  const [status, setStatus] = useState(task.status)
+  const [timeSpent, setTimeSpent] = useState(task.time_on_task_mins || 0)
+  const [notes, setNotes] = useState(task.completion_notes || '')
+  const [screenshotUrl, setScreenshotUrl] = useState(task.completion_screenshot_url || '')
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+  const [saved, setSaved] = useState(false)
+
+  const handleSave = async () => {
+    setSaving(true)
+    setError('')
+    setSaved(false)
+
+    try {
+      const updates: Record<string, any> = {
+        status,
+        time_on_task_mins: timeSpent,
+        completion_notes: notes,
+        updated_by: 'rajani'
+      }
+
+      if (screenshotUrl) {
+        updates.completion_screenshot_url = screenshotUrl
+      }
+
+      if (status === 'completed' && task.status !== 'completed') {
+        updates.completed_at = new Date().toISOString()
+      }
+
+      const response = await fetch(`/api/tasks/${task.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to update task')
+      }
+
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2000)
+      onUpdate()
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const priorityColors: Record<number, string> = {
+    1: 'bg-red-500/20 text-red-400 border-red-500/30',
+    2: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
+    3: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
+    4: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
+  }
+
+  const statusIcons: Record<string, JSX.Element> = {
+    pending: <Circle className="w-4 h-4 text-gray-400" />,
+    in_progress: <Clock className="w-4 h-4 text-blue-400" />,
+    completed: <CheckCircle className="w-4 h-4 text-green-400" />,
+    blocked: <AlertCircle className="w-4 h-4 text-red-400" />,
+  }
+
+  return (
+    <div className="bg-gray-800 border border-gray-700 rounded-lg p-4">
+      {/* Task header */}
+      <div className="flex items-start gap-3 mb-4">
+        {statusIcons[status] || <Circle className="w-4 h-4 text-gray-400" />}
+        <div className="flex-1">
+          <h3 className="text-white font-medium">{task.title}</h3>
+          {task.description && (
+            <p className="text-gray-400 text-sm mt-1">{task.description}</p>
+          )}
+          <div className="flex gap-2 mt-2">
+            <span className={`text-xs px-2 py-0.5 rounded border ${priorityColors[task.priority]}`}>
+              P{task.priority}
+            </span>
+            <span className="text-xs text-gray-500">
+              {task.business}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Instructions section */}
+      {task.instructions && (
+        <div className="bg-gray-900 rounded p-3 mb-4">
+          <p className="text-xs text-gray-500 mb-1">Instructions</p>
+          <pre className="text-sm text-gray-300 whitespace-pre-wrap font-sans">
+            {task.instructions}
+          </pre>
+        </div>
+      )}
+
+      {/* Status and feedback inputs */}
+      <div className="space-y-3">
+        <div>
+          <label className="text-sm text-gray-400 block mb-1">Status</label>
+          <select
+            value={status}
+            onChange={(e) => setStatus(e.target.value as Task['status'])}
+            className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white"
+          >
+            <option value="pending">Pending</option>
+            <option value="in_progress">In Progress</option>
+            <option value="completed">Completed</option>
+            <option value="blocked">Blocked</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="text-sm text-gray-400 block mb-1">
+            Time Spent (minutes)
+          </label>
+          <input
+            type="number"
+            value={timeSpent}
+            onChange={(e) => setTimeSpent(parseInt(e.target.value) || 0)}
+            min={0}
+            className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white"
+          />
+        </div>
+
+        <div>
+          <label className="text-sm text-gray-400 block mb-1">
+            Notes / Feedback
+          </label>
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            rows={3}
+            placeholder="What was done? Any issues encountered?"
+            className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white"
+          />
+        </div>
+
+        <div>
+          <label className="text-sm text-gray-400 block mb-1">
+            Screenshot URL (optional)
+          </label>
+          <input
+            type="url"
+            value={screenshotUrl}
+            onChange={(e) => setScreenshotUrl(e.target.value)}
+            placeholder="https://..."
+            className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white"
+          />
+        </div>
+
+        {error && (
+          <div className="text-red-400 text-sm bg-red-500/10 px-3 py-2 rounded">
+            {error}
+          </div>
+        )}
+
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className={`w-full py-2 rounded font-medium transition-colors ${
+            saved
+              ? 'bg-green-600 text-white'
+              : 'bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-50'
+          }`}
+        >
+          {saving ? 'Saving...' : saved ? 'Saved!' : 'Save Changes'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 function TaskCard({ task, onClarificationSubmit }: { task: Task, onClarificationSubmit?: () => void }) {
   const [showDetails, setShowDetails] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -1444,6 +1625,7 @@ export default function TasksPage() {
   const [showAllBusiness, setShowAllBusiness] = useState(false)
   const [showArchive, setShowArchive] = useState(false)
   const [peterFilter, setPeterFilter] = useState(false)
+  const [rajaniFilter, setRajaniFilter] = useState(false)
   const { data: session } = useSession()
 
   // DEV: Allow ?viewAs=peter@teelixir.com to test other user views
@@ -1537,6 +1719,18 @@ export default function TasksPage() {
 
   const peterTasksCount = peterTasks.filter(t => t.status !== 'completed').length
 
+  // Rajani's assigned tasks
+  const rajaniTasks = useMemo(() => {
+    return filteredDbTasks.filter(t =>
+      t.assigned_to?.toLowerCase() === 'rajani@teelixir.com'
+    )
+  }, [filteredDbTasks])
+
+  const rajaniTasksCount = rajaniTasks.filter(t => t.status !== 'completed').length
+
+  // Check if current user is Rajani for simplified view
+  const isRajaniView = userEmail?.toLowerCase() === 'rajani@teelixir.com'
+
   // Tasks needing planning (pending_input status or new db tasks without a plan)
   const pendingInputTasks = useMemo(() => {
     return filteredDbTasks.filter(t =>
@@ -1576,6 +1770,82 @@ export default function TasksPage() {
 
   // Check if viewing as Peter for custom header
   const isPeterView = userEmail?.toLowerCase().includes('peter')
+
+  // Rajani's simplified view - show only her assigned tasks
+  if (isRajaniView) {
+    const activeRajaniTasks = rajaniTasks.filter(t => t.status !== 'completed')
+    const completedRajaniTasks = rajaniTasks.filter(t => t.status === 'completed')
+
+    return (
+      <div className="space-y-6">
+        <header className="flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+              <ClipboardList className="w-8 h-8 text-teal-400" />
+              My Tasks
+            </h1>
+            <p className="text-gray-400 mt-1">
+              {activeRajaniTasks.length} active task{activeRajaniTasks.length !== 1 ? 's' : ''}
+            </p>
+          </div>
+          <button
+            onClick={() => refetch()}
+            disabled={isLoading}
+            className="flex items-center gap-2 px-3 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 disabled:opacity-50"
+          >
+            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+          </button>
+        </header>
+
+        {/* Active Tasks */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-medium text-white">Active Tasks</h2>
+          {activeRajaniTasks.length > 0 ? (
+            activeRajaniTasks
+              .sort((a, b) => a.priority - b.priority)
+              .map(task => (
+                <RajaniTaskCard key={task.id} task={task} onUpdate={refetch} />
+              ))
+          ) : (
+            <div className="text-center py-8 text-gray-500 bg-gray-800/50 rounded-lg">
+              No active tasks assigned. Check back later!
+            </div>
+          )}
+        </div>
+
+        {/* Completed Tasks */}
+        {completedRajaniTasks.length > 0 && (
+          <div className="border-t border-gray-700 pt-6">
+            <h2 className="text-lg font-medium text-gray-300 mb-4">
+              Completed Tasks ({completedRajaniTasks.length})
+            </h2>
+            <div className="space-y-2">
+              {completedRajaniTasks.slice(0, 5).map(task => (
+                <div key={task.id} className="bg-gray-800/50 rounded p-3 text-sm text-gray-400">
+                  <span className="text-green-400 mr-2">✓</span>
+                  {task.title}
+                  {task.time_on_task_mins && task.time_on_task_mins > 0 && (
+                    <span className="ml-2 text-gray-500">({task.time_on_task_mins} mins)</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Suggest Task Button - will be implemented with suggestions API */}
+        <div className="border-t border-gray-700 pt-6">
+          <button
+            onClick={() => alert('Suggestion feature coming soon! For now, contact Jayson directly with your automation ideas.')}
+            className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-500"
+          >
+            <Lightbulb className="w-4 h-4" />
+            Suggest Task for Automation
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -1626,6 +1896,32 @@ export default function TasksPage() {
                 peterFilter ? 'bg-amber-700' : 'bg-amber-500/30'
               }`}>
                 {peterTasksCount}
+              </span>
+            </button>
+          )}
+          {/* Rajani Filter Button - visible to admins */}
+          {userIsAdmin && rajaniTasksCount > 0 && (
+            <button
+              onClick={() => {
+                setRajaniFilter(!rajaniFilter)
+                if (!rajaniFilter) {
+                  setPriorityFilter(null)
+                  setPeterFilter(false)
+                }
+              }}
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
+                rajaniFilter
+                  ? 'bg-teal-600 text-white hover:bg-teal-500'
+                  : 'bg-teal-500/20 text-teal-400 hover:bg-teal-500/30 border border-teal-500/30'
+              }`}
+              title="Show tasks assigned to Rajani"
+            >
+              <User className="w-4 h-4" />
+              Rajani&apos;s Tasks
+              <span className={`text-xs px-1.5 py-0.5 rounded ${
+                rajaniFilter ? 'bg-teal-700' : 'bg-teal-500/30'
+              }`}>
+                {rajaniTasksCount}
               </span>
             </button>
           )}
@@ -1746,8 +2042,68 @@ export default function TasksPage() {
         </div>
       )}
 
+      {/* Rajani Filter Results */}
+      {rajaniFilter && (
+        <div className="bg-teal-500/10 border border-teal-500/30 rounded-lg p-4">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-teal-400 font-medium flex items-center gap-2">
+              <User className="w-5 h-5" />
+              Rajani&apos;s Tasks ({rajaniTasks.filter(t => t.status !== 'completed').length} active)
+            </h3>
+            <button
+              onClick={() => setRajaniFilter(false)}
+              className="text-gray-400 hover:text-white text-sm flex items-center gap-1"
+            >
+              <X className="w-4 h-4" /> Close
+            </button>
+          </div>
+          <div className="space-y-3">
+            {rajaniTasks
+              .sort((a, b) => {
+                if (a.status === 'completed' && b.status !== 'completed') return 1
+                if (a.status !== 'completed' && b.status === 'completed') return -1
+                return a.priority - b.priority
+              })
+              .map(task => (
+                <div key={task.id} className="bg-gray-800/50 rounded-lg p-3">
+                  <TaskCard task={task} onClarificationSubmit={refetch} />
+                  {/* Show completion feedback for admins */}
+                  {task.status === 'completed' && (task.completion_notes || task.time_on_task_mins) && (
+                    <div className="mt-2 pt-2 border-t border-gray-700 text-sm space-y-1">
+                      {task.time_on_task_mins && task.time_on_task_mins > 0 && (
+                        <p className="text-gray-400 flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          Time: {task.time_on_task_mins} mins
+                        </p>
+                      )}
+                      {task.completion_notes && (
+                        <p className="text-gray-400">
+                          <span className="text-gray-500">Notes:</span> {task.completion_notes}
+                        </p>
+                      )}
+                      {task.completion_screenshot_url && (
+                        <a
+                          href={task.completion_screenshot_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-teal-400 hover:underline text-xs inline-block"
+                        >
+                          View Screenshot
+                        </a>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+            {rajaniTasks.length === 0 && (
+              <p className="text-gray-500 text-sm">No tasks assigned to Rajani</p>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Priority Filter Results */}
-      {priorityFilter && displayedTasks && !peterFilter && (
+      {priorityFilter && displayedTasks && !peterFilter && !rajaniFilter && (
         <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-white font-medium">

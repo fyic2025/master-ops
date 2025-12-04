@@ -9,6 +9,83 @@ import * as crypto from 'crypto'
 import { getStoreConfig } from './config.js'
 
 // ============================================================================
+// Date Helpers (Unleashed uses /Date(timestamp)/ format)
+// ============================================================================
+
+/**
+ * Convert Unleashed date format to ISO string
+ */
+function convertUnleashedDate(dateStr: string | undefined): string | undefined {
+  if (!dateStr) return undefined
+  const match = dateStr.match(/\/Date\((\d+)\)\//)
+  if (match) {
+    return new Date(parseInt(match[1])).toISOString()
+  }
+  return dateStr
+}
+
+/**
+ * Clean order lines for API submission (convert dates, include LineTotal)
+ */
+function cleanOrderLinesForUpdate(lines: SalesOrderLine[]): Partial<SalesOrderLine>[] {
+  return lines.map(line => ({
+    Guid: line.Guid,
+    LineNumber: line.LineNumber,
+    LineType: line.LineType,
+    Product: {
+      Guid: line.Product.Guid,
+      ProductCode: line.Product.ProductCode,
+    },
+    OrderQuantity: line.OrderQuantity,
+    UnitPrice: line.UnitPrice,
+    DiscountRate: line.DiscountRate || 0,
+    LineTotal: line.LineTotal,
+    Comments: line.Comments,
+    DueDate: convertUnleashedDate(line.DueDate),
+  }))
+}
+
+/**
+ * Recursively clean dates in an object (convert /Date(xxx)/ to ISO format)
+ */
+function cleanDatesInObject(obj: any): any {
+  if (obj === null || obj === undefined) return obj
+  if (typeof obj === 'string') {
+    const match = obj.match(/\/Date\((\d+)\)\//)
+    if (match) return new Date(parseInt(match[1])).toISOString()
+    return obj
+  }
+  if (Array.isArray(obj)) return obj.map(cleanDatesInObject)
+  if (typeof obj === 'object') {
+    const cleaned: any = {}
+    for (const [key, value] of Object.entries(obj)) {
+      // Skip LastModifiedOn fields entirely - they cause issues
+      if (key === 'LastModifiedOn') continue
+      cleaned[key] = cleanDatesInObject(value)
+    }
+    return cleaned
+  }
+  return obj
+}
+
+/**
+ * Prepare full order payload for update - sends complete order with cleaned dates
+ */
+function prepareOrderForUpdate(order: SalesOrder, newLines: SalesOrderLine[]): Partial<SalesOrder> {
+  // Calculate new subtotal from line totals
+  const subTotal = newLines.reduce((sum, line) => sum + (line.LineTotal || 0), 0)
+  const roundedSubTotal = Math.round(subTotal * 100) / 100
+
+  // Clone and clean the entire order, then update lines and totals
+  const cleaned = cleanDatesInObject(order) as SalesOrder
+  cleaned.SalesOrderLines = cleanOrderLinesForUpdate(newLines) as SalesOrderLine[]
+  cleaned.SubTotal = roundedSubTotal
+  cleaned.Total = roundedSubTotal
+
+  return cleaned
+}
+
+// ============================================================================
 // Types
 // ============================================================================
 
@@ -254,7 +331,9 @@ export class UnleashedClient {
    * Note: Must include Guid in the order object
    */
   async updateSalesOrder(order: Partial<SalesOrder> & { Guid: string }): Promise<SalesOrder> {
-    return this.request<SalesOrder>('POST', `SalesOrders/${order.Guid}`, '', order)
+    // POST with Guid in body should update existing order (per Unleashed docs)
+    // PUT creates new entities, POST updates when Guid is provided
+    return this.request<SalesOrder>('POST', 'SalesOrders', '', order)
   }
 
   /**
@@ -305,22 +384,21 @@ export class UnleashedClient {
       throw new Error(`Order not found: ${orderNumberOrGuid}`)
     }
 
-    // Add new line to existing lines
+    // Add new line to existing lines (calculate LineTotal)
     const newLine: SalesOrderLine = {
       Product: {
         ProductCode: line.productCode,
       },
       OrderQuantity: line.quantity,
       UnitPrice: line.unitPrice,
+      DiscountRate: 0,
+      LineTotal: Math.round(line.quantity * line.unitPrice * 100) / 100,
       Comments: line.comments,
     }
 
     order.SalesOrderLines.push(newLine)
 
-    return this.updateSalesOrder({
-      Guid: order.Guid,
-      SalesOrderLines: order.SalesOrderLines,
-    })
+    return this.updateSalesOrder(prepareOrderForUpdate(order, order.SalesOrderLines) as SalesOrder)
   }
 
   /**
@@ -346,10 +424,7 @@ export class UnleashedClient {
       throw new Error(`Product not found in order: ${productCode}`)
     }
 
-    return this.updateSalesOrder({
-      Guid: order.Guid,
-      SalesOrderLines: filteredLines,
-    })
+    return this.updateSalesOrder(prepareOrderForUpdate(order, filteredLines) as SalesOrder)
   }
 
   /**
@@ -376,12 +451,13 @@ export class UnleashedClient {
       throw new Error(`Product not found in order: ${productCode}`)
     }
 
+    // Update quantity and recalculate line total
+    const discountRate = line.DiscountRate || 0
+    const discountedUnitPrice = Math.round(line.UnitPrice * (1 - discountRate) * 10000) / 10000
     line.OrderQuantity = newQuantity
+    line.LineTotal = Math.round(newQuantity * discountedUnitPrice * 100) / 100
 
-    return this.updateSalesOrder({
-      Guid: order.Guid,
-      SalesOrderLines: order.SalesOrderLines,
-    })
+    return this.updateSalesOrder(prepareOrderForUpdate(order, order.SalesOrderLines) as SalesOrder)
   }
 
   // ==========================================================================

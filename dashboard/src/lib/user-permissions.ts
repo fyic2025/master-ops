@@ -55,6 +55,14 @@ export const USER_PERMISSIONS: UserPermissions[] = [
     businesses: ['boo', 'teelixir', 'elevate'],  // All shipping businesses
     allowedPages: ['/shipping', '/livechat', ''],  // Dashboard, Shipping, LiveChat
   },
+
+  // Contractors - task execution and feedback
+  {
+    email: 'rajani@teelixir.com',
+    role: 'operations',
+    businesses: ['teelixir', 'elevate'],
+    allowedPages: ['/tasks', '/automations', ''],  // Dashboard, Tasks, Automations
+  },
 ]
 
 /**

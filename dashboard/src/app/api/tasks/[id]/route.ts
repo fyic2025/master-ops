@@ -71,7 +71,10 @@ export async function PATCH(
       'plan_json', 'current_step', 'supervisor_summary',
       'supervisor_recommendation', 'repair_instruction',
       'retry_count', 'next_action_after',
-      'clarification_request', 'clarification_response'
+      'clarification_request', 'clarification_response',
+      // Task assignment and feedback fields
+      'assigned_to', 'time_on_task_mins', 'completion_notes',
+      'completion_screenshot_url', 'assigned_at', 'completed_at'
     ]
 
     for (const field of allowedFields) {
@@ -123,6 +126,26 @@ export async function PATCH(
         source: body.updated_by || 'user',
         status: 'info',
         message: `Clarification provided: ${body.clarification_response.slice(0, 200)}${body.clarification_response.length > 200 ? '...' : ''}`,
+      })
+    }
+
+    // Log task assignment
+    if (body.assigned_to) {
+      await supabase.from('task_logs').insert({
+        task_id: id,
+        source: body.updated_by || 'dashboard',
+        status: 'info',
+        message: `Task assigned to: ${body.assigned_to}`,
+      })
+    }
+
+    // Log completion with feedback
+    if (body.status === 'completed' && body.completion_notes) {
+      await supabase.from('task_logs').insert({
+        task_id: id,
+        source: body.updated_by || 'assignee',
+        status: 'success',
+        message: `Completed. Time: ${body.time_on_task_mins || 0} mins. Notes: ${body.completion_notes?.slice(0, 100)}${(body.completion_notes?.length || 0) > 100 ? '...' : ''}`,
       })
     }
 

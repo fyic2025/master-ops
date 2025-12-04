@@ -9,7 +9,12 @@
     "inventory-sync": "npx tsx scripts/run-inventory-sync.ts",
     "order-sync": "npx tsx scripts/run-order-sync.ts",
     "full-sync": "npx tsx scripts/run-full-sync.ts",
-    "test-connection": "npx tsx scripts/test-connection.ts"
+    "test-connection": "npx tsx scripts/test-connection.ts",
+    "unleashed": "npx tsx src/unleashed-cli.ts",
+    "u": "npx tsx src/unleashed-cli.ts",
+    "u:get": "npx tsx src/unleashed-cli.ts get",
+    "u:list": "npx tsx src/unleashed-cli.ts list",
+    "u:status": "npx tsx src/unleashed-cli.ts status"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.86.0",

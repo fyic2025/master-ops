@@ -3,6 +3,7 @@
  * Unleashed CLI
  *
  * Command-line interface for managing Unleashed sales orders
+ * Now with Supabase storage for edit-then-sync workflow
  *
  * Usage:
  *   npx tsx src/unleashed-cli.ts <command> [options]
@@ -18,9 +19,17 @@
  *   customer <code>          Get customer details
  *   product <code>           Get product details
  *   search-products <query>  Search products
+ *
+ * Store Commands (Supabase):
+ *   pull <order>             Pull order from Unleashed to Supabase
+ *   edit <order>             Show stored order for editing
+ *   edit-remove <order> <product>    Remove line in Supabase
+ *   edit-qty <order> <product> <qty> Update qty in Supabase
+ *   push <order>             Push edited order to Unleashed (delete+create)
  */
 
 import { UnleashedClient, printOrder, formatCurrency, parseUnleashedDate, formatDate } from './unleashed-api.js'
+import { OrderStore } from './order-store.js'
 
 const STORE = process.env.UNLEASHED_STORE || 'teelixir'
 
@@ -45,18 +54,31 @@ Commands:
   search-products <query>               Search products
   stock <product-code>                  Check stock levels
 
+Store Commands (edit in Supabase, push to Unleashed):
+  pull <order>                          Pull order from Unleashed → Supabase
+  edit <order>                          Show order from Supabase
+  edit-remove <order> <product>         Remove line in Supabase
+  edit-qty <order> <product> <qty>      Update qty in Supabase
+  push <order>                          Push to Unleashed (delete old + create new)
+
 Options:
   --store=<name>                        Store to use (teelixir|elevate), default: teelixir
   --json                                Output raw JSON
 
 Environment:
   UNLEASHED_STORE                       Default store (teelixir|elevate)
+  SUPABASE_SERVICE_KEY                  Supabase service key (for store commands)
 
 Examples:
+  # Direct Unleashed operations:
   npx tsx src/unleashed-cli.ts get SO-00002264
-  npx tsx src/unleashed-cli.ts status SO-00002264 Open
-  npx tsx src/unleashed-cli.ts add-line SO-00002264 REI-250 1 45.00 "Free sample"
   npx tsx src/unleashed-cli.ts list --status=Parked --days=7
+
+  # Edit workflow (stores in Supabase, then syncs):
+  npm run u pull SO-00002264              # Pull to Supabase
+  npm run u edit-remove SO-00002264 PP-50 # Remove line locally
+  npm run u edit-qty SO-00002264 PLIO-100 1  # Change qty locally
+  npm run u push SO-00002264              # Push changes to Unleashed
 `)
 }
 

@@ -101,7 +101,9 @@
       "Bash(powershell \"Start-Sleep -Seconds 120; doctl apps list-deployments 1a0eed70-aef6-415e-953f-d2b7f0c7c832 --format ID,Phase,Progress --no-header 2>&1 | Select-Object -First 1\")",
       "Bash(git status:*)",
       "Bash(del c:Usersjaysomaster-opstemp-test-copy.js)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(ls:*)",
+      "Bash(powershell \"Get-Content ''c:/Users/jayso/master-ops/infra/supabase/migrations/20251204_unleashed_orders.sql'' | Set-Clipboard\")"
     ],
     "deny": [],
     "ask": []
