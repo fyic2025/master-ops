@@ -95,7 +95,8 @@
       "Bash(nslookup:*)",
       "Bash(git restore:*)",
       "Bash(powershell \"Start-Sleep -Seconds 60; doctl apps list-deployments 1a0eed70-aef6-415e-953f-d2b7f0c7c832 --format ID,Phase,Progress --no-header 2>&1 | Select-Object -First 1\")",
-      "Bash(powershell \"Start-Sleep -Seconds 90; doctl apps list-deployments 1a0eed70-aef6-415e-953f-d2b7f0c7c832 --format ID,Phase,Progress --no-header 2>&1 | Select-Object -First 1\")"
+      "Bash(powershell \"Start-Sleep -Seconds 90; doctl apps list-deployments 1a0eed70-aef6-415e-953f-d2b7f0c7c832 --format ID,Phase,Progress --no-header 2>&1 | Select-Object -First 1\")",
+      "Bash(powershell -Command:*)"
     ],
     "deny": [],
     "ask": []
