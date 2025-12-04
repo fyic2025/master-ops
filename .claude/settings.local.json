@@ -120,7 +120,10 @@
       "Skill(supabase-expert)",
       "Bash(powershell \"Get-Content ''c:/Users/jayso/master-ops/infra/supabase/migrations/20251204_cashflow_schema.sql'' | Set-Clipboard\")",
       "Bash(git diff:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(del \"c:\\Users\\jayso\\master-ops\\temp-orders.json\" \"c:\\Users\\jayso\\master-ops\\temp-analyze-orders.js\" \"c:\\Users\\jayso\\master-ops\\temp-sku-analysis.js\" \"c:\\Users\\jayso\\master-ops\\temp-test-unleashed.js\" \"c:\\Users\\jayso\\master-ops\\temp-test-unleashed2.js\")",
+      "Bash(cmd /c del:*)",
+      "Bash(powershell \"Get-Content ''c:/Users/jayso/master-ops/infra/supabase/migrations/20251203_automation_execution_logs.sql'' | Set-Clipboard\")"
     ],
     "deny": [],
     "ask": []
