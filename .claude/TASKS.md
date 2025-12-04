@@ -1,6 +1,6 @@
 # Master Operations Task Framework
 
-> **Last Updated:** 2025-12-04
+> **Last Updated:** 2025-12-05
 > **Usage:** Reference this file when starting a new Claude Code session. Say "what's next" to review priorities.
 
 ---
@@ -27,6 +27,47 @@ Cross-business initiatives that take precedence.
 - [ ] **P2** Build task API endpoints for CRUD operations
 - [ ] **P2** Connect Tasks UI to Supabase backend
 - [ ] **P3** Add task creation form in dashboard
+
+### Shipping Labels (Branch: shipping-label-launch-plan)
+> Shipping label system launch for BOO, Teelixir, Elevate - 75% complete
+
+- [ ] **P1** Deploy shipping database migration to Supabase projects
+- [ ] **P1** Configure AusPost API credentials in DO App Platform
+- [ ] **P1** Confirm/update warehouse sender addresses
+- [ ] **P2** Test order sync from all platforms (BOO, Teelixir, Elevate)
+- [ ] **P2** Test label creation and Zebra printing
+- [ ] **P2** Deploy and verify production environment
+
+### Accounting Dashboard (Branch: accounting-dashboard-plan)
+> Full bookkeeping automation - All 4 businesses use Xero
+
+- [ ] **P2** Get BOO Xero tenant OAuth credentials
+- [ ] **P2** Get RHF Xero tenant OAuth credentials
+- [ ] **P2** Create Accounting tab in dashboard (/home/accounting)
+- [ ] **P3** Build AP automation: email invoice ingestion → Xero bills
+- [ ] **P3** Build bank reconciliation: auto-match transactions
+- [ ] **P3** Build AR automation: overdue invoice follow-up
+
+### Inventory Management (Branch: inventory-dashboard-setup)
+> Unleashed inventory replacement - Code ready to merge
+
+- [ ] **P2** Review and merge inventory dashboard implementation
+- [ ] **P2** Deploy inventory migration: `20251204_inventory_management.sql`
+- [ ] **P2** Test Teelixir Shopify inventory sync
+
+### Ordering Dashboard (Branch: restore-ordering-dashboard)
+> Teelixir production planning from legacy FYIC portal
+
+- [ ] **P3** Deploy ordering dashboard migration
+- [ ] **P3** Build Unleashed data sync API routes
+- [ ] **P3** Create Stock Analysis, BOM, Stock Needs views
+
+### Voice AI Integration (Branch: voice-ai-integration-plan)
+> Ultra-low latency (<200ms) Voice AI for calls
+
+- [ ] **P4** Evaluate Telnyx Sydney vs OpenAI Realtime API
+- [ ] **P4** Build Voice AI tab in dashboard
+- [ ] **P4** Implement inbound/outbound call handling
 
 ### Migration
 > Platform migrations and major infrastructure changes
@@ -768,5 +809,9 @@ node shared/libs/integrations/health/sync-health-checks.js
 - Pending tasks saved: 0
 
 ### Session a6f9a682 (2025-12-04 09:03 am)
+- Exit reason: other
+- Pending tasks saved: 0
+
+### Session 5f6a0b22 (2025-12-04 09:08 am)
 - Exit reason: other
 - Pending tasks saved: 0
