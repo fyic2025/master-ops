@@ -1,18 +1,160 @@
 # Voice AI Integration Plan
 
 **Created:** 2024-12-04
+**Updated:** 2024-12-04 (Ultra-Low Latency Revision)
 **Status:** Planning
 **Target:** Dashboard integration with Voice AI tab
+**Location:** Melbourne, Australia
 
 ---
 
 ## Executive Summary
 
 This document outlines a step-by-step implementation plan for integrating Voice AI capabilities into the master-ops dashboard. The focus is on:
-- **Lowest cost** (~$0.03/minute target vs industry standard $0.10/minute)
-- **Lowest latency** (<500ms response time)
+- **Ultra-low latency** (<200ms response time - human conversation speed)
+- **Lowest cost** (~$0.03-0.05/minute target vs industry standard $0.10/minute)
 - **Highest quality** (natural-sounding voices)
 - **Both inbound and outbound** call capabilities
+- **Australian infrastructure** (Sydney PoP for Melbourne calls)
+
+---
+
+## ⚡ CRITICAL: Ultra-Low Latency Requirements
+
+### Why 500ms is Too Slow
+
+| Latency | Experience |
+|---------|------------|
+| **150-200ms** | Human conversation speed (natural) |
+| **232ms** | GPT-4o average response time |
+| **300ms** | Noticeable but acceptable |
+| **500ms** | Feels laggy, unnatural |
+| **800ms+** | Frustrating, robotic |
+
+**ITU-T Recommendation:** 100-150ms one-way latency for interactive voice.
+
+### Australia-Specific Challenge
+
+Network latency from Melbourne to:
+- US West Coast: ~150-180ms
+- US East Coast: ~200-250ms
+- Singapore: ~80-100ms
+- Sydney: ~10-20ms
+
+**Solution:** Use infrastructure with Australian presence.
+
+---
+
+## 🏆 RECOMMENDED: Telnyx Full-Stack Voice AI (Sydney)
+
+### Why Telnyx is the Best Choice for Australia
+
+**Telnyx deployed GPUs in Sydney in October 2025** specifically for Voice AI:
+- Sub-200ms round-trip time (RTT)
+- GPU inference co-located with telephony PoP
+- Zero external API calls (everything on private network)
+- Australian data sovereignty compliance
+- Licensed carrier in Australia
+
+### Architecture
+
+```
+Melbourne User ──[10-20ms]──▶ Telnyx Sydney PoP
+                                    │
+                              ┌─────┴─────┐
+                              │ Co-located │
+                              │   GPUs     │
+                              ├───────────┤
+                              │ STT (50ms)│
+                              │ LLM (80ms)│
+                              │ TTS (40ms)│
+                              └─────┬─────┘
+                                    │
+                              Total: <200ms RTT
+```
+
+### Telnyx Pricing (Estimated)
+
+| Component | Cost |
+|-----------|------|
+| Voice AI Agent | ~$0.05-0.08/min (bundled) |
+| Australian Phone Number | ~$5-10/month |
+| Inbound calls | ~$0.015/min |
+| Outbound calls (AU) | ~$0.02/min |
+
+**Contact Telnyx for exact AU pricing and volume discounts.**
+
+---
+
+## 🚀 ALTERNATIVE: OpenAI Realtime API (GPT-4o Voice)
+
+### Why Consider OpenAI Realtime API
+
+OpenAI's Realtime API provides **speech-to-speech** in a single model:
+- **232ms average latency** (matches human response time)
+- **<200ms** with gpt-4o-realtime-preview-2024-12-17
+- No separate STT/LLM/TTS - single unified model
+- Natural voice with emotional range
+- WebSocket connection (low overhead)
+
+### Pricing (December 2024 - 60% Reduction)
+
+| Model | Audio Input | Audio Output | Cached Input |
+|-------|-------------|--------------|--------------|
+| gpt-4o-realtime | $40/1M tokens | $80/1M tokens | $2.50/1M |
+| gpt-4o-mini-realtime | $10/1M tokens | $20/1M tokens | $0.30/1M |
+| gpt-realtime (newest) | $32/1M tokens | $64/1M tokens | $0.40/1M |
+
+**Estimated per-minute cost:** ~$0.08-0.12/min (higher than Telnyx but simpler)
+
+### Latency Consideration for Australia
+
+OpenAI uses global edge infrastructure, but primary inference is US-based.
+- Expect ~250-350ms total latency from Melbourne
+- Still acceptable, but not as fast as Telnyx Sydney
+
+---
+
+## 🔬 FUTURE: Moshi (Self-Hosted Ultra-Low Latency)
+
+### What is Moshi?
+
+[Moshi by Kyutai Labs](https://github.com/kyutai-labs/moshi) is an open-source speech-to-speech model:
+- **160ms theoretical latency** (200ms practical)
+- Full-duplex conversation (can listen while speaking)
+- Open-source (MIT license)
+- Can be self-hosted on Australian infrastructure
+
+### Self-Hosted Architecture
+
+```
+Melbourne User ──▶ DigitalOcean Sydney Droplet
+                        │
+                   ┌────┴────┐
+                   │  Moshi  │  (GPU: ~$300-500/month)
+                   │  7B     │
+                   │ params  │
+                   └────┬────┘
+                        │
+                   160-200ms RTT
+```
+
+**Pros:** Lowest latency possible, full control, no per-minute costs
+**Cons:** Requires GPU infrastructure (~$300-500/month), more complex setup
+
+---
+
+## 📊 Provider Comparison Summary (Australia Focus)
+
+| Provider | Latency (Melbourne) | Cost/Min | Setup Complexity | Best For |
+|----------|---------------------|----------|------------------|----------|
+| **Telnyx Sydney** ⭐ | <200ms | ~$0.05-0.08 | Low | Production, low latency |
+| OpenAI Realtime | ~250-350ms | ~$0.08-0.12 | Medium | Simplicity, quality |
+| Retell AI | ~620ms | $0.07 | Low | No-code, compliance |
+| Moshi (self-hosted) | <200ms | ~$0.02 + hosting | High | Maximum control |
+| DIY Stack (US) | ~400-600ms | ~$0.03 | High | Cost optimization |
+
+**Recommendation:** Start with **Telnyx Sydney** for best latency/cost balance in Australia.
 
 ---
 
@@ -614,35 +756,140 @@ master-ops/
 
 ---
 
-## Part 9: Quick Start Checklist
+## Part 9: Quick Start Checklist (Ultra-Low Latency Focus)
 
-### Tomorrow's Implementation Steps
+### 🎯 OPTION A: Fastest Setup - Telnyx Voice AI Agents (Recommended)
 
-- [ ] **Hour 1-2:** Sign up for accounts
-  - [ ] Telnyx (get API key, buy AU number)
-  - [ ] Deepgram (get API key, $200 free credit)
-  - [ ] Cartesia (get API key) OR use Deepgram Aura
-  - [ ] OpenAI (if not already have) OR Groq (free tier)
+**Total Time: 2-4 hours to first call**
 
-- [ ] **Hour 2-3:** Store credentials
-  - [ ] `node creds.js set global telnyx_api_key <key>`
-  - [ ] `node creds.js set global deepgram_api_key <key>`
-  - [ ] `node creds.js set global cartesia_api_key <key>`
-  - [ ] `node creds.js set global groq_api_key <key>`
+#### Step 1: Telnyx Account Setup (30 min)
+- [ ] Sign up at https://telnyx.com
+- [ ] Verify identity (required for AU numbers)
+- [ ] Navigate to **Voice AI Agents** section
+- [ ] Request access to Sydney GPU infrastructure
+- [ ] Purchase Australian phone number (+61)
+  - Local: 1300 number (~$10/month)
+  - Or mobile: +61 4xx (~$5/month)
 
-- [ ] **Hour 3-4:** Database setup
-  - [ ] Run voice_ai_tables.sql migration
-  - [ ] Verify tables created
+#### Step 2: Configure Voice AI Agent (30 min)
+- [ ] Create new Voice AI Agent in Telnyx portal
+- [ ] Select **Sydney** as the region (critical for latency!)
+- [ ] Configure:
+  - System prompt (what the AI should do)
+  - First message (greeting)
+  - Voice selection
+  - Call handling rules
 
-- [ ] **Hour 4-6:** Add navigation & page structure
-  - [ ] Add Voice AI to business-config.ts
-  - [ ] Create voice-ai page directory
-  - [ ] Create basic page.tsx with placeholder UI
+#### Step 3: Test Inbound Call (15 min)
+- [ ] Call your Telnyx number from mobile
+- [ ] Verify <200ms latency (should feel instant)
+- [ ] Test conversation flow
+- [ ] Check transcript in Telnyx dashboard
 
-- [ ] **Hour 6-8:** First API route
-  - [ ] Create `/api/voice-ai/config/route.ts`
-  - [ ] Create `/api/voice-ai/webhooks/telnyx/route.ts`
-  - [ ] Test webhook receives data
+#### Step 4: Dashboard Integration (2-3 hours)
+- [ ] Store Telnyx API key: `node creds.js set global telnyx_api_key <key>`
+- [ ] Create database tables (see schema below)
+- [ ] Add Voice AI navigation to dashboard
+- [ ] Create webhook endpoint for call events
+- [ ] Build basic UI for call logs
+
+---
+
+### 🔧 OPTION B: OpenAI Realtime API (Alternative)
+
+**Total Time: 3-5 hours to first call**
+
+#### Step 1: OpenAI Setup (15 min)
+- [ ] Ensure you have OpenAI API access
+- [ ] Enable Realtime API (may require waitlist)
+- [ ] Note: ~250-350ms latency from Melbourne (acceptable)
+
+#### Step 2: Telephony Setup (30 min)
+- [ ] Sign up for Telnyx (for phone numbers only)
+- [ ] Or use Twilio for SIP trunking
+- [ ] Configure SIP trunk to your server
+
+#### Step 3: Build WebSocket Bridge (2-3 hours)
+- [ ] Create server to bridge Telnyx SIP ↔ OpenAI WebSocket
+- [ ] Use LiveKit or Pipecat for orchestration
+- [ ] Deploy to DigitalOcean Sydney for lowest latency
+
+---
+
+### 📋 Credential Storage
+
+```bash
+# Telnyx (required)
+node creds.js set global telnyx_api_key <your-telnyx-api-key>
+node creds.js set global telnyx_phone_number +61xxxxxxxxx
+
+# OpenAI Realtime (if using Option B)
+node creds.js set global openai_api_key <your-openai-key>
+
+# Optional: Deepgram for custom STT
+node creds.js set global deepgram_api_key <your-deepgram-key>
+```
+
+---
+
+### 🗄️ Database Setup (Quick Version)
+
+Run this migration:
+
+```sql
+-- Minimal tables for MVP
+CREATE TABLE voice_ai_calls (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  business TEXT NOT NULL DEFAULT 'elevate',
+  direction TEXT NOT NULL CHECK (direction IN ('inbound', 'outbound')),
+  status TEXT DEFAULT 'completed',
+  from_number TEXT,
+  to_number TEXT,
+  duration_seconds INTEGER,
+  cost_cents DECIMAL(10,4),
+  transcript TEXT,
+  summary TEXT,
+  outcome TEXT,
+  telnyx_call_id TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_voice_calls_business ON voice_ai_calls(business);
+CREATE INDEX idx_voice_calls_created ON voice_ai_calls(created_at DESC);
+```
+
+---
+
+### 🖥️ Dashboard Navigation Update
+
+Add to `dashboard/src/lib/business-config.ts`:
+
+```typescript
+import { Phone } from 'lucide-react'
+
+// Add to elevate navigation (line ~132)
+{ name: 'Voice AI', href: '/voice-ai', icon: Phone }
+
+// Or add to home navigation for global access (line ~56)
+{ name: 'Voice AI', href: '/voice-ai', icon: Phone }
+```
+
+---
+
+### 📞 Test Your First Call
+
+Once Telnyx is configured:
+
+1. **Call your Telnyx number** from your mobile
+2. **Listen for response** - should be <1 second
+3. **Have a conversation** - test the AI's responses
+4. **Check the transcript** in Telnyx dashboard
+5. **Verify webhook** receives call data
+
+Expected latency from Melbourne:
+- **Telnyx Sydney:** ~150-200ms (feels instant)
+- **OpenAI Realtime:** ~250-350ms (slight delay, acceptable)
+- **Retell/Vapi:** ~500-800ms (noticeable lag)
 
 ---
 
@@ -669,23 +916,58 @@ master-ops/
 - [Retell vs Vapi Comparison](https://www.retellai.com/blog/retell-vs-vapi)
 - [Voice AI Cost Analysis](https://dev.to/cloudx/how-much-does-it-really-cost-to-run-a-voice-ai-agent-at-scale-8en)
 - [Telnyx Australia](https://telnyx.com/australia)
+- [Telnyx Sydney GPU Deployment](https://telnyx.com/resources/sydney-gpu-deployment)
 - [Deepgram Pricing](https://deepgram.com/pricing)
+- [OpenAI Realtime API](https://openai.com/index/introducing-the-realtime-api/)
+- [Moshi by Kyutai](https://github.com/kyutai-labs/moshi)
 
 ---
 
-## Conclusion
+## Conclusion (Updated for Ultra-Low Latency)
 
-The recommended approach achieves the target of **~$0.03/minute** through:
+### Primary Recommendation: Telnyx Voice AI (Sydney)
 
-1. **Deepgram Nova-3** for STT ($0.0043/min) - Industry-leading accuracy and speed
-2. **Groq or GPT-4o-mini** for LLM (~$0.01-0.02/min) - Fast, affordable inference
-3. **Cartesia Sonic** for TTS (~$0.005/min) - Natural voices at low cost
-4. **Telnyx** for telephony (~$0.01/min) - Sydney PoP for low AU latency
-5. **Pipecat** for orchestration ($0) - Open-source, flexible
+For Melbourne-based operations requiring **human-like conversation speed**:
 
-This is **47-63% cheaper** than managed platforms while maintaining:
-- **<500ms latency** (natural conversation feel)
-- **High voice quality** (Cartesia's natural TTS)
-- **Full control** over the experience
+| Metric | Target | Telnyx Sydney |
+|--------|--------|---------------|
+| **Latency** | <200ms | ✅ <200ms RTT |
+| **Cost** | <$0.10/min | ✅ ~$0.05-0.08/min |
+| **Voice Quality** | Natural | ✅ High quality |
+| **Setup Time** | Same day | ✅ 2-4 hours |
 
-The dashboard integration follows the same patterns as AWS Migration, making it familiar and consistent with the existing UI.
+**Why Telnyx wins for Australia:**
+1. **GPUs co-located in Sydney** - No cross-Pacific latency
+2. **Full-stack solution** - No stitching together providers
+3. **Sub-200ms RTT** - Matches human conversation speed
+4. **Licensed AU carrier** - Compliant, reliable numbers
+5. **Competitive pricing** - ~$0.05-0.08/min bundled
+
+### Alternative: OpenAI Realtime API
+
+For simpler setup with slightly higher latency (~250-350ms from Melbourne):
+- Single model handles STT + LLM + TTS
+- ~$0.08-0.12/min
+- Excellent voice quality and emotional range
+
+### Future Option: Self-Hosted Moshi
+
+For maximum control and lowest latency (<160ms):
+- Open-source speech-to-speech model
+- Requires GPU hosting (~$300-500/month)
+- Can deploy on Sydney infrastructure
+
+---
+
+## Quick Decision Matrix
+
+| If you want... | Choose |
+|----------------|--------|
+| **Fastest setup + lowest latency** | Telnyx Voice AI (Sydney) |
+| **Simplest integration** | OpenAI Realtime API |
+| **Cheapest at scale** | DIY Stack (Deepgram + Groq + Cartesia) |
+| **Maximum control** | Self-hosted Moshi |
+
+---
+
+**Next Step:** Sign up for Telnyx, request Sydney region access, and make your first test call today. The dashboard integration can follow once the core voice system is proven.
