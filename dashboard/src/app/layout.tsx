@@ -1,7 +1,9 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import './globals.css'
 import { QueryProvider } from '@/components/QueryProvider'
 import { SessionProvider } from '@/components/SessionProvider'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
+import { ErrorHandlerInit } from '@/components/ErrorHandlerInit'
 
 export const metadata: Metadata = {
   title: 'Master Ops Dashboard',
@@ -16,9 +18,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen bg-gray-950">
+        <ErrorHandlerInit />
         <SessionProvider>
           <QueryProvider>
-            {children}
+            <ErrorBoundary>
+              {children}
+            </ErrorBoundary>
           </QueryProvider>
         </SessionProvider>
       </body>
