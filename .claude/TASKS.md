@@ -640,3 +640,32 @@ Move to "Completed Tasks" section at bottom.
 ### Session 1a67d5d4 (2025-12-04 07:02 pm)
 - Exit reason: other
 - Pending tasks saved: 0
+
+---
+
+## Unleashed → HubSpot Order Sync Notes
+
+**Status:** Fixed and Healthy (2025-12-04)
+
+**Problem:**
+- n8n workflow `cD0rlCpqUfggEKYI` wasn't running since Dec 1st
+- Root cause: Missing Supabase tables that the workflow required
+
+**Solution Applied:**
+1. Created migration: `infra/supabase/migrations/20251204_hubspot_sync_schema.sql`
+2. Tables created: `hubspot_sync_log`, `integration_logs`
+3. Function created: `log_hubspot_sync()` - upsert for sync logging
+4. Updated dashboard job status to healthy
+
+**Validation Results:**
+- Unleashed API: Connected (5,929 orders available)
+- hubspot_sync_log table: Accessible
+- integration_logs table: Accessible
+- log_hubspot_sync() function: Working
+- Dashboard status: Healthy
+
+**Workflow Details:**
+- ID: `cD0rlCpqUfggEKYI`
+- Name: "Unleashed → HubSpot Order Sync (Deals)"
+- Schedule: Every 6 hours
+- Syncs: Unleashed sales orders → HubSpot deals
