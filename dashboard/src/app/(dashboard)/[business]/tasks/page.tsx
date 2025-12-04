@@ -1014,36 +1014,20 @@ function TaskCard({ task, onClarificationSubmit }: { task: Task, onClarification
     e.preventDefault()
     e.stopPropagation()
 
-    console.log('[Copy for Claude] Button clicked for task:', task.title)
+    // Always generate text and show modal first
+    const text = generateClaudePrompt(task)
+    setCopyModalText(text)
+    setShowCopyModal(true)
 
+    // Try to copy to clipboard in background
     try {
-      // Use comprehensive prompt for Claude Code planning
-      const text = generateClaudePrompt(task)
-      console.log('[Copy for Claude] Generated prompt length:', text.length)
-
       const success = await copyTextToClipboard(text)
-      console.log('[Copy for Claude] Copy result:', success)
-
       if (success) {
         setCopied(true)
-        setCopyError(false)
         setTimeout(() => setCopied(false), 2000)
-      } else {
-        // Show modal with text for manual copying
-        setCopyModalText(text)
-        setShowCopyModal(true)
       }
-    } catch (err) {
-      console.error('[Copy for Claude] Error:', err)
-      // Show modal as fallback
-      try {
-        const text = generateClaudePrompt(task)
-        setCopyModalText(text)
-        setShowCopyModal(true)
-      } catch {
-        setCopyError(true)
-        setTimeout(() => setCopyError(false), 3000)
-      }
+    } catch {
+      // Ignore clipboard errors - modal is already showing
     }
   }
 
