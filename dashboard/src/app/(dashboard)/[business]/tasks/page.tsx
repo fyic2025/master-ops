@@ -2561,6 +2561,7 @@ export default function TasksPage() {
         onSuccess={handleTaskAdded}
         allowedBusinesses={allowedBusinesses}
         userEmail={userEmail}
+        userIsAdmin={userIsAdmin}
       />
     </div>
   )
