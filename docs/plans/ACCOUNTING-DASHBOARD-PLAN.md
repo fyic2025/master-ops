@@ -1,8 +1,9 @@
 # Accounting Dashboard Automation Plan
 
 **Created**: 2025-12-04
-**Status**: Planning
-**Target Businesses**: Buy Organics Online (BOO), Red Hill Fresh (RHF)
+**Updated**: 2025-12-04
+**Status**: Ready to Implement
+**Target Businesses**: All 4 (BOO, RHF, Teelixir, Elevate)
 **Proof of Concept**: Start with BOO, then RHF
 
 ---
@@ -15,35 +16,38 @@ This plan outlines the implementation of an **Accounting** tab on the master das
 2. Automate transaction categorization and reconciliation
 3. Leverage ATO rulings for tax compliance
 4. Generate BAS-ready reports
-5. Integrate with accounting software (Xero/MYOB)
+5. Integrate with Xero (all 4 businesses use Xero)
 
 **Success Criteria**: One business (BOO or RHF) fully automated within the proof of concept phase.
+
+**KEY SIMPLIFICATION**: All 4 businesses use Xero, and we already have a complete Xero integration built!
 
 ---
 
 ## Current State Assessment
 
-### What We Have
+### What We Have (READY TO USE)
 
 | Asset | Location | Status |
 |-------|----------|--------|
 | **Dashboard** | ops.growthcohq.com | Running on DO App Platform |
 | **Finance Tab** | `/home/finance` | Teelixir + Elevate P&L only |
+| **Xero Client** | `shared/libs/integrations/xero/client.ts` | **COMPLETE** - Multi-tenant OAuth, rate limiting, all endpoints |
+| **Xero Schema** | `infra/supabase/schema-financials.sql` | **COMPLETE** - Accounts, journals, mappings, reports |
 | **ATO Rulings Schema** | teelixir-leads Supabase | Schema ready, sync script ready |
 | **BOO Orders** | `bc_orders` table | Syncing from BigCommerce |
 | **RHF Orders** | `wc_orders`, `wc_order_line_items` | Syncing from WooCommerce |
-| **Xero Integration** | Teelixir + Elevate only | Full schema + scripts ready |
 
-### What We Need
+### What We Need to Add
 
 | Need | Priority | Notes |
 |------|----------|-------|
+| BOO Xero tenant credentials | HIGH | Get OAuth tokens for BOO's Xero org |
+| RHF Xero tenant credentials | HIGH | Get OAuth tokens for RHF's Xero org |
+| Add BOO/RHF to `xero_organizations` table | HIGH | Extend existing schema |
 | Accounting tab in dashboard | HIGH | New section for all businesses |
-| BOO accounting software connection | HIGH | Likely Xero or MYOB - TBD |
-| RHF accounting software connection | MEDIUM | Likely Xero or MYOB - TBD |
-| Transaction categorization engine | HIGH | Map orders to chart of accounts |
-| Bank feed reconciliation | MEDIUM | Match bank transactions to orders |
-| GST calculation & reporting | HIGH | BAS preparation |
+| Transaction categorization engine | MEDIUM | Map orders to chart of accounts |
+| GST calculation & reporting | MEDIUM | BAS preparation |
 | ATO rulings integration | LOW | Tax compliance reference |
 
 ---
@@ -119,27 +123,34 @@ The new Accounting section will be accessible from the **Home** business (global
 
 ## Phase 1: Foundation (Day 1)
 
-### 1.1 Discovery Tasks
+### 1.1 Xero OAuth Setup for BOO and RHF
 
-**ACTION REQUIRED**: Before implementing, we need to confirm:
+**CONFIRMED**: All 4 businesses use Xero. We can reuse the existing Xero integration.
 
+**Steps to connect BOO and RHF to Xero:**
+
+```bash
+# 1. Run the OAuth setup script
+npx tsx scripts/financials/setup-xero-auth-direct.ts
+
+# 2. Visit the authorization URL printed by the script
+# 3. Log in to Xero with BOO account credentials
+# 4. Authorize the app
+# 5. Copy the callback URL parameters
+# 6. Script will save tokens to Supabase vault
+
+# 7. Repeat for RHF
 ```
-□ What accounting software does BOO use?
-   - Options: Xero, MYOB, QuickBooks, Manual spreadsheets
-   - If Xero: We can reuse existing Xero integration code
-   - If MYOB: Need to build new connector
 
-□ What accounting software does RHF use?
-   - Same options as above
+**After OAuth, add to `xero_organizations` table:**
 
-□ Does BOO have a dedicated bookkeeper?
-   - If yes: What's their workflow?
-   - If no: Full automation is higher priority
-
-□ Current BAS lodgement process?
-   - Who prepares it?
-   - What data sources are used?
-   - What manual steps exist?
+```sql
+INSERT INTO xero_organizations (xero_tenant_id, business_key, name, legal_name) VALUES
+  ('<boo-tenant-id>', 'boo', 'Buy Organics Online', 'Buy Organics Online Pty Ltd'),
+  ('<rhf-tenant-id>', 'rhf', 'Red Hill Fresh', 'Red Hill Fresh Pty Ltd')
+ON CONFLICT (business_key) DO UPDATE SET
+  xero_tenant_id = EXCLUDED.xero_tenant_id,
+  updated_at = NOW();
 ```
 
 ### 1.2 Add Accounting Navigation
@@ -352,20 +363,35 @@ This script will:
 
 ---
 
-## Phase 3: BOO Implementation (Day 2-3)
+## Phase 3: BOO Xero Implementation (Day 2-3)
 
-### 3.1 Connect BOO Accounting Software
+### 3.1 Connect BOO to Xero
 
-**If BOO uses Xero**:
-- Reuse existing Xero client from `shared/libs/integrations/xero/`
-- Get BOO's Xero tenant ID and OAuth credentials
-- Add to `xero_organizations` table
-- Sync chart of accounts to `accounts` table
+**BOO uses Xero** - We reuse the existing Xero client:
 
-**If BOO uses MYOB**:
-- Create new MYOB integration in `shared/libs/integrations/myob/`
-- MYOB uses OAuth 2.0 similar to Xero
-- Create equivalent schema for MYOB data
+```typescript
+import { xeroClient } from '@/shared/libs/integrations/xero'
+
+// Set BOO tenant
+xeroClient.setTenant(BOO_XERO_TENANT_ID)
+
+// Sync chart of accounts
+const accounts = await xeroClient.accounts.list()
+
+// Get P&L report
+const pnl = await xeroClient.reports.getProfitAndLoss({
+  fromDate: '2024-01-01',
+  toDate: '2024-12-31'
+})
+
+// Get bank transactions for reconciliation
+const bankTxns = await xeroClient.bankTransactions.list()
+```
+
+**Steps:**
+1. Complete OAuth for BOO (see Phase 1.1)
+2. Run account sync: `npx tsx scripts/financials/sync-xero-to-supabase.ts --business=boo`
+3. Verify accounts in `accounts` table
 
 ### 3.2 Map BOO Transaction Categories
 
@@ -517,40 +543,42 @@ Features:
 
 ## Implementation Checklist
 
-### Day 1: Foundation
-- [ ] Confirm BOO accounting software (Xero/MYOB/other)
-- [ ] Confirm RHF accounting software
-- [ ] Add Accounting to navigation in `business-config.ts`
-- [ ] Create accounting page structure
-- [ ] Create accounting database schema
-- [ ] Run schema migration
+### Day 1: Xero Setup & Navigation
+- [ ] **Run Xero OAuth for BOO** - `npx tsx scripts/financials/setup-xero-auth-direct.ts`
+- [ ] **Get BOO Xero tenant ID** - From OAuth callback
+- [ ] **Add BOO to xero_organizations table** - SQL insert
+- [ ] **Sync BOO chart of accounts** - `npx tsx scripts/financials/sync-xero-to-supabase.ts --business=boo`
+- [ ] **Add Accounting to navigation** - Edit `business-config.ts`
+- [ ] **Create accounting page structure** - mkdir + page.tsx files
+- [ ] **Deploy dashboard** - `doctl apps create-deployment 1a0eed70-aef6-415e-953f-d2b7f0c7c832 --force-rebuild`
 
-### Day 2: Data Layer
-- [ ] Create API routes for accounting
-- [ ] Create transaction sync script for BOO
-- [ ] Test transaction sync with sample data
-- [ ] Create category mapping rules for BOO
-- [ ] Verify GST calculations
+### Day 2: BOO Financial Data
+- [ ] **Create API route for P&L** - `/api/accounting/pnl`
+- [ ] **Fetch BOO P&L from Xero** - Use existing xeroClient
+- [ ] **Create API route for transactions** - `/api/accounting/transactions`
+- [ ] **Fetch BOO bank transactions** - For reconciliation view
+- [ ] **Test P&L display in dashboard** - Verify numbers match Xero
 
 ### Day 3: UI Implementation
-- [ ] Build AccountingTabs component
-- [ ] Build Overview dashboard
-- [ ] Build Transactions page
-- [ ] Build ATO Rulings search
-- [ ] Test on staging
+- [ ] **Build AccountingTabs component** - Overview, Transactions, BAS, ATO Rules
+- [ ] **Build Overview dashboard** - All 4 businesses P&L summary
+- [ ] **Build Transactions page** - Bank transactions list with filters
+- [ ] **Build ATO Rulings search** - Query ato_rulings table
+- [ ] **Test on staging** - Verify data loads correctly
 
-### Day 4: BAS & Reports
-- [ ] Build BAS Preparation page
-- [ ] Create GST calculation logic
-- [ ] Build report generation
-- [ ] Test BAS calculations with real data
+### Day 4: BAS & RHF
+- [ ] **Run Xero OAuth for RHF** - Same process as BOO
+- [ ] **Add RHF to xero_organizations** - SQL insert
+- [ ] **Sync RHF chart of accounts** - Extend sync script
+- [ ] **Build BAS Preparation page** - GST summary + export
+- [ ] **Create GST calculation logic** - From Xero reports
 
-### Day 5: Automation
-- [ ] Create n8n workflow for daily sync
-- [ ] Create reminder workflows
-- [ ] Test full flow end-to-end
-- [ ] Deploy to production
-- [ ] Document for ongoing use
+### Day 5: Automation & Polish
+- [ ] **Create n8n workflow for daily Xero sync** - All 4 businesses
+- [ ] **Create BAS reminder workflow** - 7 days before due
+- [ ] **Test full flow end-to-end** - BOO + RHF complete
+- [ ] **Deploy final version** - Production deployment
+- [ ] **Update documentation** - Usage guide for accounting tab
 
 ---
 
@@ -616,33 +644,53 @@ Features:
 
 ## Quick Start Guide (Tomorrow)
 
-### Step 1: Confirm Accounting Software
-Ask: "What accounting software does BOO use? Xero, MYOB, or something else?"
-
-### Step 2: Run These Commands
+### Step 1: Connect BOO to Xero
 ```bash
-# 1. Create the database schema
 cd /home/user/master-ops
-npx tsx infra/scripts/run-migration.ts infra/supabase/migrations/20251204_accounting_schema.sql
 
-# 2. Sync ATO rulings
-npx tsx infra/scripts/sync-ato-rulings.ts --verbose
+# 1. Run the Xero OAuth setup
+npx tsx scripts/financials/setup-xero-auth-direct.ts
 
-# 3. Add navigation (edit business-config.ts)
-# Add: { name: 'Accounting', href: '/accounting', icon: Calculator }
+# 2. Follow the URL printed, log in with BOO Xero credentials
+# 3. Authorize the app, copy the callback parameters
+# 4. Script saves tokens automatically
+```
 
-# 4. Create the page structure
+### Step 2: Add BOO to Database
+```sql
+-- Run in Supabase SQL editor (teelixir-leads project)
+INSERT INTO xero_organizations (xero_tenant_id, business_key, name, legal_name) VALUES
+  ('<your-boo-tenant-id>', 'boo', 'Buy Organics Online', 'Buy Organics Online Pty Ltd');
+```
+
+### Step 3: Sync BOO Data from Xero
+```bash
+# Sync chart of accounts and recent transactions
+npx tsx scripts/financials/sync-xero-to-supabase.ts --business=boo
+```
+
+### Step 4: Add Dashboard Navigation
+```bash
+# Edit dashboard/src/lib/business-config.ts
+# Add to 'home' navigation array:
+# { name: 'Accounting', href: '/accounting', icon: Calculator }
+```
+
+### Step 5: Create Accounting Page
+```bash
 mkdir -p dashboard/src/app/\(dashboard\)/home/accounting
+# Create page.tsx with business summary cards
+```
 
-# 5. Deploy dashboard
+### Step 6: Deploy
+```bash
 doctl apps create-deployment 1a0eed70-aef6-415e-953f-d2b7f0c7c832 --force-rebuild
 ```
 
-### Step 3: Build First Page
-Create `dashboard/src/app/(dashboard)/home/accounting/page.tsx` with overview dashboard.
-
-### Step 4: Connect Data
-Create API route to fetch from `bc_orders` and display in dashboard.
+### Step 7: Verify
+- Visit https://ops.growthcohq.com/home/accounting
+- Confirm BOO P&L data displays correctly
+- Compare numbers to Xero dashboard
 
 ---
 
