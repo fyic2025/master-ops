@@ -113,7 +113,8 @@
       "Bash(cmd /c del \"c:\\Users\\jayso\\master-ops\\temp-generate-order-pdf.js\")",
       "Bash(start \"\" \"c:\\Users\\jayso\\master-ops\\teelixir\\scripts\\email-preview.html\")",
       "Bash(del \"c:\\Users\\jayso\\master-ops\\temp-get-images.js\")",
-      "Bash(cmd /c del \"c:\\Users\\jayso\\master-ops\\temp-get-images.js\")"
+      "Bash(cmd /c del \"c:\\Users\\jayso\\master-ops\\temp-get-images.js\")",
+      "Bash(cp:*)"
     ],
     "deny": [],
     "ask": []

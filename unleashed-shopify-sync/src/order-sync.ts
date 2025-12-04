@@ -10,8 +10,6 @@ import {
   StoreConfig,
   ShopifyOrder,
   ShopifyLineItem,
-  UnleashedSalesOrder,
-  UnleashedSalesOrderLine,
   BundleMapping,
   OrderSyncResult,
 } from './types.js'
@@ -19,6 +17,50 @@ import {
 export interface OrderSyncOptions {
   dryRun?: boolean
   verbose?: boolean
+}
+
+// Proper Unleashed API types (different from types.ts simplified versions)
+interface UnleashedApiSalesOrder {
+  Customer: {
+    CustomerCode: string
+    CustomerName?: string
+    Guid?: string
+  }
+  OrderDate: string
+  RequiredDate: string
+  OrderStatus: 'Open' | 'Parked' | 'Placed' | 'Completed'
+  Comments?: string
+  CustomerRef?: string
+  Tax: {
+    TaxCode: string
+  }
+  Currency?: {
+    CurrencyCode: string
+  }
+  SubTotal: number
+  TaxTotal?: number
+  Total?: number
+  DeliveryName?: string
+  DeliveryStreetAddress?: string
+  DeliveryStreetAddress2?: string
+  DeliverySuburb?: string
+  DeliveryCity?: string
+  DeliveryRegion?: string
+  DeliveryCountry?: string
+  DeliveryPostCode?: string
+  SalesOrderLines: UnleashedApiSalesOrderLine[]
+}
+
+interface UnleashedApiSalesOrderLine {
+  LineNumber: number
+  Product: {
+    ProductCode: string
+  }
+  OrderQuantity: number
+  UnitPrice: number
+  DiscountRate: number
+  LineTotal: number
+  Comments?: string
 }
 
 /**
@@ -57,8 +99,9 @@ export async function syncOrder(
     }
 
     // Expand line items (handle bundles)
-    const expandedLines: UnleashedSalesOrderLine[] = []
+    const expandedLines: UnleashedApiSalesOrderLine[] = []
     let bundlesExpanded = 0
+    let lineNumber = 1
 
     for (const item of order.line_items) {
       const bundleComponents = bundleMap.get(item.sku)
@@ -70,21 +113,33 @@ export async function syncOrder(
 
         for (const component of bundleComponents) {
           const componentQty = item.quantity * component.component_quantity
+          const unitPrice = 0 // Price is on bundle, not components
           expandedLines.push({
-            ProductCode: component.unleashed_product_code,
-            ProductDescription: `[Bundle: ${item.title}] ${component.unleashed_product_code}`,
+            LineNumber: lineNumber++,
+            Product: {
+              ProductCode: component.unleashed_product_code,
+            },
             OrderQuantity: componentQty,
-            UnitPrice: 0, // Price is on bundle, not components
+            UnitPrice: unitPrice,
+            DiscountRate: 0,
+            LineTotal: Math.round(componentQty * unitPrice * 100) / 100,
+            Comments: `Bundle: ${item.title}`,
           })
           console.log(`      → ${component.unleashed_product_code} x${componentQty}`)
         }
       } else {
         // Regular product
+        const unitPrice = parseFloat(item.price)
+        const lineTotal = Math.round(item.quantity * unitPrice * 100) / 100
         expandedLines.push({
-          ProductCode: item.sku,
-          ProductDescription: item.title,
+          LineNumber: lineNumber++,
+          Product: {
+            ProductCode: item.sku,
+          },
           OrderQuantity: item.quantity,
-          UnitPrice: parseFloat(item.price),
+          UnitPrice: unitPrice,
+          DiscountRate: 0,
+          LineTotal: lineTotal,
         })
         if (verbose) {
           console.log(`   📦 ${item.sku}: ${item.title} x${item.quantity}`)
@@ -97,17 +152,32 @@ export async function syncOrder(
 
     console.log(`   Line items: ${order.line_items.length} → ${expandedLines.length} (expanded)`)
 
-    // Build Unleashed sales order
-    const customerCode = await findOrCreateUnleashedCustomer(config, order, dryRun)
+    // Calculate subtotal from line totals
+    // Note: Shopify prices are GST-inclusive but we pass them as subtotal
+    // Tax will be calculated by Unleashed based on Tax Code
+    const subTotal = expandedLines.reduce((sum, line) => sum + line.LineTotal, 0)
+    const roundedSubTotal = Math.round(subTotal * 100) / 100
 
-    const salesOrder: UnleashedSalesOrder = {
-      CustomerCode: customerCode,
+    // Find or create customer in Unleashed
+    const customer = await findOrCreateUnleashedCustomer(config, order, dryRun)
+
+    // Build Unleashed sales order with proper API structure
+    const salesOrder: UnleashedApiSalesOrder = {
+      Customer: customer,
       OrderDate: new Date(order.created_at).toISOString(),
       RequiredDate: new Date(order.created_at).toISOString(),
-      Comments: `Shopify Order #${order.order_number}. Email: ${order.email}`,
-      ExternalReference: order.id.toString(),
       OrderStatus: order.financial_status === 'paid' ? 'Completed' : 'Parked',
-      DeliveryMethod: 'Standard Shipping',
+      Comments: `Shopify Order #${order.order_number}. Email: ${order.email}`,
+      CustomerRef: order.id.toString(),
+      Tax: {
+        TaxCode: 'Exempt', // No additional tax (prices already include GST)
+      },
+      Currency: {
+        CurrencyCode: 'AUD',
+      },
+      SubTotal: roundedSubTotal,
+      TaxTotal: 0,
+      Total: roundedSubTotal, // Total = SubTotal when TaxTotal is 0
       SalesOrderLines: expandedLines,
     }
 
@@ -116,9 +186,10 @@ export async function syncOrder(
       salesOrder.DeliveryName = order.shipping_address.name
       salesOrder.DeliveryStreetAddress = order.shipping_address.address1
       salesOrder.DeliveryStreetAddress2 = order.shipping_address.address2 || ''
+      salesOrder.DeliverySuburb = order.shipping_address.city
       salesOrder.DeliveryCity = order.shipping_address.city
       salesOrder.DeliveryRegion = order.shipping_address.province
-      salesOrder.DeliveryPostalCode = order.shipping_address.zip
+      salesOrder.DeliveryPostCode = order.shipping_address.zip
       salesOrder.DeliveryCountry = order.shipping_address.country
     }
 
@@ -141,34 +212,46 @@ export async function syncOrder(
   return result
 }
 
+interface CustomerRef {
+  CustomerCode: string
+  CustomerName?: string
+  Guid?: string
+}
+
 /**
  * Find existing customer or create new one in Unleashed
+ * Returns customer object with Guid for use in sales order
  */
 async function findOrCreateUnleashedCustomer(
   config: StoreConfig,
   order: ShopifyOrder,
   dryRun: boolean
-): Promise<string> {
+): Promise<CustomerRef> {
   // Generate customer code from Shopify customer ID
   const customerCode = `SHOPIFY-${order.customer.id}`
+  const customerName = `${order.customer.first_name} ${order.customer.last_name}`
 
   if (dryRun) {
-    return customerCode
+    return { CustomerCode: customerCode, CustomerName: customerName }
   }
 
   // Check if customer exists
   const existingCustomer = await findUnleashedCustomer(config, customerCode)
 
   if (existingCustomer) {
-    return customerCode
+    return {
+      CustomerCode: existingCustomer.CustomerCode,
+      CustomerName: existingCustomer.CustomerName,
+      Guid: existingCustomer.Guid,
+    }
   }
 
   // Create new customer
   const newCustomer = {
     CustomerCode: customerCode,
-    CustomerName: `${order.customer.first_name} ${order.customer.last_name}`,
+    CustomerName: customerName,
     Email: order.customer.email,
-    ContactName: `${order.customer.first_name} ${order.customer.last_name}`,
+    ContactName: customerName,
   }
 
   // Add address if available
@@ -182,8 +265,12 @@ async function findOrCreateUnleashedCustomer(
     })
   }
 
-  await createUnleashedCustomer(config, newCustomer)
-  return customerCode
+  const createdCustomer = await createUnleashedCustomer(config, newCustomer)
+  return {
+    CustomerCode: createdCustomer.CustomerCode,
+    CustomerName: createdCustomer.CustomerName,
+    Guid: createdCustomer.Guid,
+  }
 }
 
 /**
