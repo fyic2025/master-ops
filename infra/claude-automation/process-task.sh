@@ -214,7 +214,7 @@ echo "$RESULT" >> "$LOG_FILE"
 # PARSE RESULT
 # ═══════════════════════════════════════════════════════════════════════════
 
-IS_ERROR=$(echo "$RESULT" | jq -r '.is_error // true')
+IS_ERROR=$(echo "$RESULT" | jq -r 'if .is_error == null then "true" else (.is_error | tostring) end')
 RESULT_TEXT=$(echo "$RESULT" | jq -r '.result // "No result returned"')
 DURATION_MS=$(echo "$RESULT" | jq -r '.duration_ms // 0')
 COST_USD=$(echo "$RESULT" | jq -r '.total_cost_usd // 0')
