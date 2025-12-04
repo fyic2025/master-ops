@@ -8,7 +8,7 @@
 - DO NOT deploy via SCP to any droplet
 - DO NOT use PM2 on the droplet for this app
 - DO NOT try to restart nginx for this app
-- The droplet (170.64.223.141) is for OTHER services, not this dashboard
+- The n8n droplet (134.199.175.243) is for OTHER services, not this dashboard
 
 ### ✅ CORRECT Deployment:
 ```bash
