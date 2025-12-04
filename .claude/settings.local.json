@@ -123,7 +123,9 @@
       "Bash(python:*)",
       "Bash(del \"c:\\Users\\jayso\\master-ops\\temp-orders.json\" \"c:\\Users\\jayso\\master-ops\\temp-analyze-orders.js\" \"c:\\Users\\jayso\\master-ops\\temp-sku-analysis.js\" \"c:\\Users\\jayso\\master-ops\\temp-test-unleashed.js\" \"c:\\Users\\jayso\\master-ops\\temp-test-unleashed2.js\")",
       "Bash(cmd /c del:*)",
-      "Bash(powershell \"Get-Content ''c:/Users/jayso/master-ops/infra/supabase/migrations/20251203_automation_execution_logs.sql'' | Set-Clipboard\")"
+      "Bash(powershell \"Get-Content ''c:/Users/jayso/master-ops/infra/supabase/migrations/20251203_automation_execution_logs.sql'' | Set-Clipboard\")",
+      "Bash(powershell:*)",
+      "Bash(python3 -c \"import json,sys; d=json.load(sys.stdin); c=[n for n in d if n.get(''''name'''')==''''Summarize''''][0]; print(repr(c[''''parameters''''][''''jsCode''''][:100]))\")"
     ],
     "deny": [],
     "ask": []
