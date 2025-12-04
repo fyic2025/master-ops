@@ -244,6 +244,15 @@ When new work arises, ask:
 ```
 Move to "Completed Tasks" section at bottom.
 
+### After Every Fix - Dashboard Updates (MANDATORY)
+After completing any fix (especially CI/CD, TypeScript, or code changes):
+1. **Run health check**: `npx tsx scripts/cicd-health-check.ts`
+2. **Verify dashboard updated**: Check https://ops.growthcohq.com/home/cicd
+3. **Clear stale issues if needed**: Mark resolved issues in database
+4. **Commit and push**: Ensure all changes are saved to git
+
+This ensures the dashboard always reflects current codebase state.
+
 ---
 
 ## Anniversary Upsell System Notes
