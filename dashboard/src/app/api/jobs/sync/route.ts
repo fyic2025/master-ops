@@ -22,18 +22,18 @@ const SYNCABLE_JOBS: Record<string, {
   },
   'livechat-sync': {
     business: 'boo',
-    script: 'shared/libs/integrations/livechat/sync-conversations.js',
+    script: 'scripts/integrations/livechat/sync-conversations.js',
     args: '--days=7',
     description: 'Sync LiveChat conversations'
   },
   'gmc-sync': {
     business: 'boo',
-    script: 'shared/libs/integrations/google-merchant/sync-products.js',
+    script: 'scripts/integrations/google-merchant/sync-products.js',
     description: 'Sync Google Merchant Center products'
   },
   'gsc-issues-sync': {
     business: 'boo',
-    script: 'shared/libs/integrations/gsc/sync-gsc-issues.js',
+    script: 'scripts/integrations/gsc/sync-gsc-issues.js',
     args: '--skip-performance',
     description: 'Sync GSC issues'
   }
@@ -66,13 +66,9 @@ export async function POST(request: NextRequest) {
       .eq('job_name', jobName)
       .eq('business', job.business)
 
-    // Run the sync script
-    // Scripts in shared/ are at repo root, scripts in scripts/ are in dashboard folder
+    // Run the sync script - all scripts are now in dashboard/scripts/
     const dashboardRoot = process.cwd()
-    const repoRoot = path.join(dashboardRoot, '..')
-    const scriptPath = job.script.startsWith('shared/')
-      ? path.join(repoRoot, job.script)
-      : path.join(dashboardRoot, job.script)
+    const scriptPath = path.join(dashboardRoot, job.script)
     const command = `node "${scriptPath}" ${job.args || ''}`
 
     console.log(`Running sync: ${command}`)
