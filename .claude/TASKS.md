@@ -214,6 +214,7 @@ Tasks moved here after completion for reference.
 - [x] **2025-12-04** Job monitoring UI improvements | Added "Last attempted" date display, stock-sync to syncable jobs
 - [x] **2025-12-04** Teelixir order sync fixes | Fixed duplicate detection, added discount sync, fuzzy matching, B2C filter
 - [x] **2025-12-04** Fixed unleashed-order-sync n8n job | Created HubSpot sync schema, deployed tables, validated workflow
+- [x] **2025-12-04** CI/CD batch 1 TypeScript fixes | Fixed 10 TS errors in unleashed-shopify-sync (order-sync, unleashed-api, inventory-sync)
 
 ---
 
