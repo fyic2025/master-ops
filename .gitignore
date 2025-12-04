@@ -5,7 +5,8 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 .pnpm-store/
-package-lock.json
+**/package-lock.json
+!/package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
