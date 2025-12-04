@@ -1393,32 +1393,40 @@ function BusinessSection({
   )
 }
 
+// Assignee options for task routing
+const ASSIGNEE_OPTIONS = [
+  { value: 'system', label: 'System (Automation/Claude)', email: null },
+  { value: 'maria', label: 'Maria', email: 'admin@teelixir.com' },
+  { value: 'rajani', label: 'Rajani', email: 'rajani@teelixir.com' },
+]
+
 // Add Task Modal
 function AddTaskModal({
   isOpen,
   onClose,
   onSuccess,
   allowedBusinesses,
-  userEmail
+  userEmail,
+  userIsAdmin
 }: {
   isOpen: boolean
   onClose: () => void
   onSuccess?: () => void
   allowedBusinesses: string[]
   userEmail?: string | null
+  userIsAdmin?: boolean
 }) {
   const [business, setBusiness] = useState('')
   const [category, setCategory] = useState('')
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [priority, setPriority] = useState<1 | 2 | 3 | 4>(2)
+  const [assignee, setAssignee] = useState<'system' | 'maria' | 'rajani'>('system')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
-  // Filter TASK_FRAMEWORK by allowed businesses
-  const availableBusinesses = Object.entries(TASK_FRAMEWORK).filter(([key]) =>
-    allowedBusinesses.includes(key)
-  )
+  // Show ALL businesses (not filtered) - anyone can create tasks for any business
+  const availableBusinesses = Object.entries(TASK_FRAMEWORK)
 
   const categories = business ? Object.entries(TASK_FRAMEWORK[business as keyof typeof TASK_FRAMEWORK]?.categories || {}) : []
 
@@ -1428,12 +1436,17 @@ function AddTaskModal({
     setTitle('')
     setDescription('')
     setPriority(2)
+    setAssignee('system')
     setError('')
   }
 
   const handleSubmit = async () => {
     setSaving(true)
     setError('')
+
+    // Get the selected assignee's email
+    const selectedAssignee = ASSIGNEE_OPTIONS.find(a => a.value === assignee)
+    const assignedEmail = assignee !== 'system' ? selectedAssignee?.email : null
 
     try {
       const response = await fetch('/api/tasks', {
@@ -1446,7 +1459,13 @@ function AddTaskModal({
           category,
           priority,
           status: 'pending_input', // New tasks await Claude planning
-          created_by: userEmail?.split('@')[0] || 'dashboard'
+          created_by: userEmail?.split('@')[0] || 'dashboard',
+          // Triage workflow fields
+          suggested_assignee: assignee,
+          // Admin creates: direct assignment (skip triage)
+          // Non-admin creates: goes to triage queue
+          triage_status: userIsAdmin ? 'triaged' : 'pending_triage',
+          assigned_to: userIsAdmin ? assignedEmail : null,
         }),
       })
 
@@ -1577,6 +1596,26 @@ Add this task to the dashboard.`
                 </button>
               ))}
             </div>
+          </div>
+
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">
+              {userIsAdmin ? 'Assign To' : 'Suggested Assignee'}
+            </label>
+            <select
+              value={assignee}
+              onChange={(e) => setAssignee(e.target.value as 'system' | 'maria' | 'rajani')}
+              className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white"
+            >
+              {ASSIGNEE_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+            {!userIsAdmin && (
+              <p className="text-xs text-gray-500 mt-1">
+                Task will go to Jayson for triage before assignment.
+              </p>
+            )}
           </div>
         </div>
 
