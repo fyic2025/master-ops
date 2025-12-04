@@ -64,7 +64,8 @@ function checkTypeScript(): void {
     console.log('  No TypeScript errors')
   } catch (error: any) {
     const output = error.stdout || error.message || ''
-    const lines = output.split('\n')
+    // Normalize line endings for Windows compatibility
+    const lines = output.split('\n').map((l: string) => l.replace(/\r$/, ''))
 
     // Parse TypeScript errors: file(line,col): error TSxxxx: message
     const errorRegex = /^(.+?)\((\d+),(\d+)\):\s*(error|warning)\s+(TS\d+):\s*(.+)$/
