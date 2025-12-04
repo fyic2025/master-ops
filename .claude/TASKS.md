@@ -28,6 +28,18 @@ Cross-business initiatives that take precedence.
 - [ ] **P2** Connect Tasks UI to Supabase backend
 - [ ] **P3** Add task creation form in dashboard
 
+### Shipping Labels
+> Shipping label system launch for BOO, Teelixir, Elevate
+
+- [ ] **P1** Deploy shipping database migration to Supabase projects
+- [ ] **P1** Configure AusPost API credentials in DO App Platform
+- [ ] **P1** Confirm/update warehouse sender addresses
+- [ ] **P2** Test order sync from all platforms
+- [ ] **P2** Test label creation and Zebra printing
+- [ ] **P2** Deploy and verify production environment
+
+**Full launch plan:** See "Shipping Label System Launch Plan" section below
+
 ### Migration
 > Platform migrations and major infrastructure changes
 
@@ -680,6 +692,174 @@ This ensures the dashboard always reflects current codebase state.
 - Syncs: Unleashed sales orders → HubSpot deals
 
 
+
+---
+
+## Shipping Label System Launch Plan
+
+**Status:** Ready for Final Testing & Deployment
+
+**Implementation:** ~75% Complete | Target Launch: Tomorrow
+
+The shipping label system is largely built and needs final testing and configuration to go live. The UI is in the nav for BOO, Teelixir, Elevate, and Home. All core components (order sync, label creation, Zebra printing, manifests) are implemented.
+
+---
+
+### Phase 1: Database Setup (30 mins)
+> Deploy shipping tables to Supabase
+
+- [ ] **P1** Run migration on teelixir-leads Supabase: `20251201_shipping_platform_schema.sql`
+- [ ] **P1** Run migration on boo Supabase (if separate project)
+- [ ] **P1** Run migration on elevate Supabase (if separate project)
+- [ ] Verify tables created: `carrier_configurations`, `shipping_orders`, `shipping_order_items`, `shipping_manifests`, `shipping_tracking_events`
+
+**Migration file:** `infra/supabase/migrations/20251201_shipping_platform_schema.sql`
+
+---
+
+### Phase 2: Environment Configuration (20 mins)
+> Configure API credentials for carriers and platforms
+
+**AusPost (Required):**
+- [ ] **P1** Add `AUSPOST_API_KEY` to DO App Platform environment
+- [ ] **P1** Add `AUSPOST_API_SECRET` to DO App Platform environment
+- [ ] Add `BOO_AUSPOST_ACCOUNT` (account number)
+- [ ] Add `TEELIXIR_AUSPOST_ACCOUNT` (account number)
+- [ ] Add `ELEVATE_AUSPOST_ACCOUNT` (account number)
+
+**Sendle (Optional but recommended for BOO/Teelixir):**
+- [ ] Add `BOO_SENDLE_API_KEY`
+- [ ] Add `TEELIXIR_SENDLE_API_KEY`
+- [ ] Add `SENDLE_ID`
+
+**Note:** Platform credentials (BigCommerce, Shopify) should already be configured from other integrations.
+
+---
+
+### Phase 3: Sender Address Configuration (10 mins)
+> Update warehouse addresses in sender-addresses.ts
+
+**File:** `dashboard/src/lib/sender-addresses.ts`
+
+Current placeholder: 21 Ross Street, Bayswater VIC 3153
+
+- [ ] **P1** Confirm or update Teelixir warehouse address
+- [ ] **P1** Confirm or update BOO warehouse address
+- [ ] **P1** Confirm or update Elevate warehouse address
+- [ ] Update phone numbers for each business
+- [ ] Update email addresses for each business
+
+---
+
+### Phase 4: Carrier Service Configuration (15 mins)
+> Insert carrier configs into database
+
+- [ ] Insert AusPost services for BOO into `carrier_configurations`
+- [ ] Insert AusPost services for Teelixir into `carrier_configurations`
+- [ ] Insert AusPost services for Elevate into `carrier_configurations`
+- [ ] Insert Sendle services for BOO (if using)
+- [ ] Insert Sendle services for Teelixir (if using)
+
+**Default services to configure:**
+- 3D85: Parcel Post + Signature (domestic)
+- 3J85: Express Post + Signature (domestic)
+- PTI8: Pack & Track International
+
+---
+
+### Phase 5: Integration Testing (45 mins)
+> End-to-end workflow verification
+
+**Order Sync Test:**
+- [ ] **P1** Go to /boo/shipping and click "Sync New"
+- [ ] Verify orders appear in the "New" tab
+- [ ] Test historical sync (1 month) if needed
+- [ ] Repeat for /teelixir/shipping
+- [ ] Repeat for /elevate/shipping
+
+**Label Creation Test:**
+- [ ] Click an order to open the drawer
+- [ ] Select weight, package type, carrier, and service
+- [ ] Click "Print Label & Ship"
+- [ ] Verify tracking number appears
+- [ ] Check BigCommerce/Shopify order is updated with tracking
+
+**Manifest Test:**
+- [ ] Print 2-3 test labels
+- [ ] Go to "Printed" tab
+- [ ] Click "Create Manifest"
+- [ ] Verify manifest PDF downloads
+
+---
+
+### Phase 6: Zebra Printer Setup (30 mins)
+> Configure direct printing to Zebra thermal printer
+
+**Prerequisites:**
+- [ ] Install Zebra Browser Print on warehouse computer: https://www.zebra.com/us/en/support-downloads/printer-software/browser-print.html
+- [ ] Connect Zebra printer (ZD420/ZD620 or similar)
+- [ ] Test printer is detected in Browser Print
+
+**Testing:**
+- [ ] Open /shipping page in Chrome/Edge
+- [ ] Create a test label
+- [ ] Verify label prints directly to Zebra
+- [ ] If Browser Print not detected, verify fallback to HTML viewer works
+
+---
+
+### Phase 7: Deploy to Production (15 mins)
+> Final deployment and go-live
+
+- [ ] Commit any remaining changes
+- [ ] Push to main branch
+- [ ] Deploy dashboard: `doctl apps create-deployment 1a0eed70-aef6-415e-953f-d2b7f0c7c832 --force-rebuild`
+- [ ] Wait for deployment to complete (5-10 mins)
+- [ ] Verify /home/shipping loads correctly
+- [ ] Verify /boo/shipping, /teelixir/shipping, /elevate/shipping work
+
+---
+
+### Phase 8: Staff Training & Handover (15 mins)
+> Quick reference for warehouse staff
+
+**Daily Workflow:**
+1. Open ops.growthcohq.com/{business}/shipping
+2. Click "Sync New" to pull today's orders
+3. Click each order → Set weight/package → Print Label
+4. At end of day, go to "Printed" tab → "Create Manifest"
+
+**Troubleshooting:**
+- If Zebra not detected: Refresh page, check Browser Print is running
+- If label fails: Check weight is set, try different service
+- If manifest fails: Ensure all printed orders have same carrier
+
+---
+
+### Key Files Reference
+
+| File | Purpose |
+|------|---------|
+| `dashboard/src/app/(dashboard)/[business]/shipping/page.tsx` | Main shipping UI |
+| `dashboard/src/components/shipping/OrderDetailsDrawer.tsx` | Label creation drawer |
+| `dashboard/src/app/api/shipping/label/route.ts` | Label creation API |
+| `dashboard/src/app/api/shipping/sync/route.ts` | Order sync API |
+| `dashboard/src/app/api/shipping/manifest/route.ts` | Manifest API |
+| `dashboard/src/lib/zebra-print.ts` | Zebra printer integration |
+| `dashboard/src/lib/sender-addresses.ts` | Warehouse addresses |
+| `shared/libs/integrations/auspost/client.ts` | AusPost API client |
+| `infra/supabase/migrations/20251201_shipping_platform_schema.sql` | Database schema |
+
+---
+
+### Quick Validation Checklist (Pre-Launch)
+
+- [ ] Can sync orders from all 3 platforms
+- [ ] Can create a label and get tracking number
+- [ ] Tracking number shows in source platform (BC/Shopify)
+- [ ] Zebra prints ZPL label OR fallback viewer works
+- [ ] Can create end-of-day manifest
+- [ ] Home view shows orders from all businesses with filter
 
 ---
 
