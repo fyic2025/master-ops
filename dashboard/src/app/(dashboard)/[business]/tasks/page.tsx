@@ -1007,6 +1007,8 @@ function TaskCard({ task, onClarificationSubmit }: { task: Task, onClarification
   const [clarificationResponse, setClarificationResponse] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
+  const [showCopyModal, setShowCopyModal] = useState(false)
+  const [copyModalText, setCopyModalText] = useState('')
 
   const copyToClipboard = async (e: React.MouseEvent) => {
     e.preventDefault()
@@ -1027,32 +1029,21 @@ function TaskCard({ task, onClarificationSubmit }: { task: Task, onClarification
         setCopyError(false)
         setTimeout(() => setCopied(false), 2000)
       } else {
-        // Open a new window with the text for manual copying
-        const win = window.open('', '_blank', 'width=800,height=600,scrollbars=yes')
-        if (win) {
-          win.document.write(`
-            <html>
-            <head><title>Copy for Claude - ${task.title || 'Task'}</title></head>
-            <body style="font-family: monospace; padding: 20px; background: #1a1a1a; color: #fff;">
-              <h3>Select All (Ctrl+A) and Copy (Ctrl+C):</h3>
-              <textarea id="content" style="width: 100%; height: 80vh; background: #2a2a2a; color: #fff; padding: 10px; border: 1px solid #444;">${text.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
-              <script>document.getElementById('content').select();</script>
-            </body>
-            </html>
-          `)
-          win.document.close()
-          setCopied(true)
-          setTimeout(() => setCopied(false), 2000)
-        } else {
-          setCopyError(true)
-          setTimeout(() => setCopyError(false), 3000)
-          alert('Popup blocked. Please allow popups for this site.')
-        }
+        // Show modal with text for manual copying
+        setCopyModalText(text)
+        setShowCopyModal(true)
       }
     } catch (err) {
       console.error('[Copy for Claude] Error:', err)
-      setCopyError(true)
-      setTimeout(() => setCopyError(false), 3000)
+      // Show modal as fallback
+      try {
+        const text = generateClaudePrompt(task)
+        setCopyModalText(text)
+        setShowCopyModal(true)
+      } catch {
+        setCopyError(true)
+        setTimeout(() => setCopyError(false), 3000)
+      }
     }
   }
 
@@ -1261,6 +1252,48 @@ After research, update this task in the dashboard with your findings.`
           <pre className="text-xs text-gray-300 whitespace-pre-wrap font-mono leading-relaxed">
             {task.instructions}
           </pre>
+        </div>
+      )}
+
+      {/* Copy Modal for manual copying when clipboard fails */}
+      {showCopyModal && (
+        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={() => setShowCopyModal(false)}>
+          <div className="bg-gray-900 border border-gray-700 rounded-lg max-w-4xl w-full max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-4 border-b border-gray-700">
+              <h3 className="text-white font-medium">Copy for Claude - {task.title}</h3>
+              <button onClick={() => setShowCopyModal(false)} className="text-gray-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-4 flex-1 overflow-hidden">
+              <p className="text-sm text-gray-400 mb-2">Select all (Ctrl+A) and copy (Ctrl+C):</p>
+              <textarea
+                readOnly
+                value={copyModalText}
+                className="w-full h-[60vh] bg-gray-800 text-gray-200 text-sm font-mono p-3 rounded border border-gray-600 resize-none focus:outline-none focus:border-blue-500"
+                onFocus={(e) => e.target.select()}
+              />
+            </div>
+            <div className="p-4 border-t border-gray-700 flex justify-end gap-2">
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(copyModalText).then(() => {
+                    setCopied(true)
+                    setTimeout(() => setCopied(false), 2000)
+                    setShowCopyModal(false)
+                  }).catch(() => {
+                    alert('Please manually select and copy the text')
+                  })
+                }}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded text-sm"
+              >
+                Try Copy Again
+              </button>
+              <button onClick={() => setShowCopyModal(false)} className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded text-sm">
+                Close
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
