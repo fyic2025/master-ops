@@ -291,6 +291,44 @@ async function findOrCreateUnleashedCustomer(
 }
 
 /**
+ * Check if a Shopify order already exists in Unleashed
+ * Searches for order number pattern like "Shopify31695"
+ */
+async function checkExistingUnleashedOrder(
+  config: StoreConfig,
+  shopifyOrderNumber: number
+): Promise<string | null> {
+  const orderNumber = `Shopify${shopifyOrderNumber}`
+  const queryString = `orderNumber=${encodeURIComponent(orderNumber)}`
+  const url = `${config.unleashed.apiUrl}/SalesOrders?${queryString}`
+  const signature = generateUnleashedSignature(queryString, config.unleashed.apiKey)
+
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'api-auth-id': config.unleashed.apiId,
+        'api-auth-signature': signature,
+      },
+    })
+
+    if (!response.ok) {
+      return null
+    }
+
+    const data = await response.json()
+    const items = data.Items || []
+    if (items.length > 0) {
+      return items[0].OrderNumber || items[0].Guid
+    }
+    return null
+  } catch {
+    return null
+  }
+}
+
+/**
  * Find customer in Unleashed by code
  */
 async function findUnleashedCustomer(
@@ -357,7 +395,7 @@ async function createUnleashedCustomer(
  */
 async function createUnleashedSalesOrder(
   config: StoreConfig,
-  order: UnleashedSalesOrder
+  order: UnleashedApiSalesOrder
 ): Promise<any> {
   const url = `${config.unleashed.apiUrl}/SalesOrders`
   const signature = generateUnleashedSignature('', config.unleashed.apiKey)
