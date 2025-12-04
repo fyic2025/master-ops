@@ -131,19 +131,6 @@ ALLOWED_TOOLS=$(echo "$TASK_DATA" | jq -r '.allowed_tools | join(",")')
 log_info "Task: $TASK_TITLE (Business: $TASK_BUSINESS, Priority: $TASK_PRIORITY)"
 
 # ═══════════════════════════════════════════════════════════════════════════
-# UPDATE STATUS TO IN_PROGRESS
-# ═══════════════════════════════════════════════════════════════════════════
-
-log_info "Setting task status to in_progress..."
-
-curl -s -X PATCH "${SUPABASE_URL}/rest/v1/tasks?id=eq.${TASK_ID}" \
-    -H "apikey: ${SUPABASE_KEY}" \
-    -H "Authorization: Bearer ${SUPABASE_KEY}" \
-    -H "Content-Type: application/json" \
-    -H "Prefer: return=minimal" \
-    -d "{\"status\": \"in_progress\", \"started_at\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}"
-
-# ═══════════════════════════════════════════════════════════════════════════
 # CONSTRUCT PROMPT
 # ═══════════════════════════════════════════════════════════════════════════
 
@@ -195,6 +182,19 @@ if [ "$DRY_RUN" = "1" ]; then
 fi
 
 # ═══════════════════════════════════════════════════════════════════════════
+# UPDATE STATUS TO IN_PROGRESS
+# ═══════════════════════════════════════════════════════════════════════════
+
+log_info "Setting task status to in_progress..."
+
+curl -s -X PATCH "${SUPABASE_URL}/rest/v1/tasks?id=eq.${TASK_ID}" \
+    -H "apikey: ${SUPABASE_KEY}" \
+    -H "Authorization: Bearer ${SUPABASE_KEY}" \
+    -H "Content-Type: application/json" \
+    -H "Prefer: return=minimal" \
+    -d "{\"status\": \"in_progress\", \"assigned_at\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}"
+
+# ═══════════════════════════════════════════════════════════════════════════
 # EXECUTE WITH CLAUDE CODE HEADLESS
 # ═══════════════════════════════════════════════════════════════════════════
 
@@ -244,11 +244,9 @@ curl -s -X PATCH "${SUPABASE_URL}/rest/v1/tasks?id=eq.${TASK_ID}" \
     -H "Prefer: return=minimal" \
     -d "{
         \"status\": \"$STATUS\",
-        \"supervisor_summary\": $ESCAPED_RESULT,
+        \"completion_notes\": $ESCAPED_RESULT,
         \"completed_at\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",
-        \"execution_time_ms\": $DURATION_MS,
-        \"cost_usd\": $COST_USD,
-        \"session_id\": \"$SESSION_ID\"
+        \"automation_notes\": \"duration_ms: $DURATION_MS, cost_usd: $COST_USD, session_id: $SESSION_ID\"
     }"
 
 # ═══════════════════════════════════════════════════════════════════════════
