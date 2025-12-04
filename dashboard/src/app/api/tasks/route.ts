@@ -110,6 +110,11 @@ export async function POST(request: NextRequest) {
       source_file: body.source_file || null,
       needs_research: body.needs_research || false,
       created_by: body.created_by || 'dashboard',
+      // Triage workflow fields
+      suggested_assignee: body.suggested_assignee || null,
+      triage_status: body.triage_status || null,
+      assigned_to: body.assigned_to || null,
+      automation_notes: body.automation_notes || null,
     }
 
     const { data, error } = await supabase

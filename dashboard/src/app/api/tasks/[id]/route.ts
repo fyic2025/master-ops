@@ -74,7 +74,9 @@ export async function PATCH(
       'clarification_request', 'clarification_response',
       // Task assignment and feedback fields
       'assigned_to', 'time_on_task_mins', 'completion_notes',
-      'completion_screenshot_url', 'assigned_at', 'completed_at'
+      'completion_screenshot_url', 'assigned_at', 'completed_at',
+      // Triage workflow fields
+      'suggested_assignee', 'triage_status', 'automation_notes'
     ]
 
     for (const field of allowedFields) {
@@ -136,6 +138,16 @@ export async function PATCH(
         source: body.updated_by || 'dashboard',
         status: 'info',
         message: `Task assigned to: ${body.assigned_to}`,
+      })
+    }
+
+    // Log triage completion
+    if (body.triage_status === 'triaged') {
+      await supabase.from('task_logs').insert({
+        task_id: id,
+        source: body.updated_by || 'admin',
+        status: 'info',
+        message: `Task triaged. ${body.assigned_to ? `Assigned to: ${body.assigned_to}` : 'Routed to system'}${body.automation_notes ? `. Notes: ${body.automation_notes.slice(0, 100)}` : ''}`,
       })
     }
 
