@@ -84,7 +84,16 @@
       "Bash(git pull:*)",
       "Bash(git fetch:*)",
       "Bash(npm view:*)",
-      "Bash(npm search:*)"
+      "Bash(npm search:*)",
+      "Bash(npx:*)",
+      "Bash(pip install:*)",
+      "Bash(python -m uv:*)",
+      "Bash(grep:*)",
+      "Bash(mkdir:*)",
+      "Bash(doctl apps get:*)",
+      "Bash(nslookup automations.growthcohq.com)",
+      "Bash(nslookup:*)",
+      "Bash(git restore:*)"
     ],
     "deny": [],
     "ask": []
