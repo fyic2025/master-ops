@@ -196,6 +196,40 @@ When working on any business-specific task, always specify the business slug.
 
 ---
 
+## MCP Servers (VS Code Integration)
+
+The following MCP servers are configured in VS Code for direct platform access:
+
+### Database Access
+| Server | Project | Capabilities |
+|--------|---------|--------------|
+| `supabase-teelixir-leads` | teelixir-leads | SQL queries, table design, migrations |
+| `supabase-boo` | Buy Organics Online | SQL queries, table design, migrations |
+| `supabase-elevate` | Elevate | SQL queries, table design, migrations |
+
+### E-Commerce & Marketing
+| Server | Capabilities |
+|--------|--------------|
+| `shopify-dev` | Shopify API docs, GraphQL schema, dev tools |
+| `klaviyo-teelixir` | Teelixir email campaigns, flows, segments |
+| `klaviyo-boo` | BOO email campaigns, flows, segments |
+| `klaviyo-elevate` | Elevate email campaigns, flows, segments |
+
+### Development & Research
+| Server | Capabilities |
+|--------|--------------|
+| `github` | Repo management, PRs, issues, code search |
+| `brave-search` | Web research (2K queries/month) |
+| `puppeteer` | Browser automation, scraping, testing |
+| `chrome-devtools` | Browser debugging, network inspection, DOM |
+
+### MCP Config Location
+```
+C:\Users\jayso\AppData\Roaming\Code\User\mcp.json
+```
+
+---
+
 ## Environment & Credentials
 
 Credentials are stored in Supabase vault. Access via:
@@ -206,9 +240,12 @@ node creds.js get <business> <key>
 Common keys:
 - `shopify_access_token` - Shopify Admin API
 - `bigcommerce_access_token` - BigCommerce API
-- `klaviyo_api_key` - Klaviyo API
+- `klaviyo_api_key` - Klaviyo public API key
+- `klaviyo_private_key` - Klaviyo private API key (for MCP)
 - `google_refresh_token` - Google APIs (GA4, GSC, Ads)
 - `apify_token` - Apify web scraping API (global)
+- `github_pat` - GitHub Personal Access Token (global)
+- `brave_api_key` - Brave Search API (global)
 
 ---
 

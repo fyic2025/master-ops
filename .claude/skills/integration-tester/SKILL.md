@@ -20,6 +20,19 @@ Activate this skill when the user mentions:
 - "generate integration test"
 - "check if [service] is working"
 
+## MCP Browser Testing Tools
+
+Browser automation and debugging available via VS Code MCP:
+
+| MCP Server | Use For |
+|------------|---------|
+| `puppeteer` | Browser automation, form testing, scraping, screenshots |
+| `chrome-devtools` | Network inspection, DOM debugging, console access |
+
+These tools enable end-to-end testing of web integrations, checkout flows, and UI verification.
+
+---
+
 ## Testing Methodology
 
 ### Phase 1: Initial Assessment

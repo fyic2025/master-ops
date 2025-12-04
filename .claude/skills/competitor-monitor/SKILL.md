@@ -19,6 +19,18 @@ allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Task
 
 ---
 
+## MCP Research Tools
+
+Direct research and scraping tools available via VS Code MCP:
+
+| MCP Server | Use For |
+|------------|---------|
+| `brave-search` | Competitor research, market news, product searches |
+| `puppeteer` | Scrape competitor websites, pricing, product lists |
+| `chrome-devtools` | Inspect competitor page structure, network calls |
+
+---
+
 ## Capabilities
 
 ### Core Functions

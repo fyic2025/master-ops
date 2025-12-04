@@ -20,6 +20,18 @@ allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Task
 
 ---
 
+## MCP Server Access
+
+Direct Shopify development tools available via VS Code MCP:
+
+| MCP Server | Capabilities |
+|------------|--------------|
+| `shopify-dev` | API docs, GraphQL schema introspection, dev tools |
+
+The MCP server provides instant access to Shopify documentation, Admin GraphQL schema, and API references without needing to search external docs.
+
+---
+
 ## Capabilities
 
 ### Core Functions

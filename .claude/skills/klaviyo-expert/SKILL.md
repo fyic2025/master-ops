@@ -19,6 +19,20 @@ allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Task
 
 ---
 
+## MCP Server Access
+
+Direct Klaviyo API access is available via VS Code MCP servers:
+
+| MCP Server | Account | Business |
+|------------|---------|----------|
+| `klaviyo-teelixir` | Teelixir AU | Teelixir |
+| `klaviyo-boo` | Buy Organics Online | BOO |
+| `klaviyo-elevate` | Elevate Wholesale | Elevate |
+
+These MCP servers provide direct access to campaigns, flows, segments, templates, and analytics without needing scripts.
+
+---
+
 ## Capabilities
 
 ### Core Functions

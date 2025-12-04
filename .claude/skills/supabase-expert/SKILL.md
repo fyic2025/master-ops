@@ -24,6 +24,18 @@ Activate this skill when the user mentions:
 - "database warnings/errors"
 - "rationalize tables"
 
+## MCP Server Access
+
+Direct database access is available via VS Code MCP servers:
+
+| MCP Server | Project | Use For |
+|------------|---------|---------|
+| `supabase-teelixir-leads` | qcvfxxsnqvdfmpbcgdni | Teelixir Leads / Shared DB |
+| `supabase-boo` | usibnysqelovfuctmkqw | Buy Organics Online |
+| `supabase-elevate` | xioudaqfmkdpkgujxehv | Elevate Wholesale |
+
+These MCP servers provide direct SQL execution, schema inspection, and migration capabilities without needing scripts.
+
 ## Core Capabilities
 
 This skill combines 5 specialized sub-capabilities:
