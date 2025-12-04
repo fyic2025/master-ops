@@ -60,6 +60,8 @@ interface UnleashedApiSalesOrderLine {
   UnitPrice: number
   DiscountRate: number
   LineTotal: number
+  TaxRate: number
+  LineTax: number
   Comments?: string
 }
 
@@ -123,6 +125,8 @@ export async function syncOrder(
             UnitPrice: unitPrice,
             DiscountRate: 0,
             LineTotal: Math.round(componentQty * unitPrice * 100) / 100,
+            TaxRate: 0,
+            LineTax: 0,
             Comments: `Bundle: ${item.title}`,
           })
           console.log(`      → ${component.unleashed_product_code} x${componentQty}`)
@@ -140,6 +144,8 @@ export async function syncOrder(
           UnitPrice: unitPrice,
           DiscountRate: 0,
           LineTotal: lineTotal,
+          TaxRate: 0,
+          LineTax: 0,
         })
         if (verbose) {
           console.log(`   📦 ${item.sku}: ${item.title} x${item.quantity}`)
