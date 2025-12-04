@@ -1,4 +1,4 @@
-// Nav config v2025-12-03T10:00
+// Nav config v2025-12-04T10:00
 import {
   Home,
   TrendingUp,
@@ -23,6 +23,7 @@ import {
   Cloud,
   ClipboardList,
   GitBranch,
+  Boxes,
   type LucideIcon
 } from 'lucide-react'
 
@@ -109,6 +110,7 @@ export const BUSINESSES: Record<BusinessCode, Business> = {
     navigation: [
       { name: 'Dashboard', href: '', icon: Home },
       { name: 'Shipping', href: '/shipping', icon: Send },
+      { name: 'Inventory', href: '/inventory', icon: Boxes },
       { name: 'Distributors', href: '/distributors', icon: Truck },
       { name: 'Dist. Trends', href: '/distributors/trends', icon: TrendingUp },
       { name: 'Automations', href: '/automations', icon: Zap },
