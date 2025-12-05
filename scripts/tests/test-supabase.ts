@@ -71,7 +71,7 @@ async function testSupabaseIntegration() {
       // Try to call get_tasks_for_retry RPC
       const tasksForRetry = await supabaseClient.rpc('get_tasks_for_retry', {
         p_max_retries: 3,
-      });
+      }) as unknown[];
       results.rpcFunctions = true;
       console.log(`✅ RPC functions available - get_tasks_for_retry returned ${tasksForRetry?.length || 0} tasks`);
     } catch (error) {

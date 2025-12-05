@@ -88,15 +88,15 @@ export class WorkflowAutomation {
     // Get workflow statistics (last 24 hours)
     const stats = await n8nClient.getWorkflowStats(workflowId, 1)
 
-    if (stats.executions.total === 0) {
+    if (stats.totalExecutions === 0) {
       status.issues.push('No recent executions')
       if (workflow.active) {
         status.healthy = false
       }
     } else {
-      status.successRate = (stats.executions.success / stats.executions.total) * 100
-      status.avgDuration = stats.performance.avgDuration
-      status.recentFailures = stats.executions.error
+      status.successRate = stats.successRate
+      status.avgDuration = 0 // Duration stats not available from n8n API
+      status.recentFailures = stats.failedExecutions
 
       // Get last execution time
       const executions = await n8nClient.executions.list({ workflowId, limit: 1 })
@@ -495,6 +495,7 @@ export class WorkflowAutomation {
       .delete()
       .eq('workflow_id', workflowId)
       .lt('started_at', cutoffDate.toISOString())
+      .select('id')
 
     if (error) {
       logger.error('Failed to cleanup executions', {
@@ -504,7 +505,7 @@ export class WorkflowAutomation {
       return 0
     }
 
-    const deletedCount = Array.isArray(data) ? data.length : 0
+    const deletedCount = data?.length ?? 0
 
     logger.info('Cleanup completed', {
       source: 'workflow-automation',

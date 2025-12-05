@@ -268,4 +268,13 @@ export class ErrorHandler {
       retryable: false,
     })
   }
+
+  static serviceUnavailable(message: string, context: Omit<IntegrationErrorContext, 'category'> = {}): IntegrationError {
+    return new IntegrationError(message, {
+      ...context,
+      category: 'SERVER_ERROR',
+      code: context.code || 'SERVICE_UNAVAILABLE',
+      retryable: true,
+    })
+  }
 }

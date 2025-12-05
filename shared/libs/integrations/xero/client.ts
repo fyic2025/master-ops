@@ -164,7 +164,7 @@ class XeroConnector extends BaseConnector {
         })
       }
 
-      return response.json() as XeroOAuthToken
+      return await response.json() as XeroOAuthToken
     })
   }
 
@@ -195,7 +195,7 @@ class XeroConnector extends BaseConnector {
         })
       }
 
-      return response.json() as XeroOAuthToken
+      return await response.json() as XeroOAuthToken
     })
   }
 
@@ -264,7 +264,7 @@ class XeroConnector extends BaseConnector {
         throw await this.handleErrorResponse(response)
       }
 
-      return response.json() as XeroConnection[]
+      return await response.json() as XeroConnection[]
     })
   }
 
