@@ -108,9 +108,9 @@ Premium adaptogens and medicinal mushrooms.
 ### Automations
 > n8n workflows, scheduled jobs, sync processes
 
-- [ ] **P2** Anniversary Upsell: Enable automation in dashboard
-- [ ] **P2** Anniversary Upsell: Schedule queue-anniversary-emails.ts in n8n (daily)
-- [ ] **P2** Anniversary Upsell: Schedule send-anniversary-upsell.ts in n8n (hourly 9am-6pm AEST)
+- [x] **P2** Anniversary Upsell: Enable automation in dashboard | LIVE - enabled=true
+- [x] **P2** Anniversary Upsell: Schedule queue-anniversary-emails.ts | PM2 cron daily at 8am AEST
+- [x] **P2** Anniversary Upsell: Schedule send-anniversary-upsell.ts | PM2 cron hourly 9am-6pm AEST
 
 ### SEO
 > Rankings, content optimization, technical SEO, GSC
@@ -278,6 +278,7 @@ Tasks moved here after completion for reference.
 - [x] **2025-12-04** CI/CD batch 1 TypeScript fixes | Fixed 10 TS errors in unleashed-shopify-sync (order-sync, unleashed-api, inventory-sync)
 - [x] **2025-12-05** TASK-17 Task attachments feature | File upload/download for tasks - migration pending
 - [x] **2025-12-05** TASK-33 Fix unleashed-order-sync n8n workflow | Fixed crypto module blocked by n8n security
+- [x] **2025-12-05** Anniversary Upsell automation LIVE | PM2 cron jobs deployed, 8am queue + hourly 9am-6pm sender
 
 ---
 
@@ -319,30 +320,32 @@ This ensures the dashboard always reflects current codebase state.
 
 ## Anniversary Upsell System Notes
 
-**Status:** Tested and Ready for Activation
+**Status:** LIVE (2025-12-05)
 
-**Test Results (2025-12-04 - Re-validated):**
+**Deployment:**
+- Scripts deployed to droplet at `/root/master-ops/teelixir/scripts/`
+- PM2 cron jobs configured and saved
+- Automation enabled in database (enabled=true)
+
+**PM2 Jobs:**
+- `anniversary-queue-daily`: Runs daily at 8am AEST (`0 8 * * *`)
+- `anniversary-send-hourly`: Runs hourly 9am-6pm AEST (`0 9-18 * * *`)
+
+**Test Results (2025-12-05):**
 - All 8 phases passed
 - Test email delivered to jayson@fyic.com.au (discount code: JAYSONUSER15)
 - Gmail OAuth working (colette@teelixir.com)
 - Shopify discount code creation working
 - 500 candidates in view, 0 due today (customers maturing into send window)
-- Melbourne time 15:20 - within send window (9AM-7PM)
 
 **Scripts:**
 - teelixir/scripts/queue-anniversary-emails.ts - Run daily to queue eligible customers
 - teelixir/scripts/send-anniversary-upsell.ts - Run hourly (9am-6pm AEST) to send emails
 
-**Activation Steps:**
-1. Enable in dashboard: ops.growthcohq.com/teelixir/automations/anniversary_upsell
-2. Create n8n workflow for daily queue builder
-3. Create n8n workflow for hourly sender (9am-6pm AEST)
-4. First emails will go out in ~26-40 days when customers mature into send window
-
-**Teelixir Automation Tasks:**
-- [ ] P2 Anniversary Upsell: Enable automation in dashboard
-- [ ] P2 Anniversary Upsell: Schedule queue-anniversary-emails.ts in n8n (daily)
-- [ ] P2 Anniversary Upsell: Schedule send-anniversary-upsell.ts in n8n (hourly 9am-6pm AEST)
+**Monitoring:**
+- Check PM2 logs: `pm2 logs anniversary-queue-daily` / `pm2 logs anniversary-send-hourly`
+- Check queue: `https://ops.growthcohq.com/api/automations/anniversary/queue`
+- Check stats: `https://ops.growthcohq.com/api/automations/anniversary/stats`
 
 ---
 
