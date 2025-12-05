@@ -36,7 +36,7 @@ async function testGitHubIntegration() {
       throw new Error(`HTTP ${userResponse.status}: ${userResponse.statusText}`)
     }
 
-    const userData = await userResponse.json()
+    const userData = await userResponse.json() as { login: string; name: string; public_repos: number }
     console.log('✅ User Info:', {
       login: userData.login,
       name: userData.name,
@@ -58,7 +58,7 @@ async function testGitHubIntegration() {
       throw new Error(`HTTP ${reposResponse.status}: ${reposResponse.statusText}`)
     }
 
-    const repos = await reposResponse.json()
+    const repos = await reposResponse.json() as Array<{ name: string; full_name: string; private: boolean; updated_at: string }>
     console.log(`✅ Found ${repos.length} recent repositories`)
 
     if (repos.length > 0) {

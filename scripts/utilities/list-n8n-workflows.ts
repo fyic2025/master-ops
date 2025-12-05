@@ -22,7 +22,7 @@ async function listWorkflows() {
       throw new Error(`Failed to fetch workflows: ${response.status} ${response.statusText}`);
     }
 
-    const result = await response.json();
+    const result = await response.json() as { data?: any[] };
     const workflows = result.data || [];
 
     console.log(`Found ${workflows.length} workflows:\n`);

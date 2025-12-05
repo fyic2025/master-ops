@@ -39,7 +39,7 @@ async function testBraveSearchIntegration() {
       throw new Error(`HTTP ${searchResponse.status}: ${searchResponse.statusText}`)
     }
 
-    const searchData = await searchResponse.json()
+    const searchData = await searchResponse.json() as { type: string; web?: { results?: Array<{ title: string; url: string }> } }
     console.log('✅ Search API Response:', {
       type: searchData.type,
       resultsCount: searchData.web?.results?.length || 0,

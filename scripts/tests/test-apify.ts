@@ -34,7 +34,7 @@ async function testApifyIntegration() {
       throw new Error(`HTTP ${userResponse.status}: ${userResponse.statusText}`)
     }
 
-    const userData = await userResponse.json()
+    const userData = await userResponse.json() as { data?: { username?: string; email?: string; plan?: string } }
     console.log('✅ User Info:', {
       username: userData.data?.username,
       email: userData.data?.email,
@@ -54,7 +54,7 @@ async function testApifyIntegration() {
       throw new Error(`HTTP ${actorsResponse.status}: ${actorsResponse.statusText}`)
     }
 
-    const actorsData = await actorsResponse.json()
+    const actorsData = await actorsResponse.json() as { data?: { items?: any[] } }
     const actors = actorsData.data?.items || []
     console.log(`✅ Found ${actors.length} actors`)
 

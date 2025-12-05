@@ -32,7 +32,7 @@ async function listCredentials() {
       console.log(`  Status: ${response.status} ${response.statusText}\n`);
 
       if (response.ok) {
-        const result = await response.json();
+        const result = await response.json() as { data?: any[] };
         const credentials = result.data || result;
 
         console.log('✅ Credentials found:\n');

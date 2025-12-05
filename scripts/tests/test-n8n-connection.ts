@@ -37,8 +37,8 @@ async function testN8nConnection() {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`)
     }
 
-    const data = await response.json()
-    const workflows = data.data || data
+    const data = await response.json() as { data?: any[] } | any[]
+    const workflows = (data as { data?: any[] }).data || []
 
     console.log(`✅ Success! Found ${workflows.length} workflow(s)`)
 

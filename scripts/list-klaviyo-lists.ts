@@ -40,7 +40,7 @@ async function listLists() {
     process.exit(1)
   }
 
-  const data = await response.json()
+  const data = await response.json() as { data?: any[] }
   const lists = data.data || []
 
   console.log(`📋 Found ${lists.length} lists:\n`)

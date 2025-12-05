@@ -38,7 +38,7 @@ async function testSmartleadIntegration() {
       throw new Error(`HTTP ${campaignsResponse.status}: ${campaignsResponse.statusText}`)
     }
 
-    const campaigns = await campaignsResponse.json()
+    const campaigns = await campaignsResponse.json() as Array<{ id: string; name: string; status: string }>
     console.log(`✅ Found ${campaigns.length || 0} campaigns`)
 
     if (campaigns && campaigns.length > 0) {
@@ -63,7 +63,7 @@ async function testSmartleadIntegration() {
     )
 
     if (accountResponse.ok) {
-      const accountData = await accountResponse.json()
+      const accountData = await accountResponse.json() as { email?: string; name?: string }
       console.log('✅ Account Info:', {
         email: accountData.email || 'N/A',
         name: accountData.name || 'N/A',

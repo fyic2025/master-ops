@@ -32,7 +32,7 @@ async function logStart(): Promise<string | null> {
       })
     })
     if (!response.ok) return null
-    const data = await response.json()
+    const data = await response.json() as Array<{ id?: string }>
     return data[0]?.id || null
   } catch {
     return null
@@ -95,12 +95,12 @@ async function fetchPage(page: number): Promise<{ products: any[], hasMore: bool
     throw new Error(`BigCommerce API error: ${response.status}`)
   }
 
-  const data = await response.json()
+  const data = await response.json() as { data?: any[]; meta?: { pagination?: { current_page?: number; total_pages?: number; total?: number } } }
   const pagination = data.meta?.pagination || {}
 
   return {
     products: data.data || [],
-    hasMore: pagination.current_page < pagination.total_pages,
+    hasMore: (pagination.current_page || 0) < (pagination.total_pages || 0),
     total: pagination.total || 0
   }
 }

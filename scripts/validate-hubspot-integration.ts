@@ -142,7 +142,7 @@ async function validateAPIConnectivity() {
       );
 
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json() as { shop: { name: string } };
         addResult('API', 'Shopify Teelixir', 'pass', `✓ Connected - ${data.shop.name}`);
         console.log(`${colors.green}✓${colors.reset} Shopify Teelixir - Connected - ${data.shop.name}`);
       } else {
@@ -171,7 +171,7 @@ async function validateAPIConnectivity() {
       );
 
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json() as { shop: { name: string } };
         addResult('API', 'Shopify Elevate', 'pass', `✓ Connected - ${data.shop.name}`);
         console.log(`${colors.green}✓${colors.reset} Shopify Elevate - Connected - ${data.shop.name}`);
       } else {

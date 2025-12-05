@@ -46,7 +46,7 @@ async function listSegments() {
     process.exit(1)
   }
 
-  const data = await response.json()
+  const data = await response.json() as { data?: any[] }
   const segments = data.data || []
 
   console.log(`\n📋 Found ${segments.length} segments:\n`)
