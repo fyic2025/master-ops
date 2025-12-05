@@ -78,6 +78,7 @@ export const BUSINESSES: Record<BusinessCode, Business> = {
       { name: 'Dashboard', href: '', icon: Home },
       { name: 'Tasks', href: '/tasks', icon: ClipboardList },
       { name: 'Issues', href: '/issues', icon: AlertTriangle },
+      { name: 'n8n Health', href: '/n8n', icon: Zap },
     ]
   },
   boo: {
