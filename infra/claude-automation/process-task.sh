@@ -220,9 +220,6 @@ DURATION_MS=$(echo "$RESULT" | jq -r '.duration_ms // 0')
 COST_USD=$(echo "$RESULT" | jq -r '.total_cost_usd // 0')
 SESSION_ID=$(echo "$RESULT" | jq -r '.session_id // ""')
 
-log_debug "IS_ERROR value: [$IS_ERROR]"
-log_debug "RESULT first 200 chars: ${RESULT:0:200}"
-
 if [ "$IS_ERROR" = "false" ]; then
     STATUS="completed"
     log_info "Task completed successfully"
@@ -264,15 +261,17 @@ curl -s -X POST "${SUPABASE_URL}/rest/v1/task_logs" \
     -H "Content-Type: application/json" \
     -H "Prefer: return=minimal" \
     -d "{
-        \"task_id\": \"$TASK_ID\",
-        \"event\": \"execution_complete\",
+        \"task_id\": $TASK_ID,
+        \"source\": \"claude_automation\",
         \"status\": \"$STATUS\",
-        \"session_id\": \"$SESSION_ID\",
-        \"duration_ms\": $DURATION_MS,
-        \"cost_usd\": $COST_USD,
-        \"output\": $ESCAPED_RESULT,
-        \"created_at\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
-    }" 2>/dev/null || log_debug "task_logs table may not exist yet"
+        \"message\": \"Task $TASK_ID execution complete\",
+        \"details_json\": {
+            \"session_id\": \"$SESSION_ID\",
+            \"duration_ms\": $DURATION_MS,
+            \"cost_usd\": $COST_USD,
+            \"result_preview\": $(echo "$RESULT_TEXT" | head -c 500 | jq -Rs '.')
+        }
+    }" 2>/dev/null || log_debug "task_logs insert failed"
 
 # ═══════════════════════════════════════════════════════════════════════════
 # FINAL OUTPUT
