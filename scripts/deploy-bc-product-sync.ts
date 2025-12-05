@@ -294,7 +294,7 @@ async function deploy() {
       throw new Error(`Failed to create workflow: ${response.status} - ${error}`)
     }
 
-    const result = await response.json()
+    const result = await response.json() as { id: string }
     console.log(`Workflow created successfully!`)
     console.log(`ID: ${result.id}`)
     console.log(`URL: ${N8N_URL}/workflow/${result.id}`)
@@ -325,7 +325,7 @@ async function deploy() {
     })
 
     if (execResponse.ok) {
-      const execResult = await execResponse.json()
+      const execResult = await execResponse.json() as { data?: { executionId?: string } }
       console.log(`Execution started! ID: ${execResult.data?.executionId || 'N/A'}`)
       console.log(`\nMonitor progress at: ${N8N_URL}/execution/${execResult.data?.executionId || ''}`)
     } else {

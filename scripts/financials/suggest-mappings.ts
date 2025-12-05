@@ -560,8 +560,9 @@ async function main() {
     logger.info('Account mapping suggestion process completed');
 
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
     logger.error('Error in account mapping process:', error);
-    console.error('Error:', error.message);
+    console.error('Error:', errorMessage);
     process.exit(1);
   } finally {
     rl.close();

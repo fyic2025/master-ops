@@ -249,7 +249,7 @@ async function deploy() {
       throw new Error(`Failed to create workflow: ${response.status} - ${error}`)
     }
 
-    const result = await response.json()
+    const result = await response.json() as { id: string }
     console.log(`Workflow created successfully!`)
     console.log(`ID: ${result.id}`)
     console.log(`URL: ${N8N_URL}/workflow/${result.id}`)

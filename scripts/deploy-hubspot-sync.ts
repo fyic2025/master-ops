@@ -42,19 +42,30 @@ async function n8nRequest(endpoint: string, method = 'GET', body?: any) {
   return response.json();
 }
 
+interface N8nCredential {
+  id: string;
+  name: string;
+  type: string;
+}
+
+interface N8nWorkflow {
+  id: string;
+  active?: boolean;
+}
+
 async function checkCredentials() {
   console.log('🔍 Checking existing credentials in n8n...\n');
 
   try {
-    const creds = await n8nRequest('/credentials');
+    const creds = await n8nRequest('/credentials') as { data?: N8nCredential[] };
 
     // Check for HubSpot credential
-    const hubspotCred = creds.data?.find((c: any) =>
+    const hubspotCred = creds.data?.find((c) =>
       c.name.toLowerCase().includes('hubspot') || c.type === 'httpHeaderAuth'
     );
 
     // Check for Supabase/Postgres credential
-    const supabaseCred = creds.data?.find((c: any) =>
+    const supabaseCred = creds.data?.find((c) =>
       c.name.toLowerCase().includes('supabase') || c.type === 'postgres'
     );
 
@@ -64,13 +75,14 @@ async function checkCredentials() {
     console.log('');
 
     return { hubspotCred, supabaseCred };
-  } catch (error: any) {
-    console.error('Error checking credentials:', error.message);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('Error checking credentials:', errorMessage);
     return { hubspotCred: null, supabaseCred: null };
   }
 }
 
-async function createHubSpotCredential() {
+async function createHubSpotCredential(): Promise<N8nCredential | null> {
   console.log('📝 Creating HubSpot API credential...');
 
   if (!HUBSPOT_ACCESS_TOKEN) {
@@ -86,17 +98,18 @@ async function createHubSpotCredential() {
         name: 'Authorization',
         value: `Bearer ${HUBSPOT_ACCESS_TOKEN}`,
       },
-    });
+    }) as N8nCredential;
 
     console.log(`✅ Created HubSpot credential (ID: ${credential.id})\n`);
     return credential;
-  } catch (error: any) {
-    console.error('❌ Failed to create HubSpot credential:', error.message);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('❌ Failed to create HubSpot credential:', errorMessage);
     return null;
   }
 }
 
-async function createSupabaseCredential() {
+async function createSupabaseCredential(): Promise<N8nCredential | null> {
   console.log('📝 Creating Supabase credential...');
 
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
@@ -120,12 +133,13 @@ async function createSupabaseCredential() {
         port: 5432,
         ssl: 'allow',
       },
-    });
+    }) as N8nCredential;
 
     console.log(`✅ Created Supabase credential (ID: ${credential.id})\n`);
     return credential;
-  } catch (error: any) {
-    console.error('❌ Failed to create Supabase credential:', error.message);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('❌ Failed to create Supabase credential:', errorMessage);
     console.log('   Trying alternative host format...');
 
     try {
@@ -140,12 +154,13 @@ async function createSupabaseCredential() {
           port: 6543, // Supabase transaction pooler port
           ssl: 'require',
         },
-      });
+      }) as N8nCredential;
 
       console.log(`✅ Created Supabase credential with alternative format (ID: ${credential.id})\n`);
       return credential;
-    } catch (error2: any) {
-      console.error('❌ Failed with alternative format too:', error2.message);
+    } catch (error2) {
+      const error2Message = error2 instanceof Error ? error2.message : String(error2);
+      console.error('❌ Failed with alternative format too:', error2Message);
       return null;
     }
   }
@@ -188,14 +203,15 @@ async function importWorkflow(hubspotCredId: string, supabaseCredId: string) {
   workflowJson.name = '🚀 Smartlead → HubSpot Outreach Tracking (Auto-deployed)';
 
   try {
-    const result = await n8nRequest('/workflows', 'POST', workflowJson);
+    const result = await n8nRequest('/workflows', 'POST', workflowJson) as N8nWorkflow;
     console.log(`✅ Workflow imported successfully!`);
     console.log(`   Workflow ID: ${result.id}`);
     console.log(`   Webhook URL: ${N8N_BASE_URL}/webhook/smartlead-webhook`);
     console.log(`   Status: ${result.active ? '✅ ACTIVE' : '⚠️ INACTIVE'}\n`);
     return result;
-  } catch (error: any) {
-    console.error('❌ Failed to import workflow:', error.message);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('❌ Failed to import workflow:', errorMessage);
     throw error;
   }
 }
@@ -239,8 +255,9 @@ async function testWorkflow(workflowId: string) {
       console.log('   Response:', text.substring(0, 200));
       return false;
     }
-  } catch (error: any) {
-    console.error('❌ Test webhook failed:', error.message);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('❌ Test webhook failed:', errorMessage);
     return false;
   }
 }
@@ -307,8 +324,9 @@ async function main() {
     console.log('');
     console.log('=' .repeat(60));
 
-  } catch (error: any) {
-    console.error('\n❌ Deployment failed:', error.message);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('\n❌ Deployment failed:', errorMessage);
     console.error('\nPlease import workflow manually:');
     console.error('  1. Go to https://automation.growthcohq.com');
     console.error('  2. Import: infra/n8n-workflows/templates/smartlead-hubspot-sync-FIXED.json');
