@@ -25,6 +25,7 @@ import {
   ClipboardList,
   GitBranch,
   Boxes,
+  Building2,
   type LucideIcon
 } from 'lucide-react'
 
