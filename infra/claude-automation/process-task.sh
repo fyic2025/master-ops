@@ -523,6 +523,57 @@ curl -s -X POST "${SUPABASE_URL}/rest/v1/task_logs" \
     }" 2>/dev/null || log_debug "task_logs insert failed"
 
 # ═══════════════════════════════════════════════════════════════════════════
+# CREATE NOTIFICATION
+# ═══════════════════════════════════════════════════════════════════════════
+
+log_info "Creating notification..."
+
+# Determine notification type and message
+case "$FINAL_STATUS" in
+    "completed")
+        NOTIF_TYPE="completed"
+        NOTIF_TITLE="Task Completed: $TASK_TITLE"
+        NOTIF_MESSAGE="Task #$TASK_ID completed successfully using $FINAL_MODEL model. Cost: \$${TOTAL_COST}"
+        ;;
+    "needs_manual")
+        NOTIF_TYPE="needs_manual"
+        NOTIF_TITLE="Manual Review Required: $TASK_TITLE"
+        NOTIF_MESSAGE="Task #$TASK_ID exhausted all models and needs manual handling. Tried $ATTEMPT_COUNT models."
+        ;;
+    *)
+        NOTIF_TYPE="failed"
+        NOTIF_TITLE="Task Failed: $TASK_TITLE"
+        NOTIF_MESSAGE="Task #$TASK_ID failed after $ATTEMPT_COUNT attempts. Last model: $FINAL_MODEL"
+        ;;
+esac
+
+# Add escalation flag to type if escalated
+if [ "$ESCALATED" = "true" ]; then
+    NOTIF_TYPE="escalated"
+    NOTIF_TITLE="[Escalated] $NOTIF_TITLE"
+fi
+
+# Insert notification
+curl -s -X POST "${SUPABASE_URL}/rest/v1/notifications" \
+    -H "apikey: ${SUPABASE_KEY}" \
+    -H "Authorization: Bearer ${SUPABASE_KEY}" \
+    -H "Content-Type: application/json" \
+    -H "Prefer: return=minimal" \
+    -d "{
+        \"task_id\": $TASK_ID,
+        \"type\": \"$NOTIF_TYPE\",
+        \"title\": $(echo "$NOTIF_TITLE" | jq -Rs '.'),
+        \"message\": $(echo "$NOTIF_MESSAGE" | jq -Rs '.'),
+        \"metadata\": {
+            \"model_used\": \"$FINAL_MODEL\",
+            \"escalated\": $ESCALATED,
+            \"cost_usd\": $TOTAL_COST,
+            \"duration_ms\": $TOTAL_DURATION,
+            \"attempt_count\": $ATTEMPT_COUNT
+        }
+    }" 2>/dev/null || log_debug "notification insert failed"
+
+# ═══════════════════════════════════════════════════════════════════════════
 # FINAL OUTPUT
 # ═══════════════════════════════════════════════════════════════════════════
 

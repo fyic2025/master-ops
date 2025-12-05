@@ -6,6 +6,7 @@ import { useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { BUSINESSES, BUSINESS_ORDER, type BusinessCode } from '@/lib/business-config'
 import { getAllowedBusinesses, isAdmin, getDefaultRedirect } from '@/lib/user-permissions'
+import { NotificationBell } from './NotificationBell'
 
 export function TopHeader() {
   const params = useParams()
@@ -70,6 +71,12 @@ export function TopHeader() {
           )
         })}
       </nav>
+
+      {/* Spacer */}
+      <div className="flex-1" />
+
+      {/* Notifications */}
+      <NotificationBell />
     </header>
   )
 }
