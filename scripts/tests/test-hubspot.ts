@@ -4,7 +4,7 @@
  * Run with: npx tsx test-hubspot.ts
  */
 
-import { hubspotClient, hubspotAPI } from './shared/libs/hubspot';
+import { hubspotClient, hubspotAPI } from '../../shared/libs/hubspot';
 
 async function testHubSpotIntegration() {
   console.log('🧪 Testing HubSpot Integration...\n');

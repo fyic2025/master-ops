@@ -26,6 +26,8 @@ import {
   ArrowRight
 } from 'lucide-react'
 import { getAllowedBusinesses, isAdmin } from '@/lib/user-permissions'
+import AttachmentUpload from '@/components/tasks/AttachmentUpload'
+import AttachmentList from '@/components/tasks/AttachmentList'
 
 // Task Framework Structure
 const TASK_FRAMEWORK = {
@@ -1099,6 +1101,19 @@ function MarkCompleteModal({
   )
 }
 
+// Attachment type for task attachments
+interface TaskAttachment {
+  id: string
+  filename: string
+  original_filename: string
+  file_type: string
+  size_bytes: number
+  storage_path: string
+  uploaded_by: string
+  description: string | null
+  uploaded_at: string
+}
+
 // Simplified task card for Rajani to update status, time, notes
 function RajaniTaskCard({ task, onUpdate }: { task: Task, onUpdate: () => void }) {
   const [status, setStatus] = useState(task.status)
@@ -1108,6 +1123,27 @@ function RajaniTaskCard({ task, onUpdate }: { task: Task, onUpdate: () => void }
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [saved, setSaved] = useState(false)
+  const [attachments, setAttachments] = useState<TaskAttachment[]>([])
+  const [loadingAttachments, setLoadingAttachments] = useState(false)
+
+  // Fetch attachments when task changes
+  useEffect(() => {
+    const fetchAttachments = async () => {
+      setLoadingAttachments(true)
+      try {
+        const response = await fetch(`/api/tasks/${task.id}/attachments`)
+        if (response.ok) {
+          const data = await response.json()
+          setAttachments(data.attachments || [])
+        }
+      } catch (err) {
+        console.error('Failed to fetch attachments:', err)
+      } finally {
+        setLoadingAttachments(false)
+      }
+    }
+    fetchAttachments()
+  }, [task.id])
 
   const handleSave = async () => {
     setSaving(true)
@@ -1195,6 +1231,42 @@ function RajaniTaskCard({ task, onUpdate }: { task: Task, onUpdate: () => void }
           </pre>
         </div>
       )}
+
+      {/* Attachments section */}
+      <div className="bg-gray-900 rounded p-3 mb-4">
+        <p className="text-xs text-gray-500 mb-2">Attachments</p>
+        {loadingAttachments ? (
+          <p className="text-sm text-gray-400">Loading attachments...</p>
+        ) : (
+          <>
+            <AttachmentList
+              taskId={task.id}
+              attachments={attachments}
+              onDelete={() => {
+                // Refresh attachments after delete
+                fetch(`/api/tasks/${task.id}/attachments`)
+                  .then(res => res.json())
+                  .then(data => setAttachments(data.attachments || []))
+                  .catch(console.error)
+              }}
+              currentUser="rajani"
+            />
+            <div className="mt-3">
+              <AttachmentUpload
+                taskId={task.id}
+                onUploadComplete={() => {
+                  // Refresh attachments after upload
+                  fetch(`/api/tasks/${task.id}/attachments`)
+                    .then(res => res.json())
+                    .then(data => setAttachments(data.attachments || []))
+                    .catch(console.error)
+                }}
+                uploadedBy="rajani"
+              />
+            </div>
+          </>
+        )}
+      </div>
 
       {/* Status and feedback inputs */}
       <div className="space-y-3">

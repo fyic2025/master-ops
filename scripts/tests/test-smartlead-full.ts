@@ -1,5 +1,5 @@
 #!/usr/bin/env tsx
-import { smartleadClient } from './shared/libs/integrations/smartlead'
+import { smartleadClient } from '../../shared/libs/integrations/smartlead'
 
 async function test() {
   console.log('🧪 Comprehensive Smartlead Integration Test\n')

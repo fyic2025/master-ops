@@ -6,9 +6,9 @@
  * Usage: npx tsx validate-workflow.ts <workflow-id-or-file>
  */
 
-import { n8nClient } from './shared/libs/n8n'
-import { WorkflowValidator } from './shared/libs/n8n/validator'
-import type { N8nWorkflow } from './shared/libs/n8n/client'
+import { n8nClient } from '../../shared/libs/n8n'
+import { WorkflowValidator, type ValidationCheck } from '../../shared/libs/n8n/validator'
+import type { N8nWorkflow } from '../../shared/libs/n8n/client'
 import * as fs from 'fs'
 import * as path from 'path'
 
@@ -107,20 +107,20 @@ async function validateWorkflow() {
   ] as const
 
   categories.forEach((category) => {
-    const categoryChecks = result.checks.filter((c) => c.category === category)
+    const categoryChecks = result.checks.filter((c: ValidationCheck) => c.category === category)
     if (categoryChecks.length === 0) return
 
-    const passed = categoryChecks.filter((c) => c.passed).length
-    const failed = categoryChecks.filter((c) => !c.passed).length
+    const passed = categoryChecks.filter((c: ValidationCheck) => c.passed).length
+    const failed = categoryChecks.filter((c: ValidationCheck) => !c.passed).length
     const icon =
-      failed === 0 ? '✅' : categoryChecks.some((c) => !c.passed && c.severity === 'error') ? '❌' : '⚠️'
+      failed === 0 ? '✅' : categoryChecks.some((c: ValidationCheck) => !c.passed && c.severity === 'error') ? '❌' : '⚠️'
 
     console.log(`${icon} ${getCategoryName(category)} (${passed}/${categoryChecks.length} passed)`)
     console.log('─'.repeat(70))
 
     // Show failed checks first
-    const failedChecks = categoryChecks.filter((c) => !c.passed)
-    failedChecks.forEach((check) => {
+    const failedChecks = categoryChecks.filter((c: ValidationCheck) => !c.passed)
+    failedChecks.forEach((check: ValidationCheck) => {
       const severityIcon =
         check.severity === 'error' ? '❌' : check.severity === 'warning' ? '⚠️' : 'ℹ️'
       console.log(`  ${severityIcon} ${check.message}`)
@@ -132,7 +132,7 @@ async function validateWorkflow() {
     })
 
     // Show passed checks (condensed)
-    const passedChecks = categoryChecks.filter((c) => c.passed)
+    const passedChecks = categoryChecks.filter((c: ValidationCheck) => c.passed)
     if (passedChecks.length > 0) {
       console.log(`  ✅ ${passedChecks.length} check(s) passed`)
       console.log()
@@ -170,7 +170,7 @@ async function validateWorkflow() {
     console.log()
     console.log('This workflow has critical issues that must be fixed before deployment:')
     console.log()
-    result.summary.criticalIssues.forEach((issue, i) => {
+    result.summary.criticalIssues.forEach((issue: string, i: number) => {
       console.log(`  ${i + 1}. ${issue}`)
     })
   }
@@ -179,8 +179,8 @@ async function validateWorkflow() {
 
   // Recommendations
   const allRecommendations = result.checks
-    .filter((c) => !c.passed && c.recommendation)
-    .map((c) => c.recommendation)
+    .filter((c: ValidationCheck) => !c.passed && c.recommendation)
+    .map((c: ValidationCheck) => c.recommendation)
 
   if (allRecommendations.length > 0 && allRecommendations.length <= 10) {
     console.log('═'.repeat(70))
@@ -188,7 +188,7 @@ async function validateWorkflow() {
     console.log('═'.repeat(70))
     console.log()
 
-    allRecommendations.forEach((rec, i) => {
+    allRecommendations.forEach((rec: string | undefined, i: number) => {
       console.log(`${i + 1}. ${rec}`)
     })
 

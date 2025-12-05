@@ -2,7 +2,7 @@
  * Verify all required properties exist
  */
 
-import { hubspotClient } from './shared/libs/hubspot';
+import { hubspotClient } from '../../shared/libs/hubspot';
 
 const REQUIRED_PROPERTIES = [
   { name: 'lead_id_1', shouldBeUnique: true, label: 'Lead ID 1' },

@@ -3,8 +3,8 @@
  * Handles batch processing and error tracking
  */
 
-import { supabase } from './infra/supabase/client';
-import { hubspotClient } from './shared/libs/hubspot';
+import { supabase } from '../../infra/supabase/client';
+import { hubspotClient } from '../../shared/libs/hubspot';
 
 // Field mapping from Supabase to HubSpot
 // NOTE: HubSpot field names use underscores (lead_id_1, open_rate_1)

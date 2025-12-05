@@ -1,4 +1,4 @@
-import { n8nClient } from './shared/libs/n8n'
+import { n8nClient } from '../../shared/libs/n8n'
 
 async function deepCheck() {
   const exec = await n8nClient.getExecution('19068')

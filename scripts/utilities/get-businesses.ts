@@ -2,7 +2,7 @@
  * Fetch businesses from Supabase
  */
 
-import { supabase } from './infra/supabase/client';
+import { supabase } from '../../infra/supabase/client';
 
 async function getBusinesses() {
   console.log('Fetching businesses from Supabase...\n');

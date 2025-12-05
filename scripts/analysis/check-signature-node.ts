@@ -1,4 +1,4 @@
-import { n8nClient } from './shared/libs/n8n'
+import { n8nClient } from '../../shared/libs/n8n'
 
 async function checkNode() {
   const workflow = await n8nClient.getWorkflow('lj35rsDvrz5LK9Ox')

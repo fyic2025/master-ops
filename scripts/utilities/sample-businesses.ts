@@ -2,7 +2,7 @@
  * Sample businesses table and get total count
  */
 
-import { supabase } from './infra/supabase/client';
+import { supabase } from '../../infra/supabase/client';
 
 async function sampleBusinessesData() {
   console.log('📊 Analyzing businesses table...\n');
@@ -30,7 +30,7 @@ async function sampleBusinessesData() {
     }
 
     console.log('📋 Sample businesses (first 5):\n');
-    businesses?.forEach((business, index) => {
+    businesses?.forEach((business: typeof businesses[number], index: number) => {
       console.log(`${index + 1}. ${business.name}`);
       console.log(`   📍 ${business.city}`);
       console.log(`   📞 ${business.phone || 'No phone'}`);
@@ -122,3 +122,4 @@ sampleBusinessesData()
     console.error('\n❌ Failed to analyze businesses table');
     process.exit(1);
   });
+

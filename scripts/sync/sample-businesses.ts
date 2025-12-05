@@ -2,7 +2,7 @@
  * Sample businesses table and get total count
  */
 
-import { supabase } from './infra/supabase/client';
+import { supabase } from '../../infra/supabase/client';
 
 async function sampleBusinessesData() {
   console.log('📊 Analyzing businesses table...\n');

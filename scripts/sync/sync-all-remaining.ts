@@ -4,7 +4,7 @@
 
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import { supabase } from './infra/supabase/client';
+import { supabase } from '../../infra/supabase/client';
 
 const execAsync = promisify(exec);
 

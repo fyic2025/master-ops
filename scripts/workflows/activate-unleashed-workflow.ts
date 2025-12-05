@@ -4,7 +4,7 @@
  * Activates the fixed workflow to run on schedule
  */
 
-import { n8nClient } from './shared/libs/n8n'
+import { n8nClient } from '../../shared/libs/n8n'
 
 const WORKFLOW_ID = 'lj35rsDvrz5LK9Ox'
 

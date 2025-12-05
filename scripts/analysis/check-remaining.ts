@@ -1,4 +1,4 @@
-import { supabase } from './infra/supabase/client';
+import { supabase } from '../../infra/supabase/client';
 
 async function checkRemaining() {
   console.log('Investigating remaining businesses...\n');

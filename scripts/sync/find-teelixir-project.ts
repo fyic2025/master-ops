@@ -2,7 +2,7 @@
  * Find Teelixir Supabase project and get credentials
  */
 
-import { supabaseAPI } from './shared/libs/supabase';
+import { supabaseAPI } from '../../shared/libs/supabase';
 
 async function findTeelixirProject() {
   console.log('🔍 Searching for Teelixir Supabase project...\n');

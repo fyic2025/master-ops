@@ -2,7 +2,7 @@
  * Get HubSpot company properties to understand field mapping
  */
 
-import { hubspotClient } from './shared/libs/hubspot';
+import { hubspotClient } from '../../shared/libs/hubspot';
 
 async function getHubSpotProperties() {
   console.log('🔍 Fetching HubSpot company properties...\n');

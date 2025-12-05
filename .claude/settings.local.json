@@ -69,7 +69,11 @@
       "Bash(git reset:*)",
       "Bash(npm install:*)",
       "Bash(dir:*)",
-      "Bash(git fetch:*)"
+      "Bash(git fetch:*)",
+      "Bash(del c:Usersjaysomaster-opstmp-tasks.json)",
+      "Bash(del c:Usersjaysomaster-opscheck-tasks.js c:Usersjaysomaster-opstmp-jobs.json)",
+      "Bash(grep:*)",
+      "Bash(del fix-imports.js)"
     ],
     "deny": [],
     "ask": []

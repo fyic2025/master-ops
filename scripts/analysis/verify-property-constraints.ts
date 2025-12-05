@@ -3,7 +3,7 @@
  * Shows which properties still need to be fixed
  */
 
-import { hubspotClient } from './shared/libs/hubspot';
+import { hubspotClient } from '../../shared/libs/hubspot';
 
 // Properties that should NOT have unique constraints
 const SHOULD_NOT_BE_UNIQUE = [

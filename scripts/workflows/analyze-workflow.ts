@@ -2,7 +2,7 @@
  * Analyze Specific Workflow
  */
 
-import { n8nClient, analyzeWorkflow, generateWorkflowDocs } from './shared/libs/n8n'
+import { n8nClient, analyzeWorkflow, generateWorkflowDocs } from '../../shared/libs/n8n'
 
 const workflowId = process.argv[2] || 'lj35rsDvrz5LK9Ox'
 

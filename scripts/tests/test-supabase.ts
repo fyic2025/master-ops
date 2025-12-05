@@ -4,7 +4,7 @@
  * Run with: npx tsx test-supabase.ts
  */
 
-import { supabaseClient, supabaseAPI, Task } from './shared/libs/supabase';
+import { supabaseClient, supabaseAPI, Task } from '../../shared/libs/supabase';
 
 async function testSupabaseIntegration() {
   console.log('🧪 Testing Supabase Integration...\n');

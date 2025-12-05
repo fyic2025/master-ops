@@ -8,9 +8,9 @@
  * Usage: npx tsx test-workflow-credentials.ts <workflow-id-or-file>
  */
 
-import { n8nClient } from './shared/libs/n8n'
-import type { N8nWorkflow, N8nNode } from './shared/libs/n8n/client'
-import { bearerAuth, apiKeyAuth, hmacAuth, basicAuth } from './.claude/skills/integration-tester/scripts/auth-strategies'
+import { n8nClient } from '../../shared/libs/n8n'
+import type { N8nWorkflow, N8nNode } from '../../shared/libs/n8n/client'
+import { bearerAuth, apiKeyAuth, hmacAuth, basicAuth } from '../../.claude/skills/integration-tester/scripts/auth-strategies'
 import * as fs from 'fs'
 
 // ============================================================================
@@ -296,7 +296,7 @@ async function testWorkflowCredentials() {
   }
 
   // Extract nodes with credentials
-  const nodesWithCredentials = workflow.nodes.filter(n => n.credentials)
+  const nodesWithCredentials = workflow.nodes.filter((n: N8nNode) => n.credentials)
 
   if (nodesWithCredentials.length === 0) {
     console.log('ℹ️  No credentials found in workflow')
@@ -312,7 +312,7 @@ async function testWorkflowCredentials() {
   let credentialsMap: Map<string, any>
   try {
     const { data } = await n8nClient.listCredentials()
-    credentialsMap = new Map(data.map(c => [c.id, c]))
+    credentialsMap = new Map(data.map((c: { id: string; [key: string]: any }) => [c.id, c]))
     console.log(`📋 Loaded ${data.length} credential(s) from n8n`)
     console.log()
   } catch (error) {

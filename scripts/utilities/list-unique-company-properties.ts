@@ -3,7 +3,7 @@
  * This helps identify which of the 10 unique slots are being used
  */
 
-import { hubspotClient } from './shared/libs/hubspot';
+import { hubspotClient } from '../../shared/libs/hubspot';
 
 async function listUniqueProperties() {
   console.log('🔍 Fetching all company properties...\n');

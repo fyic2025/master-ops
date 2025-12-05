@@ -13,7 +13,7 @@ import {
   validateWorkflow,
   generateWorkflowDocs,
   calculateSuccessRate,
-} from './shared/libs/n8n'
+} from '../../shared/libs/n8n'
 
 async function testN8nLibrary() {
   console.log('🧪 Testing n8n Library\n')

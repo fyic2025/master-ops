@@ -1,4 +1,4 @@
-import { hubspotClient } from './shared/libs/hubspot';
+import { hubspotClient } from '../../shared/libs/hubspot';
 
 async function checkEngagementFields() {
   const engagementFields = [

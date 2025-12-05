@@ -6,9 +6,9 @@
  * Usage: npx tsx validate-workflow.ts <workflow-id-or-file>
  */
 
-import { n8nClient } from './shared/libs/n8n'
-import { WorkflowValidator } from './shared/libs/n8n/validator'
-import type { N8nWorkflow } from './shared/libs/n8n/client'
+import { n8nClient } from '../../shared/libs/n8n'
+import { WorkflowValidator } from '../../shared/libs/n8n/validator'
+import type { N8nWorkflow } from '../../shared/libs/n8n/client'
 import * as fs from 'fs'
 import * as path from 'path'
 

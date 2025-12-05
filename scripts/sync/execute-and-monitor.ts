@@ -4,7 +4,7 @@
  * Manually trigger a workflow and monitor its execution
  */
 
-import { n8nClient } from './shared/libs/n8n'
+import { n8nClient } from '../../shared/libs/n8n'
 
 const WORKFLOW_ID = process.argv[2] || 'lj35rsDvrz5LK9Ox'
 

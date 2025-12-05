@@ -8,9 +8,9 @@
  * Usage: npx tsx test-workflow-credentials.ts <workflow-id-or-file>
  */
 
-import { n8nClient } from './shared/libs/n8n'
-import type { N8nWorkflow, N8nNode } from './shared/libs/n8n/client'
-import { bearerAuth, apiKeyAuth, hmacAuth, basicAuth } from './.claude/skills/integration-tester/scripts/auth-strategies'
+import { n8nClient } from '../../shared/libs/n8n'
+import type { N8nWorkflow, N8nNode } from '../../shared/libs/n8n/client'
+import { bearerAuth, apiKeyAuth, hmacAuth, basicAuth } from '../../.claude/skills/integration-tester/scripts/auth-strategies'
 import * as fs from 'fs'
 
 // ============================================================================
