@@ -2335,7 +2335,9 @@ function mergeTasksWithDb(dbTasks: Task[]): Record<string, Task[]> {
 
   // Add database tasks to their appropriate categories
   for (const task of dbTasks) {
-    const key = `${task.business || 'overall'}.${task.category || 'dashboard'}`
+    // Map 'general' to 'overall' for consistency with task framework
+    const business = task.business === 'general' ? 'overall' : (task.business || 'overall')
+    const key = `${business}.${task.category || 'dashboard'}`
     if (!merged[key]) {
       merged[key] = []
     }
@@ -2392,7 +2394,8 @@ export default function TasksPage() {
   const filteredDbTasks = useMemo(() => {
     if (userIsAdmin) return dbTasks
     return dbTasks.filter(t => {
-      const taskBusiness = t.business || 'overall'
+      // Map 'general' to 'overall' for consistency with task framework
+      const taskBusiness = t.business === 'general' ? 'overall' : (t.business || 'overall')
       return allowedBusinesses.includes(taskBusiness as any)
     })
   }, [dbTasks, allowedBusinesses, userIsAdmin])
