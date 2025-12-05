@@ -296,6 +296,109 @@ Before completing any task:
 
 ---
 
+## Task Queue Validation Rules
+
+The Task Framework at ops.growthcohq.com manages automated and manual tasks. Follow these rules to maintain queue quality.
+
+### Valid Task Requirements
+
+**Every task MUST have:**
+| Field | Requirement |
+|-------|-------------|
+| `title` | Clear, specific action (verb + noun). Max 80 chars |
+| `description` | Detailed context with success criteria |
+| `business` | Valid business slug: `teelixir`, `boo`, `elevate`, `rhf`, or `overall` |
+| `priority` | P1 (urgent), P2 (normal), P3 (low) |
+| `category` | Valid category for the business |
+| `execution_type` | `manual` (default) or `auto` |
+
+**Good task titles:**
+- ✅ "Fix broken product image on Teelixir Lions Mane page"
+- ✅ "Update BOO shipping rates for NSW zones"
+- ✅ "Create Klaviyo flow for abandoned cart recovery"
+
+**Bad task titles:**
+- ❌ "Document findings and issues" (too vague)
+- ❌ "Create optimization recommendations" (no context)
+- ❌ "Check things" (meaningless)
+
+### Execution Type Selection
+
+| Choose `auto` when: | Choose `manual` when: |
+|---------------------|----------------------|
+| Task has clear API-based solution | Requires human judgment |
+| Can be verified programmatically | Needs visual/UX review |
+| No file system access needed | Requires local file edits |
+| Database or API operations | Multi-step creative work |
+| Scheduled/recurring tasks | One-time complex changes |
+
+**Auto tasks are processed by n8n every 5 minutes** using the 3-tier model (Haiku → Sonnet → Opus).
+
+### Avoiding Stale Tasks
+
+**DO NOT create tasks for:**
+- Session-specific debugging steps (these become stale immediately)
+- "Document X" without specific deliverable
+- Vague analysis tasks without clear output
+- Tasks that depend on ephemeral context
+
+**Session artifacts to avoid:**
+```
+❌ "Analyze current session findings"
+❌ "Document investigation results"
+❌ "Create report from analysis"
+❌ "Review and summarize"
+```
+
+**Instead, be specific:**
+```
+✅ "Write GSC indexing issues report for BOO - save to /reports/gsc-issues-2024-01.md"
+✅ "Create Supabase migration for new customer_segments table"
+✅ "Update Klaviyo segment 'VIP Customers' with RFM score > 8"
+```
+
+### Task Lifecycle
+
+```
+pending → in_progress → completed
+              ↓
+          failed → (auto-retry up to 3x for auto tasks)
+              ↓
+          needs_manual (escalated to dashboard)
+```
+
+**Status meanings:**
+| Status | Description |
+|--------|-------------|
+| `pending` | Waiting to be picked up |
+| `in_progress` | Currently being worked on |
+| `completed` | Successfully finished |
+| `failed` | Execution failed (will retry if auto) |
+| `needs_manual` | Requires human intervention |
+| `blocked` | Waiting on external dependency |
+
+### Task Hygiene
+
+**Delete tasks when:**
+- Created during a debugging session and no longer relevant
+- Superseded by a newer, more specific task
+- Business context has changed making task obsolete
+- Task has been `pending` for 30+ days without action
+
+**Archive (mark completed) when:**
+- Task was manually completed outside the system
+- Task is no longer needed but should be kept for records
+
+### Priority Guidelines
+
+| Priority | Use For | Expected Turnaround |
+|----------|---------|---------------------|
+| P1 | Revenue-impacting, site down, security issues | Same day |
+| P2 | Normal feature work, improvements, non-urgent fixes | 1-3 days |
+| P3 | Nice-to-have, low-impact optimizations | When time permits |
+
+---
+
 ## Skill Documentation Location
 
 All skills are in: `.claude/skills/<skill-name>/`

@@ -17,6 +17,7 @@ import {
   MessageSquare,
   Tag,
   AlertCircle,
+  AlertTriangle,
   BarChart3,
   Send,
   Zap,
@@ -55,6 +56,7 @@ export const BUSINESSES: Record<BusinessCode, Business> = {
     navigation: [
       { name: 'Dashboard', href: '', icon: Home },
       { name: 'Tasks', href: '/tasks', icon: ClipboardList },
+      { name: 'Issues', href: '/issues', icon: AlertTriangle },
       { name: 'CI/CD', href: '/cicd', icon: GitBranch },
       { name: 'Shipping', href: '/shipping', icon: Send },
       { name: 'PPC', href: '/ppc', icon: TrendingUp },
