@@ -226,7 +226,7 @@ export async function GET(request: NextRequest) {
       }
     `
 
-    let allCustomers: any[] = []
+    let allShopifyCustomers: any[] = []
     let hasNextPage = true
     let cursor: string | null = null
 
@@ -251,50 +251,157 @@ export async function GET(request: NextRequest) {
       }
 
       const customers = customersData.data?.customers?.edges?.map((e: any) => e.node) || []
-      allCustomers = [...allCustomers, ...customers]
+      allShopifyCustomers = [...allShopifyCustomers, ...customers]
 
       hasNextPage = customersData.data?.customers?.pageInfo?.hasNextPage || false
       cursor = customersData.data?.customers?.pageInfo?.endCursor || null
 
-      if (allCustomers.length > 500) break
+      if (allShopifyCustomers.length > 500) break
     }
 
-    // Step 2: Fetch Unleashed orders
+    // Step 2: Fetch ALL Unleashed orders (they are the primary source for B2B)
     let unleashedOrders: UnleashedSalesOrder[] = []
     try {
       unleashedOrders = await fetchUnleashedOrders(startDate || undefined, endDate || undefined)
       console.log(`Fetched ${unleashedOrders.length} Unleashed orders`)
     } catch (err) {
       console.error('Failed to fetch Unleashed orders:', err)
-      // Continue without Unleashed data
     }
 
-    // Create email lookup for Unleashed orders
-    // Group orders by customer email (normalized)
-    const unleashedOrdersByEmail = new Map<string, UnleashedSalesOrder[]>()
-    const unleashedOrdersByName = new Map<string, UnleashedSalesOrder[]>()
+    // Group Unleashed orders by customer (CustomerCode is the key)
+    const unleashedOrdersByCustomer = new Map<string, UnleashedSalesOrder[]>()
+    const unleashedCustomerInfo = new Map<string, { name: string; email?: string; code: string }>()
 
     for (const order of unleashedOrders) {
-      // Skip non-completed orders
       if (order.OrderStatus === 'Deleted') continue
 
-      const email = order.Customer?.Email?.toLowerCase().trim()
-      const name = order.Customer?.CustomerName?.toLowerCase().trim()
+      const customerCode = order.Customer?.CustomerCode || 'UNKNOWN'
+      const existing = unleashedOrdersByCustomer.get(customerCode) || []
+      existing.push(order)
+      unleashedOrdersByCustomer.set(customerCode, existing)
 
-      if (email) {
-        const existing = unleashedOrdersByEmail.get(email) || []
-        existing.push(order)
-        unleashedOrdersByEmail.set(email, existing)
-      }
-
-      if (name) {
-        const existing = unleashedOrdersByName.get(name) || []
-        existing.push(order)
-        unleashedOrdersByName.set(name, existing)
+      // Store customer info
+      if (!unleashedCustomerInfo.has(customerCode)) {
+        unleashedCustomerInfo.set(customerCode, {
+          code: customerCode,
+          name: order.Customer?.CustomerName || customerCode,
+          email: order.Customer?.Email
+        })
       }
     }
 
-    // Step 3: For each Shopify customer, get Shopify orders + match Unleashed orders
+    // Create lookup maps for matching Shopify customers to Unleashed
+    const shopifyCustomerByEmail = new Map<string, any>()
+    const shopifyCustomerByName = new Map<string, any>()
+
+    for (const customer of allShopifyCustomers) {
+      const email = customer.email?.toLowerCase().trim()
+      if (email) {
+        shopifyCustomerByEmail.set(email, customer)
+      }
+      const fullName = `${customer.firstName || ''} ${customer.lastName || ''}`.toLowerCase().trim()
+      if (fullName.length > 3) {
+        shopifyCustomerByName.set(fullName, customer)
+      }
+    }
+
+    // Step 3: Build customer list - primary source is Unleashed, supplement with Shopify
+    const customersWithOrders: CustomerWithOrders[] = []
+    const processedShopifyCustomers = new Set<string>()
+
+    // Process Unleashed customers FIRST (they have the B2B order data)
+    for (const [customerCode, orders] of unleashedOrdersByCustomer) {
+      const customerInfo = unleashedCustomerInfo.get(customerCode)!
+      const customerEmail = customerInfo.email?.toLowerCase().trim()
+      const customerName = customerInfo.name?.toLowerCase().trim()
+
+      // Try to match to a Shopify customer
+      let matchedShopifyCustomer = null
+      if (customerEmail) {
+        matchedShopifyCustomer = shopifyCustomerByEmail.get(customerEmail)
+      }
+      if (!matchedShopifyCustomer && customerName) {
+        matchedShopifyCustomer = shopifyCustomerByName.get(customerName)
+      }
+
+      // Convert Unleashed orders to our format
+      const allOrders: CustomerOrder[] = orders.map(uOrder => ({
+        id: uOrder.Guid,
+        name: uOrder.OrderNumber,
+        createdAt: uOrder.OrderDate,
+        totalPrice: (uOrder.Total || 0).toString(),
+        source: 'unleashed' as const,
+        lineItems: (uOrder.SalesOrderLines || []).map(line => {
+          // Extract brand from product code format "KIK - TEE MES-50" -> "KIK"
+          const productCode = line.Product?.ProductCode || ''
+          const brandMatch = productCode.split(' - ')[0]?.trim()
+          const vendor = brandMatch || 'Elevate'
+
+          return {
+            title: line.Product?.ProductDescription || productCode || 'Unknown',
+            vendor,
+            quantity: line.OrderQuantity,
+            price: (line.UnitPrice || 0).toString(),
+            totalPrice: (line.LineTotal || 0).toString()
+          }
+        })
+      }))
+
+      // Sort orders by date (newest first)
+      allOrders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+
+      // Calculate metrics
+      const totalSpend = allOrders.reduce((sum, o) => sum + parseFloat(o.totalPrice), 0)
+      const orderCount = allOrders.length
+      const avgOrderValue = orderCount > 0 ? totalSpend / orderCount : 0
+      const lastOrderDate = allOrders.length > 0 ? allOrders[0].createdAt : null
+
+      // Calculate brand breakdown
+      const brandBreakdown: Record<string, { amount: number; orderCount: number }> = {}
+      allOrders.forEach((order) => {
+        const orderBrands = new Set<string>()
+        order.lineItems.forEach((item) => {
+          const vendor = item.vendor || 'Unknown'
+          if (!brandBreakdown[vendor]) {
+            brandBreakdown[vendor] = { amount: 0, orderCount: 0 }
+          }
+          brandBreakdown[vendor].amount += parseFloat(item.totalPrice)
+          orderBrands.add(vendor)
+        })
+        orderBrands.forEach(brand => {
+          brandBreakdown[brand].orderCount += 1
+        })
+      })
+
+      // Use Shopify customer data if matched, otherwise use Unleashed data
+      const isApproved = matchedShopifyCustomer?.tags?.includes('approved') &&
+                         matchedShopifyCustomer?.state !== 'DISABLED'
+
+      if (matchedShopifyCustomer) {
+        processedShopifyCustomers.add(matchedShopifyCustomer.id)
+      }
+
+      customersWithOrders.push({
+        id: matchedShopifyCustomer?.id || `unleashed-${customerCode}`,
+        email: matchedShopifyCustomer?.email || customerInfo.email || '',
+        firstName: matchedShopifyCustomer?.firstName || customerInfo.name?.split(' ')[0] || null,
+        lastName: matchedShopifyCustomer?.lastName || customerInfo.name?.split(' ').slice(1).join(' ') || null,
+        state: matchedShopifyCustomer?.state || 'ENABLED',
+        tags: matchedShopifyCustomer?.tags || [],
+        createdAt: matchedShopifyCustomer?.createdAt || allOrders[allOrders.length - 1]?.createdAt || new Date().toISOString(),
+        isApproved,
+        orders: allOrders,
+        metrics: {
+          totalSpend,
+          orderCount,
+          avgOrderValue,
+          lastOrderDate,
+          brandBreakdown
+        }
+      })
+    }
+
+    // Step 4: Add any Shopify customers without Unleashed orders (approved but haven't ordered)
     const ordersQuery = `
       query getCustomerOrders($customerId: ID!, $query: String) {
         customer(id: $customerId) {
@@ -336,69 +443,17 @@ export async function GET(request: NextRequest) {
       }
     `
 
-    const customersWithOrders: CustomerWithOrders[] = []
+    // Add Shopify-only customers (not matched to Unleashed)
+    const shopifyOnlyCustomers = allShopifyCustomers.filter(c => !processedShopifyCustomers.has(c.id))
     const batchSize = 10
-    const processedUnleashedOrders = new Set<string>()
 
-    for (let i = 0; i < allCustomers.length; i += batchSize) {
-      const batch = allCustomers.slice(i, i + batchSize)
+    for (let i = 0; i < shopifyOnlyCustomers.length; i += batchSize) {
+      const batch = shopifyOnlyCustomers.slice(i, i + batchSize)
 
       const batchPromises = batch.map(async (customer) => {
         const allOrders: CustomerOrder[] = []
-        const email = customer.email?.toLowerCase().trim()
-        const fullName = `${customer.firstName || ''} ${customer.lastName || ''}`.toLowerCase().trim()
 
-        // Match Unleashed orders by email or name FIRST (they have brand data)
-        const matchedUnleashedOrders: UnleashedSalesOrder[] = []
-        const shopifyOrderNumbersInUnleashed = new Set<string>()
-
-        if (email) {
-          const byEmail = unleashedOrdersByEmail.get(email) || []
-          matchedUnleashedOrders.push(...byEmail)
-        }
-
-        // Also try matching by name if no email match
-        if (matchedUnleashedOrders.length === 0 && fullName.length > 3) {
-          const byName = unleashedOrdersByName.get(fullName) || []
-          matchedUnleashedOrders.push(...byName)
-        }
-
-        // Process Unleashed orders FIRST - they have better brand/product data
-        for (const uOrder of matchedUnleashedOrders) {
-          if (processedUnleashedOrders.has(uOrder.Guid)) continue
-          processedUnleashedOrders.add(uOrder.Guid)
-
-          // Track if this is a Shopify-synced order (e.g., "Shopify12345")
-          const shopifyMatch = uOrder.OrderNumber?.match(/shopify[#]?(\d+)/i)
-          if (shopifyMatch) {
-            shopifyOrderNumbersInUnleashed.add(shopifyMatch[1])
-          }
-
-          // Convert to our format - use Unleashed data for brand breakdown
-          allOrders.push({
-            id: uOrder.Guid,
-            name: uOrder.OrderNumber,
-            createdAt: uOrder.OrderDate,
-            totalPrice: (uOrder.Total || 0).toString(),
-            source: 'unleashed' as const,
-            lineItems: (uOrder.SalesOrderLines || []).map(line => {
-              // Extract brand from product code format "KIK - TEE MES-50" -> "KIK"
-              const productCode = line.Product?.ProductCode || ''
-              const brandMatch = productCode.split(' - ')[0]?.trim()
-              const vendor = brandMatch || 'Elevate'
-
-              return {
-                title: line.Product?.ProductDescription || productCode || 'Unknown',
-                vendor,
-                quantity: line.OrderQuantity,
-                price: (line.UnitPrice || 0).toString(),
-                totalPrice: (line.LineTotal || 0).toString()
-              }
-            })
-          })
-        }
-
-        // Fetch Shopify orders - but skip any already covered by Unleashed
+        // Fetch Shopify orders
         try {
           const ordersResp = await fetch(graphqlUrl, {
             method: 'POST',
@@ -420,14 +475,6 @@ export async function GET(request: NextRequest) {
 
           for (const e of shopifyOrders) {
             const order = e.node
-            // Extract order number (e.g., "#12345" -> "12345")
-            const orderNum = order.name?.replace('#', '')
-
-            // Skip if this Shopify order exists in Unleashed (use Unleashed version instead)
-            if (orderNum && shopifyOrderNumbersInUnleashed.has(orderNum)) {
-              continue // Unleashed version already added with better brand data
-            }
-
             allOrders.push({
               id: order.id,
               name: order.name,
@@ -498,7 +545,7 @@ export async function GET(request: NextRequest) {
       const batchResults = await Promise.all(batchPromises)
       customersWithOrders.push(...batchResults)
 
-      if (i + batchSize < allCustomers.length) {
+      if (i + batchSize < shopifyOnlyCustomers.length) {
         await new Promise(resolve => setTimeout(resolve, 100))
       }
     }
@@ -513,6 +560,7 @@ export async function GET(request: NextRequest) {
         sum + c.orders.filter(o => o.source === 'shopify').length, 0),
       unleashedOrders: customersWithOrders.reduce((sum, c) =>
         sum + c.orders.filter(o => o.source === 'unleashed').length, 0),
+      unleashedCustomers: unleashedOrdersByCustomer.size,
     }
 
     return NextResponse.json({
