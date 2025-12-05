@@ -320,7 +320,50 @@ export async function GET(request: NextRequest) {
         const email = customer.email?.toLowerCase().trim()
         const fullName = `${customer.firstName || ''} ${customer.lastName || ''}`.toLowerCase().trim()
 
-        // Fetch Shopify orders
+        // Match Unleashed orders by email or name FIRST (they have brand data)
+        const matchedUnleashedOrders: UnleashedSalesOrder[] = []
+        const shopifyOrderNumbersInUnleashed = new Set<string>()
+
+        if (email) {
+          const byEmail = unleashedOrdersByEmail.get(email) || []
+          matchedUnleashedOrders.push(...byEmail)
+        }
+
+        // Also try matching by name if no email match
+        if (matchedUnleashedOrders.length === 0 && fullName.length > 3) {
+          const byName = unleashedOrdersByName.get(fullName) || []
+          matchedUnleashedOrders.push(...byName)
+        }
+
+        // Process Unleashed orders FIRST - they have better brand/product data
+        for (const uOrder of matchedUnleashedOrders) {
+          if (processedUnleashedOrders.has(uOrder.Guid)) continue
+          processedUnleashedOrders.add(uOrder.Guid)
+
+          // Track if this is a Shopify-synced order (e.g., "Shopify12345")
+          const shopifyMatch = uOrder.OrderNumber?.match(/shopify[#]?(\d+)/i)
+          if (shopifyMatch) {
+            shopifyOrderNumbersInUnleashed.add(shopifyMatch[1])
+          }
+
+          // Convert to our format - use Unleashed data for brand breakdown
+          allOrders.push({
+            id: uOrder.Guid,
+            name: uOrder.OrderNumber,
+            createdAt: uOrder.OrderDate,
+            totalPrice: (uOrder.Total || 0).toString(),
+            source: 'unleashed' as const,
+            lineItems: (uOrder.SalesOrderLines || []).map(line => ({
+              title: line.Product?.ProductDescription || line.Product?.ProductCode || 'Unknown',
+              vendor: line.Product?.ProductCode?.split('-')[0] || 'Elevate', // Extract brand from product code
+              quantity: line.OrderQuantity,
+              price: (line.UnitPrice || 0).toString(),
+              totalPrice: (line.LineTotal || 0).toString()
+            }))
+          })
+        }
+
+        // Fetch Shopify orders - but skip any already covered by Unleashed
         try {
           const ordersResp = await fetch(graphqlUrl, {
             method: 'POST',
@@ -338,9 +381,19 @@ export async function GET(request: NextRequest) {
           })
 
           const ordersData = await ordersResp.json()
-          const shopifyOrders = ordersData.data?.customer?.orders?.edges?.map((e: any) => {
+          const shopifyOrders = ordersData.data?.customer?.orders?.edges || []
+
+          for (const e of shopifyOrders) {
             const order = e.node
-            return {
+            // Extract order number (e.g., "#12345" -> "12345")
+            const orderNum = order.name?.replace('#', '')
+
+            // Skip if this Shopify order exists in Unleashed (use Unleashed version instead)
+            if (orderNum && shopifyOrderNumbersInUnleashed.has(orderNum)) {
+              continue // Unleashed version already added with better brand data
+            }
+
+            allOrders.push({
               id: order.id,
               name: order.name,
               createdAt: order.createdAt,
@@ -353,53 +406,10 @@ export async function GET(request: NextRequest) {
                 price: li.node.originalUnitPriceSet?.shopMoney?.amount || '0',
                 totalPrice: li.node.discountedTotalSet?.shopMoney?.amount || '0'
               })) || []
-            }
-          }) || []
-
-          allOrders.push(...shopifyOrders)
+            })
+          }
         } catch (err) {
           console.error(`Error fetching Shopify orders for ${customer.email}:`, err)
-        }
-
-        // Match Unleashed orders by email or name
-        const matchedUnleashedOrders: UnleashedSalesOrder[] = []
-
-        if (email) {
-          const byEmail = unleashedOrdersByEmail.get(email) || []
-          matchedUnleashedOrders.push(...byEmail)
-        }
-
-        // Also try matching by name if no email match
-        if (matchedUnleashedOrders.length === 0 && fullName.length > 3) {
-          const byName = unleashedOrdersByName.get(fullName) || []
-          matchedUnleashedOrders.push(...byName)
-        }
-
-        // Convert Unleashed orders to our format (avoid duplicates)
-        for (const uOrder of matchedUnleashedOrders) {
-          if (processedUnleashedOrders.has(uOrder.Guid)) continue
-
-          // Check if this Unleashed order matches a Shopify order (by order number pattern)
-          const isShopifySync = uOrder.OrderNumber?.toLowerCase().includes('shopify')
-          if (isShopifySync) continue // Skip - already counted in Shopify orders
-
-          processedUnleashedOrders.add(uOrder.Guid)
-
-          // Convert to our format
-          allOrders.push({
-            id: uOrder.Guid,
-            name: uOrder.OrderNumber,
-            createdAt: uOrder.OrderDate,
-            totalPrice: (uOrder.Total || 0).toString(),
-            source: 'unleashed' as const,
-            lineItems: (uOrder.SalesOrderLines || []).map(line => ({
-              title: line.Product?.ProductDescription || line.Product?.ProductCode || 'Unknown',
-              vendor: 'Elevate', // Unleashed doesn't have vendor per line
-              quantity: line.OrderQuantity,
-              price: (line.UnitPrice || 0).toString(),
-              totalPrice: (line.LineTotal || 0).toString()
-            }))
-          })
         }
 
         // Sort orders by date (newest first)
