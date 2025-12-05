@@ -405,8 +405,22 @@ while true; do
 
     EXEC_OUTPUT=$(execute_with_model "$CURRENT_MODEL") || true
 
+    # Handle empty output (command failed completely)
+    if [ -z "$EXEC_OUTPUT" ]; then
+        EXEC_OUTPUT="failure|0|0||Command execution failed"
+    fi
+
     # Parse output
     IFS='|' read -r STATUS DURATION COST SESSION RESULT_TEXT <<< "$EXEC_OUTPUT"
+
+    # Ensure numeric values have defaults
+    DURATION=${DURATION:-0}
+    COST=${COST:-0}
+
+    # Validate DURATION is numeric
+    if ! [[ "$DURATION" =~ ^[0-9]+$ ]]; then
+        DURATION=0
+    fi
 
     # Build attempt record
     ATTEMPT_RECORD=$(jq -n \
