@@ -24,6 +24,8 @@ Ask yourself for EVERY task:
 - Does this involve automation? → Check n8n-workflow-manager, dashboard-automation
 - Does this involve customers? → Check segmentation-engine, churn-predictor skills
 - Does this involve web scraping/leads? → Check apify-expert
+- Does this involve **design/UI**? → Check frontend-design, canvas-design, web-artifacts-builder, theme-factory
+- Does this involve **documents**? → Check pdf, xlsx, docx, pptx
 
 ### Skill Activation Command
 
@@ -40,7 +42,9 @@ Example: Before writing email copy, activate:
 
 ---
 
-## Complete Skills Registry (38 Skills)
+## Complete Skills Registry (54 Skills)
+
+> **Full Registry:** See [.claude/SKILLS-REGISTRY.md](.claude/SKILLS-REGISTRY.md) for detailed skill finder and activation checklist.
 
 ### E-Commerce Platforms
 | Skill | Use When |
@@ -114,6 +118,33 @@ Example: Before writing email copy, activate:
 | `integration-tester` | API testing, connection validation |
 | `dashboard-automation` | Dashboard metrics, alerts, reports |
 
+### Design & Frontend
+| Skill | Use When |
+|-------|----------|
+| `frontend-design` | Distinctive UI, bold typography, animations, layouts |
+| `canvas-design` | Museum-quality visual art (PNG/PDF) |
+| `brand-guidelines` | Brand identity systems |
+| `theme-factory` | Theme styling |
+| `web-artifacts-builder` | React + Tailwind + shadcn/ui components |
+| `landing-page-builder` | Campaign landing pages, lead gen pages |
+| `algorithmic-art` | Generative art patterns |
+
+### Document Processing
+| Skill | Use When |
+|-------|----------|
+| `pdf` | PDF processing, extraction, creation |
+| `xlsx` | Excel file operations with formulas |
+| `docx` | Word document processing |
+| `pptx` | PowerPoint processing |
+
+### Development Tools
+| Skill | Use When |
+|-------|----------|
+| `mcp-builder` | Build MCP servers |
+| `skill-creator` | Create new skills |
+| `webapp-testing` | Web app testing |
+| `doc-coauthoring` | Document collaboration |
+
 ### Other
 | Skill | Use When |
 |-------|----------|
@@ -177,6 +208,49 @@ Scraping Google Maps leads → apify-expert + supabase-expert
 Checking Apify usage → apify-expert
 Running lead scrapes → apify-expert + n8n-workflow-manager
 Processing scraped data → apify-expert + supabase-expert
+```
+
+### Design Tasks
+```
+Creating landing page → frontend-design + landing-page-builder + brand-asset-manager
+Building UI components → frontend-design + web-artifacts-builder
+Creating visual art → canvas-design + brand-guidelines
+Styling themes → theme-factory + brand-guidelines
+```
+
+### Document Tasks
+```
+Processing PDF → pdf
+Creating Excel reports → xlsx
+Generating Word docs → docx
+Creating presentations → pptx
+```
+
+---
+
+## Project Planning Requirements
+
+**When starting ANY project or multi-step task:**
+
+1. **Review SKILLS-REGISTRY.md** - Check [.claude/SKILLS-REGISTRY.md](.claude/SKILLS-REGISTRY.md)
+2. **Identify ALL applicable skills** - Use the Quick Skill Finder table
+3. **Document skills in plan** - List which skills will be used
+4. **Activate before starting** - Load skills using the Skill tool
+
+### Planning Template
+
+When planning projects, include this section:
+
+```markdown
+## Skills to Use
+| Skill | Purpose |
+|-------|---------|
+| skill-name | Why this skill is needed |
+
+## Skill Activation Order
+1. First activate: brand-asset-manager (for brand consistency)
+2. Then activate: [primary skill]
+3. Supporting: [additional skills]
 ```
 
 ---
