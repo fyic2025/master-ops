@@ -1,12 +1,80 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import {
   Users, Plus, Loader2, CheckCircle, AlertCircle, Copy, ExternalLink,
   RefreshCw, Mail, Upload, Download, Filter, ChevronDown, ChevronUp,
-  CheckSquare, Square, Search, X
+  CheckSquare, Square, Search, X, Calendar, ArrowUpDown, ArrowUp, ArrowDown
 } from 'lucide-react'
+
+// Date range presets
+type DateRangePreset = 'mtd' | 'last_month' | 'last_3_months' | 'last_6_months' | 'last_12_months' | 'all_time'
+
+const DATE_PRESETS: { value: DateRangePreset; label: string; canCompare: boolean }[] = [
+  { value: 'mtd', label: 'Month to Date', canCompare: true },
+  { value: 'last_month', label: 'Last Month', canCompare: true },
+  { value: 'last_3_months', label: 'Last 3 Months', canCompare: true },
+  { value: 'last_6_months', label: 'Last 6 Months', canCompare: true },
+  { value: 'last_12_months', label: 'Last 12 Months', canCompare: true },
+  { value: 'all_time', label: 'All Time', canCompare: false },
+]
+
+function getDateRange(preset: DateRangePreset): { startDate: string; endDate: string } {
+  const now = new Date()
+  const endDate = now.toISOString().split('T')[0]
+
+  switch (preset) {
+    case 'mtd':
+      return {
+        startDate: new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0],
+        endDate
+      }
+    case 'last_month': {
+      const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+      const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0)
+      return {
+        startDate: lastMonth.toISOString().split('T')[0],
+        endDate: lastMonthEnd.toISOString().split('T')[0]
+      }
+    }
+    case 'last_3_months':
+      return {
+        startDate: new Date(now.getFullYear(), now.getMonth() - 3, now.getDate()).toISOString().split('T')[0],
+        endDate
+      }
+    case 'last_6_months':
+      return {
+        startDate: new Date(now.getFullYear(), now.getMonth() - 6, now.getDate()).toISOString().split('T')[0],
+        endDate
+      }
+    case 'last_12_months':
+      return {
+        startDate: new Date(now.getFullYear() - 1, now.getMonth(), now.getDate()).toISOString().split('T')[0],
+        endDate
+      }
+    case 'all_time':
+    default:
+      return { startDate: '', endDate: '' }
+  }
+}
+
+function getCompareRange(preset: DateRangePreset): { startDate: string; endDate: string } | null {
+  const current = getDateRange(preset)
+  if (!current.startDate || preset === 'all_time') return null
+
+  const start = new Date(current.startDate)
+  const end = new Date(current.endDate)
+  const duration = end.getTime() - start.getTime()
+
+  const compareEnd = new Date(start.getTime() - 1) // Day before current start
+  const compareStart = new Date(compareEnd.getTime() - duration)
+
+  return {
+    startDate: compareStart.toISOString().split('T')[0],
+    endDate: compareEnd.toISOString().split('T')[0]
+  }
+}
 
 interface CustomerFormData {
   email: string
@@ -19,6 +87,30 @@ interface CustomerFormData {
   city: string
   state: string
   postcode: string
+}
+
+interface BrandBreakdown {
+  amount: number
+  orderCount: number
+}
+
+interface CustomerMetrics {
+  totalSpend: number
+  orderCount: number
+  avgOrderValue: number
+  lastOrderDate: string | null
+  brandBreakdown: Record<string, BrandBreakdown>
+}
+
+interface CustomerWithOrders {
+  id: string
+  email: string
+  firstName: string | null
+  lastName: string | null
+  state: string
+  tags: string[]
+  createdAt: string
+  metrics: CustomerMetrics
 }
 
 interface ShopifyCustomer {
@@ -49,6 +141,9 @@ const initialFormData: CustomerFormData = {
   postcode: '',
 }
 
+type SortKey = 'name' | 'totalSpend' | 'lastOrderDate' | 'avgOrderValue' | 'orderCount'
+type SortDir = 'asc' | 'desc'
+
 export default function CustomersPage() {
   const params = useParams()
   const business = params?.business as string
@@ -70,51 +165,128 @@ export default function CustomersPage() {
 
 function ElevateCustomerManager() {
   const [activeTab, setActiveTab] = useState<'list' | 'create' | 'bulk'>('list')
-  const [customers, setCustomers] = useState<ShopifyCustomer[]>([])
+  const [customers, setCustomers] = useState<CustomerWithOrders[]>([])
+  const [compareCustomers, setCompareCustomers] = useState<CustomerWithOrders[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
-  const [stateFilter, setStateFilter] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [actionLoading, setActionLoading] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
 
+  // Date range state
+  const [datePreset, setDatePreset] = useState<DateRangePreset>('last_3_months')
+  const [compareEnabled, setCompareEnabled] = useState(false)
+
+  // Sorting state
+  const [sortKey, setSortKey] = useState<SortKey>('totalSpend')
+  const [sortDir, setSortDir] = useState<SortDir>('desc')
+
+  const canCompare = DATE_PRESETS.find(p => p.value === datePreset)?.canCompare ?? false
+
   const fetchCustomers = useCallback(async () => {
     setLoading(true)
     try {
-      const response = await fetch('/api/elevate/customers')
+      const { startDate, endDate } = getDateRange(datePreset)
+      const params = new URLSearchParams()
+      if (startDate) params.set('startDate', startDate)
+      if (endDate) params.set('endDate', endDate)
+
+      const response = await fetch(`/api/elevate/customers/orders?${params}`)
       const data = await response.json()
       if (data.customers) {
         setCustomers(data.customers)
+      }
+
+      // Fetch compare period if enabled
+      if (compareEnabled && canCompare) {
+        const compareRange = getCompareRange(datePreset)
+        if (compareRange) {
+          const compareParams = new URLSearchParams()
+          compareParams.set('startDate', compareRange.startDate)
+          compareParams.set('endDate', compareRange.endDate)
+          const compareResp = await fetch(`/api/elevate/customers/orders?${compareParams}`)
+          const compareData = await compareResp.json()
+          setCompareCustomers(compareData.customers || [])
+        }
+      } else {
+        setCompareCustomers([])
       }
     } catch (err) {
       console.error('Failed to fetch customers:', err)
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [datePreset, compareEnabled, canCompare])
 
   useEffect(() => {
     fetchCustomers()
   }, [fetchCustomers])
 
-  const filteredCustomers = customers.filter(c => {
-    // Filter by verifiedEmail status
-    if (stateFilter === 'active' && c.state === 'DISABLED') return false
-    if (stateFilter === 'approved' && (!c.tags?.includes('approved') || c.state === 'DISABLED')) return false
-    if (stateFilter === 'with_orders' && c.numberOfOrders === 0) return false
-    if (stateFilter === 'DISABLED' && c.state !== 'DISABLED') return false
+  // Create compare lookup for faster access
+  const compareMap = useMemo(() => {
+    const map = new Map<string, CustomerMetrics>()
+    compareCustomers.forEach(c => map.set(c.id, c.metrics))
+    return map
+  }, [compareCustomers])
 
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase()
-      return (
-        c.email?.toLowerCase().includes(q) ||
-        c.firstName?.toLowerCase().includes(q) ||
-        c.lastName?.toLowerCase().includes(q) ||
-        c.note?.toLowerCase().includes(q)
-      )
+  // Filter and sort customers
+  const filteredCustomers = useMemo(() => {
+    let filtered = customers.filter(c => {
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase()
+        return (
+          c.email?.toLowerCase().includes(q) ||
+          c.firstName?.toLowerCase().includes(q) ||
+          c.lastName?.toLowerCase().includes(q)
+        )
+      }
+      return true
+    })
+
+    // Sort
+    filtered.sort((a, b) => {
+      let aVal: any
+      let bVal: any
+
+      switch (sortKey) {
+        case 'name':
+          aVal = `${a.firstName || ''} ${a.lastName || ''}`.trim().toLowerCase()
+          bVal = `${b.firstName || ''} ${b.lastName || ''}`.trim().toLowerCase()
+          break
+        case 'totalSpend':
+          aVal = a.metrics.totalSpend
+          bVal = b.metrics.totalSpend
+          break
+        case 'lastOrderDate':
+          aVal = a.metrics.lastOrderDate ? new Date(a.metrics.lastOrderDate).getTime() : 0
+          bVal = b.metrics.lastOrderDate ? new Date(b.metrics.lastOrderDate).getTime() : 0
+          break
+        case 'avgOrderValue':
+          aVal = a.metrics.avgOrderValue
+          bVal = b.metrics.avgOrderValue
+          break
+        case 'orderCount':
+          aVal = a.metrics.orderCount
+          bVal = b.metrics.orderCount
+          break
+      }
+
+      if (aVal < bVal) return sortDir === 'asc' ? -1 : 1
+      if (aVal > bVal) return sortDir === 'asc' ? 1 : -1
+      return 0
+    })
+
+    return filtered
+  }, [customers, searchQuery, sortKey, sortDir])
+
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir(sortDir === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortKey(key)
+      setSortDir('desc')
     }
-    return true
-  })
+  }
 
   const toggleSelect = (id: string) => {
     const newSet = new Set(selectedIds)
@@ -158,39 +330,34 @@ function ElevateCustomerManager() {
     }
   }
 
-  const getStateColor = (state: string) => {
-    switch (state) {
-      case 'ENABLED': return 'bg-green-500/20 text-green-400'
-      case 'INVITED': return 'bg-yellow-500/20 text-yellow-400'
-      case 'DISABLED': return 'bg-red-500/20 text-red-400'
-      default: return 'bg-gray-500/20 text-gray-400'
-    }
-  }
+  // Summary stats
+  const stats = useMemo(() => {
+    const totalRevenue = customers.reduce((sum, c) => sum + c.metrics.totalSpend, 0)
+    const totalOrders = customers.reduce((sum, c) => sum + c.metrics.orderCount, 0)
+    const customersWithOrders = customers.filter(c => c.metrics.orderCount > 0).length
+    const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0
 
-  const getStateLabel = (state: string) => {
-    switch (state) {
-      case 'ENABLED': return 'Activated'
-      case 'INVITED': return 'Pending'
-      case 'DISABLED': return 'Disabled'
-      default: return state
-    }
-  }
+    // Compare stats
+    const compareTotalRevenue = compareCustomers.reduce((sum, c) => sum + c.metrics.totalSpend, 0)
+    const compareTotalOrders = compareCustomers.reduce((sum, c) => sum + c.metrics.orderCount, 0)
 
-  // Stats - for passwordless accounts, track approval status and orders
-  const stats = {
-    total: customers.length,
-    active: customers.filter(c => c.state !== 'DISABLED').length,
-    approved: customers.filter(c => c.tags?.includes('approved') && c.state !== 'DISABLED').length,
-    disabled: customers.filter(c => c.state === 'DISABLED').length,
-    withOrders: customers.filter(c => c.numberOfOrders > 0).length,
-  }
+    return {
+      totalCustomers: customers.length,
+      customersWithOrders,
+      totalRevenue,
+      totalOrders,
+      avgOrderValue,
+      revenueChange: compareTotalRevenue > 0 ? ((totalRevenue - compareTotalRevenue) / compareTotalRevenue) * 100 : null,
+      ordersChange: compareTotalOrders > 0 ? ((totalOrders - compareTotalOrders) / compareTotalOrders) * 100 : null,
+    }
+  }, [customers, compareCustomers])
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Elevate Customers</h1>
-          <p className="text-gray-400 mt-1">Manage wholesale customer accounts</p>
+          <p className="text-gray-400 mt-1">Wholesale customer analytics & management</p>
         </div>
         <button
           onClick={fetchCustomers}
@@ -202,27 +369,71 @@ function ElevateCustomerManager() {
         </button>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-5 gap-4">
+      {/* Date Range Picker */}
+      <div className="flex items-center gap-4 flex-wrap bg-gray-900 border border-gray-800 rounded-lg p-4">
+        <div className="flex items-center gap-2">
+          <Calendar className="w-4 h-4 text-gray-500" />
+          <span className="text-gray-400 text-sm">Date Range:</span>
+        </div>
+        <div className="flex gap-2 flex-wrap">
+          {DATE_PRESETS.map(preset => (
+            <button
+              key={preset.value}
+              onClick={() => {
+                setDatePreset(preset.value)
+                if (!preset.canCompare) setCompareEnabled(false)
+              }}
+              className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                datePreset === preset.value
+                  ? 'bg-purple-600 text-white'
+                  : 'bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700'
+              }`}
+            >
+              {preset.label}
+            </button>
+          ))}
+        </div>
+        {canCompare && (
+          <label className="flex items-center gap-2 ml-4 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={compareEnabled}
+              onChange={(e) => setCompareEnabled(e.target.checked)}
+              className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-purple-600 focus:ring-purple-500"
+            />
+            <span className="text-sm text-gray-400">Compare to previous period</span>
+          </label>
+        )}
+      </div>
+
+      {/* Summary Stats */}
+      <div className="grid grid-cols-4 gap-4">
         <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <p className="text-gray-500 text-sm">Total Customers</p>
-          <p className="text-2xl font-bold text-white">{stats.total}</p>
+          <p className="text-2xl font-bold text-white">{stats.totalCustomers}</p>
+          <p className="text-gray-500 text-xs mt-1">{stats.customersWithOrders} with orders</p>
         </div>
         <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
-          <p className="text-gray-500 text-sm">Active</p>
-          <p className="text-2xl font-bold text-green-400">{stats.active}</p>
+          <p className="text-gray-500 text-sm">Total Revenue</p>
+          <p className="text-2xl font-bold text-green-400">${stats.totalRevenue.toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+          {stats.revenueChange !== null && (
+            <p className={`text-xs mt-1 ${stats.revenueChange >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+              {stats.revenueChange >= 0 ? '↑' : '↓'} {Math.abs(stats.revenueChange).toFixed(1)}% vs prev period
+            </p>
+          )}
         </div>
         <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
-          <p className="text-gray-500 text-sm">Approved</p>
-          <p className="text-2xl font-bold text-yellow-400">{stats.approved}</p>
+          <p className="text-gray-500 text-sm">Total Orders</p>
+          <p className="text-2xl font-bold text-blue-400">{stats.totalOrders}</p>
+          {stats.ordersChange !== null && (
+            <p className={`text-xs mt-1 ${stats.ordersChange >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+              {stats.ordersChange >= 0 ? '↑' : '↓'} {Math.abs(stats.ordersChange).toFixed(1)}% vs prev period
+            </p>
+          )}
         </div>
         <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
-          <p className="text-gray-500 text-sm">With Orders</p>
-          <p className="text-2xl font-bold text-blue-400">{stats.withOrders}</p>
-        </div>
-        <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
-          <p className="text-gray-500 text-sm">Disabled</p>
-          <p className="text-2xl font-bold text-red-400">{stats.disabled}</p>
+          <p className="text-gray-500 text-sm">Avg Order Value</p>
+          <p className="text-2xl font-bold text-purple-400">${stats.avgOrderValue.toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
         </div>
       </div>
 
@@ -258,7 +469,7 @@ function ElevateCustomerManager() {
           }`}
         >
           <Users className="w-4 h-4 inline mr-2" />
-          Customer List
+          Customer Analytics
         </button>
         <button
           onClick={() => setActiveTab('create')}
@@ -282,18 +493,19 @@ function ElevateCustomerManager() {
 
       {/* Tab Content */}
       {activeTab === 'list' && (
-        <CustomerList
+        <CustomerAnalyticsList
           customers={filteredCustomers}
+          compareMap={compareMap}
+          compareEnabled={compareEnabled}
           loading={loading}
           selectedIds={selectedIds}
           toggleSelect={toggleSelect}
           selectAll={selectAll}
-          stateFilter={stateFilter}
-          setStateFilter={setStateFilter}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
-          getStateColor={getStateColor}
-          getStateLabel={getStateLabel}
+          sortKey={sortKey}
+          sortDir={sortDir}
+          onSort={handleSort}
           sendActivationEmails={sendActivationEmails}
           actionLoading={actionLoading}
           setMessage={setMessage}
@@ -324,78 +536,61 @@ function ElevateCustomerManager() {
   )
 }
 
-interface CustomerListProps {
-  customers: ShopifyCustomer[]
+interface CustomerAnalyticsListProps {
+  customers: CustomerWithOrders[]
+  compareMap: Map<string, CustomerMetrics>
+  compareEnabled: boolean
   loading: boolean
   selectedIds: Set<string>
   toggleSelect: (id: string) => void
   selectAll: () => void
-  stateFilter: string
-  setStateFilter: (v: string) => void
   searchQuery: string
   setSearchQuery: (v: string) => void
-  getStateColor: (s: string) => string
-  getStateLabel: (s: string) => string
+  sortKey: SortKey
+  sortDir: SortDir
+  onSort: (key: SortKey) => void
   sendActivationEmails: (ids: string[]) => Promise<void>
   actionLoading: boolean
   setMessage: (m: { type: 'success' | 'error', text: string } | null) => void
   fetchCustomers: () => void
 }
 
-function CustomerList({
-  customers, loading, selectedIds, toggleSelect, selectAll,
-  stateFilter, setStateFilter, searchQuery, setSearchQuery,
-  getStateColor, getStateLabel, sendActivationEmails, actionLoading,
-  setMessage, fetchCustomers
-}: CustomerListProps) {
-  // Customers who haven't logged in yet and aren't disabled
-  const notLoggedInSelected = customers.filter(c => selectedIds.has(c.id) && !c.tags?.includes('approved') && c.state !== 'DISABLED')
+function CustomerAnalyticsList({
+  customers, compareMap, compareEnabled, loading, selectedIds, toggleSelect, selectAll,
+  searchQuery, setSearchQuery, sortKey, sortDir, onSort,
+  sendActivationEmails, actionLoading, setMessage, fetchCustomers
+}: CustomerAnalyticsListProps) {
+  const SortHeader = ({ label, sortKeyName }: { label: string; sortKeyName: SortKey }) => (
+    <th
+      className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase cursor-pointer hover:text-white"
+      onClick={() => onSort(sortKeyName)}
+    >
+      <div className="flex items-center gap-1">
+        {label}
+        {sortKey === sortKeyName ? (
+          sortDir === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+        ) : (
+          <ArrowUpDown className="w-3 h-3 opacity-50" />
+        )}
+      </div>
+    </th>
+  )
 
   return (
     <div className="space-y-4">
-      {/* Filters & Actions */}
+      {/* Search */}
       <div className="flex items-center gap-4 flex-wrap">
-        <div className="flex items-center gap-2">
-          <Filter className="w-4 h-4 text-gray-500" />
-          <select
-            value={stateFilter}
-            onChange={(e) => setStateFilter(e.target.value)}
-            className="px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm"
-          >
-            <option value="all">All</option>
-            <option value="active">Active</option>
-            <option value="approved">Approved</option>
-            <option value="with_orders">With Orders</option>
-            <option value="DISABLED">Disabled</option>
-          </select>
-        </div>
-
         <div className="flex-1 relative">
           <Search className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Search by name, email, or business..."
+            placeholder="Search by name or email..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 text-sm"
           />
         </div>
-
-        {selectedIds.size > 0 && (
-          <div className="flex items-center gap-2">
-            <span className="text-gray-400 text-sm">{selectedIds.size} selected</span>
-            {notLoggedInSelected.length > 0 && (
-              <button
-                onClick={() => sendActivationEmails(notLoggedInSelected.map(c => c.id))}
-                disabled={actionLoading}
-                className="flex items-center gap-2 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm disabled:opacity-50"
-              >
-                {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
-                Send Activation ({notLoggedInSelected.length})
-              </button>
-            )}
-          </div>
-        )}
+        <span className="text-gray-500 text-sm">{customers.length} customers</span>
       </div>
 
       {/* Table */}
@@ -412,7 +607,7 @@ function CustomerList({
           <table className="w-full">
             <thead className="bg-gray-800/50">
               <tr>
-                <th className="px-4 py-3 text-left">
+                <th className="px-4 py-3 text-left w-8">
                   <button onClick={selectAll} className="text-gray-400 hover:text-white">
                     {selectedIds.size === customers.length ? (
                       <CheckSquare className="w-4 h-4" />
@@ -421,25 +616,23 @@ function CustomerList({
                     )}
                   </button>
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Customer</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Business</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Status</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Orders</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Created</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Actions</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase w-8">Access</th>
+                <SortHeader label="Customer" sortKeyName="name" />
+                <SortHeader label="Total Spend" sortKeyName="totalSpend" />
+                <SortHeader label="Orders" sortKeyName="orderCount" />
+                <SortHeader label="Last Order" sortKeyName="lastOrderDate" />
+                <SortHeader label="Avg Order $" sortKeyName="avgOrderValue" />
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase w-10"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800">
               {customers.map((customer) => (
-                <CustomerRow
+                <CustomerAnalyticsRow
                   key={customer.id}
                   customer={customer}
+                  compareMetrics={compareEnabled ? compareMap.get(customer.id) : undefined}
                   selected={selectedIds.has(customer.id)}
                   onToggle={() => toggleSelect(customer.id)}
-                  getStateColor={getStateColor}
-                  getStateLabel={getStateLabel}
-                  onSendActivation={() => sendActivationEmails([customer.id])}
-                  actionLoading={actionLoading}
                   setMessage={setMessage}
                   fetchCustomers={fetchCustomers}
                 />
@@ -456,118 +649,122 @@ function CustomerList({
           Approved = Can see wholesale prices
         </span>
         <span className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-yellow-400"></span>
-          Pending = Awaiting approval
-        </span>
-        <span className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-red-400"></span>
-          Disabled = Cannot access store
+          <span className="w-2 h-2 rounded-full bg-gray-500"></span>
+          Not approved = Awaiting approval
         </span>
       </div>
     </div>
   )
 }
 
-interface CustomerRowProps {
-  customer: ShopifyCustomer
+interface CustomerAnalyticsRowProps {
+  customer: CustomerWithOrders
+  compareMetrics?: CustomerMetrics
   selected: boolean
   onToggle: () => void
-  getStateColor: (s: string) => string
-  getStateLabel: (s: string) => string
-  onSendActivation: () => void
-  actionLoading: boolean
   setMessage: (m: { type: 'success' | 'error', text: string } | null) => void
   fetchCustomers: () => void
 }
 
-function CustomerRow({
-  customer, selected, onToggle, getStateColor, getStateLabel,
-  onSendActivation, actionLoading, setMessage, fetchCustomers
-}: CustomerRowProps) {
-  const [sendingOne, setSendingOne] = useState(false)
+function CustomerAnalyticsRow({
+  customer, compareMetrics, selected, onToggle, setMessage, fetchCustomers
+}: CustomerAnalyticsRowProps) {
+  const [expanded, setExpanded] = useState(false)
+  const isApproved = customer.tags?.includes('approved') && customer.state !== 'DISABLED'
 
-  // Extract business name from note
-  const businessMatch = customer.note?.match(/Business:\s*([^|]+)/i)
-  const businessName = businessMatch ? businessMatch[1].trim() : '-'
+  const formatCurrency = (val: number) =>
+    '$' + val.toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr)
-    return date.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })
+  const formatDate = (dateStr: string | null) => {
+    if (!dateStr) return '-'
+    return new Date(dateStr).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })
   }
 
-  const handleSendOne = async () => {
-    setSendingOne(true)
-    try {
-      const response = await fetch('/api/elevate/customers/activate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customerIds: [customer.id] })
-      })
-      const data = await response.json()
-      if (response.ok) {
-        setMessage({ type: 'success', text: `Activation email sent to ${customer.email}` })
-        fetchCustomers()
-      } else {
-        setMessage({ type: 'error', text: data.error })
-      }
-    } catch (err: any) {
-      setMessage({ type: 'error', text: err.message })
-    } finally {
-      setSendingOne(false)
-    }
+  const getChangeIndicator = (current: number, compare: number | undefined) => {
+    if (!compare || compare === 0) return null
+    const change = ((current - compare) / compare) * 100
+    if (Math.abs(change) < 1) return null
+    return (
+      <span className={`text-xs ${change >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+        {change >= 0 ? '↑' : '↓'}{Math.abs(change).toFixed(0)}%
+      </span>
+    )
   }
+
+  // Sort brands by amount
+  const sortedBrands = Object.entries(customer.metrics.brandBreakdown)
+    .sort((a, b) => b[1].amount - a[1].amount)
 
   return (
-    <tr className="hover:bg-gray-800/50">
-      <td className="px-4 py-3">
-        <button onClick={onToggle} className="text-gray-400 hover:text-white">
-          {selected ? <CheckSquare className="w-4 h-4 text-purple-400" /> : <Square className="w-4 h-4" />}
-        </button>
-      </td>
-      <td className="px-4 py-3">
-        <div>
-          <p className="text-white font-medium">
-            {customer.firstName || ''} {customer.lastName || ''}
-            {!customer.firstName && !customer.lastName && <span className="text-gray-500">No name</span>}
-          </p>
-          <p className="text-gray-500 text-sm">{customer.email}</p>
-        </div>
-      </td>
-      <td className="px-4 py-3 text-gray-400 text-sm">{businessName}</td>
-      <td className="px-4 py-3">
-        {customer.state === 'DISABLED' ? (
-          <span className="px-2 py-1 rounded text-xs font-medium bg-red-500/20 text-red-400">
-            Disabled
-          </span>
-        ) : customer.verifiedEmail ? (
-          <span className="px-2 py-1 rounded text-xs font-medium bg-green-500/20 text-green-400">
-            Logged In
-          </span>
-        ) : (
-          <span className="px-2 py-1 rounded text-xs font-medium bg-yellow-500/20 text-yellow-400">
-            Not Logged In
-          </span>
-        )}
-      </td>
-      <td className="px-4 py-3 text-gray-400">{customer.numberOfOrders}</td>
-      <td className="px-4 py-3 text-gray-500 text-sm">{formatDate(customer.createdAt)}</td>
-      <td className="px-4 py-3">
-        {!customer.tags?.includes('approved') && customer.state !== 'DISABLED' && (
-          <button
-            onClick={handleSendOne}
-            disabled={sendingOne}
-            className="flex items-center gap-1 px-2 py-1 text-xs text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 rounded transition-colors disabled:opacity-50"
-            title="Resend activation email"
-          >
-            {sendingOne ? <Loader2 className="w-3 h-3 animate-spin" /> : <Mail className="w-3 h-3" />}
-            Resend
+    <>
+      <tr className="hover:bg-gray-800/50">
+        <td className="px-4 py-3">
+          <button onClick={onToggle} className="text-gray-400 hover:text-white">
+            {selected ? <CheckSquare className="w-4 h-4 text-purple-400" /> : <Square className="w-4 h-4" />}
           </button>
-        )}
-        {customer.verifiedEmail && (
-          <span className="text-green-400 text-xs">Ready to order</span>
-        )}
-      </td>
-    </tr>
+        </td>
+        <td className="px-4 py-3">
+          <span
+            className={`w-2.5 h-2.5 rounded-full inline-block ${isApproved ? 'bg-green-400' : 'bg-gray-500'}`}
+            title={isApproved ? 'Approved' : 'Not approved'}
+          />
+        </td>
+        <td className="px-4 py-3">
+          <div>
+            <p className="text-white font-medium">
+              {customer.firstName || ''} {customer.lastName || ''}
+              {!customer.firstName && !customer.lastName && <span className="text-gray-500">No name</span>}
+            </p>
+            <p className="text-gray-500 text-sm">{customer.email}</p>
+          </div>
+        </td>
+        <td className="px-4 py-3">
+          <div className="flex items-center gap-2">
+            <span className="text-green-400 font-medium">{formatCurrency(customer.metrics.totalSpend)}</span>
+            {getChangeIndicator(customer.metrics.totalSpend, compareMetrics?.totalSpend)}
+          </div>
+        </td>
+        <td className="px-4 py-3">
+          <div className="flex items-center gap-2">
+            <span className="text-gray-300">{customer.metrics.orderCount}</span>
+            {getChangeIndicator(customer.metrics.orderCount, compareMetrics?.orderCount)}
+          </div>
+        </td>
+        <td className="px-4 py-3 text-gray-400 text-sm">{formatDate(customer.metrics.lastOrderDate)}</td>
+        <td className="px-4 py-3">
+          <span className="text-purple-400">{formatCurrency(customer.metrics.avgOrderValue)}</span>
+        </td>
+        <td className="px-4 py-3">
+          {sortedBrands.length > 0 && (
+            <button
+              onClick={() => setExpanded(!expanded)}
+              className="p-1 text-gray-500 hover:text-white transition-colors"
+              title={expanded ? 'Collapse' : 'Expand brand breakdown'}
+            >
+              {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </button>
+          )}
+        </td>
+      </tr>
+      {expanded && sortedBrands.length > 0 && (
+        <tr className="bg-gray-800/30">
+          <td colSpan={8} className="px-4 py-3">
+            <div className="ml-12">
+              <p className="text-gray-400 text-xs uppercase mb-2">Brand Breakdown</p>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                {sortedBrands.map(([brand, data]) => (
+                  <div key={brand} className="bg-gray-900 rounded-lg p-3 border border-gray-700">
+                    <p className="text-white font-medium text-sm truncate" title={brand}>{brand}</p>
+                    <p className="text-green-400 text-lg">{formatCurrency(data.amount)}</p>
+                    <p className="text-gray-500 text-xs">{data.orderCount} order{data.orderCount !== 1 ? 's' : ''}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </td>
+        </tr>
+      )}
+    </>
   )
 }
 
@@ -813,7 +1010,7 @@ function BulkUpload({ onSuccess, setMessage }: BulkUploadProps) {
           row[h] = values[i] || ''
         })
         return row
-      }).filter(r => r.email) // Only rows with email
+      }).filter(r => r.email)
 
       setPreview(rows.slice(0, 5))
     }
@@ -836,7 +1033,6 @@ function BulkUpload({ onSuccess, setMessage }: BulkUploadProps) {
           const values = line.split(',').map(v => v.trim())
           const row: any = {}
           headers.forEach((h, i) => {
-            // Map common CSV headers to our field names
             const fieldMap: Record<string, string> = {
               'email': 'email',
               'first name': 'firstName',
@@ -922,7 +1118,6 @@ function BulkUpload({ onSuccess, setMessage }: BulkUploadProps) {
       </div>
 
       <div className="space-y-6">
-        {/* File Upload */}
         <div className="border-2 border-dashed border-gray-700 rounded-lg p-8 text-center">
           <input
             type="file"
@@ -940,7 +1135,6 @@ function BulkUpload({ onSuccess, setMessage }: BulkUploadProps) {
           </label>
         </div>
 
-        {/* Preview */}
         {preview.length > 0 && (
           <div>
             <h3 className="text-sm font-medium text-gray-400 mb-3">Preview (first 5 rows)</h3>
@@ -967,7 +1161,6 @@ function BulkUpload({ onSuccess, setMessage }: BulkUploadProps) {
           </div>
         )}
 
-        {/* Results */}
         {results && (
           <div className={`rounded-lg p-4 ${results.failed > 0 ? 'bg-yellow-900/20 border border-yellow-800' : 'bg-green-900/20 border border-green-800'}`}>
             <p className="font-medium text-white mb-2">Upload Complete</p>
@@ -985,7 +1178,6 @@ function BulkUpload({ onSuccess, setMessage }: BulkUploadProps) {
           </div>
         )}
 
-        {/* Upload Button */}
         {file && !results && (
           <div className="flex justify-end">
             <button onClick={handleUpload} disabled={uploading}
