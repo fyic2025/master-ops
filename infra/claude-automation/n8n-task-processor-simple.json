@@ -43,7 +43,7 @@
             },
             {
               "name": "status",
-              "value": "eq.pending"
+              "value": "in.(pending,pending_input)"
             },
             {
               "name": "execution_type",
