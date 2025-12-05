@@ -323,6 +323,42 @@ export class SupabaseLogger {
   }
 
   /**
+   * Get baseline CWV metrics from the last successful production deployment
+   */
+  async getCwvBaseline(brand: string, environment: string): Promise<{
+    lcp: number | null;
+    fid: number | null;
+    cls: number | null;
+    tti: number | null;
+    performance: number | null;
+    auditId: string | null;
+  }> {
+    // Get the most recent audit from a successful deployment
+    const { data, error } = await this.client
+      .from('lighthouse_audits')
+      .select('audit_id, lcp_value, fid_value, cls_value, tti_value, performance_score')
+      .eq('brand', brand)
+      .eq('environment', environment)
+      .not('deployment_id', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (error || !data) {
+      return { lcp: null, fid: null, cls: null, tti: null, performance: null, auditId: null };
+    }
+
+    return {
+      lcp: data.lcp_value,
+      fid: data.fid_value,
+      cls: data.cls_value,
+      tti: data.tti_value,
+      performance: data.performance_score,
+      auditId: data.audit_id
+    };
+  }
+
+  /**
    * Check if scores meet deployment thresholds
    */
   async checkDeploymentThresholds(auditId: string): Promise<{

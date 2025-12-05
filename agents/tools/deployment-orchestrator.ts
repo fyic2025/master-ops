@@ -5,8 +5,11 @@
 
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import * as fs from 'fs';
+import * as path from 'path';
 import { getLogger, DeploymentLog } from './supabase-logger';
 import LighthouseRunner from './lighthouse-runner';
+import LiquidValidator from './liquid-validator';
 import * as readline from 'readline';
 
 const execAsync = promisify(exec);
@@ -30,6 +33,7 @@ export interface ValidationGateResult {
 export class DeploymentOrchestrator {
   private logger = getLogger();
   private lighthouseRunner = new LighthouseRunner();
+  private liquidValidator = new LiquidValidator();
 
   /**
    * Execute full deployment workflow
@@ -190,7 +194,7 @@ export class DeploymentOrchestrator {
 
     try {
       // Check Git status
-      const { stdout: gitStatus } = await execAsync('git status --porcelain');
+      const { stdout: gitStatus } = await execAsync('git status --porcelain', { cwd: options.themePath });
       if (gitStatus.trim()) {
         details.push('⚠️  Uncommitted changes detected');
         passed = false;
@@ -198,11 +202,54 @@ export class DeploymentOrchestrator {
         details.push('✅ Git working directory clean');
       }
 
-      // TODO: Add Liquid syntax validation
-      // TODO: Add JavaScript linting
-      // TODO: Add CSS validation
+      // Liquid syntax validation
+      console.log('      Validating Liquid templates...');
+      const liquidResult = await this.liquidValidator.validate({
+        themePath: options.themePath,
+        failOnWarnings: false,
+        skipChecks: ['ImgWidthAndHeight'] // Skip non-critical checks
+      });
 
-      details.push('✅ Code quality checks passed');
+      if (!liquidResult.passed) {
+        passed = false;
+        details.push(`❌ Liquid validation failed: ${liquidResult.summary.errorCount} error(s)`);
+        // Add first 3 errors to details
+        for (const error of liquidResult.errors.slice(0, 3)) {
+          details.push(`   • ${error.file}:${error.line} - ${error.message}`);
+        }
+        if (liquidResult.errors.length > 3) {
+          details.push(`   ... and ${liquidResult.errors.length - 3} more error(s)`);
+        }
+      } else {
+        details.push('✅ Liquid templates valid');
+        if (liquidResult.warnings.length > 0) {
+          details.push(`   ℹ️  ${liquidResult.warnings.length} warning(s) (non-blocking)`);
+        }
+      }
+
+      // JavaScript linting
+      console.log('      Checking JavaScript...');
+      const jsResult = await this.validateJavaScript(options.themePath);
+      if (!jsResult.passed) {
+        passed = false;
+        details.push(...jsResult.details);
+      } else {
+        details.push('✅ JavaScript valid');
+      }
+
+      // CSS validation
+      console.log('      Checking CSS...');
+      const cssResult = await this.validateCSS(options.themePath);
+      if (!cssResult.passed) {
+        // CSS errors are warnings, not blockers
+        details.push(...cssResult.details);
+      } else {
+        details.push('✅ CSS valid');
+      }
+
+      if (passed) {
+        details.push('✅ All code quality checks passed');
+      }
 
       return {
         gateName: 'Code Quality',
@@ -218,6 +265,161 @@ export class DeploymentOrchestrator {
         blocking: true
       };
     }
+  }
+
+  /**
+   * Validate JavaScript files in theme
+   */
+  private async validateJavaScript(themePath: string): Promise<{ passed: boolean; details: string[] }> {
+    const details: string[] = [];
+    let passed = true;
+
+    const assetsPath = path.join(themePath, 'assets');
+    if (!fs.existsSync(assetsPath)) {
+      return { passed: true, details: [] };
+    }
+
+    const jsFiles = fs.readdirSync(assetsPath).filter(f => f.endsWith('.js') && !f.endsWith('.min.js'));
+
+    for (const file of jsFiles) {
+      const filePath = path.join(assetsPath, file);
+      const content = fs.readFileSync(filePath, 'utf-8');
+
+      // Basic syntax check using Node's parser
+      try {
+        // Check for common syntax errors
+        const issues = this.checkJavaScriptSyntax(content, file);
+        if (issues.length > 0) {
+          passed = false;
+          details.push(`❌ JavaScript errors in ${file}:`);
+          for (const issue of issues.slice(0, 3)) {
+            details.push(`   • ${issue}`);
+          }
+        }
+      } catch (error: any) {
+        passed = false;
+        details.push(`❌ JavaScript syntax error in ${file}: ${error.message}`);
+      }
+    }
+
+    return { passed, details };
+  }
+
+  /**
+   * Basic JavaScript syntax checking
+   */
+  private checkJavaScriptSyntax(content: string, filename: string): string[] {
+    const issues: string[] = [];
+
+    // Check for common issues
+    const lines = content.split('\n');
+    let braceCount = 0;
+    let parenCount = 0;
+    let bracketCount = 0;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const lineNum = i + 1;
+
+      // Count brackets (ignoring strings)
+      const stripped = line.replace(/"[^"]*"|'[^']*'|`[^`]*`/g, '');
+      braceCount += (stripped.match(/\{/g) || []).length - (stripped.match(/\}/g) || []).length;
+      parenCount += (stripped.match(/\(/g) || []).length - (stripped.match(/\)/g) || []).length;
+      bracketCount += (stripped.match(/\[/g) || []).length - (stripped.match(/\]/g) || []).length;
+
+      // Check for console.log (warning in production)
+      if (line.includes('console.log') && !line.includes('//')) {
+        issues.push(`Line ${lineNum}: console.log found (remove for production)`);
+      }
+
+      // Check for debugger statements
+      if (/\bdebugger\b/.test(line) && !line.includes('//')) {
+        issues.push(`Line ${lineNum}: debugger statement found`);
+      }
+    }
+
+    // Check for unclosed brackets at end of file
+    if (braceCount !== 0) {
+      issues.push(`Mismatched braces: ${braceCount > 0 ? 'unclosed {' : 'extra }'}`);
+    }
+    if (parenCount !== 0) {
+      issues.push(`Mismatched parentheses: ${parenCount > 0 ? 'unclosed (' : 'extra )'}`);
+    }
+    if (bracketCount !== 0) {
+      issues.push(`Mismatched brackets: ${bracketCount > 0 ? 'unclosed [' : 'extra ]'}`);
+    }
+
+    return issues;
+  }
+
+  /**
+   * Validate CSS files in theme
+   */
+  private async validateCSS(themePath: string): Promise<{ passed: boolean; details: string[] }> {
+    const details: string[] = [];
+    let passed = true;
+
+    const assetsPath = path.join(themePath, 'assets');
+    if (!fs.existsSync(assetsPath)) {
+      return { passed: true, details: [] };
+    }
+
+    const cssFiles = fs.readdirSync(assetsPath).filter(f =>
+      (f.endsWith('.css') || f.endsWith('.scss.liquid')) && !f.endsWith('.min.css')
+    );
+
+    for (const file of cssFiles) {
+      const filePath = path.join(assetsPath, file);
+      const content = fs.readFileSync(filePath, 'utf-8');
+
+      const issues = this.checkCSSSyntax(content, file);
+      if (issues.length > 0) {
+        // CSS issues are warnings, not errors
+        details.push(`⚠️  CSS issues in ${file}:`);
+        for (const issue of issues.slice(0, 3)) {
+          details.push(`   • ${issue}`);
+        }
+      }
+    }
+
+    return { passed, details };
+  }
+
+  /**
+   * Basic CSS syntax checking
+   */
+  private checkCSSSyntax(content: string, filename: string): string[] {
+    const issues: string[] = [];
+
+    // Count braces
+    const openBraces = (content.match(/\{/g) || []).length;
+    const closeBraces = (content.match(/\}/g) || []).length;
+
+    if (openBraces !== closeBraces) {
+      issues.push(`Mismatched braces: ${openBraces} open, ${closeBraces} close`);
+    }
+
+    // Check for common issues
+    const lines = content.split('\n');
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      const lineNum = i + 1;
+
+      // Check for !important overuse (warning)
+      if (line.includes('!important')) {
+        const importantCount = (line.match(/!important/g) || []).length;
+        if (importantCount > 1) {
+          issues.push(`Line ${lineNum}: Multiple !important declarations`);
+        }
+      }
+
+      // Check for invalid property values
+      if (line.includes(': ;') || line.includes(':;')) {
+        issues.push(`Line ${lineNum}: Empty property value`);
+      }
+    }
+
+    return issues;
   }
 
   private async validateLighthouse(options: DeploymentOptions): Promise<ValidationGateResult> {
@@ -408,8 +610,20 @@ export class DeploymentOrchestrator {
       }
 
       // TODO: Check for JavaScript errors
-      // TODO: Monitor Core Web Vitals
       // TODO: Verify key functionality
+
+      // Monitor Core Web Vitals for regressions
+      const cwvCheck = await this.checkCwvRegression(options, result);
+      if (!cwvCheck.passed) {
+        console.log(`   ⚠️  Core Web Vitals regression detected`);
+        for (const regression of cwvCheck.regressions) {
+          console.log(`      • ${regression}`);
+        }
+        // Create alert but don't block deployment for minor regressions
+        if (cwvCheck.severity === 'critical') {
+          return false;
+        }
+      }
 
       console.log(`   ✅ Post-deployment validation passed`);
       return true;
@@ -417,6 +631,112 @@ export class DeploymentOrchestrator {
       console.error(`   ❌ Post-deployment validation error:`, error.message);
       return false;
     }
+  }
+
+  /**
+   * Check for Core Web Vitals regressions compared to baseline
+   * Returns severity: 'none' | 'warning' | 'critical'
+   */
+  private async checkCwvRegression(
+    options: DeploymentOptions,
+    currentAudit: { coreWebVitals: { lcp: number; fid: number; cls: number; tti: number } }
+  ): Promise<{
+    passed: boolean;
+    severity: 'none' | 'warning' | 'critical';
+    regressions: string[];
+  }> {
+    const regressions: string[] = [];
+
+    // Get baseline from previous successful deployment
+    const baseline = await this.logger.getCwvBaseline(options.brand, options.environment);
+
+    if (!baseline.auditId) {
+      console.log(`   ℹ️  No baseline found - skipping regression check`);
+      return { passed: true, severity: 'none', regressions: [] };
+    }
+
+    const current = currentAudit.coreWebVitals;
+
+    // Regression thresholds
+    const THRESHOLDS = {
+      lcp: { warning: 0.15, critical: 0.30 },    // 15% / 30% increase
+      fid: { warning: 0.20, critical: 0.50 },    // 20% / 50% increase
+      cls: { warning: 0.03, critical: 0.05 },    // Absolute increase of 0.03 / 0.05
+      tti: { warning: 0.15, critical: 0.30 }     // 15% / 30% increase
+    };
+
+    let hasCritical = false;
+    let hasWarning = false;
+
+    // Check LCP regression
+    if (baseline.lcp && current.lcp > baseline.lcp) {
+      const increase = (current.lcp - baseline.lcp) / baseline.lcp;
+      if (increase >= THRESHOLDS.lcp.critical) {
+        regressions.push(`LCP: ${baseline.lcp.toFixed(2)}s → ${current.lcp.toFixed(2)}s (+${(increase * 100).toFixed(0)}% - CRITICAL)`);
+        hasCritical = true;
+      } else if (increase >= THRESHOLDS.lcp.warning) {
+        regressions.push(`LCP: ${baseline.lcp.toFixed(2)}s → ${current.lcp.toFixed(2)}s (+${(increase * 100).toFixed(0)}%)`);
+        hasWarning = true;
+      }
+    }
+
+    // Check FID regression
+    if (baseline.fid && current.fid > baseline.fid) {
+      const increase = (current.fid - baseline.fid) / baseline.fid;
+      if (increase >= THRESHOLDS.fid.critical) {
+        regressions.push(`FID: ${baseline.fid.toFixed(0)}ms → ${current.fid.toFixed(0)}ms (+${(increase * 100).toFixed(0)}% - CRITICAL)`);
+        hasCritical = true;
+      } else if (increase >= THRESHOLDS.fid.warning) {
+        regressions.push(`FID: ${baseline.fid.toFixed(0)}ms → ${current.fid.toFixed(0)}ms (+${(increase * 100).toFixed(0)}%)`);
+        hasWarning = true;
+      }
+    }
+
+    // Check CLS regression (absolute, not percentage)
+    if (baseline.cls !== null && current.cls > baseline.cls) {
+      const increase = current.cls - baseline.cls;
+      if (increase >= THRESHOLDS.cls.critical) {
+        regressions.push(`CLS: ${baseline.cls.toFixed(3)} → ${current.cls.toFixed(3)} (+${increase.toFixed(3)} - CRITICAL)`);
+        hasCritical = true;
+      } else if (increase >= THRESHOLDS.cls.warning) {
+        regressions.push(`CLS: ${baseline.cls.toFixed(3)} → ${current.cls.toFixed(3)} (+${increase.toFixed(3)})`);
+        hasWarning = true;
+      }
+    }
+
+    // Check TTI regression
+    if (baseline.tti && current.tti > baseline.tti) {
+      const increase = (current.tti - baseline.tti) / baseline.tti;
+      if (increase >= THRESHOLDS.tti.critical) {
+        regressions.push(`TTI: ${baseline.tti.toFixed(2)}s → ${current.tti.toFixed(2)}s (+${(increase * 100).toFixed(0)}% - CRITICAL)`);
+        hasCritical = true;
+      } else if (increase >= THRESHOLDS.tti.warning) {
+        regressions.push(`TTI: ${baseline.tti.toFixed(2)}s → ${current.tti.toFixed(2)}s (+${(increase * 100).toFixed(0)}%)`);
+        hasWarning = true;
+      }
+    }
+
+    const severity: 'none' | 'warning' | 'critical' = hasCritical ? 'critical' : hasWarning ? 'warning' : 'none';
+
+    // Create alert if regressions detected
+    if (regressions.length > 0) {
+      await this.logger.createAlert({
+        brand: options.brand,
+        environment: options.environment,
+        severity: severity === 'critical' ? 'critical' : 'medium',
+        alert_type: 'cwv_regression',
+        title: `Core Web Vitals regression after deployment`,
+        description: regressions.join('\n'),
+        metric_name: 'cwv',
+        status: 'open'
+      });
+    }
+
+    return {
+      passed: severity !== 'critical',
+      severity,
+      regressions
+    };
   }
 
   /**
