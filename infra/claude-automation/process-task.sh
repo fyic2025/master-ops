@@ -173,7 +173,16 @@ TASK_BUSINESS=$(echo "$TASK_DATA" | jq -r '.business')
 TASK_PRIORITY=$(echo "$TASK_DATA" | jq -r '.priority')
 TASK_CONTEXT=$(echo "$TASK_DATA" | jq -r '.context')
 ALLOWED_TOOLS=$(echo "$TASK_DATA" | jq -r '.allowed_tools | join(",")')
-EXISTING_ATTEMPTS=$(echo "$TASK_DATA" | jq -c '.model_attempts')
+# Handle model_attempts - might be a string if reset incorrectly
+_RAW_ATTEMPTS=$(echo "$TASK_DATA" | jq -c '.model_attempts')
+if [ "$_RAW_ATTEMPTS" = "null" ] || [ -z "$_RAW_ATTEMPTS" ]; then
+    EXISTING_ATTEMPTS="[]"
+elif echo "$_RAW_ATTEMPTS" | jq -e 'type == "string"' >/dev/null 2>&1; then
+    # It's a string, parse it
+    EXISTING_ATTEMPTS=$(echo "$_RAW_ATTEMPTS" | jq -r '.' | jq -c '.')
+else
+    EXISTING_ATTEMPTS="$_RAW_ATTEMPTS"
+fi
 
 log_info "Task: $TASK_TITLE (Business: $TASK_BUSINESS, Priority: $TASK_PRIORITY)"
 
