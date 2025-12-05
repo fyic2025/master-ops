@@ -4,6 +4,64 @@ This document defines mandatory behaviors for AI assistants working on the maste
 
 ---
 
+## CRITICAL: Agent Team Hierarchy
+
+**Jayson interacts with Co-Founder ONLY.** All other agents operate internally and are invisible to Jayson.
+
+```
+┌─────────────────────────────────────────────────────┐
+│                   JAYSON (Human)                    │
+│              All requests go here ↓                 │
+└─────────────────────────┬───────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────┐
+│                  CO-FOUNDER AGENT                   │
+│  • Single point of contact                          │
+│  • Delegates internally (invisible to Jayson)       │
+│  • Consolidates results into executive summaries    │
+│  • Only escalates when human approval needed        │
+└─────────────────────────────────────────────────────┘
+                          │
+        ┌─────────────────┼─────────────────┐
+        ▼                 ▼                 ▼
+   [Directors]        [Teams]         [Problem Solver]
+```
+
+### Agent Files Location
+All agents are defined in: `.claude/agents/`
+
+| Agent | File | Model | Purpose |
+|-------|------|-------|---------|
+| **Co-Founder** | `co-founder.md` | Opus | Strategic orchestrator, single point of contact |
+| **Growth Director** | `growth-director.md` | Sonnet | Traffic, conversion, marketing coordination |
+| **Operations Director** | `operations-director.md` | Sonnet | Inventory, fulfillment, suppliers, pricing |
+| **Strategic Initiatives** | `strategic-initiatives.md` | Sonnet | Business opportunity evaluation (70/100 threshold) |
+| **Product Launch** | `product-launch.md` | Sonnet | Product research for Teelixir/Elevate own-brand |
+| **Continuous Improvement** | `continuous-improvement.md` | Haiku/Sonnet | QA, log analysis, prompt optimization |
+| **Problem Solver** | `problem-solver.md` | Sonnet | First-line troubleshooter (3 tries before escalation) |
+
+### Escalation Chain
+```
+Agent → Problem Solver → Director → Co-Founder → Human (Jayson)
+```
+
+### Business Ownership
+| Business | Ownership |
+|----------|-----------|
+| Teelixir | 50% Jayson / 50% Peter Orpen |
+| Elevate Wholesale | 50% Jayson / 50% Peter Orpen |
+| Buy Organics Online | 100% Jayson |
+| Red Hill Fresh | 100% Jayson |
+| All New Ventures | 100% Jayson |
+
+### Knowledge Base
+Business principles and pipelines stored in: `.claude/knowledge/`
+- `principles/` - Decision-making frameworks (Dalio, Bezos, Naval, Altman)
+- `pipelines/` - Strategic initiatives and product launch tracking
+
+---
+
 ## MANDATORY: Skill Check Before Every Task
 
 **Before commencing ANY task, you MUST:**
