@@ -2293,7 +2293,11 @@ function EditTaskModal({
 // Fetch tasks from database
 async function fetchDbTasks(): Promise<Task[]> {
   try {
-    const response = await fetch('/api/tasks', { cache: 'no-store' })
+    // Add timestamp to bust browser cache
+    const response = await fetch(`/api/tasks?_t=${Date.now()}`, {
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache' }
+    })
     if (!response.ok) return []
     const data = await response.json()
     return (data.tasks || []).map((t: any) => ({
@@ -2388,6 +2392,8 @@ export default function TasksPage() {
     queryKey: ['tasks'],
     queryFn: fetchDbTasks,
     refetchInterval: 30000, // Refresh every 30 seconds
+    staleTime: 0, // Always consider data stale for manual refetch
+    gcTime: 0, // Don't cache (was cacheTime in older versions)
   })
 
   // Filter db tasks by user's allowed businesses
