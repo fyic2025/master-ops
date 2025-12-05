@@ -333,22 +333,19 @@ check_failure() {
     local result="$1"
     local is_error="$2"
 
-    # Check explicit error flag
+    # Primary check: explicit error flag from Claude
     if [ "$is_error" = "true" ]; then
         return 0  # true = failure
     fi
 
-    # Check for failure keywords
-    local result_lower=$(echo "$result" | tr '[:upper:]' '[:lower:]')
-    local failure_keywords=("i cannot" "i'm unable" "error:" "failed to" "exception" "permission denied" "not found" "timeout")
-    for keyword in "${failure_keywords[@]}"; do
-        if [[ "$result_lower" == *"$keyword"* ]]; then
-            return 0  # true = failure
-        fi
-    done
-
     # Check for empty response
-    if [ -z "$result" ] || [ "$result" = "null" ]; then
+    if [ -z "$result" ] || [ "$result" = "null" ] || [ "$result" = "No result returned" ]; then
+        return 0  # true = failure
+    fi
+
+    # Only check for CLI-level errors (not content in Claude's response)
+    # These are errors from the CLI itself, not Claude's task output
+    if [[ "$result" == "Error:"* ]] || [[ "$result" == "error:"* ]]; then
         return 0  # true = failure
     fi
 
