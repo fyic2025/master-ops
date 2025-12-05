@@ -41,6 +41,12 @@ const BATCH_SIZE = 50
 const PAGE_SIZE = 200
 const MIN_DELAY_MS = 200
 
+// Minimum order date - prevents syncing historical orders before December 2025
+// Set via SYNC_MIN_ORDER_DATE env var or defaults to Dec 1, 2025
+const MIN_ORDER_DATE = process.env.SYNC_MIN_ORDER_DATE
+  ? new Date(process.env.SYNC_MIN_ORDER_DATE)
+  : new Date('2025-12-01T00:00:00Z')
+
 interface SyncConfig {
   dryRun: boolean
   fullSync: boolean
@@ -452,8 +458,19 @@ async function syncOrders(
   let skipped = 0
 
   try {
-    // For full sync, get all orders. Otherwise, last 90 days
-    const startDate = config.fullSync ? undefined : getDateDaysAgo(90)
+    // For full sync, use MIN_ORDER_DATE as cutoff. Otherwise, last 90 days (but not before MIN_ORDER_DATE)
+    let startDate: string
+    if (config.fullSync) {
+      // Full sync: use MIN_ORDER_DATE to prevent syncing very old history
+      startDate = MIN_ORDER_DATE.toISOString().split('T')[0]
+      console.log(`  ℹ️ Full sync limited to orders from ${startDate} (MIN_ORDER_DATE)`)
+    } else {
+      // Incremental: last 90 days, but enforce MIN_ORDER_DATE if 90 days ago is earlier
+      const ninetyDaysAgo = new Date()
+      ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90)
+      const effectiveDate = ninetyDaysAgo > MIN_ORDER_DATE ? ninetyDaysAgo : MIN_ORDER_DATE
+      startDate = effectiveDate.toISOString().split('T')[0]
+    }
     const allOrders = await unleashed.listAllSalesOrders(startDate)
     console.log(`  ✓ Found ${allOrders.length} total orders`)
 
@@ -767,10 +784,11 @@ async function main() {
   }
 
   if (config.fullSync) {
-    console.log('📊 FULL SYNC - Processing all historical orders\n')
+    console.log(`📊 FULL SYNC - Processing orders from ${MIN_ORDER_DATE.toISOString().split('T')[0]}\n`)
   } else {
     console.log('📊 INCREMENTAL SYNC - Processing last 90 days\n')
   }
+  console.log(`📅 Min Order Date: ${MIN_ORDER_DATE.toISOString().split('T')[0]} (enforced)\n`)
 
   // Load credentials from vault
   console.log('🔐 Loading credentials from vault...')

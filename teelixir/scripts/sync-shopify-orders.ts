@@ -33,6 +33,12 @@ const SHOPIFY_API_VERSION = '2024-01'
 const BATCH_SIZE = 250 // Shopify max per request
 const SUPABASE_URL = 'https://qcvfxxsnqvdfmpbcgdni.supabase.co'
 
+// Minimum order date - prevents syncing historical orders before December 2025
+// Set via SYNC_MIN_ORDER_DATE env var or defaults to Dec 1, 2025
+const MIN_ORDER_DATE = process.env.SYNC_MIN_ORDER_DATE
+  ? new Date(process.env.SYNC_MIN_ORDER_DATE)
+  : new Date('2025-12-01T00:00:00Z')
+
 // Load credentials
 const creds = require('../../creds')
 
@@ -488,7 +494,8 @@ async function main() {
   console.log('═'.repeat(60))
   console.log('  TEELIXIR SHOPIFY ORDER SYNC')
   console.log('═'.repeat(60))
-  console.log(`  Mode: ${FULL_SYNC ? 'Full (18 months)' : `Incremental (${SYNC_DAYS} days)`}`)
+  console.log(`  Mode: ${FULL_SYNC ? 'Full (3 years)' : `Incremental (${SYNC_DAYS} days)`}`)
+  console.log(`  Min Date: ${MIN_ORDER_DATE.toISOString().split('T')[0]} (enforced)`)
   console.log(`  Dry Run: ${DRY_RUN ? 'Yes' : 'No'}`)
   console.log(`  Calculate Only: ${CALCULATE_ONLY ? 'Yes' : 'No'}`)
   console.log('═'.repeat(60))
@@ -520,10 +527,18 @@ async function main() {
     const supabase = createClient(SUPABASE_URL, supabaseKey)
 
     if (!CALCULATE_ONLY) {
-      // Calculate date range
-      const createdAtMin = new Date()
-      createdAtMin.setDate(createdAtMin.getDate() - SYNC_DAYS)
-      const createdAtMinStr = createdAtMin.toISOString()
+      // Calculate date range, enforcing MIN_ORDER_DATE
+      const requestedDate = new Date()
+      requestedDate.setDate(requestedDate.getDate() - SYNC_DAYS)
+
+      // Use the later of requestedDate or MIN_ORDER_DATE
+      const effectiveDate = requestedDate > MIN_ORDER_DATE ? requestedDate : MIN_ORDER_DATE
+      const createdAtMinStr = effectiveDate.toISOString()
+
+      if (requestedDate < MIN_ORDER_DATE) {
+        console.log(`⚠️ Requested ${SYNC_DAYS} days would go before MIN_ORDER_DATE`)
+        console.log(`   Enforcing minimum: ${MIN_ORDER_DATE.toISOString().split('T')[0]}`)
+      }
 
       // Fetch orders from Shopify
       const orders = await fetchOrders(shopifyToken, createdAtMinStr)
