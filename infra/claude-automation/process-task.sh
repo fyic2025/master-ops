@@ -356,7 +356,8 @@ execute_with_model() {
     local model_tier="$1"
     local model_name="${MODEL_NAMES[$model_tier]}"
 
-    log_info "Attempting execution with model: $model_tier ($model_name)"
+    # Use >&2 to send log to stderr, keeping stdout clean for return value
+    log_info "Attempting execution with model: $model_tier ($model_name)" >&2
 
     cd "$REPO_ROOT"
 
@@ -385,11 +386,11 @@ execute_with_model() {
 
     # Check if task failed
     if check_failure "$result_text" "$is_error"; then
-        log_info "Model $model_tier FAILED (duration: ${duration_ms}ms, cost: \$${cost_usd})"
+        log_info "Model $model_tier FAILED (duration: ${duration_ms}ms, cost: \$${cost_usd})" >&2
         echo "failure|$duration_ms|$cost_usd|$session_id|$result_text"
         return 1
     else
-        log_info "Model $model_tier SUCCEEDED (duration: ${duration_ms}ms, cost: \$${cost_usd})"
+        log_info "Model $model_tier SUCCEEDED (duration: ${duration_ms}ms, cost: \$${cost_usd})" >&2
         echo "success|$duration_ms|$cost_usd|$session_id|$result_text"
         return 0
     fi
