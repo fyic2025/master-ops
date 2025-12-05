@@ -82,16 +82,16 @@
           "options": {
             "caseSensitive": true,
             "leftValue": "",
-            "typeValidation": "strict"
+            "typeValidation": "loose"
           },
           "conditions": [
             {
               "id": "has-task",
-              "leftValue": "={{ $json.length }}",
-              "rightValue": 0,
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
               "operator": {
-                "type": "number",
-                "operation": "gt"
+                "type": "string",
+                "operation": "isNotEmpty"
               }
             }
           ],
@@ -107,7 +107,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const tasks = $input.first().json;\nif (Array.isArray(tasks) && tasks.length > 0) {\n  return [{ json: { task_id: tasks[0].id } }];\n}\nreturn [{ json: { task_id: null } }];"
+        "jsCode": "// $json is already the task object {id: 58, ...} from HTTP Request\nconst task = $input.first().json;\nreturn [{ json: { task_id: task.id } }];"
       },
       "id": "extract-id",
       "name": "Extract Task ID",
