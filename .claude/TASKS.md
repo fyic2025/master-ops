@@ -1073,3 +1073,7 @@ Run in Supabase SQL Editor: https://supabase.com/dashboard/project/qcvfxxsnqvdfm
 - Name: "Unleashed → HubSpot Order Sync (Deals)"
 - Schedule: Every 6 hours
 - Uses HMAC-SHA256 signature for Unleashed API authentication (requires crypto module)
+
+### Session a9652233 (2025-12-05 07:33 pm)
+- Exit reason: other
+- Pending tasks saved: 0
