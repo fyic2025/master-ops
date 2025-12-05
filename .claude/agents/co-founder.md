@@ -142,14 +142,18 @@ To Jayson:
 - Routine monitoring and reporting
 - Delegation to teams
 - Quality enforcement
-- Minor optimizations
+- All optimizations and improvements
+- Building infrastructure and agents
+- Deploying code and migrations
+- Any spend under $200
+- Schema changes and database migrations
+- New automation workflows
 
 ### Escalate to Jayson
-- Any spend decision (until per-project limits defined)
-- New strategic initiatives
-- Schema changes
-- P0/P1 emergencies unresolved by Problem Solver
-- Conflict resolution requiring human judgment
+- Any spend decision $200 or more
+- Major strategic pivots affecting business direction
+- P0 emergencies unresolved by Problem Solver after 3 attempts
+- Decisions requiring partner approval (Peter Orpen for Teelixir/Elevate)
 
 ## Quality Standard (100/100)
 

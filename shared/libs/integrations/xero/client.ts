@@ -92,9 +92,11 @@ class XeroConnector extends BaseConnector {
     this.scopes = config.scopes || [
       'offline_access',
       'accounting.transactions.read',
+      'accounting.transactions', // Write access for bank transactions
       'accounting.journals.read',
       'accounting.reports.read',
       'accounting.contacts.read',
+      'accounting.contacts', // Write access for creating contacts
       'accounting.settings.read',
     ]
 
@@ -553,6 +555,62 @@ class XeroConnector extends BaseConnector {
           `/BankTransactions/${transactionId}`
         )
         return response.BankTransactions[0]
+      }),
+
+    /**
+     * Create a new bank transaction
+     */
+    create: (transaction: Partial<XeroBankTransaction>): Promise<XeroBankTransaction> =>
+      this.execute('bankTransactions.create', async () => {
+        const response = await this.request<XeroBankTransactionsResponse>(
+          'POST',
+          '/BankTransactions',
+          { BankTransactions: [transaction] }
+        )
+        return response.BankTransactions[0]
+      }),
+
+    /**
+     * Update an existing bank transaction
+     */
+    update: (transactionId: string, transaction: Partial<XeroBankTransaction>): Promise<XeroBankTransaction> =>
+      this.execute('bankTransactions.update', async () => {
+        const response = await this.request<XeroBankTransactionsResponse>(
+          'POST',
+          `/BankTransactions/${transactionId}`,
+          { BankTransactions: [transaction] }
+        )
+        return response.BankTransactions[0]
+      }),
+  }
+
+  // ==================== CONTACTS (Enhanced) ====================
+
+  readonly contactsExtended = {
+    /**
+     * Create a new contact
+     */
+    create: (contact: Partial<XeroContact>): Promise<XeroContact> =>
+      this.execute('contacts.create', async () => {
+        const response = await this.request<XeroContactsResponse>(
+          'POST',
+          '/Contacts',
+          { Contacts: [contact] }
+        )
+        return response.Contacts[0]
+      }),
+
+    /**
+     * Update an existing contact
+     */
+    update: (contactId: string, contact: Partial<XeroContact>): Promise<XeroContact> =>
+      this.execute('contacts.update', async () => {
+        const response = await this.request<XeroContactsResponse>(
+          'POST',
+          `/Contacts/${contactId}`,
+          { Contacts: [contact] }
+        )
+        return response.Contacts[0]
       }),
   }
 
