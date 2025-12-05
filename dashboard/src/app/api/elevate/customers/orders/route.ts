@@ -85,6 +85,16 @@ interface UnleashedSalesOrder {
   }>
 }
 
+// Parse Unleashed date format /Date(timestamp)/ to Date object
+function parseUnleashedDate(dateStr: string): Date | null {
+  if (!dateStr) return null
+  const match = dateStr.match(/\/Date\((\d+)\)\//)
+  if (match) {
+    return new Date(parseInt(match[1]))
+  }
+  return new Date(dateStr)
+}
+
 // Fetch Unleashed sales orders with pagination
 async function fetchUnleashedOrders(
   startDate?: string,
@@ -93,7 +103,11 @@ async function fetchUnleashedOrders(
   const { apiId, apiKey } = getUnleashedCredentials()
   const allOrders: UnleashedSalesOrder[] = []
   let page = 1
-  const pageSize = 200
+  const pageSize = 500
+
+  // Convert dates for filtering (Unleashed uses different format)
+  const startDateObj = startDate ? new Date(startDate) : null
+  const endDateObj = endDate ? new Date(endDate + 'T23:59:59') : null
 
   while (true) {
     const params = new URLSearchParams({
@@ -101,8 +115,8 @@ async function fetchUnleashedOrders(
       page: page.toString(),
     })
 
-    if (startDate) params.set('startDate', startDate)
-    if (endDate) params.set('endDate', endDate)
+    // Unleashed date filter format: modifiedSince or filter by status
+    // We'll filter client-side for more accurate date handling
 
     const queryString = params.toString()
     const signature = generateUnleashedSignature(queryString, apiKey)
@@ -123,17 +137,31 @@ async function fetchUnleashedOrders(
 
     const data: any = await response.json()
     const orders = data.Items || []
-    allOrders.push(...orders)
+
+    // Filter by date client-side (Unleashed date format is tricky)
+    for (const order of orders) {
+      const orderDate = parseUnleashedDate(order.OrderDate)
+      if (!orderDate) continue
+
+      // Apply date filter
+      if (startDateObj && orderDate < startDateObj) continue
+      if (endDateObj && orderDate > endDateObj) continue
+
+      // Convert date to ISO string for consistency
+      order.OrderDate = orderDate.toISOString()
+      allOrders.push(order)
+    }
 
     // Check if more pages
     const totalPages = data.Pagination?.NumberOfPages || 1
     if (page >= totalPages || orders.length < pageSize) break
     page++
 
-    // Safety limit
-    if (allOrders.length > 1000) break
+    // Safety limit (higher now)
+    if (page > 10) break
   }
 
+  console.log(`Fetched ${allOrders.length} Unleashed orders after date filtering`)
   return allOrders
 }
 
@@ -353,13 +381,20 @@ export async function GET(request: NextRequest) {
             createdAt: uOrder.OrderDate,
             totalPrice: (uOrder.Total || 0).toString(),
             source: 'unleashed' as const,
-            lineItems: (uOrder.SalesOrderLines || []).map(line => ({
-              title: line.Product?.ProductDescription || line.Product?.ProductCode || 'Unknown',
-              vendor: line.Product?.ProductCode?.split('-')[0] || 'Elevate', // Extract brand from product code
-              quantity: line.OrderQuantity,
-              price: (line.UnitPrice || 0).toString(),
-              totalPrice: (line.LineTotal || 0).toString()
-            }))
+            lineItems: (uOrder.SalesOrderLines || []).map(line => {
+              // Extract brand from product code format "KIK - TEE MES-50" -> "KIK"
+              const productCode = line.Product?.ProductCode || ''
+              const brandMatch = productCode.split(' - ')[0]?.trim()
+              const vendor = brandMatch || 'Elevate'
+
+              return {
+                title: line.Product?.ProductDescription || productCode || 'Unknown',
+                vendor,
+                quantity: line.OrderQuantity,
+                price: (line.UnitPrice || 0).toString(),
+                totalPrice: (line.LineTotal || 0).toString()
+              }
+            })
           })
         }
 
