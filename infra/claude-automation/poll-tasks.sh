@@ -50,7 +50,7 @@ fi
 log "Fetching pending auto tasks..."
 
 TASKS_RESPONSE=$(curl -s -X GET \
-    "${SUPABASE_URL}/rest/v1/tasks?execution_type=eq.auto&status=eq.pending&order=priority.asc,created_at.asc&limit=${MAX_TASKS_PER_RUN}" \
+    "${SUPABASE_URL}/rest/v1/tasks?execution_type=eq.auto&status=in.(pending,pending_input)&order=priority.asc,created_at.asc&limit=${MAX_TASKS_PER_RUN}" \
     -H "apikey: ${SUPABASE_KEY}" \
     -H "Authorization: Bearer ${SUPABASE_KEY}" \
     -H "Content-Type: application/json")
