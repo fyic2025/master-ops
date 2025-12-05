@@ -42,8 +42,11 @@ export { GMCProductWriter, createGMCWriter, gmcWriterBoo, gmcWriterTeelixir, gmc
 export {
   IssueRemediator,
   createIssueRemediator,
-  IssueCategory,
   ISSUE_CATEGORIES,
+} from './issue-remediator'
+
+export type {
+  IssueCategory,
   RemediationStrategy,
   RemediationContext,
   RemediationResult,

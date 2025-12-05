@@ -406,4 +406,5 @@ if (require.main === module) {
   main()
 }
 
-export { IntegrationHealthCheck, HealthCheckResult, HealthCheckSummary }
+export { IntegrationHealthCheck }
+export type { HealthCheckResult, HealthCheckSummary }

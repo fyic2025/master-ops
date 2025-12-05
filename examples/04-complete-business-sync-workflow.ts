@@ -347,4 +347,5 @@ if (require.main === module) {
   main()
 }
 
-export { syncBusinessData, SyncResult, SyncSummary }
+export { syncBusinessData }
+export type { SyncResult, SyncSummary }

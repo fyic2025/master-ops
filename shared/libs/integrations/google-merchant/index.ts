@@ -6,13 +6,16 @@
 
 export {
   GoogleMerchantConnector,
+  createMerchantConnector,
+  merchantBoo,
+  merchantTeelixir,
+  merchantRhf,
+} from './client'
+
+export type {
   BusinessId,
   MerchantProduct,
   ProductStatus,
   AccountStatus,
   MerchantHealthCheck,
-  createMerchantConnector,
-  merchantBoo,
-  merchantTeelixir,
-  merchantRhf,
 } from './client'

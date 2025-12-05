@@ -9,19 +9,21 @@
 // Core connector
 export {
   GoogleAdsConnector,
-  GoogleAdsConnectorConfig,
   createGoogleAdsConnector,
   googleAdsBoo,
   googleAdsTeelixir,
   googleAdsRhf,
 } from './client'
 
+export type { GoogleAdsConnectorConfig } from './client'
+
 // Sync service
 export {
   GoogleAdsSyncService,
-  SyncResult,
   syncAllBusinesses,
 } from './sync-service'
+
+export type { SyncResult } from './sync-service'
 
 // Types
 export * from './types'
