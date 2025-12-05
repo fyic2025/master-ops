@@ -235,15 +235,20 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET - List recent customers (optional feature)
+// GET - List customers (last 30 days or all with approved tag)
 export async function GET(request: NextRequest) {
   try {
     const accessToken = await getAccessToken()
     const graphqlUrl = `https://${SHOPIFY_STORE}/admin/api/${SHOPIFY_API_VERSION}/graphql.json`
 
+    // Get customers created in last 30 days OR with approved tag
+    const thirtyDaysAgo = new Date()
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+    const dateFilter = thirtyDaysAgo.toISOString().split('T')[0]
+
     const query = `
       query recentCustomers {
-        customers(first: 20, sortKey: CREATED_AT, reverse: true, query: "tag:approved") {
+        customers(first: 100, sortKey: CREATED_AT, reverse: true, query: "created_at:>=${dateFilter} OR tag:approved") {
           edges {
             node {
               id
@@ -252,8 +257,10 @@ export async function GET(request: NextRequest) {
               lastName
               state
               createdAt
+              updatedAt
               tags
               numberOfOrders
+              note
             }
           }
         }
