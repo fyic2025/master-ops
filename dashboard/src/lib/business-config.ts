@@ -111,6 +111,7 @@ export const BUSINESSES: Record<BusinessCode, Business> = {
     navigation: [
       { name: 'Dashboard', href: '', icon: Home },
       { name: 'Orders', href: '/orders', icon: ShoppingCart },
+      { name: 'Accounting', href: '/accounting/bank-recon', icon: Building2 },
       { name: 'Automations', href: '/automations', icon: Zap },
       { name: 'Delivery Zones', href: '/delivery', icon: Truck },
       { name: 'Inventory', href: '/inventory', icon: Package },
