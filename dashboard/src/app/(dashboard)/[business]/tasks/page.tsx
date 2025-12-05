@@ -2321,6 +2321,8 @@ async function fetchDbTasks(): Promise<Task[]> {
       suggested_assignee: t.suggested_assignee,
       triage_status: t.triage_status,
       automation_notes: t.automation_notes,
+      // Execution type for auto/manual toggle
+      execution_type: t.execution_type,
     }))
   } catch {
     return []
