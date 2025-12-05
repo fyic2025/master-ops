@@ -33,7 +33,7 @@ async function testConnection() {
       }
     )
 
-    const data = await response.json()
+    const data = await response.json() as { token_type?: string; expires_in?: number; access_token?: string; error?: string; error_description?: string }
 
     if (!response.ok) {
       throw { response: { status: response.status, data } }
@@ -56,7 +56,7 @@ async function testConnection() {
       }
     )
 
-    const connections = await connectionsResponse.json()
+    const connections = await connectionsResponse.json() as Array<{ tenantName?: string; tenantId?: string; tenantType?: string }>
 
     console.log('✅ Connections retrieved!')
     console.log(`   Found ${connections.length} organization(s):`)
