@@ -276,6 +276,8 @@ Tasks moved here after completion for reference.
 - [x] **2025-12-04** Teelixir order sync fixes | Fixed duplicate detection, added discount sync, fuzzy matching, B2C filter
 - [x] **2025-12-04** Fixed unleashed-order-sync n8n job | Created HubSpot sync schema, deployed tables, validated workflow
 - [x] **2025-12-04** CI/CD batch 1 TypeScript fixes | Fixed 10 TS errors in unleashed-shopify-sync (order-sync, unleashed-api, inventory-sync)
+- [x] **2025-12-05** TASK-17 Task attachments feature | File upload/download for tasks - migration pending
+- [x] **2025-12-05** TASK-33 Fix unleashed-order-sync n8n workflow | Fixed crypto module blocked by n8n security
 
 ---
 
@@ -1010,3 +1012,64 @@ We currently operate **3 separate Supabase projects** with significant fragmenta
 ### Session f6eddaf0 (2025-12-05 05:26 pm)
 - Exit reason: other
 - Pending tasks saved: 0
+
+---
+
+## Task Attachments Feature Notes (TASK-17)
+
+**Status:** Code Complete, Migration Pending
+
+**Implementation Details (2025-12-05):**
+
+**Files Created:**
+- `infra/supabase/migrations/20251205_task_attachments.sql` - Database schema
+- `dashboard/src/app/api/tasks/[id]/attachments/route.ts` - GET/POST endpoints
+- `dashboard/src/app/api/tasks/[id]/attachments/[attachmentId]/route.ts` - GET/DELETE/PATCH endpoints
+- `dashboard/src/components/tasks/AttachmentUpload.tsx` - Drag-drop file upload
+- `dashboard/src/components/tasks/AttachmentList.tsx` - File list with download/delete
+
+**Files Modified:**
+- `dashboard/src/app/(dashboard)/[business]/tasks/page.tsx` - Integrated into RajaniTaskCard
+
+**Infrastructure:**
+- Storage bucket `task-attachments` created in Supabase
+- 10MB file size limit
+- Allowed types: PDF, images, Word, Excel, CSV, text
+
+**Migration Required:**
+Run in Supabase SQL Editor: https://supabase.com/dashboard/project/qcvfxxsnqvdfmpbcgdni/sql
+```sql
+-- Run contents of infra/supabase/migrations/20251205_task_attachments.sql
+```
+
+**Features:**
+- Drag-and-drop file upload
+- File type validation
+- Size limit enforcement (10MB)
+- Optional file description
+- Soft delete (is_deleted flag)
+- Signed URLs for secure downloads (1 hour expiry)
+- Auto-refresh on upload/delete
+
+---
+
+## TASK-33 Unleashed Order Sync Fix Notes
+
+**Status:** Fixed (2025-12-05)
+
+**Problem:**
+- n8n workflow "Unleashed → HubSpot Order Sync (Deals)" was active but all executions failing
+- Error: `Module 'crypto' is disallowed [line 4]`
+- n8n security update blocked Node.js builtin modules in Code nodes
+
+**Solution Applied:**
+1. SSH to n8n droplet (134.199.175.243)
+2. Added `NODE_FUNCTION_ALLOW_BUILTIN=crypto` to `/opt/n8n/.env`
+3. Restarted n8n container: `docker restart n8n`
+4. Verified workflow is active and will run on next 6-hour schedule
+
+**Workflow Details:**
+- ID: `cD0rlCpqUfggEKYI`
+- Name: "Unleashed → HubSpot Order Sync (Deals)"
+- Schedule: Every 6 hours
+- Uses HMAC-SHA256 signature for Unleashed API authentication (requires crypto module)

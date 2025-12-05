@@ -73,7 +73,9 @@
       "Bash(del c:Usersjaysomaster-opstmp-tasks.json)",
       "Bash(del c:Usersjaysomaster-opscheck-tasks.js c:Usersjaysomaster-opstmp-jobs.json)",
       "Bash(grep:*)",
-      "Bash(del fix-imports.js)"
+      "Bash(del fix-imports.js)",
+      "Bash(git pull:*)",
+      "Bash(git stash:*)"
     ],
     "deny": [],
     "ask": []
