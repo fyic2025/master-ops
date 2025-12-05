@@ -220,6 +220,9 @@ DURATION_MS=$(echo "$RESULT" | jq -r '.duration_ms // 0')
 COST_USD=$(echo "$RESULT" | jq -r '.total_cost_usd // 0')
 SESSION_ID=$(echo "$RESULT" | jq -r '.session_id // ""')
 
+log_debug "IS_ERROR value: [$IS_ERROR]"
+log_debug "RESULT first 200 chars: ${RESULT:0:200}"
+
 if [ "$IS_ERROR" = "false" ]; then
     STATUS="completed"
     log_info "Task completed successfully"
