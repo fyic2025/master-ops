@@ -145,7 +145,7 @@ export async function createAnniversaryDiscount(
       return { success: false, error: `Failed to create price rule: ${errorText}` }
     }
 
-    const priceRuleData = await priceRuleResponse.json()
+    const priceRuleData = await priceRuleResponse.json() as { price_rule: PriceRule }
     const priceRule: PriceRule = priceRuleData.price_rule
 
     // Create the discount code
@@ -170,7 +170,7 @@ export async function createAnniversaryDiscount(
       return { success: false, error: `Failed to create discount code: ${errorText}` }
     }
 
-    const discountCodeData = await discountCodeResponse.json()
+    const discountCodeData = await discountCodeResponse.json() as { discount_code: DiscountCode }
     const discountCode: DiscountCode = discountCodeData.discount_code
 
     return {
@@ -229,7 +229,7 @@ export async function checkDiscountUsage(
 
     if (!response.ok) return null
 
-    const data = await response.json()
+    const data = await response.json() as { discount_code: DiscountCode }
     const discountCode: DiscountCode = data.discount_code
 
     return {

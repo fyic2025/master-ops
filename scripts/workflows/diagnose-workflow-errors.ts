@@ -40,7 +40,7 @@ async function diagnoseErrors() {
     console.log('═'.repeat(70))
     console.log('RECENT EXECUTIONS')
     console.log('═'.repeat(70))
-    executions.forEach((exec, idx) => {
+    executions.forEach((exec: { id: string; status?: string; finished?: boolean; startedAt: string }, idx: number) => {
       const status = exec.status || (exec.finished ? 'success' : 'error')
       const emoji = status === 'success' ? '✅' : status === 'error' ? '❌' : '⏳'
       const date = new Date(exec.startedAt).toLocaleString()

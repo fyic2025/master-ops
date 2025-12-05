@@ -69,7 +69,7 @@ async function getBusinessSpecificTasks(business: Business) {
   }
 
   console.log(`Found ${data?.length || 0} tasks for ${business}:`)
-  data?.forEach((task, i) => {
+  data?.forEach((task: { status: string; title: string }, i: number) => {
     console.log(`  ${i + 1}. [${task.status}] ${task.title}`)
   })
 }

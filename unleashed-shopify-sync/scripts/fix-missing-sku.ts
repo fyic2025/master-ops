@@ -28,7 +28,7 @@ async function main() {
     return
   }
 
-  const searchData = await searchResponse.json()
+  const searchData = await searchResponse.json() as { products?: Array<{ id: number; title: string; variants: Array<{ id: number; title: string; sku: string | null }> }> }
   const products = searchData.products || []
 
   console.log(`Found ${products.length} matching products:\n`)
@@ -63,7 +63,7 @@ async function main() {
         })
 
         if (updateResponse.ok) {
-          const updated = await updateResponse.json()
+          const updated = await updateResponse.json() as { variant: { sku: string } }
           console.log(`  ✅ SKU updated to: ${updated.variant.sku}`)
         } else {
           console.log(`  ❌ Update failed: ${await updateResponse.text()}`)

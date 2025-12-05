@@ -24,7 +24,7 @@ async function main() {
       },
     })
 
-    const data = await response.json()
+    const data = await response.json() as { products?: Array<{ id: number; title: string; variants: Array<{ id: number; title: string; sku: string | null }> }> }
     const products = data.products || []
 
     if (products.length === 0) {

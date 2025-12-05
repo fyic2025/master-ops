@@ -120,7 +120,7 @@ export class GmailConnector extends BaseConnector {
       throw new Error(`Failed to refresh Gmail access token: ${error}`)
     }
 
-    const data = await response.json()
+    const data = await response.json() as { access_token: string; expires_in: number }
     this.accessToken = data.access_token
     // Refresh 5 minutes before expiry
     this.tokenExpiresAt = Date.now() + (data.expires_in - 300) * 1000
@@ -232,7 +232,7 @@ export class GmailConnector extends BaseConnector {
           throw new Error(`Gmail API error (${response.status}): ${errorBody}`)
         }
 
-        const result = await response.json()
+        const result = await response.json() as { id: string; threadId: string }
 
         return {
           success: true,
@@ -301,7 +301,7 @@ export class GmailConnector extends BaseConnector {
         throw new Error(`Gmail API error: ${response.status}`)
       }
 
-      const profile = await response.json()
+      const profile = await response.json() as { emailAddress: string }
 
       return {
         status: 'healthy',

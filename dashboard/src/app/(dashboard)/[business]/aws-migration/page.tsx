@@ -20,6 +20,8 @@ import {
   CogIcon,
   PlayIcon,
   XMarkIcon,
+  ClipboardDocumentIcon,
+  ClipboardDocumentCheckIcon,
 } from '@heroicons/react/24/outline';
 
 interface MigrationComponent {
@@ -266,6 +268,7 @@ export default function AwsMigrationPage() {
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [editingComponent, setEditingComponent] = useState<MigrationComponent | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [copiedActivityId, setCopiedActivityId] = useState<string | null>(null);
 
   const queryClient = useQueryClient();
 
@@ -327,6 +330,13 @@ export default function AwsMigrationPage() {
       });
     }
   }, [editingComponent, mutation]);
+
+  const handleCopyActivity = useCallback(async (activity: ActivityLog) => {
+    const text = `[${new Date(activity.created_at).toLocaleString()}] ${activity.action}${activity.component ? ` - ${activity.component}` : ''}${activity.message ? `\n${activity.message}` : ''}`;
+    await navigator.clipboard.writeText(text);
+    setCopiedActivityId(activity.id);
+    setTimeout(() => setCopiedActivityId(null), 2000);
+  }, []);
 
   if (isLoading) {
     return (
@@ -730,18 +740,52 @@ export default function AwsMigrationPage() {
 
           {/* Recent Activity */}
           <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
-            <h3 className="font-semibold text-white mb-4">Recent Activity</h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-white">Recent Activity</h3>
+              {recentActivity.length > 0 && (
+                <button
+                  onClick={async () => {
+                    const text = recentActivity.slice(0, 5).map(a =>
+                      `[${new Date(a.created_at).toLocaleString()}] ${a.action}${a.component ? ` - ${a.component}` : ''}${a.message ? `: ${a.message}` : ''}`
+                    ).join('\n');
+                    await navigator.clipboard.writeText(text);
+                    setCopiedActivityId('all');
+                    setTimeout(() => setCopiedActivityId(null), 2000);
+                  }}
+                  className="text-xs text-gray-400 hover:text-white flex items-center gap-1"
+                >
+                  {copiedActivityId === 'all' ? (
+                    <><ClipboardDocumentCheckIcon className="h-3.5 w-3.5 text-green-400" /> Copied!</>
+                  ) : (
+                    <><ClipboardDocumentIcon className="h-3.5 w-3.5" /> Copy All</>
+                  )}
+                </button>
+              )}
+            </div>
             {recentActivity.length === 0 ? (
               <p className="text-sm text-gray-500">No recent activity</p>
             ) : (
               <div className="space-y-3">
                 {recentActivity.slice(0, 5).map((activity) => (
-                  <div key={activity.id} className="text-sm">
+                  <div key={activity.id} className="text-sm group relative">
                     <div className="flex items-center justify-between">
                       <span className="text-gray-300">{activity.action}</span>
-                      <span className="text-xs text-gray-500">
-                        {new Date(activity.created_at).toLocaleDateString()}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleCopyActivity(activity)}
+                          className="opacity-0 group-hover:opacity-100 p-1 text-gray-500 hover:text-white transition-all"
+                          title="Copy activity"
+                        >
+                          {copiedActivityId === activity.id ? (
+                            <ClipboardDocumentCheckIcon className="h-3.5 w-3.5 text-green-400" />
+                          ) : (
+                            <ClipboardDocumentIcon className="h-3.5 w-3.5" />
+                          )}
+                        </button>
+                        <span className="text-xs text-gray-500">
+                          {new Date(activity.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
                     </div>
                     {activity.component && (
                       <p className="text-xs text-gray-500">{activity.component}</p>

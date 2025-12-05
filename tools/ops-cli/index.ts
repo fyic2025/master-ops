@@ -36,7 +36,7 @@ program
   .description('Run health checks on all integrations')
   .option('-v, --verbose', 'Show detailed output')
   .option('-s, --services <services>', 'Comma-separated list of services to check (e.g., hubspot,supabase)')
-  .action(async (options) => {
+  .action(async (options: { verbose?: boolean; services?: string }) => {
     try {
       const services = options.services ? options.services.split(',') : undefined
 
@@ -70,7 +70,7 @@ program
   .option('-n, --limit <number>', 'Number of logs to retrieve', '50')
   .option('--tail', 'Continuously monitor logs (like tail -f)')
   .option('--errors-only', 'Show only errors')
-  .action(async (options) => {
+  .action(async (options: { source?: string; level?: string; status?: string; limit: string; tail?: boolean; errorsOnly?: boolean }) => {
     try {
       if (!serviceClient) {
         console.error('Supabase service client not configured')
@@ -155,7 +155,7 @@ program
   .command('test-integration <service>')
   .alias('test')
   .description('Test connection to a specific integration')
-  .action(async (service) => {
+  .action(async (service: string) => {
     try {
       console.log(`Testing ${service} integration...\n`)
 
@@ -187,7 +187,7 @@ program
   .option('-l, --limit <number>', 'Limit results', '10')
   .option('-o, --order <field>', 'Order by field', 'created_at')
   .option('--desc', 'Order descending')
-  .action(async (table, options) => {
+  .action(async (table: string, options: { filter?: string; limit: string; order: string; desc?: boolean }) => {
     try {
       if (!serviceClient) {
         console.error('Supabase service client not configured')
@@ -227,7 +227,7 @@ program
   .command('stats')
   .description('Show integration statistics and health summary')
   .option('-h, --hours <hours>', 'Hours to look back', '24')
-  .action(async (options) => {
+  .action(async (options: { hours: string }) => {
     try {
       if (!serviceClient) {
         console.error('Supabase service client not configured')
@@ -280,7 +280,7 @@ program
   .description('List n8n workflow execution statistics')
   .option('-l, --limit <number>', 'Number of workflows to show', '10')
   .option('--failures', 'Show only failed executions')
-  .action(async (options) => {
+  .action(async (options: { limit: string; failures?: boolean }) => {
     try {
       if (!serviceClient) {
         console.error('Supabase service client not configured')

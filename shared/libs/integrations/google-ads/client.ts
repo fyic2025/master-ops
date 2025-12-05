@@ -162,7 +162,7 @@ export class GoogleAdsConnector extends BaseConnector {
       throw new Error(`Failed to refresh access token: ${error}`)
     }
 
-    const data = await response.json()
+    const data = await response.json() as { access_token: string; expires_in: number }
     this.accessToken = data.access_token
     // Set expiry 5 minutes before actual expiry for safety
     this.tokenExpiresAt = Date.now() + (data.expires_in - 300) * 1000

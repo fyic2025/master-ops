@@ -30,7 +30,7 @@ async function main() {
   })
 
   if (response.ok) {
-    const data = await response.json()
+    const data = await response.json() as { variant: { sku: string } }
     console.log(`✅ SKU updated to: ${data.variant.sku}`)
   } else {
     console.log(`❌ Failed: ${await response.text()}`)

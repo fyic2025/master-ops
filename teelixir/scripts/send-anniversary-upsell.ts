@@ -218,7 +218,7 @@ async function createPersonalizedDiscount(
     return { success: false, error: `Price rule failed: ${errorText}` }
   }
 
-  const priceRuleData = await priceRuleResponse.json()
+  const priceRuleData = await priceRuleResponse.json() as { price_rule: { id: number } }
   const priceRuleId = priceRuleData.price_rule.id
 
   // Create discount code
@@ -301,7 +301,7 @@ class GmailSender {
       throw new Error(`Failed to refresh Gmail token: ${await response.text()}`)
     }
 
-    const data = await response.json()
+    const data = await response.json() as { access_token: string; expires_in: number }
     this.accessToken = data.access_token
     this.tokenExpiresAt = Date.now() + (data.expires_in - 300) * 1000
   }
@@ -367,7 +367,7 @@ class GmailSender {
         throw new Error(`Gmail API error: ${await response.text()}`)
       }
 
-      const result = await response.json()
+      const result = await response.json() as { id: string }
       return { success: true, messageId: result.id }
     } catch (error) {
       return { success: false, error: error instanceof Error ? error.message : String(error) }

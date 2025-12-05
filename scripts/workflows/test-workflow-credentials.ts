@@ -296,7 +296,7 @@ async function testWorkflowCredentials() {
   }
 
   // Extract nodes with credentials
-  const nodesWithCredentials = workflow.nodes.filter(n => n.credentials)
+  const nodesWithCredentials = workflow.nodes.filter((n: N8nNode) => n.credentials)
 
   if (nodesWithCredentials.length === 0) {
     console.log('ℹ️  No credentials found in workflow')
@@ -312,7 +312,7 @@ async function testWorkflowCredentials() {
   let credentialsMap: Map<string, any>
   try {
     const { data } = await n8nClient.listCredentials()
-    credentialsMap = new Map(data.map(c => [c.id, c]))
+    credentialsMap = new Map(data.map((c: { id: string }) => [c.id, c]))
     console.log(`📋 Loaded ${data.length} credential(s) from n8n`)
     console.log()
   } catch (error) {

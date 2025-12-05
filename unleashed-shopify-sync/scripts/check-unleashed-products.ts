@@ -46,7 +46,7 @@ async function main() {
   console.log('=== Unleashed Products (Teelixir) ===\n')
 
   // Fetch all products
-  const data = await fetchUnleashedProducts(config)
+  const data = await fetchUnleashedProducts(config) as { Items?: Array<{ ProductCode?: string; ProductDescription?: string; DefaultSellPrice?: number }> }
   const products = data.Items || []
 
   console.log(`Total products: ${products.length}\n`)

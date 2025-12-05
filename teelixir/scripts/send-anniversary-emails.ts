@@ -431,7 +431,7 @@ class GmailSender {
       throw new Error(`Failed to refresh Gmail access token: ${error}`)
     }
 
-    const data = await response.json()
+    const data = await response.json() as { access_token: string; expires_in: number }
     this.accessToken = data.access_token
     this.tokenExpiresAt = Date.now() + (data.expires_in - 300) * 1000
   }
@@ -508,7 +508,7 @@ class GmailSender {
         throw new Error(`Gmail API error (${response.status}): ${errorBody}`)
       }
 
-      const result = await response.json()
+      const result = await response.json() as { id: string }
       return { success: true, messageId: result.id }
     } catch (error) {
       return {

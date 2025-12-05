@@ -27,7 +27,7 @@ async function analyzeSpecificWorkflow() {
 
     // List nodes
     console.log('Node Structure:')
-    workflow.nodes.forEach((node, idx) => {
+    workflow.nodes.forEach((node: { name: string; type: string; disabled?: boolean; notes?: string }, idx: number) => {
       const disabled = node.disabled ? ' [DISABLED]' : ''
       console.log(`  ${idx + 1}. ${node.name} (${node.type})${disabled}`)
       if (node.notes) {
@@ -58,7 +58,7 @@ async function analyzeSpecificWorkflow() {
     console.log('RECENT EXECUTIONS (Last 10)')
     console.log('═'.repeat(70))
     if (executions.length > 0) {
-      executions.forEach((exec, idx) => {
+      executions.forEach((exec: { id: string; status?: string; finished?: boolean; startedAt: string }, idx: number) => {
         const status = exec.status || (exec.finished ? 'success' : 'error')
         const emoji = status === 'success' ? '✅' : status === 'error' ? '❌' : '⏳'
         const date = new Date(exec.startedAt).toLocaleString()
@@ -104,7 +104,7 @@ async function analyzeSpecificWorkflow() {
 
       if (failedExecs.length > 0) {
         console.log('Recent failures:')
-        failedExecs.forEach((exec, idx) => {
+        failedExecs.forEach((exec: { id: string; startedAt: string; stoppedAt?: string; data?: { resultData?: { error?: { message?: string } } } }, idx: number) => {
           console.log(`\n${idx + 1}. Execution ${exec.id}`)
           console.log(`   Started: ${new Date(exec.startedAt).toLocaleString()}`)
           console.log(`   Stopped: ${exec.stoppedAt ? new Date(exec.stoppedAt).toLocaleString() : 'N/A'}`)
@@ -149,7 +149,7 @@ async function analyzeSpecificWorkflow() {
       recommendations.push('⚠️  Complex workflow without error handling is risky')
     }
 
-    if (workflow.nodes.some(n => n.disabled)) {
+    if (workflow.nodes.some((n: { disabled?: boolean }) => n.disabled)) {
       recommendations.push('ℹ️  Some nodes are disabled - review if this is intentional')
     }
 

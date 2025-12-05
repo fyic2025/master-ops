@@ -38,7 +38,7 @@ async function testShopifyConnection(config: StoreConfig): Promise<{
       }
     }
 
-    const locationsData = await locationsResponse.json()
+    const locationsData = await locationsResponse.json() as { locations?: ShopifyLocation[] }
     const locations = locationsData.locations || []
 
     // Get product count
@@ -51,7 +51,7 @@ async function testShopifyConnection(config: StoreConfig): Promise<{
 
     let productCount = 0
     if (countResponse.ok) {
-      const countData = await countResponse.json()
+      const countData = await countResponse.json() as { count?: number }
       productCount = countData.count || 0
     }
 
@@ -106,7 +106,7 @@ async function testUnleashedConnection(config: StoreConfig): Promise<{
       }
     }
 
-    const productsData = await productsResponse.json()
+    const productsData = await productsResponse.json() as { Pagination?: { NumberOfItems?: number } }
     const productCount = productsData.Pagination?.NumberOfItems || 0
 
     // Test StockOnHand endpoint
@@ -125,7 +125,7 @@ async function testUnleashedConnection(config: StoreConfig): Promise<{
 
     let stockItemCount = 0
     if (stockResponse.ok) {
-      const stockData = await stockResponse.json()
+      const stockData = await stockResponse.json() as { Pagination?: { NumberOfItems?: number } }
       stockItemCount = stockData.Pagination?.NumberOfItems || 0
     }
 

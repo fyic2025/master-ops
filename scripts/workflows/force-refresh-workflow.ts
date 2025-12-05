@@ -25,7 +25,7 @@ async function forceRefresh() {
     // Step 3: Get workflow
     console.log('3️⃣  Fetching workflow...')
     const workflow = await n8nClient.getWorkflow(WORKFLOW_ID)
-    const signatureNodeIndex = workflow.nodes.findIndex(n => n.name === 'Prepare Signature String')
+    const signatureNodeIndex = workflow.nodes.findIndex((n: { name: string }) => n.name === 'Prepare Signature String')
     console.log(`   ✅ Found signature node at index ${signatureNodeIndex}\n`)
 
     // Step 4: Remove the comment with "crypto" word

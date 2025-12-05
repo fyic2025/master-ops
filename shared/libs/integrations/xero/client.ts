@@ -320,7 +320,7 @@ class XeroConnector extends BaseConnector {
     let errorMessage = `Xero API error: ${response.status} ${response.statusText}`
 
     try {
-      const errorData = await response.json()
+      const errorData = await response.json() as { Message?: string; Detail?: string }
       if (errorData.Message) {
         errorMessage = errorData.Message
       } else if (errorData.Detail) {

@@ -165,7 +165,7 @@ export class GoogleMerchantConnector extends BaseConnector {
       throw new Error(`Failed to refresh access token: ${error}`)
     }
 
-    const data = await response.json()
+    const data = await response.json() as { access_token: string; expires_in: number }
     this.accessToken = data.access_token
     this.tokenExpiresAt = Date.now() + (data.expires_in - 300) * 1000
   }

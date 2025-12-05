@@ -21,7 +21,7 @@ async function activateWorkflow() {
 
     // Verify the fix is in place
     console.log('2️⃣  Verifying authentication fix is in place...')
-    const signatureNode = workflow.nodes.find(n => n.name === 'Prepare Signature String')
+    const signatureNode = workflow.nodes.find((n: { name: string; type: string }) => n.name === 'Prepare Signature String')
 
     if (!signatureNode || signatureNode.type !== 'n8n-nodes-base.code') {
       throw new Error('Authentication fix not found - cannot activate')
@@ -57,7 +57,7 @@ async function activateWorkflow() {
     console.log()
 
     // Get the schedule info
-    const scheduleNode = workflow.nodes.find(n => n.type.includes('schedule'))
+    const scheduleNode = workflow.nodes.find((n: { type: string }) => n.type.includes('schedule'))
     if (scheduleNode) {
       console.log('📅 Schedule:')
       const params = scheduleNode.parameters as any
