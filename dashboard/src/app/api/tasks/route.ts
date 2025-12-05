@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
 
+// Force dynamic to prevent caching
+export const dynamic = 'force-dynamic'
+
 // GET /api/tasks - List tasks with optional filters
 export async function GET(request: NextRequest) {
   try {
