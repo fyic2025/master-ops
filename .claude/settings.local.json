@@ -81,7 +81,9 @@
       "Bash(del c:Usersjaysomaster-opstemp-test-activation.js c:Usersjaysomaster-opstemp-check-theme.js)",
       "Bash(cd:*)",
       "Bash(del c:Usersjaysomaster-opstemp-flows.json c:Usersjaysomaster-opstemp-flow-detail.json c:Usersjaysomaster-opstemp-flow-welcome.json)",
-      "Bash(claude /plugins)"
+      "Bash(claude /plugins)",
+      "Bash(git clone:*)",
+      "Bash(del c:Usersjaysomaster-opstemp-check-unleashed-lines.js)"
     ],
     "deny": [],
     "ask": []
