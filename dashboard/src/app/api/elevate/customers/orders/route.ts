@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-// Supabase connection
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+// Force dynamic rendering - this route uses runtime environment variables
+export const dynamic = 'force-dynamic'
 
-const supabase = createClient(supabaseUrl, supabaseKey)
+// Create Supabase client lazily to avoid build-time errors
+function getSupabase() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+  return createClient(supabaseUrl, supabaseKey)
+}
 
 interface OrderLineItem {
   title: string
@@ -46,6 +50,7 @@ interface CustomerWithOrders {
 // GET - Fetch all customers with their orders from Supabase
 export async function GET(request: NextRequest) {
   try {
+    const supabase = getSupabase()
     const { searchParams } = new URL(request.url)
     const startDate = searchParams.get('startDate') // YYYY-MM-DD
     const endDate = searchParams.get('endDate') // YYYY-MM-DD
