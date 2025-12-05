@@ -164,7 +164,7 @@ class SendleConnector extends BaseConnector {
     if (!response.ok) {
       let errorData: SendleError | string
       try {
-        errorData = await response.json()
+        errorData = await response.json() as SendleError
       } catch {
         errorData = await response.text()
       }
@@ -184,7 +184,7 @@ class SendleConnector extends BaseConnector {
 
     // Return JSON for most responses
     if (contentType.includes('application/json')) {
-      return response.json()
+      return response.json() as T
     }
 
     // For non-JSON responses (like redirects to labels), return the response itself

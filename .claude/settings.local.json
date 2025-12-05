@@ -52,7 +52,21 @@
       "Bash(dir \"%USERPROFILE%\\.claude\")",
       "Bash(powershell:*)",
       "Bash(if not exist \"c:\\Users\\jayso\\master-ops\\infra\\claude-automation\" mkdir \"c:\\Users\\jayso\\master-ops\\infra\\claude-automation\")",
-      "Bash(where:*)"
+      "Bash(where:*)",
+      "Skill(shopify-expert)",
+      "Bash(ls:*)",
+      "Bash(doctl apps spec get:*)",
+      "Bash(doctl apps update:*)",
+      "Bash(nslookup:*)",
+      "Bash(host:*)",
+      "Skill(klaviyo-expert)",
+      "Bash(cat:*)",
+      "Bash(jq:*)",
+      "Bash(echo:*)",
+      "Bash(git diff:*)",
+      "Bash(for id in 20 21 22 23 24 25 26 27 37 38 39 40 41 45 47 53 54)",
+      "Bash(do echo -n \"Deleting task $id... \" curl -s -X DELETE \"https://ops.growthcohq.com/api/tasks/$id\")",
+      "Bash(git reset:*)"
     ],
     "deny": [],
     "ask": []

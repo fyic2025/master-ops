@@ -179,7 +179,7 @@ class AusPostConnector extends BaseConnector {
     if (!response.ok) {
       let errorData: AusPostApiError | string
       try {
-        errorData = await response.json()
+        errorData = await response.json() as AusPostApiError
       } catch {
         errorData = await response.text()
       }
@@ -199,7 +199,7 @@ class AusPostConnector extends BaseConnector {
 
     // Return JSON for most responses
     if (contentType.includes('application/json')) {
-      return response.json()
+      return response.json() as T
     }
 
     // For PDF/binary responses, return the response itself

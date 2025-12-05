@@ -109,7 +109,7 @@ class TeelixirUnleashedClient {
       throw new Error(`Unleashed API error: ${response.status} - ${errorBody}`)
     }
 
-    return response.json()
+    return response.json() as T
   }
 
   async listProducts(page: number = 1): Promise<{

@@ -150,7 +150,7 @@ class SmartleadConnector extends BaseConnector {
       })
     }
 
-    return response.json()
+    return response.json() as T
   }
 
   // ============================================================================

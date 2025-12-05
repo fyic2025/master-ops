@@ -180,7 +180,7 @@ export class WooCommerceConnector extends BaseConnector {
       }
     }
 
-    return result
+    return result as T
   }
 
   /**

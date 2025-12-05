@@ -218,7 +218,7 @@ export class GoogleMerchantConnector extends BaseConnector {
       })
     }
 
-    return response.json()
+    return response.json() as T
   }
 
   // ============================================

@@ -55,7 +55,7 @@ export class SupabaseManagementAPI {
       throw new Error(`Supabase API Error (${response.status}): ${error}`);
     }
 
-    return response.json();
+    return response.json() as T;
   }
 
   /**
@@ -76,7 +76,7 @@ export class SupabaseManagementAPI {
       throw new Error(`Supabase API Error (${response.status}): ${error}`);
     }
 
-    return response.json();
+    return response.json() as T;
   }
 
   /**
@@ -97,7 +97,7 @@ export class SupabaseManagementAPI {
       throw new Error(`Supabase API Error (${response.status}): ${error}`);
     }
 
-    return response.json();
+    return response.json() as T;
   }
 
   /**
@@ -122,7 +122,7 @@ export class SupabaseManagementAPI {
       return {} as T;
     }
 
-    return response.json();
+    return response.json() as T;
   }
 
   // Public API methods

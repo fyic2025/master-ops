@@ -123,7 +123,7 @@ export class ListmonkClient {
       throw new Error(`Listmonk API error ${response.status}: ${errorText}`);
     }
 
-    return response.json();
+    return response.json() as T;
   }
 
   // ==========================================

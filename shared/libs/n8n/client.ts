@@ -135,7 +135,7 @@ export class N8nClient {
       )
     }
 
-    return response.json()
+    return response.json() as T
   }
 
   // --------------------------------------------------------------------------

@@ -102,7 +102,7 @@ class ShopifyClient {
     // Rate limit handling
     await new Promise(resolve => setTimeout(resolve, RATE_LIMIT_DELAY))
 
-    return response.json()
+    return response.json() as T
   }
 
   async getLocations(): Promise<ShopifyLocation[]> {

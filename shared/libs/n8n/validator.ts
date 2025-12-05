@@ -363,7 +363,7 @@ export class WorkflowValidator {
     }
 
     // 5. Workflow has tags for categorization
-    const hasTags = workflow.tags && workflow.tags.length > 0
+    const hasTags = Boolean(workflow.tags && workflow.tags.length > 0)
     checks.push({
       id: 'naming-005',
       category: 'naming',
@@ -1122,7 +1122,7 @@ export class WorkflowValidator {
 
     // 2. Workflow has description/notes
     const hasDocumentation =
-      (workflow.nodes.some((n) => n.notes) || workflow.name?.length || 0 > 20)
+      workflow.nodes.some((n) => n.notes) || (workflow.name?.length ?? 0) > 20
 
     checks.push({
       id: 'best-002',

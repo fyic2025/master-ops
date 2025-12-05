@@ -53,7 +53,7 @@ export class HubSpotAPI {
       throw new Error(`HubSpot API Error (${response.status}): ${error}`);
     }
 
-    return response.json();
+    return response.json() as T;
   }
 
   /**
@@ -74,7 +74,7 @@ export class HubSpotAPI {
       throw new Error(`HubSpot API Error (${response.status}): ${error}`);
     }
 
-    return response.json();
+    return response.json() as T;
   }
 
   /**
@@ -95,7 +95,7 @@ export class HubSpotAPI {
       throw new Error(`HubSpot API Error (${response.status}): ${error}`);
     }
 
-    return response.json();
+    return response.json() as T;
   }
 
   /**
@@ -116,7 +116,7 @@ export class HubSpotAPI {
       throw new Error(`HubSpot API Error (${response.status}): ${error}`);
     }
 
-    return response.json();
+    return response.json() as T;
   }
 
   /**
@@ -141,7 +141,7 @@ export class HubSpotAPI {
       return {} as T;
     }
 
-    return response.json();
+    return response.json() as T;
   }
 
   // Convenience methods for common operations

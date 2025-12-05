@@ -19,7 +19,7 @@
 import { serviceClient } from '../../infra/supabase/client'
 
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error'
-export type LogSource = 'hubspot' | 'unleashed' | 'n8n' | 'supabase' | 'system' | 'workflow' | 'integration' | 'cli'
+export type LogSource = 'hubspot' | 'unleashed' | 'n8n' | 'supabase' | 'system' | 'workflow' | 'integration' | 'cli' | 'backup' | 'restore' | 'performance-monitor' | 'example' | 'xero' | 'email-alerts' | 'business-automation' | 'workflow-automation'
 
 export interface LogContext {
   source?: LogSource

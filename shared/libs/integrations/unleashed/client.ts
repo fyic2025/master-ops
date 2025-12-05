@@ -187,7 +187,7 @@ class UnleashedConnector extends BaseConnector {
       return {} as T
     }
 
-    return response.json()
+    return response.json() as T
   }
 
   /**
