@@ -95,6 +95,60 @@ function parseUnleashedDate(dateStr: string): Date | null {
   return new Date(dateStr)
 }
 
+// Fetch all Unleashed products and build ProductCode -> Brand lookup
+async function fetchUnleashedProductBrands(): Promise<Map<string, string>> {
+  const { apiId, apiKey } = getUnleashedCredentials()
+  const productBrands = new Map<string, string>()
+  let page = 1
+  const pageSize = 500
+
+  while (true) {
+    const params = new URLSearchParams({
+      pageSize: pageSize.toString(),
+      page: page.toString(),
+    })
+
+    const queryString = params.toString()
+    const signature = generateUnleashedSignature(queryString, apiKey)
+
+    const response: Response = await fetch(`${UNLEASHED_API_URL}/Products?${queryString}`, {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'api-auth-id': apiId,
+        'api-auth-signature': signature,
+      },
+    })
+
+    if (!response.ok) {
+      console.error('Unleashed Products API error:', response.status)
+      break
+    }
+
+    const data: any = await response.json()
+    const products = data.Items || []
+
+    for (const product of products) {
+      const productCode = product.ProductCode
+      const groupName = product.ProductGroup?.GroupName
+      if (productCode && groupName) {
+        productBrands.set(productCode, groupName)
+      }
+    }
+
+    // Check if more pages
+    const totalPages = data.Pagination?.NumberOfPages || 1
+    if (page >= totalPages || products.length < pageSize) break
+    page++
+
+    // Safety limit
+    if (page > 20) break
+  }
+
+  console.log(`Loaded ${productBrands.size} product -> brand mappings`)
+  return productBrands
+}
+
 // Fetch Unleashed sales orders with pagination
 async function fetchUnleashedOrders(
   startDate?: string,
@@ -259,13 +313,18 @@ export async function GET(request: NextRequest) {
       if (allShopifyCustomers.length > 500) break
     }
 
-    // Step 2: Fetch ALL Unleashed orders (they are the primary source for B2B)
+    // Step 2: Fetch product -> brand lookup and all Unleashed orders
+    let productBrands = new Map<string, string>()
     let unleashedOrders: UnleashedSalesOrder[] = []
     try {
+      // Fetch product brands first (for accurate brand breakdown)
+      productBrands = await fetchUnleashedProductBrands()
+
+      // Then fetch orders
       unleashedOrders = await fetchUnleashedOrders(startDate || undefined, endDate || undefined)
       console.log(`Fetched ${unleashedOrders.length} Unleashed orders`)
     } catch (err) {
-      console.error('Failed to fetch Unleashed orders:', err)
+      console.error('Failed to fetch Unleashed data:', err)
     }
 
     // Group Unleashed orders by customer (CustomerCode is the key)
@@ -332,10 +391,9 @@ export async function GET(request: NextRequest) {
         totalPrice: (uOrder.Total || 0).toString(),
         source: 'unleashed' as const,
         lineItems: (uOrder.SalesOrderLines || []).map(line => {
-          // Extract brand from product code format "KIK - TEE MES-50" -> "KIK"
+          // Get brand from ProductGroup lookup (fetched from Products API)
           const productCode = line.Product?.ProductCode || ''
-          const brandMatch = productCode.split(' - ')[0]?.trim()
-          const vendor = brandMatch || 'Elevate'
+          const vendor = productBrands.get(productCode) || 'Unknown'
 
           return {
             title: line.Product?.ProductDescription || productCode || 'Unknown',
