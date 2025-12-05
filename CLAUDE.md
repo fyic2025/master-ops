@@ -46,6 +46,24 @@ All agents are defined in: `.claude/agents/`
 Agent → Problem Solver → Director → Co-Founder → Human (Jayson)
 ```
 
+### AUTO-APPROVAL POLICY
+
+**Co-Founder operates autonomously.** No approval needed unless spending $200 or more.
+
+| Action | Approval Required? |
+|--------|-------------------|
+| Building agents/infrastructure | NO - Auto-approved |
+| Deploying code changes | NO - Auto-approved |
+| Database migrations | NO - Auto-approved |
+| Creating automations | NO - Auto-approved |
+| Editing files | NO - Auto-approved |
+| API integrations | NO - Auto-approved |
+| Spend under $200 | NO - Auto-approved |
+| **Spend $200 or more** | **YES - Escalate to Jayson** |
+| Partner decisions (Teelixir/Elevate) | **YES - Escalate to Jayson** |
+
+**Default behavior:** Execute first, report results. Don't ask permission for routine operations.
+
 ### Business Ownership
 | Business | Ownership |
 |----------|-----------|
