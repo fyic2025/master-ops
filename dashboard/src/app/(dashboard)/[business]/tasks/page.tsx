@@ -146,6 +146,8 @@ interface Task {
   suggested_assignee?: 'system' | 'maria' | 'rajani' | null // Who the creator suggests
   triage_status?: 'pending_triage' | 'triaged' | null // Triage workflow status
   automation_notes?: string // Jayson's notes on what's automated vs manual
+  // Execution type: manual (local Claude) or auto (API automation)
+  execution_type?: 'manual' | 'auto'
 }
 
 // Skills mapping for each category
@@ -775,6 +777,21 @@ function getStatusBadge(status: Task['status']) {
   )
 }
 
+function getExecutionTypeBadge(executionType?: 'manual' | 'auto') {
+  if (executionType === 'auto') {
+    return (
+      <span className="text-xs px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+        auto
+      </span>
+    )
+  }
+  return (
+    <span className="text-xs px-1.5 py-0.5 rounded bg-violet-500/20 text-violet-400 border border-violet-500/30">
+      manual
+    </span>
+  )
+}
+
 // Robust clipboard copy utility
 async function copyTextToClipboard(text: string): Promise<boolean> {
   // Method 1: Modern Clipboard API (works in secure contexts)
@@ -829,6 +846,256 @@ async function copyTextToClipboard(text: string): Promise<boolean> {
   }
 
   return false
+}
+
+// Handle Task Modal - shows prompt for manual local Claude Code execution
+function HandleTaskModal({
+  task,
+  onClose,
+  onComplete
+}: {
+  task: Task
+  onClose: () => void
+  onComplete: () => void
+}) {
+  const [promptData, setPromptData] = useState<{ prompt: string; command: string; simplePrompt: string } | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [copied, setCopied] = useState<'prompt' | 'command' | 'simple' | null>(null)
+
+  useEffect(() => {
+    async function fetchPrompt() {
+      try {
+        const res = await fetch(`/api/tasks/${task.id}/prompt`)
+        if (!res.ok) throw new Error('Failed to fetch prompt')
+        const data = await res.json()
+        setPromptData(data)
+      } catch (err: any) {
+        setError(err.message)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchPrompt()
+  }, [task.id])
+
+  const handleCopy = async (type: 'prompt' | 'command' | 'simple') => {
+    const text = type === 'prompt' ? promptData?.prompt :
+                 type === 'command' ? promptData?.command :
+                 promptData?.simplePrompt
+    if (!text) return
+
+    const success = await copyTextToClipboard(text)
+    if (success) {
+      setCopied(type)
+      setTimeout(() => setCopied(null), 2000)
+    }
+  }
+
+  const handleMarkInProgress = async () => {
+    try {
+      await fetch(`/api/tasks/${task.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'in_progress', updated_by: 'manual_local' })
+      })
+      onComplete()
+    } catch (err) {
+      console.error('Failed to update status:', err)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-gray-900 border border-gray-700 rounded-lg max-w-4xl w-full max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between p-4 border-b border-gray-700">
+          <div>
+            <h2 className="text-lg font-semibold text-white">Handle Task Locally</h2>
+            <p className="text-sm text-gray-400 mt-1">{task.title}</p>
+          </div>
+          <button onClick={onClose} className="text-gray-400 hover:text-white">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {loading && <p className="text-gray-400">Loading prompt...</p>}
+          {error && <p className="text-red-400">Error: {error}</p>}
+
+          {promptData && (
+            <>
+              {/* Simple prompt for quick use */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm font-medium text-gray-300">Quick Prompt (simple)</label>
+                  <button
+                    onClick={() => handleCopy('simple')}
+                    className={`text-xs px-2 py-1 rounded flex items-center gap-1 ${
+                      copied === 'simple' ? 'bg-green-600 text-white' : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+                    }`}
+                  >
+                    {copied === 'simple' ? <CheckCircle className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                    {copied === 'simple' ? 'Copied!' : 'Copy'}
+                  </button>
+                </div>
+                <pre className="bg-gray-800 border border-gray-700 rounded p-3 text-sm text-gray-300 whitespace-pre-wrap max-h-32 overflow-y-auto">
+                  {promptData.simplePrompt}
+                </pre>
+              </div>
+
+              {/* Full prompt */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm font-medium text-gray-300">Full Prompt</label>
+                  <button
+                    onClick={() => handleCopy('prompt')}
+                    className={`text-xs px-2 py-1 rounded flex items-center gap-1 ${
+                      copied === 'prompt' ? 'bg-green-600 text-white' : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+                    }`}
+                  >
+                    {copied === 'prompt' ? <CheckCircle className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                    {copied === 'prompt' ? 'Copied!' : 'Copy'}
+                  </button>
+                </div>
+                <pre className="bg-gray-800 border border-gray-700 rounded p-3 text-sm text-gray-300 whitespace-pre-wrap max-h-64 overflow-y-auto">
+                  {promptData.prompt}
+                </pre>
+              </div>
+
+              {/* CLI command */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm font-medium text-gray-300">CLI Command (for terminal)</label>
+                  <button
+                    onClick={() => handleCopy('command')}
+                    className={`text-xs px-2 py-1 rounded flex items-center gap-1 ${
+                      copied === 'command' ? 'bg-green-600 text-white' : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+                    }`}
+                  >
+                    {copied === 'command' ? <CheckCircle className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                    {copied === 'command' ? 'Copied!' : 'Copy'}
+                  </button>
+                </div>
+                <pre className="bg-gray-800 border border-gray-700 rounded p-3 text-xs text-cyan-400 font-mono overflow-x-auto">
+                  {promptData.command}
+                </pre>
+              </div>
+            </>
+          )}
+        </div>
+
+        <div className="flex items-center justify-between gap-3 p-4 border-t border-gray-700">
+          <p className="text-xs text-gray-500">Copy the prompt to your local Claude Code session</p>
+          <div className="flex gap-2">
+            <button
+              onClick={handleMarkInProgress}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded text-sm"
+            >
+              Mark In Progress
+            </button>
+            <button onClick={onClose} className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded text-sm">
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Mark Complete Modal - for completing tasks with notes
+function MarkCompleteModal({
+  task,
+  onClose,
+  onComplete
+}: {
+  task: Task
+  onClose: () => void
+  onComplete: () => void
+}) {
+  const [notes, setNotes] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleComplete = async () => {
+    setSaving(true)
+    setError('')
+
+    try {
+      const res = await fetch(`/api/tasks/${task.id}/complete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ completion_notes: notes })
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Failed to complete task')
+      }
+
+      onComplete()
+      onClose()
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-gray-900 border border-gray-700 rounded-lg max-w-lg w-full" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between p-4 border-b border-gray-700">
+          <div>
+            <h2 className="text-lg font-semibold text-white">Mark Task Complete</h2>
+            <p className="text-sm text-gray-400 mt-1">{task.title}</p>
+          </div>
+          <button onClick={onClose} className="text-gray-400 hover:text-white">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="p-4 space-y-4">
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-3 py-2 rounded text-sm">
+              {error}
+            </div>
+          )}
+
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Completion Notes (optional)
+            </label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="What was done? Any issues encountered?"
+              rows={4}
+              className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-green-500"
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center justify-end gap-3 p-4 border-t border-gray-700">
+          <button onClick={onClose} className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded text-sm">
+            Cancel
+          </button>
+          <button
+            onClick={handleComplete}
+            disabled={saving}
+            className="px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded text-sm flex items-center gap-2 disabled:opacity-50"
+          >
+            {saving ? (
+              <RefreshCw className="w-4 h-4 animate-spin" />
+            ) : (
+              <CheckCircle className="w-4 h-4" />
+            )}
+            Complete Task
+          </button>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 // Simplified task card for Rajani to update status, time, notes
@@ -1009,12 +1276,16 @@ function TaskCard({
   task,
   onClarificationSubmit,
   userEmail,
-  userIsAdmin
+  userIsAdmin,
+  onHandleTask,
+  onMarkComplete
 }: {
   task: Task
   onClarificationSubmit?: () => void
   userEmail?: string | null
   userIsAdmin?: boolean
+  onHandleTask?: (task: Task) => void
+  onMarkComplete?: (task: Task) => void
 }) {
   const [showDetails, setShowDetails] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -1133,6 +1404,7 @@ After research, update this task in the dashboard with your findings.`
               <span className="text-white text-sm font-medium">{task.title}</span>
               {getPriorityBadge(task.priority)}
               {getStatusBadge(task.status)}
+              {getExecutionTypeBadge(task.execution_type)}
               {task.needsResearch && (
                 <span className="text-xs px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-400 flex items-center gap-1">
                   <Lightbulb className="w-3 h-3" />
@@ -1210,6 +1482,26 @@ After research, update this task in the dashboard with your findings.`
             >
               <Pencil className="w-3 h-3" />
               Edit
+            </button>
+          )}
+          {/* Handle Task button for manual pending tasks */}
+          {userIsAdmin && task.fromDb && task.status === 'pending' && (task.execution_type === 'manual' || !task.execution_type) && onHandleTask && (
+            <button
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); onHandleTask(task) }}
+              className="text-xs px-2 py-1 bg-violet-600 hover:bg-violet-500 text-white rounded flex items-center gap-1 transition-colors"
+            >
+              <ClipboardList className="w-3 h-3" />
+              Handle
+            </button>
+          )}
+          {/* Mark Complete button for in_progress tasks */}
+          {userIsAdmin && task.fromDb && task.status === 'in_progress' && onMarkComplete && (
+            <button
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); onMarkComplete(task) }}
+              className="text-xs px-2 py-1 bg-green-600 hover:bg-green-500 text-white rounded flex items-center gap-1 transition-colors"
+            >
+              <CheckCircle className="w-3 h-3" />
+              Complete
             </button>
           )}
         </div>
@@ -1339,7 +1631,9 @@ function CategorySection({
   tasks,
   onRefetch,
   userEmail,
-  userIsAdmin
+  userIsAdmin,
+  onHandleTask,
+  onMarkComplete
 }: {
   businessKey: string
   businessName: string
@@ -1349,6 +1643,8 @@ function CategorySection({
   onRefetch?: () => void
   userEmail?: string | null
   userIsAdmin?: boolean
+  onHandleTask?: (task: Task) => void
+  onMarkComplete?: (task: Task) => void
 }) {
   const [expanded, setExpanded] = useState(tasks.length > 0)
 
@@ -1374,7 +1670,7 @@ function CategorySection({
 
       {expanded && (
         <div className="space-y-3 mt-2 ml-6">
-          {displayTasks.map(task => <TaskCard key={task.id} task={task} onClarificationSubmit={onRefetch} userEmail={userEmail} userIsAdmin={userIsAdmin} />)}
+          {displayTasks.map(task => <TaskCard key={task.id} task={task} onClarificationSubmit={onRefetch} userEmail={userEmail} userIsAdmin={userIsAdmin} onHandleTask={onHandleTask} onMarkComplete={onMarkComplete} />)}
         </div>
       )}
     </div>
@@ -1387,7 +1683,9 @@ function BusinessSection({
   dbTasks,
   onRefetch,
   userEmail,
-  userIsAdmin
+  userIsAdmin,
+  onHandleTask,
+  onMarkComplete
 }: {
   businessKey: string
   business: typeof TASK_FRAMEWORK.teelixir
@@ -1395,6 +1693,8 @@ function BusinessSection({
   onRefetch?: () => void
   userEmail?: string | null
   userIsAdmin?: boolean
+  onHandleTask?: (task: Task) => void
+  onMarkComplete?: (task: Task) => void
 }) {
   const [expanded, setExpanded] = useState(true)
 
@@ -1440,6 +1740,8 @@ function BusinessSection({
               onRefetch={onRefetch}
               userEmail={userEmail}
               userIsAdmin={userIsAdmin}
+              onHandleTask={onHandleTask}
+              onMarkComplete={onMarkComplete}
             />
           ))}
         </div>
@@ -1996,6 +2298,9 @@ export default function TasksPage() {
   const [peterFilter, setPeterFilter] = useState(false)
   const [rajaniFilter, setRajaniFilter] = useState(false)
   const [mariaFilter, setMariaFilter] = useState(false)
+  const [executionFilter, setExecutionFilter] = useState<'all' | 'manual' | 'auto'>('all')
+  const [handleTaskModal, setHandleTaskModal] = useState<Task | null>(null)
+  const [markCompleteTask, setMarkCompleteTask] = useState<Task | null>(null)
   const { data: session } = useSession()
 
   // DEV: Allow ?viewAs=peter@teelixir.com to test other user views
@@ -2156,6 +2461,22 @@ export default function TasksPage() {
         return (statusOrder[a.status as keyof typeof statusOrder] || 3) - (statusOrder[b.status as keyof typeof statusOrder] || 3)
       })
   }, [activeTasks, priorityFilter])
+
+  // Manual tasks ready for local Claude Code handling
+  const manualPendingTasks = useMemo(() => {
+    return filteredDbTasks.filter(t =>
+      (t.execution_type === 'manual' || !t.execution_type) &&
+      t.status === 'pending'
+    ).sort((a, b) => a.priority - b.priority)
+  }, [filteredDbTasks])
+
+  // Auto tasks (for n8n/API processing)
+  const autoPendingTasks = useMemo(() => {
+    return filteredDbTasks.filter(t =>
+      t.execution_type === 'auto' &&
+      t.status === 'pending'
+    ).sort((a, b) => a.priority - b.priority)
+  }, [filteredDbTasks])
 
   const handleTaskAdded = useCallback(() => {
     refetch()
@@ -2650,7 +2971,7 @@ export default function TasksPage() {
                 return a.priority - b.priority
               })
               .map(task => (
-                <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} />
+                <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} onHandleTask={setHandleTaskModal} onMarkComplete={setMarkCompleteTask} />
               ))}
             {peterTasks.length === 0 && (
               <p className="text-gray-500 text-sm">No tasks from Peter found</p>
@@ -2683,7 +3004,7 @@ export default function TasksPage() {
               })
               .map(task => (
                 <div key={task.id} className="bg-gray-800/50 rounded-lg p-3">
-                  <TaskCard task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} />
+                  <TaskCard task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} onHandleTask={setHandleTaskModal} onMarkComplete={setMarkCompleteTask} />
                   {/* Show completion feedback for admins */}
                   {task.status === 'completed' && (task.completion_notes || task.time_on_task_mins) && (
                     <div className="mt-2 pt-2 border-t border-gray-700 text-sm space-y-1">
@@ -2743,7 +3064,7 @@ export default function TasksPage() {
               })
               .map(task => (
                 <div key={task.id} className="bg-gray-800/50 rounded-lg p-3">
-                  <TaskCard task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} />
+                  <TaskCard task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} onHandleTask={setHandleTaskModal} onMarkComplete={setMarkCompleteTask} />
                   {/* Show completion feedback for admins */}
                   {task.status === 'completed' && (task.completion_notes || task.time_on_task_mins) && (
                     <div className="mt-2 pt-2 border-t border-gray-700 text-sm space-y-1">
@@ -2795,7 +3116,7 @@ export default function TasksPage() {
           </div>
           <div className="space-y-2">
             {displayedTasks.map(task => (
-              <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} />
+              <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} onHandleTask={setHandleTaskModal} onMarkComplete={setMarkCompleteTask} />
             ))}
             {displayedTasks.length === 0 && (
               <p className="text-gray-500 text-sm">No P{priorityFilter} tasks</p>
@@ -2816,7 +3137,7 @@ export default function TasksPage() {
           </p>
           <div className="space-y-2">
             {filteredDbTasks.filter(t => t.status === 'awaiting_clarification').map(task => (
-              <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} />
+              <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} onHandleTask={setHandleTaskModal} onMarkComplete={setMarkCompleteTask} />
             ))}
           </div>
         </div>
@@ -2834,7 +3155,7 @@ export default function TasksPage() {
           </p>
           <div className="space-y-2">
             {pendingInputTasks.slice(0, 5).map(task => (
-              <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} />
+              <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} onHandleTask={setHandleTaskModal} onMarkComplete={setMarkCompleteTask} />
             ))}
             {pendingInputTasks.length > 5 && (
               <p className="text-gray-500 text-sm text-center pt-2">
@@ -2857,7 +3178,7 @@ export default function TasksPage() {
           </p>
           <div className="space-y-2">
             {readyToActionTasks.map(task => (
-              <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} />
+              <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} onHandleTask={setHandleTaskModal} onMarkComplete={setMarkCompleteTask} />
             ))}
           </div>
         </div>
@@ -2875,7 +3196,7 @@ export default function TasksPage() {
           </p>
           <div className="space-y-2">
             {filteredDbTasks.filter(t => t.category === 'unsure').map(task => (
-              <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} />
+              <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} onHandleTask={setHandleTaskModal} onMarkComplete={setMarkCompleteTask} />
             ))}
           </div>
         </div>
@@ -2907,7 +3228,7 @@ export default function TasksPage() {
                 Completed setup tasks preserved for reference. These don&apos;t appear in active task counts.
               </p>
               {archivedTasks.map(task => (
-                <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} />
+                <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} onHandleTask={setHandleTaskModal} onMarkComplete={setMarkCompleteTask} />
               ))}
             </div>
           )}
@@ -2946,6 +3267,8 @@ export default function TasksPage() {
               onRefetch={refetch}
               userEmail={userEmail}
               userIsAdmin={userIsAdmin}
+              onHandleTask={setHandleTaskModal}
+              onMarkComplete={setMarkCompleteTask}
             />
           ))}
         </div>
@@ -2959,6 +3282,24 @@ export default function TasksPage() {
         userEmail={userEmail}
         userIsAdmin={userIsAdmin}
       />
+
+      {/* Handle Task Modal for manual local execution */}
+      {handleTaskModal && (
+        <HandleTaskModal
+          task={handleTaskModal}
+          onClose={() => setHandleTaskModal(null)}
+          onComplete={() => { refetch(); setHandleTaskModal(null) }}
+        />
+      )}
+
+      {/* Mark Complete Modal */}
+      {markCompleteTask && (
+        <MarkCompleteModal
+          task={markCompleteTask}
+          onClose={() => setMarkCompleteTask(null)}
+          onComplete={refetch}
+        />
+      )}
     </div>
   )
 }

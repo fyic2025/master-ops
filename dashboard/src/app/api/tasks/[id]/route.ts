@@ -76,7 +76,9 @@ export async function PATCH(
       'assigned_to', 'time_on_task_mins', 'completion_notes',
       'completion_screenshot_url', 'assigned_at', 'completed_at',
       // Triage workflow fields
-      'suggested_assignee', 'triage_status', 'automation_notes'
+      'suggested_assignee', 'triage_status', 'automation_notes',
+      // Execution type for manual/auto handling
+      'execution_type'
     ]
 
     for (const field of allowedFields) {

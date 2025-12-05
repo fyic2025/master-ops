@@ -35,6 +35,11 @@ export async function GET(request: NextRequest) {
       query = query.eq('priority', parseInt(priority))
     }
 
+    const executionType = searchParams.get('execution_type')
+    if (executionType) {
+      query = query.eq('execution_type', executionType)
+    }
+
     // Limit results
     const limit = searchParams.get('limit')
     if (limit) {
@@ -115,6 +120,8 @@ export async function POST(request: NextRequest) {
       triage_status: body.triage_status || null,
       assigned_to: body.assigned_to || null,
       automation_notes: body.automation_notes || null,
+      // Execution type: manual (default) or auto
+      execution_type: body.execution_type || 'manual',
     }
 
     const { data, error } = await supabase

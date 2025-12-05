@@ -46,6 +46,10 @@
               "value": "eq.pending"
             },
             {
+              "name": "execution_type",
+              "value": "eq.auto"
+            },
+            {
               "name": "order",
               "value": "priority.asc,created_at.asc"
             },
