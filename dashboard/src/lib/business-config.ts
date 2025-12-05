@@ -28,7 +28,7 @@ import {
   type LucideIcon
 } from 'lucide-react'
 
-export type BusinessCode = 'home' | 'boo' | 'teelixir' | 'elevate' | 'rhf' | 'brandco'
+export type BusinessCode = 'home' | 'overall' | 'boo' | 'teelixir' | 'elevate' | 'rhf' | 'brandco'
 
 export interface NavItem {
   name: string
@@ -66,6 +66,18 @@ export const BUSINESSES: Record<BusinessCode, Business> = {
       { name: 'AWS Migration', href: '/aws-migration', icon: Cloud },
       { name: 'Health', href: '/health', icon: Activity },
       { name: 'Settings', href: '/settings', icon: Settings },
+    ]
+  },
+  overall: {
+    code: 'overall',
+    name: 'Overall',
+    shortName: 'Overall',
+    color: 'bg-indigo-500',
+    bgColor: 'bg-indigo-500',
+    navigation: [
+      { name: 'Dashboard', href: '', icon: Home },
+      { name: 'Tasks', href: '/tasks', icon: ClipboardList },
+      { name: 'Issues', href: '/issues', icon: AlertTriangle },
     ]
   },
   boo: {
