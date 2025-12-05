@@ -701,8 +701,9 @@ async function main() {
     logger.info('Sync completed', { syncId, duration: (new Date().getTime() - startTime.getTime()) / 1000 });
 
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
     logger.error('Sync failed:', error);
-    console.error('\n✗ Error:', error.message);
+    console.error('\n✗ Error:', errorMessage);
 
     // Save failure to sync history
     if (!options.dryRun) {
@@ -712,7 +713,7 @@ async function main() {
         status: 'failed',
         started_at: startTime.toISOString(),
         completed_at: new Date().toISOString(),
-        error_message: error.message
+        error_message: errorMessage
       });
     }
 
