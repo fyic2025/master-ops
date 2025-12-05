@@ -110,6 +110,7 @@ interface CustomerWithOrders {
   state: string
   tags: string[]
   createdAt: string
+  isApproved: boolean
   metrics: CustomerMetrics
 }
 
@@ -141,7 +142,7 @@ const initialFormData: CustomerFormData = {
   postcode: '',
 }
 
-type SortKey = 'name' | 'totalSpend' | 'lastOrderDate' | 'avgOrderValue' | 'orderCount'
+type SortKey = 'name' | 'totalSpend' | 'lastOrderDate' | 'avgOrderValue' | 'orderCount' | 'access'
 type SortDir = 'asc' | 'desc'
 
 export default function CustomersPage() {
@@ -268,6 +269,10 @@ function ElevateCustomerManager() {
         case 'orderCount':
           aVal = a.metrics.orderCount
           bVal = b.metrics.orderCount
+          break
+        case 'access':
+          aVal = a.isApproved ? 1 : 0
+          bVal = b.isApproved ? 1 : 0
           break
       }
 
@@ -616,7 +621,7 @@ function CustomerAnalyticsList({
                     )}
                   </button>
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase w-8">Access</th>
+                <SortHeader label="Access" sortKeyName="access" />
                 <SortHeader label="Customer" sortKeyName="name" />
                 <SortHeader label="Total Spend" sortKeyName="totalSpend" />
                 <SortHeader label="Orders" sortKeyName="orderCount" />
@@ -670,7 +675,8 @@ function CustomerAnalyticsRow({
   customer, compareMetrics, selected, onToggle, setMessage, fetchCustomers
 }: CustomerAnalyticsRowProps) {
   const [expanded, setExpanded] = useState(false)
-  const isApproved = customer.tags?.includes('approved') && customer.state !== 'DISABLED'
+  // Use isApproved from API if available, otherwise calculate
+  const isApproved = customer.isApproved ?? (customer.tags?.includes('approved') && customer.state !== 'DISABLED')
 
   const formatCurrency = (val: number) =>
     '$' + val.toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
