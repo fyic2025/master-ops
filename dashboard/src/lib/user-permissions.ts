@@ -124,7 +124,8 @@ export function getAllowedBusinesses(email: string | null | undefined): Business
   const permissions = getUserPermissions(email)
   if (!permissions) return []
   if (permissions.businesses === 'all') {
-    return ['home', 'boo', 'teelixir', 'elevate', 'rhf', 'brandco']
+    // Include 'overall' for cross-business tasks
+    return ['home', 'boo', 'teelixir', 'elevate', 'rhf', 'brandco', 'overall' as BusinessCode]
   }
   return permissions.businesses
 }
