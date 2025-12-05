@@ -88,6 +88,12 @@ export async function GET(request: NextRequest) {
       tasks: allTasks,
       grouped,
       summary,
+    }, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      }
     })
   } catch (error: any) {
     console.error('Tasks API error:', error)
@@ -152,3 +158,4 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
+
