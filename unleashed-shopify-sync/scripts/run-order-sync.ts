@@ -13,7 +13,7 @@
  *   npx tsx scripts/run-order-sync.ts all --limit=10
  */
 
-import { getStoreConfig, getStoreNames } from '../src/config.js'
+import { getStoreConfig, getStoreNames, loadConfig } from '../src/config.js'
 import { syncOrder, fetchRecentShopifyOrders, OrderSyncOptions } from '../src/order-sync.js'
 import { BundleMapping } from '../src/types.js'
 import {
@@ -23,6 +23,9 @@ import {
   isSupabaseAvailable,
   getSupabaseClient,
 } from '../src/supabase.js'
+
+// Load global sync config
+const globalConfig = loadConfig()
 
 // Update dashboard job status
 async function updateDashboardJobStatus(
@@ -57,8 +60,29 @@ const dryRun = args.includes('--dry-run')
 const verbose = args.includes('--verbose')
 
 // Parse --since=YYYY-MM-DD
+// Enforces minimum order date from config to prevent historical duplicates
 const sinceArg = args.find(a => a.startsWith('--since='))
-const sinceDate = sinceArg ? new Date(sinceArg.replace('--since=', '')) : undefined
+const requestedSince = sinceArg ? new Date(sinceArg.replace('--since=', '')) : null
+const minDate = globalConfig.sync.minOrderDate
+
+// Determine effective since date:
+// - If requested date is before minDate, use minDate
+// - If no date requested, use minDate
+// - If requested date is after minDate, use requested date
+let sinceDate: Date | undefined
+if (minDate) {
+  if (requestedSince && requestedSince > minDate) {
+    sinceDate = requestedSince
+  } else {
+    sinceDate = minDate
+    if (requestedSince && requestedSince < minDate) {
+      console.log(`⚠️ Requested --since=${requestedSince.toISOString().split('T')[0]} is before minimum date`)
+      console.log(`   Enforcing minimum: ${minDate.toISOString().split('T')[0]}`)
+    }
+  }
+} else {
+  sinceDate = requestedSince || undefined
+}
 
 // Parse --limit=N
 const limitArg = args.find(a => a.startsWith('--limit='))
@@ -176,6 +200,10 @@ async function main() {
   console.log('=' .repeat(60))
   console.log(`Target: ${targetStore}`)
   console.log(`Mode: ${dryRun ? 'DRY RUN' : 'LIVE'}`)
+  console.log(`Since: ${sinceDate?.toISOString().split('T')[0] || 'all time'}`)
+  if (minDate) {
+    console.log(`Min Date: ${minDate.toISOString().split('T')[0]} (enforced)`)
+  }
   console.log(`Supabase: ${isSupabaseAvailable() ? 'Connected' : 'Not configured'}`)
 
   const storeNames = getStoreNames()

@@ -21,6 +21,8 @@ export interface SyncConfig {
     inventoryIntervalMinutes: number
     dryRun: boolean
     logToSupabase: boolean
+    /** Minimum order date - orders before this date will not be synced */
+    minOrderDate: Date | null
   }
 }
 
@@ -86,6 +88,10 @@ export function loadConfig(): SyncConfig {
       inventoryIntervalMinutes: parseInt(process.env.SYNC_INTERVAL_MINUTES || '30'),
       dryRun: process.env.SYNC_DRY_RUN === 'true',
       logToSupabase: process.env.SYNC_LOG_TO_SUPABASE !== 'false',
+      // December 1, 2025 cutoff - prevents syncing historical orders that may create duplicates
+      minOrderDate: process.env.SYNC_MIN_ORDER_DATE
+        ? new Date(process.env.SYNC_MIN_ORDER_DATE)
+        : new Date('2025-12-01T00:00:00Z'),
     },
   }
 }
