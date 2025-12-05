@@ -279,6 +279,7 @@ Tasks moved here after completion for reference.
 - [x] **2025-12-05** TASK-17 Task attachments feature | File upload/download for tasks - migration pending
 - [x] **2025-12-05** TASK-33 Fix unleashed-order-sync n8n workflow | Fixed crypto module blocked by n8n security
 - [x] **2025-12-05** Anniversary Upsell automation LIVE | PM2 cron jobs deployed, 8am queue + hourly 9am-6pm sender
+- [x] **2025-12-05** Teelixir order sync cron jobs | MIN_ORDER_DATE Dec 1 2025 cutoff, Shopify→Unleashed 4AM, Unleashed B2B→Supabase 5AM
 
 ---
 
@@ -1112,3 +1113,7 @@ Run in Supabase SQL Editor: https://supabase.com/dashboard/project/qcvfxxsnqvdfm
 ### Session 68070cb7 (2025-12-05 08:39 pm)
 - Exit reason: other
 - Pending tasks saved: 1
+
+### Session cf827872 (2025-12-05 08:54 pm)
+- Exit reason: other
+- Pending tasks saved: 0

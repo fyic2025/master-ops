@@ -32,6 +32,8 @@ interface ShopifyCustomer {
   tags: string[]
   numberOfOrders: number
   note: string | null
+  verifiedEmail: boolean
+  validEmailAddress: boolean
 }
 
 const initialFormData: CustomerFormData = {
@@ -96,7 +98,12 @@ function ElevateCustomerManager() {
   }, [fetchCustomers])
 
   const filteredCustomers = customers.filter(c => {
-    if (stateFilter !== 'all' && c.state !== stateFilter) return false
+    // Filter by verifiedEmail status
+    if (stateFilter === 'logged_in' && !c.verifiedEmail) return false
+    if (stateFilter === 'not_logged_in' && (c.verifiedEmail || c.state === 'DISABLED')) return false
+    if (stateFilter === 'with_orders' && c.numberOfOrders === 0) return false
+    if (stateFilter === 'DISABLED' && c.state !== 'DISABLED') return false
+
     if (searchQuery) {
       const q = searchQuery.toLowerCase()
       return (
@@ -169,12 +176,13 @@ function ElevateCustomerManager() {
     }
   }
 
-  // Stats
+  // Stats - using verifiedEmail for accurate login tracking with passwordless accounts
   const stats = {
     total: customers.length,
-    activated: customers.filter(c => c.state === 'ENABLED').length,
-    pending: customers.filter(c => c.state === 'INVITED').length,
+    loggedIn: customers.filter(c => c.verifiedEmail).length,
+    notLoggedIn: customers.filter(c => !c.verifiedEmail && c.state !== 'DISABLED').length,
     disabled: customers.filter(c => c.state === 'DISABLED').length,
+    withOrders: customers.filter(c => c.numberOfOrders > 0).length,
   }
 
   return (
@@ -195,18 +203,22 @@ function ElevateCustomerManager() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-5 gap-4">
         <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <p className="text-gray-500 text-sm">Total Customers</p>
           <p className="text-2xl font-bold text-white">{stats.total}</p>
         </div>
         <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
-          <p className="text-gray-500 text-sm">Activated</p>
-          <p className="text-2xl font-bold text-green-400">{stats.activated}</p>
+          <p className="text-gray-500 text-sm">Logged In</p>
+          <p className="text-2xl font-bold text-green-400">{stats.loggedIn}</p>
         </div>
         <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
-          <p className="text-gray-500 text-sm">Pending Activation</p>
-          <p className="text-2xl font-bold text-yellow-400">{stats.pending}</p>
+          <p className="text-gray-500 text-sm">Not Logged In</p>
+          <p className="text-2xl font-bold text-yellow-400">{stats.notLoggedIn}</p>
+        </div>
+        <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
+          <p className="text-gray-500 text-sm">With Orders</p>
+          <p className="text-2xl font-bold text-blue-400">{stats.withOrders}</p>
         </div>
         <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <p className="text-gray-500 text-sm">Disabled</p>
@@ -336,7 +348,8 @@ function CustomerList({
   getStateColor, getStateLabel, sendActivationEmails, actionLoading,
   setMessage, fetchCustomers
 }: CustomerListProps) {
-  const pendingSelected = customers.filter(c => selectedIds.has(c.id) && c.state === 'INVITED')
+  // Customers who haven't logged in yet and aren't disabled
+  const notLoggedInSelected = customers.filter(c => selectedIds.has(c.id) && !c.verifiedEmail && c.state !== 'DISABLED')
 
   return (
     <div className="space-y-4">
@@ -349,9 +362,10 @@ function CustomerList({
             onChange={(e) => setStateFilter(e.target.value)}
             className="px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm"
           >
-            <option value="all">All States</option>
-            <option value="ENABLED">Activated</option>
-            <option value="INVITED">Pending</option>
+            <option value="all">All</option>
+            <option value="logged_in">Logged In</option>
+            <option value="not_logged_in">Not Logged In</option>
+            <option value="with_orders">With Orders</option>
             <option value="DISABLED">Disabled</option>
           </select>
         </div>
@@ -370,14 +384,14 @@ function CustomerList({
         {selectedIds.size > 0 && (
           <div className="flex items-center gap-2">
             <span className="text-gray-400 text-sm">{selectedIds.size} selected</span>
-            {pendingSelected.length > 0 && (
+            {notLoggedInSelected.length > 0 && (
               <button
-                onClick={() => sendActivationEmails(pendingSelected.map(c => c.id))}
+                onClick={() => sendActivationEmails(notLoggedInSelected.map(c => c.id))}
                 disabled={actionLoading}
                 className="flex items-center gap-2 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm disabled:opacity-50"
               >
                 {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
-                Send Activation ({pendingSelected.length})
+                Send Activation ({notLoggedInSelected.length})
               </button>
             )}
           </div>
@@ -439,11 +453,11 @@ function CustomerList({
       <div className="flex items-center gap-6 text-sm text-gray-500">
         <span className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-green-400"></span>
-          Activated = Can place orders
+          Logged In = Has completed login
         </span>
         <span className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-yellow-400"></span>
-          Pending = Needs to click activation link
+          Not Logged In = Awaiting first login
         </span>
         <span className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-red-400"></span>
@@ -521,14 +535,24 @@ function CustomerRow({
       </td>
       <td className="px-4 py-3 text-gray-400 text-sm">{businessName}</td>
       <td className="px-4 py-3">
-        <span className={`px-2 py-1 rounded text-xs font-medium ${getStateColor(customer.state)}`}>
-          {getStateLabel(customer.state)}
-        </span>
+        {customer.state === 'DISABLED' ? (
+          <span className="px-2 py-1 rounded text-xs font-medium bg-red-500/20 text-red-400">
+            Disabled
+          </span>
+        ) : customer.verifiedEmail ? (
+          <span className="px-2 py-1 rounded text-xs font-medium bg-green-500/20 text-green-400">
+            Logged In
+          </span>
+        ) : (
+          <span className="px-2 py-1 rounded text-xs font-medium bg-yellow-500/20 text-yellow-400">
+            Not Logged In
+          </span>
+        )}
       </td>
       <td className="px-4 py-3 text-gray-400">{customer.numberOfOrders}</td>
       <td className="px-4 py-3 text-gray-500 text-sm">{formatDate(customer.createdAt)}</td>
       <td className="px-4 py-3">
-        {customer.state === 'INVITED' && (
+        {!customer.verifiedEmail && customer.state !== 'DISABLED' && (
           <button
             onClick={handleSendOne}
             disabled={sendingOne}
@@ -539,8 +563,8 @@ function CustomerRow({
             Resend
           </button>
         )}
-        {customer.state === 'ENABLED' && (
-          <span className="text-green-400 text-xs">Active</span>
+        {customer.verifiedEmail && (
+          <span className="text-green-400 text-xs">Ready to order</span>
         )}
       </td>
     </tr>

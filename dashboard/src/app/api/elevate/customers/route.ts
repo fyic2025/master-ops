@@ -260,6 +260,8 @@ export async function GET(request: NextRequest) {
               updatedAt
               tags
               numberOfOrders
+              verifiedEmail
+              validEmailAddress
               note
             }
           }
