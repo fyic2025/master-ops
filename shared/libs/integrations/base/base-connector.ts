@@ -225,13 +225,9 @@ export abstract class BaseConnector {
 
   /**
    * Get service health status
+   * Derived classes may override with more specific return types
    */
-  async healthCheck(): Promise<{
-    service: string
-    healthy: boolean
-    timestamp: Date
-    details?: Record<string, any>
-  }> {
+  async healthCheck(): Promise<Record<string, any>> {
     try {
       await this.performHealthCheck()
 
@@ -263,8 +259,9 @@ export abstract class BaseConnector {
 
   /**
    * Get connector metrics
+   * Derived classes may override with more specific return types
    */
-  getMetrics() {
+  getMetrics(): Record<string, any> {
     return {
       service: this.serviceName,
       rateLimiter: {
