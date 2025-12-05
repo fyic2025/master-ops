@@ -22,7 +22,8 @@ import {
   Send,
   Archive,
   User,
-  Pencil
+  Pencil,
+  ArrowRight
 } from 'lucide-react'
 import { getAllowedBusinesses, isAdmin } from '@/lib/user-permissions'
 
@@ -1278,7 +1279,8 @@ function TaskCard({
   userEmail,
   userIsAdmin,
   onHandleTask,
-  onMarkComplete
+  onMarkComplete,
+  onToggleExecutionType
 }: {
   task: Task
   onClarificationSubmit?: () => void
@@ -1286,6 +1288,7 @@ function TaskCard({
   userIsAdmin?: boolean
   onHandleTask?: (task: Task) => void
   onMarkComplete?: (task: Task) => void
+  onToggleExecutionType?: (task: Task) => void
 }) {
   const [showDetails, setShowDetails] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -1484,6 +1487,21 @@ After research, update this task in the dashboard with your findings.`
               Edit
             </button>
           )}
+          {/* Toggle execution type button */}
+          {canEdit && task.fromDb && onToggleExecutionType && (
+            <button
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleExecutionType(task) }}
+              className={`text-xs px-2 py-1 text-white rounded flex items-center gap-1 transition-colors ${
+                task.execution_type === 'auto'
+                  ? 'bg-violet-600 hover:bg-violet-500'
+                  : 'bg-cyan-600 hover:bg-cyan-500'
+              }`}
+              title={task.execution_type === 'auto' ? 'Switch to manual execution' : 'Switch to auto execution'}
+            >
+              <ArrowRight className="w-3 h-3" />
+              {task.execution_type === 'auto' ? 'Manual' : 'Auto'}
+            </button>
+          )}
           {/* Handle Task button for manual pending tasks */}
           {userIsAdmin && task.fromDb && task.status === 'pending' && (task.execution_type === 'manual' || !task.execution_type) && onHandleTask && (
             <button
@@ -1633,7 +1651,8 @@ function CategorySection({
   userEmail,
   userIsAdmin,
   onHandleTask,
-  onMarkComplete
+  onMarkComplete,
+  onToggleExecutionType
 }: {
   businessKey: string
   businessName: string
@@ -1645,6 +1664,7 @@ function CategorySection({
   userIsAdmin?: boolean
   onHandleTask?: (task: Task) => void
   onMarkComplete?: (task: Task) => void
+  onToggleExecutionType?: (task: Task) => void
 }) {
   const [expanded, setExpanded] = useState(tasks.length > 0)
 
@@ -1670,7 +1690,7 @@ function CategorySection({
 
       {expanded && (
         <div className="space-y-3 mt-2 ml-6">
-          {displayTasks.map(task => <TaskCard key={task.id} task={task} onClarificationSubmit={onRefetch} userEmail={userEmail} userIsAdmin={userIsAdmin} onHandleTask={onHandleTask} onMarkComplete={onMarkComplete} />)}
+          {displayTasks.map(task => <TaskCard key={task.id} task={task} onClarificationSubmit={onRefetch} userEmail={userEmail} userIsAdmin={userIsAdmin} onHandleTask={onHandleTask} onMarkComplete={onMarkComplete} onToggleExecutionType={onToggleExecutionType} />)}
         </div>
       )}
     </div>
@@ -1685,7 +1705,8 @@ function BusinessSection({
   userEmail,
   userIsAdmin,
   onHandleTask,
-  onMarkComplete
+  onMarkComplete,
+  onToggleExecutionType
 }: {
   businessKey: string
   business: typeof TASK_FRAMEWORK.teelixir
@@ -1695,6 +1716,7 @@ function BusinessSection({
   userIsAdmin?: boolean
   onHandleTask?: (task: Task) => void
   onMarkComplete?: (task: Task) => void
+  onToggleExecutionType?: (task: Task) => void
 }) {
   const [expanded, setExpanded] = useState(true)
 
@@ -1742,6 +1764,7 @@ function BusinessSection({
               userIsAdmin={userIsAdmin}
               onHandleTask={onHandleTask}
               onMarkComplete={onMarkComplete}
+              onToggleExecutionType={onToggleExecutionType}
             />
           ))}
         </div>
@@ -2034,6 +2057,7 @@ function EditTaskModal({
   const [description, setDescription] = useState(task.description || '')
   const [priority, setPriority] = useState<1 | 2 | 3 | 4>(task.priority || 2)
   const [status, setStatus] = useState(task.status || 'pending')
+  const [executionType, setExecutionType] = useState<'manual' | 'auto'>(task.execution_type || 'manual')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
@@ -2046,6 +2070,7 @@ function EditTaskModal({
       setDescription(task.description || '')
       setPriority(task.priority || 2)
       setStatus(task.status || 'pending')
+      setExecutionType(task.execution_type || 'manual')
     }
   }, [task, isOpen])
 
@@ -2072,6 +2097,7 @@ function EditTaskModal({
           category,
           priority,
           status,
+          execution_type: executionType,
         }),
       })
 
@@ -2203,6 +2229,37 @@ function EditTaskModal({
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
               ))}
             </select>
+          </div>
+
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">Execution Type</label>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setExecutionType('manual')}
+                className={`flex-1 py-2 rounded text-sm font-medium transition-colors ${
+                  executionType === 'manual'
+                    ? 'bg-violet-500 text-white'
+                    : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                }`}
+              >
+                Manual
+              </button>
+              <button
+                type="button"
+                onClick={() => setExecutionType('auto')}
+                className={`flex-1 py-2 rounded text-sm font-medium transition-colors ${
+                  executionType === 'auto'
+                    ? 'bg-cyan-500 text-white'
+                    : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                }`}
+              >
+                Auto
+              </button>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              Manual = handle locally with Claude Code · Auto = processed by n8n automation
+            </p>
           </div>
         </div>
 
@@ -2384,6 +2441,10 @@ export default function TasksPage() {
   const p3Count = activeTasks.filter(t => t.priority === 3 && t.status !== 'completed').length
   const p4Count = activeTasks.filter(t => t.priority === 4 && t.status !== 'completed').length
 
+  // Execution type counts (from db tasks only)
+  const manualCount = filteredDbTasks.filter(t => (t.execution_type === 'manual' || !t.execution_type) && t.status !== 'completed').length
+  const autoCount = filteredDbTasks.filter(t => t.execution_type === 'auto' && t.status !== 'completed').length
+
   // Peter's tasks count and filter
   const peterTasks = useMemo(() => {
     return filteredDbTasks.filter(t => {
@@ -2450,17 +2511,27 @@ export default function TasksPage() {
       .slice(0, 5)
   }, [activeTasks])
 
+  // Helper to filter by execution type
+  const filterByExecutionType = useCallback((tasks: Task[]) => {
+    if (executionFilter === 'all') return tasks
+    if (executionFilter === 'manual') {
+      return tasks.filter(t => t.execution_type === 'manual' || !t.execution_type)
+    }
+    return tasks.filter(t => t.execution_type === 'auto')
+  }, [executionFilter])
+
   // Filter tasks by priority when clicked (excludes archived)
   const displayedTasks = useMemo(() => {
     if (!priorityFilter) return null
-    return activeTasks
+    const filtered = activeTasks
       .filter(t => t.priority === priorityFilter && t.status !== 'completed')
+    return filterByExecutionType(filtered)
       .sort((a, b) => {
         // Sort by status: in_progress first, then scheduled, then pending
         const statusOrder = { in_progress: 0, scheduled: 1, pending: 2, pending_input: 3, blocked: 4 }
         return (statusOrder[a.status as keyof typeof statusOrder] || 3) - (statusOrder[b.status as keyof typeof statusOrder] || 3)
       })
-  }, [activeTasks, priorityFilter])
+  }, [activeTasks, priorityFilter, filterByExecutionType])
 
   // Manual tasks ready for local Claude Code handling
   const manualPendingTasks = useMemo(() => {
@@ -2480,6 +2551,22 @@ export default function TasksPage() {
 
   const handleTaskAdded = useCallback(() => {
     refetch()
+  }, [refetch])
+
+  // Toggle execution type handler
+  const toggleExecutionType = useCallback(async (task: Task) => {
+    if (!task.id) return
+    const newType = task.execution_type === 'auto' ? 'manual' : 'auto'
+    try {
+      await fetch(`/api/tasks/${task.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ execution_type: newType })
+      })
+      refetch()
+    } catch (error) {
+      console.error('Failed to toggle execution type:', error)
+    }
   }, [refetch])
 
   // Check if viewing as Peter for custom header
@@ -2846,6 +2933,45 @@ export default function TasksPage() {
         </button>
       </div>
 
+      {/* Execution Type Filter - Admin Only */}
+      {userIsAdmin && (
+        <div className="flex items-center gap-2 bg-gray-900 border border-gray-800 rounded-lg p-2">
+          <span className="text-xs text-gray-500 px-2">Execution:</span>
+          <button
+            onClick={() => setExecutionFilter('all')}
+            className={`text-xs px-3 py-1.5 rounded transition-colors ${
+              executionFilter === 'all'
+                ? 'bg-gray-700 text-white'
+                : 'text-gray-400 hover:text-white hover:bg-gray-800'
+            }`}
+          >
+            All ({manualCount + autoCount})
+          </button>
+          <button
+            onClick={() => setExecutionFilter('manual')}
+            className={`text-xs px-3 py-1.5 rounded transition-colors flex items-center gap-1.5 ${
+              executionFilter === 'manual'
+                ? 'bg-violet-500/20 text-violet-400 border border-violet-500/30'
+                : 'text-gray-400 hover:text-violet-400 hover:bg-violet-500/10'
+            }`}
+          >
+            <span className="w-2 h-2 rounded-full bg-violet-500" />
+            Manual ({manualCount})
+          </button>
+          <button
+            onClick={() => setExecutionFilter('auto')}
+            className={`text-xs px-3 py-1.5 rounded transition-colors flex items-center gap-1.5 ${
+              executionFilter === 'auto'
+                ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
+                : 'text-gray-400 hover:text-cyan-400 hover:bg-cyan-500/10'
+            }`}
+          >
+            <span className="w-2 h-2 rounded-full bg-cyan-500" />
+            Auto ({autoCount})
+          </button>
+        </div>
+      )}
+
       {/* Triage Queue - Admin Only */}
       {userIsAdmin && pendingTriageCount > 0 && (
         <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4">
@@ -2971,7 +3097,7 @@ export default function TasksPage() {
                 return a.priority - b.priority
               })
               .map(task => (
-                <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} onHandleTask={setHandleTaskModal} onMarkComplete={setMarkCompleteTask} />
+                <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} onHandleTask={setHandleTaskModal} onMarkComplete={setMarkCompleteTask} onToggleExecutionType={toggleExecutionType} />
               ))}
             {peterTasks.length === 0 && (
               <p className="text-gray-500 text-sm">No tasks from Peter found</p>
@@ -3004,7 +3130,7 @@ export default function TasksPage() {
               })
               .map(task => (
                 <div key={task.id} className="bg-gray-800/50 rounded-lg p-3">
-                  <TaskCard task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} onHandleTask={setHandleTaskModal} onMarkComplete={setMarkCompleteTask} />
+                  <TaskCard task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} onHandleTask={setHandleTaskModal} onMarkComplete={setMarkCompleteTask} onToggleExecutionType={toggleExecutionType} />
                   {/* Show completion feedback for admins */}
                   {task.status === 'completed' && (task.completion_notes || task.time_on_task_mins) && (
                     <div className="mt-2 pt-2 border-t border-gray-700 text-sm space-y-1">
@@ -3064,7 +3190,7 @@ export default function TasksPage() {
               })
               .map(task => (
                 <div key={task.id} className="bg-gray-800/50 rounded-lg p-3">
-                  <TaskCard task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} onHandleTask={setHandleTaskModal} onMarkComplete={setMarkCompleteTask} />
+                  <TaskCard task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} onHandleTask={setHandleTaskModal} onMarkComplete={setMarkCompleteTask} onToggleExecutionType={toggleExecutionType} />
                   {/* Show completion feedback for admins */}
                   {task.status === 'completed' && (task.completion_notes || task.time_on_task_mins) && (
                     <div className="mt-2 pt-2 border-t border-gray-700 text-sm space-y-1">
@@ -3116,7 +3242,7 @@ export default function TasksPage() {
           </div>
           <div className="space-y-2">
             {displayedTasks.map(task => (
-              <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} onHandleTask={setHandleTaskModal} onMarkComplete={setMarkCompleteTask} />
+              <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} onHandleTask={setHandleTaskModal} onMarkComplete={setMarkCompleteTask} onToggleExecutionType={toggleExecutionType} />
             ))}
             {displayedTasks.length === 0 && (
               <p className="text-gray-500 text-sm">No P{priorityFilter} tasks</p>
@@ -3137,7 +3263,7 @@ export default function TasksPage() {
           </p>
           <div className="space-y-2">
             {filteredDbTasks.filter(t => t.status === 'awaiting_clarification').map(task => (
-              <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} onHandleTask={setHandleTaskModal} onMarkComplete={setMarkCompleteTask} />
+              <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} onHandleTask={setHandleTaskModal} onMarkComplete={setMarkCompleteTask} onToggleExecutionType={toggleExecutionType} />
             ))}
           </div>
         </div>
@@ -3155,7 +3281,7 @@ export default function TasksPage() {
           </p>
           <div className="space-y-2">
             {pendingInputTasks.slice(0, 5).map(task => (
-              <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} onHandleTask={setHandleTaskModal} onMarkComplete={setMarkCompleteTask} />
+              <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} onHandleTask={setHandleTaskModal} onMarkComplete={setMarkCompleteTask} onToggleExecutionType={toggleExecutionType} />
             ))}
             {pendingInputTasks.length > 5 && (
               <p className="text-gray-500 text-sm text-center pt-2">
@@ -3178,7 +3304,7 @@ export default function TasksPage() {
           </p>
           <div className="space-y-2">
             {readyToActionTasks.map(task => (
-              <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} onHandleTask={setHandleTaskModal} onMarkComplete={setMarkCompleteTask} />
+              <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} onHandleTask={setHandleTaskModal} onMarkComplete={setMarkCompleteTask} onToggleExecutionType={toggleExecutionType} />
             ))}
           </div>
         </div>
@@ -3196,7 +3322,7 @@ export default function TasksPage() {
           </p>
           <div className="space-y-2">
             {filteredDbTasks.filter(t => t.category === 'unsure').map(task => (
-              <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} onHandleTask={setHandleTaskModal} onMarkComplete={setMarkCompleteTask} />
+              <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} onHandleTask={setHandleTaskModal} onMarkComplete={setMarkCompleteTask} onToggleExecutionType={toggleExecutionType} />
             ))}
           </div>
         </div>
@@ -3228,7 +3354,7 @@ export default function TasksPage() {
                 Completed setup tasks preserved for reference. These don&apos;t appear in active task counts.
               </p>
               {archivedTasks.map(task => (
-                <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} onHandleTask={setHandleTaskModal} onMarkComplete={setMarkCompleteTask} />
+                <TaskCard key={task.id} task={task} onClarificationSubmit={refetch} userEmail={userEmail} userIsAdmin={userIsAdmin} onHandleTask={setHandleTaskModal} onMarkComplete={setMarkCompleteTask} onToggleExecutionType={toggleExecutionType} />
               ))}
             </div>
           )}
@@ -3269,6 +3395,7 @@ export default function TasksPage() {
               userIsAdmin={userIsAdmin}
               onHandleTask={setHandleTaskModal}
               onMarkComplete={setMarkCompleteTask}
+              onToggleExecutionType={toggleExecutionType}
             />
           ))}
         </div>
