@@ -561,7 +561,7 @@ async function main() {
 
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    logger.error('Error in account mapping process:', error);
+    logger.error('Error in account mapping process', undefined, error instanceof Error ? error : new Error(errorMessage));
     console.error('Error:', errorMessage);
     process.exit(1);
   } finally {

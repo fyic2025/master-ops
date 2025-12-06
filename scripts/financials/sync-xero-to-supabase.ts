@@ -702,7 +702,7 @@ async function main() {
 
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    logger.error('Sync failed:', error);
+    logger.error('Sync failed', undefined, error instanceof Error ? error : new Error(errorMessage));
     console.error('\n✗ Error:', errorMessage);
 
     // Save failure to sync history

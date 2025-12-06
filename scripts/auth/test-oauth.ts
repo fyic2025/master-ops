@@ -11,6 +11,7 @@ import {
   getAuthorizationUrl,
   oauth2BearerHeaders,
   type OAuth2Config,
+  type OAuth2AuthorizationCodeConfig,
 } from './oauth-strategies'
 
 // ============================================================================
@@ -67,7 +68,7 @@ const refreshTokenConfig: OAuth2Config = {
 }
 
 // Example: Authorization Code (for generating auth URL)
-const authorizationCodeConfig: OAuth2Config = {
+const authorizationCodeConfig: OAuth2AuthorizationCodeConfig = {
   flow: 'authorization_code',
   authorizationEndpoint:
     process.env.OAUTH_AUTH_ENDPOINT || 'https://api.example.com/oauth/authorize',

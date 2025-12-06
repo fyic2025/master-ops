@@ -160,7 +160,18 @@ async function main() {
     // ========================================
     console.log('5️⃣  Sending daily summary...\n')
 
-    const dailySummary = {
+    const slackDailySummary = {
+      totalOperations: 1247,
+      successRate: 98.5,
+      errorCount: 19,
+      topServices: [
+        { service: 'hubspot', operations: 523 },
+        { service: 'unleashed', operations: 412 },
+        { service: 'n8n', operations: 312 }
+      ]
+    }
+
+    const emailDailySummary = {
       totalOperations: 1247,
       successRate: 98.5,
       errorCount: 19,
@@ -171,24 +182,18 @@ async function main() {
       ],
       topErrors: [
         { message: 'Rate limit exceeded', count: 8 },
-        { message: 'Connection timeout', count: 6 },
-        { message: 'Invalid response format', count: 5 }
+        { message: 'Connection timeout', count: 6 }
       ],
       healthStatus: {
         supabase: true,
         hubspot: true,
-        unleashed: true,
-        n8n: false // Example: n8n is down
+        n8n: false
       }
     }
 
-    await slackAlerter.sendDailySummary(dailySummary, {
-      environment: 'production'
-    })
+    await slackAlerter.sendDailySummary(slackDailySummary)
 
-    await emailAlerter.sendDailySummary(dailySummary, {
-      environment: 'production'
-    })
+    await emailAlerter.sendDailySummary(emailDailySummary)
 
     console.log('✅ Daily summary sent\n')
 
@@ -259,11 +264,11 @@ async function main() {
     // ========================================
     console.log('7️⃣  Sending generic alert...\n')
 
-    await slackAlerter.sendAlert(
+    await slackAlerter.sendCriticalAlert(
       'Custom Alert',
       'This is a custom alert message with flexible content.',
       {
-        businessSlug: 'teelixir',
+        service: 'teelixir',
         metadata: {
           customField: 'value',
           timestamp: new Date().toISOString()

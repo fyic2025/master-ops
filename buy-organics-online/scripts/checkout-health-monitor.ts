@@ -1175,9 +1175,11 @@ async function saveHealthCheckResult(result: HealthCheckResult): Promise<void> {
       details: issue.details,
     }))
 
-    await supabase.from('boo_checkout_health_issues').insert(issuesToInsert).catch(() => {
+    try {
+      await supabase.from('boo_checkout_health_issues').insert(issuesToInsert)
+    } catch {
       // Table may not exist yet
-    })
+    }
   }
 }
 

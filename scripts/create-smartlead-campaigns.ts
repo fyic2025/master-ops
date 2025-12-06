@@ -491,7 +491,7 @@ async function createCampaignWithLeads() {
     console.log('✅ Smartlead API connected\n')
 
     // Get existing campaigns to avoid duplicates
-    const existingCampaigns = await smartleadClient.campaigns.list({ limit: 100 })
+    const existingCampaigns = await smartleadClient.campaigns.list()
     console.log(`📋 Found ${existingCampaigns.results.length} existing campaigns\n`)
 
     const campaigns = [

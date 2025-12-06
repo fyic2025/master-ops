@@ -75,7 +75,7 @@ async function main() {
   console.log(`  Action: ${deleteMode ? 'DELETE irrelevant' : 'MARK as not_relevant'}`)
   console.log('=================================================\n')
 
-  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+  const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_KEY!)
 
   // Get all pending rulings (ones that haven't been reviewed)
   const { data: rulings, error } = await supabase

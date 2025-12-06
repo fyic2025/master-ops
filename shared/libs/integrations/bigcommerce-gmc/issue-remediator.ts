@@ -213,7 +213,7 @@ export class IssueRemediator {
             {
               field: 'identifierExists',
               oldValue: undefined,
-              newValue: hasBrandMPN,
+              newValue: hasBrandMPN ? 'true' : 'false',
             },
           ],
         }

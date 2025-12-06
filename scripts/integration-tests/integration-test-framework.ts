@@ -170,7 +170,7 @@ export class IntegrationTestFramework {
 
       case 'oauth':
         const tokenResponse = await getOAuth2Token(this.config.auth.config)
-        this.authHeaders = oauth2BearerHeaders(tokenResponse.access_token)
+        this.authHeaders = oauth2BearerHeaders(tokenResponse.access_token) as unknown as Record<string, string>
         break
 
       case 'custom':

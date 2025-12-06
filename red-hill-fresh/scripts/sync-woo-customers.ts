@@ -25,12 +25,12 @@ class WooClient {
   private consumerSecret: string
 
   constructor() {
-    this.baseUrl = process.env.RHF_WOO_URL || 'https://redhillfresh.com.au'
-    this.consumerKey = process.env.RHF_WOO_CONSUMER_KEY || ''
-    this.consumerSecret = process.env.RHF_WOO_CONSUMER_SECRET || ''
+    this.baseUrl = process.env.REDHILLFRESH_WP_URL || 'https://redhillfresh.com.au'
+    this.consumerKey = process.env.REDHILLFRESH_WC_CONSUMER_KEY || ''
+    this.consumerSecret = process.env.REDHILLFRESH_WC_CONSUMER_SECRET || ''
 
     if (!this.consumerKey || !this.consumerSecret) {
-      throw new Error('Missing RHF_WOO_CONSUMER_KEY or RHF_WOO_CONSUMER_SECRET')
+      throw new Error('Missing REDHILLFRESH_WC_CONSUMER_KEY or REDHILLFRESH_WC_CONSUMER_SECRET')
     }
   }
 
@@ -54,16 +54,16 @@ class WooClient {
     return res.json()
   }
 
-  async getCustomers(page: number = 1, perPage: number = 100) {
+  async getCustomers(page: number = 1, perPage: number = 100): Promise<WooCustomer[]> {
     return this.request('customers', {
       page: String(page),
       per_page: String(perPage),
       orderby: 'registered_date',
       order: 'desc'
-    })
+    }) as Promise<WooCustomer[]>
   }
 
-  async getOrders(params: { page?: number; perPage?: number; after?: string } = {}) {
+  async getOrders(params: { page?: number; perPage?: number; after?: string } = {}): Promise<WooOrder[]> {
     const queryParams: Record<string, string> = {
       page: String(params.page || 1),
       per_page: String(params.perPage || 100),
@@ -73,7 +73,7 @@ class WooClient {
     if (params.after) {
       queryParams.after = params.after
     }
-    return this.request('orders', queryParams)
+    return this.request('orders', queryParams) as Promise<WooOrder[]>
   }
 }
 

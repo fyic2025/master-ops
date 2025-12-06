@@ -197,7 +197,9 @@ const CONTACT_PROPERTIES: PropertyDefinition[] = [
 // Script Logic
 // =============================================================================
 
-async function createProperty(objectType: string, property: PropertyDefinition, dryRun: boolean) {
+type HubSpotObjectType = 'contacts' | 'companies' | 'deals' | 'tickets'
+
+async function createProperty(objectType: HubSpotObjectType, property: PropertyDefinition, dryRun: boolean) {
   if (dryRun) {
     console.log(`[DRY RUN] Would create ${property.name} (${objectType})`)
     return { success: true, dryRun: true }

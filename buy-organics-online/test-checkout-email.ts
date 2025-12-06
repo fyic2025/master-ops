@@ -134,7 +134,7 @@ function encodeMessage(message: string): string {
     .replace(/=+$/, '')
 }
 
-async function sendTestEmail(accessToken: string): Promise<void> {
+async function sendTestEmail(accessToken: string): Promise<{ id: string; threadId: string }> {
   const timestamp = new Date().toLocaleString('en-AU', {
     timeZone: 'Australia/Sydney',
     dateStyle: 'full',
@@ -227,7 +227,7 @@ async function sendTestEmail(accessToken: string): Promise<void> {
     throw new Error(`Gmail API error: ${error}`)
   }
 
-  const result = await response.json()
+  const result = await response.json() as { id: string; threadId: string }
   return result
 }
 
@@ -239,7 +239,7 @@ async function main() {
     console.log('')
 
     console.log('Step 2: Sending test email...')
-    const result = await sendTestEmail(accessToken) as { id: string; threadId: string }
+    const result = await sendTestEmail(accessToken)
     console.log('  ✓ Email sent successfully!')
     console.log(`  Message ID: ${result.id}`)
     console.log(`  Thread ID: ${result.threadId}`)

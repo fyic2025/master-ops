@@ -719,7 +719,7 @@ async function syncAllFeeds(config: SyncConfig): Promise<void> {
   console.log(`  Feed filter: ${config.feedFilter || 'all'}`)
   console.log('=================================================\n')
 
-  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+  const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_KEY!)
 
   // Filter feeds if specified
   let feedsToSync = RSS_FEEDS

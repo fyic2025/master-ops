@@ -107,7 +107,7 @@ Focus on actionable insights, best practices, and reusable patterns.`;
   }
 
   // Extract JSON from the response
-  const jsonMatch = content.text.match(/\{[\s\S]*\}/);
+  const jsonMatch = content.text?.match(/\{[\s\S]*\}/);
   if (!jsonMatch) {
     throw new Error('Could not extract JSON from Claude response');
   }

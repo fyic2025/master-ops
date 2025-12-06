@@ -76,7 +76,7 @@ export class GoogleAdsSyncService {
       throw new Error(`Account not found for business: ${this.business}`)
     }
 
-    this.accountId = data.id
+    this.accountId = data.id as string
     return this.accountId
   }
 

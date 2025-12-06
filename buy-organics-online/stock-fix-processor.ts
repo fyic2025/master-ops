@@ -96,7 +96,7 @@ async function callBigCommerceAPI(
       body: JSON.stringify(data),
     })
 
-    const responseData = await response.json()
+    const responseData = await response.json() as { title?: string; errors?: string[] }
 
     if (!response.ok) {
       return {

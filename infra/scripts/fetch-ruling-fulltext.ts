@@ -267,7 +267,7 @@ async function fetchAllFullText(config: FetchConfig): Promise<void> {
   }
   console.log('=================================================\n')
 
-  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+  const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_KEY!)
 
   // Get rulings to fetch
   const rulings = await getRulingsToFetch(supabase, config)

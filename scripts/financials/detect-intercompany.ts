@@ -487,7 +487,7 @@ async function main() {
 
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    logger.error('Error in intercompany detection:', error);
+    logger.error('Error in intercompany detection', undefined, error instanceof Error ? error : new Error(errorMessage));
     console.error('Error:', errorMessage);
     process.exit(1);
   }

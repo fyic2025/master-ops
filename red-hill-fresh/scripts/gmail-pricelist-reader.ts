@@ -181,7 +181,7 @@ class RHFGmailClient {
       throw new Error(`Gmail search failed: ${response.status} ${await response.text()}`)
     }
 
-    return response.json()
+    return response.json() as Promise<{ messages: { id: string }[] }>
   }
 
   async getMessage(messageId: string): Promise<GmailMessage> {
@@ -195,7 +195,7 @@ class RHFGmailClient {
       throw new Error(`Failed to get message: ${response.status}`)
     }
 
-    return response.json()
+    return response.json() as Promise<GmailMessage>
   }
 
   async getAttachment(messageId: string, attachmentId: string): Promise<string> {
@@ -789,7 +789,7 @@ async function syncPricelists(config: SyncConfig): Promise<void> {
 
 // Helper to recursively find attachments in message parts
 function findAttachments(part: GmailMessage['payload'] | GmailPart, attachments: { filename: string; attachmentId: string }[]): void {
-  if (part.filename && part.body?.attachmentId) {
+  if ('filename' in part && part.filename && part.body?.attachmentId) {
     attachments.push({ filename: part.filename, attachmentId: part.body.attachmentId })
   }
   if (part.parts) {

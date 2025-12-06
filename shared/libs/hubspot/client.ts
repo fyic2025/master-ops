@@ -144,7 +144,8 @@ export class HubSpotClient {
             filters: [
               {
                 propertyName: 'email',
-                operator: 'EQ',
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                operator: 'EQ' as any,
                 value: email,
               },
             ],

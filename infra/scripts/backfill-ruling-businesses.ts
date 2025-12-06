@@ -161,7 +161,7 @@ async function backfillBusinessTags(config: BackfillConfig): Promise<void> {
   }
   console.log('=================================================\n')
 
-  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+  const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_KEY!)
 
   // Get rulings that need tagging (empty or null applicable_businesses)
   let query = supabase
