@@ -106,7 +106,7 @@ async function getAccessToken(): Promise<string> {
     throw new Error(`Failed to refresh access token: ${error}`)
   }
 
-  const data = await response.json()
+  const data = await response.json() as any
   return data.access_token
 }
 

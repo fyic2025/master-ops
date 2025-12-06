@@ -74,7 +74,7 @@ async function sendEmail(email: PendingEmail): Promise<boolean> {
   }
 
   // Build template data
-  const templateData = {
+  const templateData: Record<string, any> = {
     first_name: email.subscriber_first_name || 'there',
     email: email.email,
     subject: email.subject,

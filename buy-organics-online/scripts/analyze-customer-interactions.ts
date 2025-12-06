@@ -162,9 +162,9 @@ class CustomerAnalytics {
       const words = row.subject.toLowerCase()
         .replace(/[^a-z0-9\s]/g, ' ')
         .split(/\s+/)
-        .filter(w => w.length > 2 && !stopWords.has(w));
+        .filter((w: string) => w.length > 2 && !stopWords.has(w));
 
-      words.forEach(word => {
+      words.forEach((word: string) => {
         wordCounts[word] = (wordCounts[word] || 0) + 1;
       });
     });

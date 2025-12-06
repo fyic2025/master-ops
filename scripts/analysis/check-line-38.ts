@@ -11,12 +11,12 @@ async function checkLine38() {
   console.log('Line 38:', lines[37])
   console.log()
   console.log('Lines 35-42:')
-  lines.slice(34, 42).forEach((line, i) => {
+  lines.slice(34, 42).forEach((line: string, i: number) => {
     console.log(`${35+i}: ${line}`)
   })
   console.log()
   console.log('Searching for "crypto" references:')
-  lines.forEach((line, i) => {
+  lines.forEach((line: string, i: number) => {
     if (line.toLowerCase().includes('crypto')) {
       console.log(`Line ${i+1}: ${line}`)
     }

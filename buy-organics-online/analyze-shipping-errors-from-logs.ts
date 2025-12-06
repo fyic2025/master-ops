@@ -45,7 +45,7 @@ async function analyzeShippingErrors() {
       bySeverity[severityKey].push(log)
 
       // Check for errors
-      if (log.severity === 'errors' || log.message.toLowerCase().includes('error') || log.message.toLowerCase().includes('fail')) {
+      if (String(log.severity) === 'errors' || log.message.toLowerCase().includes('error') || log.message.toLowerCase().includes('fail')) {
         errorLogs.push(log)
 
         // Check for postcode-related errors

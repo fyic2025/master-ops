@@ -111,7 +111,7 @@ export async function getClientCredentialsToken(
     )
   }
 
-  const tokenData: OAuth2TokenResponse = await response.json()
+  const tokenData = await response.json() as OAuth2TokenResponse
   return tokenData
 }
 
@@ -202,7 +202,7 @@ export async function exchangeAuthorizationCode(
     )
   }
 
-  const tokenData: OAuth2TokenResponse = await response.json()
+  const tokenData = await response.json() as OAuth2TokenResponse
   return tokenData
 }
 
@@ -253,7 +253,7 @@ export async function refreshAccessToken(
     )
   }
 
-  const tokenData: OAuth2TokenResponse = await response.json()
+  const tokenData = await response.json() as OAuth2TokenResponse
   return tokenData
 }
 

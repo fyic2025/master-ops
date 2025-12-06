@@ -13,7 +13,11 @@ import {
   ChevronUp,
   Truck,
   Building2,
-  Calendar
+  Calendar,
+  XCircle,
+  EyeOff,
+  PackageX,
+  Zap
 } from 'lucide-react'
 
 // Date range options
@@ -41,6 +45,10 @@ interface DispatchProduct {
   review_status: 'pending' | 'reviewed' | 'resolved'
   review_notes: string | null
   analysis_date: string
+  validity_issue: 'not_found' | 'discontinued' | 'out_of_stock' | 'hidden' | null
+  is_valid_product: boolean
+  product_inventory: number | null
+  product_visible: boolean | null
 }
 
 interface DispatchData {
@@ -49,18 +57,27 @@ interface DispatchData {
   summary: {
     total_products: number
     needs_review: number
-    by_supplier: { name: string; count: number; total_orders: number }[]
+    invalid_products: number
+    hidden_by_smart_filters: number
+    by_supplier: { name: string; count: number; total_orders: number; invalid_count: number }[]
   }
   analysis_period: {
     weeks: number
     orders_analyzed: number
     analysis_date: string | null
   }
+  smart_filters: {
+    enabled: boolean
+    hidden_count: number
+    rules: string[]
+  }
 }
 
-async function fetchDispatchIssues(supplier: string): Promise<DispatchData> {
+async function fetchDispatchIssues(supplier: string, dateRange: string, smartFilters: boolean): Promise<DispatchData> {
   const params = new URLSearchParams()
   if (supplier !== 'all') params.set('supplier', supplier)
+  params.set('dateRange', dateRange)
+  params.set('smartFilters', String(smartFilters))
 
   const res = await fetch(`/api/dispatch-issues?${params}`)
   if (!res.ok) throw new Error('Failed to fetch')
@@ -90,6 +107,34 @@ function StatusBadge({ status }: { status: string }) {
     <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs ${c.bg} ${c.text}`}>
       <Icon className="w-3 h-3" />
       {status}
+    </span>
+  )
+}
+
+function ValidityBadge({ issue }: { issue: string | null }) {
+  if (!issue) {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs bg-green-500/20 text-green-400">
+        <CheckCircle className="w-3 h-3" />
+        Valid
+      </span>
+    )
+  }
+
+  const config: Record<string, { bg: string; text: string; icon: any; label: string }> = {
+    not_found: { bg: 'bg-red-500/20', text: 'text-red-400', icon: XCircle, label: 'Deleted' },
+    discontinued: { bg: 'bg-red-500/20', text: 'text-red-400', icon: PackageX, label: 'Discontinued' },
+    out_of_stock: { bg: 'bg-yellow-500/20', text: 'text-yellow-400', icon: PackageX, label: 'Out of Stock' },
+    hidden: { bg: 'bg-gray-500/20', text: 'text-gray-400', icon: EyeOff, label: 'Hidden' },
+  }
+
+  const c = config[issue] || { bg: 'bg-gray-500/20', text: 'text-gray-400', icon: AlertTriangle, label: issue }
+  const Icon = c.icon
+
+  return (
+    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs ${c.bg} ${c.text}`}>
+      <Icon className="w-3 h-3" />
+      {c.label}
     </span>
   )
 }
@@ -127,10 +172,11 @@ export default function StockPage() {
   const [dateRange, setDateRange] = useState('3m') // Default to 3 months
   const [sortColumn, setSortColumn] = useState<string>('recommended_stock')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
+  const [smartFilters, setSmartFilters] = useState(true) // Smart filters ON by default
 
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['dispatch-issues', selectedSupplier, dateRange],
-    queryFn: () => fetchDispatchIssues(selectedSupplier),
+    queryKey: ['dispatch-issues', selectedSupplier, dateRange, smartFilters],
+    queryFn: () => fetchDispatchIssues(selectedSupplier, dateRange, smartFilters),
   })
 
   const sortedProducts = useMemo(() => {
@@ -221,26 +267,46 @@ export default function StockPage() {
         </div>
       </div>
 
-      {/* Analysis info */}
-      {data?.analysis_period && (
-        <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-3 flex items-center gap-4 text-sm">
-          <span className="text-gray-400">
-            Analysis: <span className="text-white">{data.analysis_period.orders_analyzed.toLocaleString()} orders</span>
-          </span>
-          <span className="text-gray-600">|</span>
-          <span className="text-gray-400">
-            Period: <span className="text-white">{data.analysis_period.weeks} weeks</span>
-          </span>
-          {data.analysis_period.analysis_date && (
-            <>
-              <span className="text-gray-600">|</span>
-              <span className="text-gray-400">
-                Date: <span className="text-white">{new Date(data.analysis_period.analysis_date).toLocaleDateString()}</span>
-              </span>
-            </>
+      {/* Analysis info + Smart Filters */}
+      <div className="flex items-center justify-between gap-4">
+        {data?.analysis_period && (
+          <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-3 flex items-center gap-4 text-sm">
+            <span className="text-gray-400">
+              Analysis: <span className="text-white">{data.analysis_period.orders_analyzed.toLocaleString()} orders</span>
+            </span>
+            <span className="text-gray-600">|</span>
+            <span className="text-gray-400">
+              Period: <span className="text-white">{data.analysis_period.weeks} weeks</span>
+            </span>
+            {data.analysis_period.analysis_date && (
+              <>
+                <span className="text-gray-600">|</span>
+                <span className="text-gray-400">
+                  Date: <span className="text-white">{new Date(data.analysis_period.analysis_date).toLocaleDateString()}</span>
+                </span>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Smart Filters Toggle */}
+        <button
+          onClick={() => setSmartFilters(!smartFilters)}
+          className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm transition-all ${
+            smartFilters
+              ? 'bg-blue-500/20 border-blue-500 text-blue-400'
+              : 'bg-gray-800/50 border-gray-700 text-gray-400 hover:border-gray-600'
+          }`}
+        >
+          <Zap className="w-4 h-4" />
+          Smart Filters {smartFilters ? 'ON' : 'OFF'}
+          {smartFilters && data?.smart_filters?.hidden_count && data.smart_filters.hidden_count > 0 && (
+            <span className="ml-1 px-1.5 py-0.5 bg-blue-500/30 rounded text-xs">
+              {data.smart_filters.hidden_count} hidden
+            </span>
           )}
-        </div>
-      )}
+        </button>
+      </div>
 
       {/* Supplier filter cards */}
       {data?.summary?.by_supplier && (
@@ -276,7 +342,7 @@ export default function StockPage() {
 
       {/* Summary stats */}
       {data?.summary && (
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-4 gap-4">
           <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
             <p className="text-gray-400 text-sm">Total Products</p>
             <p className="text-2xl font-bold text-white">{sortedProducts.length}</p>
@@ -285,6 +351,12 @@ export default function StockPage() {
             <p className="text-yellow-400 text-sm">Needs Review</p>
             <p className="text-2xl font-bold text-yellow-400">
               {sortedProducts.filter(p => p.review_status === 'pending').length}
+            </p>
+          </div>
+          <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
+            <p className="text-red-400 text-sm">Invalid Products</p>
+            <p className="text-2xl font-bold text-red-400">
+              {sortedProducts.filter(p => p.validity_issue !== null).length}
             </p>
           </div>
           <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
@@ -318,20 +390,23 @@ export default function StockPage() {
                 <th className="text-right p-4 font-medium">
                   <SortHeader column="recommended_stock" label="Keep in Stock" />
                 </th>
+                <th className="text-center p-4 font-medium">
+                  <SortHeader column="validity_issue" label="Validity" />
+                </th>
                 <th className="text-center p-4 font-medium">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800">
               {isLoading ? (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-gray-400">
+                  <td colSpan={8} className="p-8 text-center text-gray-400">
                     <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2" />
                     Loading...
                   </td>
                 </tr>
               ) : sortedProducts.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-gray-400">
+                  <td colSpan={8} className="p-8 text-center text-gray-400">
                     No dispatch issues found
                   </td>
                 </tr>
@@ -368,6 +443,9 @@ export default function StockPage() {
                         {product.recommended_stock}
                       </span>
                       <span className="text-gray-500 text-xs ml-1">units</span>
+                    </td>
+                    <td className="p-4 text-center">
+                      <ValidityBadge issue={product.validity_issue} />
                     </td>
                     <td className="p-4 text-center">
                       <select
