@@ -86,6 +86,13 @@ temp/
 *.tmp
 *.temp
 .cache/
+temp-*
+tmp-*
+
+# Data files (should not be committed)
+*.xlsx
+*.xls
+*.csv
 
 # API Keys & Secrets
 *.key
