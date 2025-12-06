@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+}
 
 // WooCommerce REST API client
 async function wooRequest(endpoint: string, params: Record<string, string> = {}) {
@@ -52,7 +54,7 @@ export async function POST(request: NextRequest) {
     const action = body.action || 'sync'
 
     // Log sync start
-    await supabase.from('integration_logs').insert({
+    await getSupabase().from('integration_logs').insert({
       source: 'rhf',
       service: 'customer_sync',
       operation: 'sync_start',
@@ -64,7 +66,7 @@ export async function POST(request: NextRequest) {
 
     if (action === 'recalculate_rfm') {
       // Just recalculate RFM scores
-      const { error } = await supabase.rpc('rhf_calculate_rfm')
+      const { error } = await getSupabase().rpc('rhf_calculate_rfm')
 
       if (error) {
         throw new Error(`RFM calculation failed: ${error.message}`)
@@ -72,7 +74,7 @@ export async function POST(request: NextRequest) {
 
       const elapsed = Date.now() - startTime
 
-      await supabase.from('integration_logs').insert({
+      await getSupabase().from('integration_logs').insert({
         source: 'rhf',
         service: 'customer_sync',
         operation: 'rfm_recalculate',
@@ -173,12 +175,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Recalculate RFM
-    await supabase.rpc('rhf_calculate_rfm')
+    await getSupabase().rpc('rhf_calculate_rfm')
 
     const elapsed = Date.now() - startTime
 
     // Log success
-    await supabase.from('integration_logs').insert({
+    await getSupabase().from('integration_logs').insert({
       source: 'rhf',
       service: 'customer_sync',
       operation: 'sync_complete',
@@ -204,7 +206,7 @@ export async function POST(request: NextRequest) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
 
     // Log error
-    await supabase.from('integration_logs').insert({
+    await getSupabase().from('integration_logs').insert({
       source: 'rhf',
       service: 'customer_sync',
       operation: 'sync_error',

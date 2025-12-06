@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+}
 
 // Trigger pricelist sync - called by n8n on schedule
 export async function POST(request: NextRequest) {
@@ -25,7 +27,7 @@ export async function POST(request: NextRequest) {
     const supplier = body.supplier || 'all'
 
     // Log sync start
-    await supabase.from('integration_logs').insert({
+    await getSupabase().from('integration_logs').insert({
       source: 'rhf',
       service: 'pricelist_sync',
       operation: 'sync_start',
@@ -64,7 +66,7 @@ export async function POST(request: NextRequest) {
     const elapsed = Date.now() - startTime
 
     // Log success
-    await supabase.from('integration_logs').insert({
+    await getSupabase().from('integration_logs').insert({
       source: 'rhf',
       service: 'pricelist_sync',
       operation: 'sync_check',
@@ -89,7 +91,7 @@ export async function POST(request: NextRequest) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
 
     // Log error
-    await supabase.from('integration_logs').insert({
+    await getSupabase().from('integration_logs').insert({
       source: 'rhf',
       service: 'pricelist_sync',
       operation: 'sync_error',
