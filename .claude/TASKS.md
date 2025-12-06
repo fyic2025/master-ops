@@ -1379,3 +1379,7 @@ Run in Supabase SQL Editor: https://supabase.com/dashboard/project/usibnysqelovf
 ```sql
 -- File: infra/supabase/migrations/20251206_bc_availability_snapshots.sql
 ```
+
+### Session 874ec77e (2025-12-06 07:05 pm)
+- Exit reason: other
+- Pending tasks saved: 0
