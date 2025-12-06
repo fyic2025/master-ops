@@ -27,6 +27,7 @@ import {
   Boxes,
   Building2,
   FileText,
+  Link2,
   type LucideIcon
 } from 'lucide-react'
 
@@ -113,6 +114,7 @@ export const BUSINESSES: Record<BusinessCode, Business> = {
     navigation: [
       { name: 'Dashboard', href: '', icon: Home },
       { name: 'Orders', href: '/orders', icon: ShoppingCart },
+      { name: 'Product Matcher', href: '/product-matcher', icon: Link2 },
       { name: 'Accounting', href: '/accounting/bank-recon', icon: Building2 },
       { name: 'Automations', href: '/automations', icon: Zap },
       { name: 'Delivery Zones', href: '/delivery', icon: Truck },
