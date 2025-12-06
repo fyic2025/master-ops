@@ -21,11 +21,12 @@ tools:
 
 | System | Status | Notes |
 |--------|--------|-------|
-| Gmail Pricelist Sync | ✅ Built | n8n workflow needs activating |
-| Weekly Ordering API | ✅ Built | `/api/rhf/weekly-orders` |
+| Gmail Pricelist Sync | ✅ Built | n8n workflow Mon/Wed/Thu 6AM |
+| Weekly Ordering | ✅ Built | API + `generate-weekly-order.ts` |
+| Stock Management | ✅ Built | `receive-delivery.ts` + `wastage-log.ts` |
+| Margin Calculator | ✅ Built | `update-margins.ts` |
 | WooCommerce Sync | ⏳ Ready | Script ready, needs credentials loaded |
-| Database Schema | ⏳ Pending | Migration file ready, needs execution |
-| Specialist Agents | ❌ Placeholders | Need working scripts |
+| Database Schema | ⏳ Pending | Migration files ready, needs execution |
 
 ### Key Files
 
@@ -33,11 +34,12 @@ tools:
 |---------|------|
 | **Task List** | `.claude/TASKS-rhf-agent-enhancement.md` |
 | Gmail Reader | `red-hill-fresh/scripts/gmail-pricelist-reader.ts` |
-| WC Sync | `red-hill-fresh/scripts/sync-woocommerce.ts` |
-| Pricelist API | `dashboard/src/app/api/rhf/sync/pricelist/route.ts` |
+| Weekly Order | `red-hill-fresh/scripts/generate-weekly-order.ts` |
+| Receive Delivery | `red-hill-fresh/scripts/receive-delivery.ts` |
+| Margin Calculator | `red-hill-fresh/scripts/update-margins.ts` |
+| Wastage Tracker | `red-hill-fresh/scripts/wastage-log.ts` |
 | Orders API | `dashboard/src/app/api/rhf/weekly-orders/route.ts` |
 | n8n Workflow | `infra/n8n-workflows/rhf/rhf-pricelist-sync.json` |
-| DB Migration | `infra/supabase/migrations/COMBINED_20251206_all_pending.sql` |
 
 ---
 
@@ -205,6 +207,10 @@ node creds.js load redhillfresh
 | WooCommerce Sync | Sync all WC data to Supabase | `npx tsx red-hill-fresh/scripts/sync-woocommerce.ts` |
 | Customer Sync | Sync customers only | `npx tsx red-hill-fresh/scripts/sync-woo-customers.ts` |
 | Pricelist Reader | Read supplier pricelists from Gmail | `npx tsx red-hill-fresh/scripts/gmail-pricelist-reader.ts` |
+| Weekly Order | Generate orders from box contents | `npx tsx red-hill-fresh/scripts/generate-weekly-order.ts` |
+| Receive Delivery | Record delivery receipt & stock | `npx tsx red-hill-fresh/scripts/receive-delivery.ts` |
+| Update Margins | Calculate product margins | `npx tsx red-hill-fresh/scripts/update-margins.ts` |
+| Wastage Log | Track spoiled/expired produce | `npx tsx red-hill-fresh/scripts/wastage-log.ts` |
 
 ### WooCommerce MCP Server
 
@@ -276,6 +282,9 @@ RHF data is stored in the BOO Supabase project:
 | `rhf_boxes` | Box types for ordering |
 | `rhf_weekly_orders` | Weekly order headers |
 | `rhf_order_lines` | Order line items |
+| `rhf_stock_levels` | Current inventory with expiry dates |
+| `rhf_margins` | Product margin calculations |
+| `rhf_wastage_log` | Spoilage/write-off tracking |
 | `rhf_gmail_sync_log` | Email processing audit |
 | `rhf_product_mappings` | Supplier → WooCommerce product mapping |
 | `rhf_unit_weights` | Default weights (box → kg conversion) |
@@ -284,6 +293,9 @@ RHF data is stored in the BOO Supabase project:
 | View | Purpose |
 |------|---------|
 | `rhf_product_costs` | Calculated margins and cost per kg |
+| `v_rhf_margin_overview` | Product margin overview |
+| `v_rhf_wastage_summary` | Weekly wastage totals by reason |
+| `v_rhf_unmapped_products` | Supplier products needing mapping |
 
 ### Skills to Activate
 
