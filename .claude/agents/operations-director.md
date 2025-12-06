@@ -1,7 +1,7 @@
 ---
 name: operations-director
 description: Operations Director - Coordinates inventory, fulfillment, pricing, and supplier management across all businesses.
-model: sonnet
+model: haiku
 tools:
   - Read
   - Bash

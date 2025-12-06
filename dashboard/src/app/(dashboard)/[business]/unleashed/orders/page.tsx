@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import {
   ShoppingCart,
   Search,
@@ -16,6 +17,7 @@ import {
   XCircle,
   Pause,
   AlertCircle,
+  Plus,
 } from 'lucide-react';
 
 interface SalesOrder {
@@ -117,13 +119,22 @@ export default function UnleashedOrdersPage() {
               )}
             </p>
           </div>
-          <button
-            onClick={() => refetch()}
-            className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-all duration-200 font-medium shadow-lg shadow-blue-900/30"
-          >
-            <RefreshCw className="w-4 h-4" />
-            Refresh
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => refetch()}
+              className="flex items-center gap-2 px-4 py-2.5 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-all duration-200 font-medium"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Refresh
+            </button>
+            <Link
+              href={`/${business}/unleashed/orders/new`}
+              className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-all duration-200 font-medium shadow-lg shadow-blue-900/30"
+            >
+              <Plus className="w-4 h-4" />
+              New Order
+            </Link>
+          </div>
         </div>
       </div>
 

@@ -1,7 +1,7 @@
 ---
 name: growth-director
 description: Growth Director - Coordinates traffic, conversion, marketing, and customer acquisition across all businesses.
-model: sonnet
+model: haiku
 tools:
   - Read
   - Bash

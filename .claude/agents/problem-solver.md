@@ -1,7 +1,7 @@
 ---
 name: problem-solver
 description: Problem Solver Agent - First-line troubleshooter that attempts fixes before escalating to humans.
-model: sonnet
+model: haiku
 tools:
   - Read
   - Bash

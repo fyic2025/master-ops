@@ -280,6 +280,8 @@ Tasks moved here after completion for reference.
 - [x] **2025-12-05** TASK-33 Fix unleashed-order-sync n8n workflow | Fixed crypto module blocked by n8n security
 - [x] **2025-12-05** Anniversary Upsell automation LIVE | PM2 cron jobs deployed, 8am queue + hourly 9am-6pm sender
 - [x] **2025-12-05** Teelixir order sync cron jobs | MIN_ORDER_DATE Dec 1 2025 cutoff, Shopify→Unleashed 4AM, Unleashed B2B→Supabase 5AM
+- [x] **2025-12-06** CI/CD TypeScript fixes | Fixed 26 TypeScript errors across 21 files (type assertions, logger signatures, OAuth types, Supabase non-null assertions)
+- [x] **2025-12-06** BOO Supplier-BC Sync Automation LIVE | 7,776 links analyzed, 101 enabled, 3,389 inventory updated, clearance protection
 
 ---
 
@@ -1293,3 +1295,87 @@ Run in Supabase SQL Editor: https://supabase.com/dashboard/project/qcvfxxsnqvdfm
 ### Session 0677b57a (2025-12-06 01:52 pm)
 - Exit reason: other
 - Pending tasks saved: 0
+
+---
+
+## BOO Supplier-BC Sync Automation Notes
+
+**Status:** LIVE (2025-12-06)
+
+**Purpose:** Automates daily supplier stock → BigCommerce availability sync for Buy Organics Online.
+
+### Data Flow
+```
+Suppliers (UHP, Kadac, Oborne, Unleashed)
+    ↓ load-*.js scripts
+supplier_products table (Supabase)
+    ↓ link-products-to-suppliers.ts
+product_supplier_links table
+    ↓ update-bc-availability.js
+BigCommerce Store (availability + inventory updates)
+```
+
+### First Live Run Results (2025-12-06)
+- **7,776** product-supplier links analyzed
+- **101** products ENABLED (100% success)
+- **3,389** products inventory updated (4 BC API errors - 99.9% success)
+- **0** products DISABLED
+- **135** clearance items SKIPPED (protected)
+- **4,147** products no change needed
+- **2,408** margin warnings logged (informational only)
+
+### Business Rules
+
+**Clearance Item Detection (SKIPPED from auto-update):**
+- SKU starts with "Copy of" OR contains "sale" → SKIP
+- These are manually managed sale/clearance items
+
+**IMPORTANT: Margin Warnings ≠ Clearance**
+- Products where `sale_price > 8% below RRP` are flagged with margin warnings
+- This does NOT mean they are clearance items
+- Many products have 10% or 8% promotional discounts - this is normal pricing
+- Only SKU containing "Copy of" or "sale" indicates actual clearance
+- Margin warnings are informational for review, updates still proceed
+
+**Supplier Inventory Rules:**
+| Supplier | When stock > 0 | When stock = 0 |
+|----------|----------------|----------------|
+| UHP | inventory = 1000 | availability = disabled |
+| Oborne | inventory = 1000 | availability = disabled |
+| Kadac | inventory = 1000 | availability = disabled |
+| Unleashed | inventory = actual | availability = disabled |
+| Elevate | inventory = actual | availability = disabled |
+
+### Safety Checks
+1. **Stale Data Protection:** Skip if supplier data > 24 hours old
+2. **Anomaly Detection:** Stop if > 500 products would be disabled at once
+3. **Supplier Wipe Detection:** Stop if > 80% of a supplier's products would be disabled
+4. **Pre-Update Snapshots:** Every run saves rollback data to `bc_availability_snapshots`
+
+### Key Files
+- `buy-organics-online/update-bc-availability.js` - Main BC update script
+- `buy-organics-online/link-products-to-suppliers.ts` - Product linker
+- `dashboard/scripts/boo/sync-all-suppliers.js` - Orchestrator
+- `dashboard/scripts/boo/load-*.js` - Individual supplier loaders
+
+### PM2 Deployment (Droplet 134.199.175.243)
+```bash
+# Run supplier sync + BC update
+pm2 start dashboard/scripts/boo/sync-all-suppliers.js \
+  --name boo-supplier-sync \
+  --cron '0 22,10 * * *' \
+  --no-autorestart
+pm2 save
+```
+
+### Database Tables
+- `supplier_products` - Raw supplier catalog data
+- `product_supplier_links` - BC product ↔ supplier SKU mappings
+- `ecommerce_products` - BC product cache (synced via bc-product-sync)
+- `bc_availability_snapshots` - Pre-update rollback data
+
+### Migration Required
+Run in Supabase SQL Editor: https://supabase.com/dashboard/project/usibnysqelovfuctmkqw/sql/new
+```sql
+-- File: infra/supabase/migrations/20251206_bc_availability_snapshots.sql
+```

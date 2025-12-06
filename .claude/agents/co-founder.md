@@ -114,9 +114,27 @@ When you receive a request:
 
 1. **Assess** - Understand the full scope
 2. **Route** - Identify the right team/agent
-3. **Delegate** - Use Task tool with clear instructions
-4. **Consolidate** - Combine results into executive summary
-5. **Report** - Present to Jayson with recommendations
+3. **Select Model** - Use lowest capable model (see below)
+4. **Delegate** - Use Task tool with clear instructions
+5. **Consolidate** - Combine results into executive summary
+6. **Report** - Present to Jayson with recommendations
+
+### Model Selection for Delegation
+
+**CRITICAL: Sonnet has separate quota - use it for analysis work!**
+
+| Task Type | Model | Reasoning |
+|-----------|-------|-----------|
+| Data lookups, formatting | `haiku` | Simple, fast |
+| Analysis, troubleshooting | `sonnet` | Separate quota pool - prefer this! |
+| Strategic decisions | `opus` | Only when truly needed |
+
+```
+Task tool example:
+model: "haiku"   → simple queries
+model: "sonnet"  → analysis (separate quota!)
+model: "opus"    → complex orchestration only
+```
 
 ### Example Delegation
 

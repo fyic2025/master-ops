@@ -34,12 +34,46 @@ All agents are defined in: `.claude/agents/`
 | Agent | File | Model | Purpose |
 |-------|------|-------|---------|
 | **Co-Founder** | `co-founder.md` | Opus | Strategic orchestrator, single point of contact |
-| **Growth Director** | `growth-director.md` | Sonnet | Traffic, conversion, marketing coordination |
-| **Operations Director** | `operations-director.md` | Sonnet | Inventory, fulfillment, suppliers, pricing |
+| **Growth Director** | `growth-director.md` | Haiku/Sonnet | Traffic, conversion, marketing coordination |
+| **Operations Director** | `operations-director.md` | Haiku/Sonnet | Inventory, fulfillment, suppliers, pricing |
 | **Strategic Initiatives** | `strategic-initiatives.md` | Sonnet | Business opportunity evaluation (70/100 threshold) |
 | **Product Launch** | `product-launch.md` | Sonnet | Product research for Teelixir/Elevate own-brand |
-| **Continuous Improvement** | `continuous-improvement.md` | Haiku/Sonnet | QA, log analysis, prompt optimization |
-| **Problem Solver** | `problem-solver.md` | Sonnet | First-line troubleshooter (3 tries before escalation) |
+| **Continuous Improvement** | `continuous-improvement.md` | Haiku | QA, log analysis, prompt optimization |
+| **Problem Solver** | `problem-solver.md` | Haiku/Sonnet | First-line troubleshooter (3 tries before escalation) |
+
+### Model Selection Guide
+
+**CRITICAL: Preserve Opus quota - Sonnet has separate (underused) limit!**
+
+| Model | Quota | Use When |
+|-------|-------|----------|
+| **Haiku** | Shared | Simple lookups, data retrieval, formatting, single-step tasks |
+| **Sonnet** | **Separate pool** | Analysis, judgment, multi-step workflows - USE THIS MORE |
+| **Opus** | Shared (expensive) | Only when strategic reasoning truly required |
+
+**Decision tree:**
+```
+Can Haiku handle this? → Use Haiku
+Can Sonnet handle this? → Use Sonnet (separate quota!)
+Only if truly complex → Opus
+```
+
+**When spawning agents via Task tool:**
+- Default to `model: "haiku"` for straightforward tasks
+- **Prefer `model: "sonnet"` for analysis** - separate quota pool!
+- Reserve `model: "opus"` only when lesser models would fail
+
+### Usage Limit Awareness
+
+**Quota reality:**
+- Opus shares the "All models" weekly limit (gets exhausted fast)
+- Sonnet has its own separate limit (often underutilized)
+- Haiku is cheap but shares the pool
+
+**Strategy:**
+1. Route analysis/judgment work to Sonnet (tap the unused quota)
+2. Use Haiku for simple data lookups
+3. Save Opus for orchestration that truly needs it
 
 ### Escalation Chain
 ```
