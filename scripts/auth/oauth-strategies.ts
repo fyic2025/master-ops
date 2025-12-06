@@ -57,6 +57,7 @@ export interface OAuth2TokenResponse {
 export interface OAuth2Headers {
   Authorization: string
   'Content-Type': string
+  [key: string]: string
 }
 
 // ============================================================================

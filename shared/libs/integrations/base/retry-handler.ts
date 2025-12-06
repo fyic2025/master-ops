@@ -11,7 +11,7 @@
  * ```
  */
 
-import { logger } from '../../logger'
+import { logger, type LogContext } from '../../logger'
 
 export interface RetryConfig {
   maxRetries?: number // Maximum number of retry attempts (default: 3)
@@ -114,7 +114,7 @@ export class RetryHandler {
               maxRetries: this.config.maxRetries,
               error: lastError.message,
             },
-          }, lastError)
+          } as LogContext, lastError)
           throw lastError
         }
 
@@ -126,7 +126,7 @@ export class RetryHandler {
               attempt,
               error: lastError.message,
             },
-          }, lastError)
+          } as LogContext, lastError)
           throw lastError
         }
 
@@ -141,7 +141,7 @@ export class RetryHandler {
             delay,
             error: lastError.message,
           },
-        })
+        } as LogContext)
 
         await this.sleep(delay)
       }
@@ -182,7 +182,7 @@ export class RetryHandler {
         logger.warn('Retrying with custom condition', {
           ...context,
           metadata: { attempt, delay },
-        })
+        } as LogContext)
         await this.sleep(delay)
       }
     }

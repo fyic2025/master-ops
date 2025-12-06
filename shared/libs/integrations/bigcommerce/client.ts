@@ -675,6 +675,14 @@ class BigCommerceConnector extends BaseConnector {
       // Add rate limiter metrics if available
     }
   }
+
+  /**
+   * Perform health check (required by BaseConnector)
+   */
+  protected async performHealthCheck(): Promise<void> {
+    // Simple health check - verify we can connect to the store
+    await this.products.count()
+  }
 }
 
 // Export class for custom instances

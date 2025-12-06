@@ -553,6 +553,13 @@ export class GMCProductWriter extends BaseConnector {
       }
     }
   }
+
+  /**
+   * Perform health check (required by BaseConnector)
+   */
+  protected async performHealthCheck(): Promise<void> {
+    await this.getAccessToken()
+  }
 }
 
 // ============================================================================

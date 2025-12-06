@@ -181,6 +181,34 @@ declare module '@modelcontextprotocol/sdk/types.js' {
   export const ReadResourceRequestSchema: any
   export const ListPromptsRequestSchema: any
   export const GetPromptRequestSchema: any
+  export interface Tool {
+    name: string
+    description: string
+    inputSchema: Record<string, any>
+  }
+}
+
+// Internal Gmail integration module (placeholder)
+declare module '*/shared/libs/integrations/gmail' {
+  export interface GmailSendOptions {
+    to: string
+    subject: string
+    body?: string
+    html?: string
+  }
+  export interface GmailSendResult {
+    id: string
+    threadId: string
+    messageId: string
+    success: boolean
+    error?: string
+  }
+  export interface GmailClient {
+    send(options: GmailSendOptions): Promise<GmailSendResult>
+    getInfo(): { email: string; connected: boolean; isConfigured: boolean; fromName: string; userEmail: string }
+    healthCheck(): Promise<{ healthy: boolean; status: string; error?: string; email: string }>
+  }
+  export const gmailClient: GmailClient
 }
 
 // zod module (basic declarations)
