@@ -17,8 +17,11 @@ import {
   XCircle,
   EyeOff,
   PackageX,
-  Zap
+  Zap,
+  Square,
+  CheckSquare
 } from 'lucide-react'
+import { StockQueueButton, StockCopyToClaudeButton, StockBulkActions, StockQueueStatus } from '@/components/stock'
 
 // Date range options
 const DATE_RANGES = [
@@ -49,6 +52,7 @@ interface DispatchProduct {
   is_valid_product: boolean
   product_inventory: number | null
   product_visible: boolean | null
+  fix_status?: 'none' | 'queued' | 'processing' | 'fixed' | 'failed'
 }
 
 interface DispatchData {
@@ -173,6 +177,7 @@ export default function StockPage() {
   const [sortColumn, setSortColumn] = useState<string>('recommended_stock')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
   const [smartFilters, setSmartFilters] = useState(true) // Smart filters ON by default
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['dispatch-issues', selectedSupplier, dateRange, smartFilters],
@@ -206,6 +211,29 @@ export default function StockPage() {
     await updateProductStatus(id, newStatus)
     refetch()
   }
+
+  // Selection handlers
+  const toggleSelectAll = () => {
+    if (selectedIds.size === sortedProducts.length) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(sortedProducts.map(p => p.id)))
+    }
+  }
+
+  const toggleSelect = (id: number) => {
+    const newSelected = new Set(selectedIds)
+    if (newSelected.has(id)) {
+      newSelected.delete(id)
+    } else {
+      newSelected.add(id)
+    }
+    setSelectedIds(newSelected)
+  }
+
+  const clearSelection = () => setSelectedIds(new Set())
+
+  const selectedProducts = sortedProducts.filter(p => selectedIds.has(p.id))
 
   const SortHeader = ({ column, label }: { column: string; label: string }) => (
     <button
@@ -368,101 +396,162 @@ export default function StockPage() {
         </div>
       )}
 
-      {/* Products table */}
-      <div className="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-800/50 text-gray-400 text-sm">
-              <tr>
-                <th className="text-left p-4 font-medium">
-                  <SortHeader column="product_name" label="Product" />
-                </th>
-                <th className="text-left p-4 font-medium">SKU</th>
-                <th className="text-left p-4 font-medium">
-                  <SortHeader column="supplier_name" label="Supplier" />
-                </th>
-                <th className="text-right p-4 font-medium">
-                  <SortHeader column="orders_per_week" label="Orders/Week" />
-                </th>
-                <th className="text-right p-4 font-medium">
-                  <SortHeader column="avg_dispatch_days" label="Avg Delay" />
-                </th>
-                <th className="text-right p-4 font-medium">
-                  <SortHeader column="recommended_stock" label="Keep in Stock" />
-                </th>
-                <th className="text-center p-4 font-medium">
-                  <SortHeader column="validity_issue" label="Validity" />
-                </th>
-                <th className="text-center p-4 font-medium">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-800">
-              {isLoading ? (
+      {/* Bulk actions toolbar - shown when items selected */}
+      {selectedProducts.length > 0 && (
+        <StockBulkActions
+          selectedProducts={selectedProducts}
+          onAction={() => {
+            refetch()
+            clearSelection()
+          }}
+          onClearSelection={clearSelection}
+        />
+      )}
+
+      {/* Main content with table and queue status sidebar */}
+      <div className="flex gap-6">
+        {/* Products table */}
+        <div className="flex-1 bg-gray-900 border border-gray-800 rounded-lg overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-800/50 text-gray-400 text-sm">
                 <tr>
-                  <td colSpan={8} className="p-8 text-center text-gray-400">
-                    <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2" />
-                    Loading...
-                  </td>
+                  <th className="w-10 p-4">
+                    <button
+                      onClick={toggleSelectAll}
+                      className="p-1 hover:bg-gray-700 rounded transition-colors"
+                    >
+                      {selectedIds.size === sortedProducts.length && sortedProducts.length > 0 ? (
+                        <CheckSquare className="w-4 h-4 text-blue-400" />
+                      ) : (
+                        <Square className="w-4 h-4" />
+                      )}
+                    </button>
+                  </th>
+                  <th className="text-left p-4 font-medium">
+                    <SortHeader column="product_name" label="Product" />
+                  </th>
+                  <th className="text-left p-4 font-medium">SKU</th>
+                  <th className="text-left p-4 font-medium">
+                    <SortHeader column="supplier_name" label="Supplier" />
+                  </th>
+                  <th className="text-right p-4 font-medium">
+                    <SortHeader column="orders_per_week" label="Orders/Week" />
+                  </th>
+                  <th className="text-right p-4 font-medium">
+                    <SortHeader column="avg_dispatch_days" label="Avg Delay" />
+                  </th>
+                  <th className="text-right p-4 font-medium">
+                    <SortHeader column="recommended_stock" label="Keep in Stock" />
+                  </th>
+                  <th className="text-center p-4 font-medium">
+                    <SortHeader column="validity_issue" label="Validity" />
+                  </th>
+                  <th className="text-center p-4 font-medium">Status</th>
+                  <th className="text-center p-4 font-medium">Actions</th>
                 </tr>
-              ) : sortedProducts.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="p-8 text-center text-gray-400">
-                    No dispatch issues found
-                  </td>
-                </tr>
-              ) : (
-                sortedProducts.map(product => (
-                  <tr key={product.id} className="hover:bg-gray-800/30">
-                    <td className="p-4">
-                      <div className="max-w-xs">
-                        <p className="text-white text-sm font-medium truncate" title={product.product_name}>
-                          {product.product_name}
-                        </p>
-                      </div>
-                    </td>
-                    <td className="p-4 text-gray-400 text-sm font-mono">
-                      {product.sku}
-                    </td>
-                    <td className="p-4 text-gray-300 text-sm">
-                      {product.supplier_name}
-                    </td>
-                    <td className="p-4 text-right text-white font-medium">
-                      {product.orders_per_week}
-                    </td>
-                    <td className="p-4 text-right">
-                      <span className={`font-medium ${
-                        product.avg_dispatch_days > 7 ? 'text-red-400' :
-                        product.avg_dispatch_days > 5 ? 'text-yellow-400' :
-                        'text-gray-300'
-                      }`}>
-                        {product.avg_dispatch_days} days
-                      </span>
-                    </td>
-                    <td className="p-4 text-right">
-                      <span className="text-lg font-bold text-green-400">
-                        {product.recommended_stock}
-                      </span>
-                      <span className="text-gray-500 text-xs ml-1">units</span>
-                    </td>
-                    <td className="p-4 text-center">
-                      <ValidityBadge issue={product.validity_issue} />
-                    </td>
-                    <td className="p-4 text-center">
-                      <select
-                        value={product.review_status}
-                        onChange={(e) => handleStatusChange(product.id, e.target.value)}
-                        className="bg-gray-800 border border-gray-700 rounded px-2 py-1 text-xs text-gray-300"
-                      >
-                        <option value="pending">Pending</option>
-                        <option value="reviewed">Reviewed</option>
-                        <option value="resolved">Resolved</option>
-                      </select>
+              </thead>
+              <tbody className="divide-y divide-gray-800">
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={10} className="p-8 text-center text-gray-400">
+                      <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2" />
+                      Loading...
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : sortedProducts.length === 0 ? (
+                  <tr>
+                    <td colSpan={10} className="p-8 text-center text-gray-400">
+                      No dispatch issues found
+                    </td>
+                  </tr>
+                ) : (
+                  sortedProducts.map(product => (
+                    <tr
+                      key={product.id}
+                      className={`hover:bg-gray-800/30 ${selectedIds.has(product.id) ? 'bg-blue-500/10' : ''}`}
+                    >
+                      <td className="p-4">
+                        <button
+                          onClick={() => toggleSelect(product.id)}
+                          className="p-1 hover:bg-gray-700 rounded transition-colors"
+                        >
+                          {selectedIds.has(product.id) ? (
+                            <CheckSquare className="w-4 h-4 text-blue-400" />
+                          ) : (
+                            <Square className="w-4 h-4 text-gray-500" />
+                          )}
+                        </button>
+                      </td>
+                      <td className="p-4">
+                        <div className="max-w-xs">
+                          <p className="text-white text-sm font-medium truncate" title={product.product_name}>
+                            {product.product_name}
+                          </p>
+                        </div>
+                      </td>
+                      <td className="p-4 text-gray-400 text-sm font-mono">
+                        {product.sku}
+                      </td>
+                      <td className="p-4 text-gray-300 text-sm">
+                        {product.supplier_name}
+                      </td>
+                      <td className="p-4 text-right text-white font-medium">
+                        {product.orders_per_week}
+                      </td>
+                      <td className="p-4 text-right">
+                        <span className={`font-medium ${
+                          product.avg_dispatch_days > 7 ? 'text-red-400' :
+                          product.avg_dispatch_days > 5 ? 'text-yellow-400' :
+                          'text-gray-300'
+                        }`}>
+                          {product.avg_dispatch_days} days
+                        </span>
+                      </td>
+                      <td className="p-4 text-right">
+                        <span className="text-lg font-bold text-green-400">
+                          {product.recommended_stock}
+                        </span>
+                        <span className="text-gray-500 text-xs ml-1">units</span>
+                      </td>
+                      <td className="p-4 text-center">
+                        <ValidityBadge issue={product.validity_issue} />
+                      </td>
+                      <td className="p-4 text-center">
+                        <select
+                          value={product.review_status}
+                          onChange={(e) => handleStatusChange(product.id, e.target.value)}
+                          className="bg-gray-800 border border-gray-700 rounded px-2 py-1 text-xs text-gray-300"
+                        >
+                          <option value="pending">Pending</option>
+                          <option value="reviewed">Reviewed</option>
+                          <option value="resolved">Resolved</option>
+                        </select>
+                      </td>
+                      <td className="p-4 text-center">
+                        <div className="flex items-center justify-center gap-1">
+                          <StockQueueButton
+                            product={product}
+                            compact
+                            onQueued={() => refetch()}
+                          />
+                          <StockCopyToClaudeButton
+                            products={[product]}
+                            compact
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Queue Status Sidebar */}
+        <div className="w-72 shrink-0">
+          <StockQueueStatus />
         </div>
       </div>
 
