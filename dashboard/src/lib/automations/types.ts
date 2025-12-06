@@ -74,7 +74,7 @@ export interface AutomationDefinition {
   slug: string
   name: string
   description: string
-  category: 'email' | 'sync' | 'notification' | 'report'
+  category: 'email' | 'sync' | 'notification' | 'report' | 'monitoring'
   icon: string  // Lucide icon name
   supportedBusinesses: BusinessCode[]
 
