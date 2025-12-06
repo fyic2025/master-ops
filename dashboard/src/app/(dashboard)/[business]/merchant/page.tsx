@@ -11,6 +11,7 @@ import {
   Play, Zap, CheckCheck, RotateCcw
 } from 'lucide-react'
 import DateRangeSelector, { DateRange, getDatePresets, getCompareRange } from '@/components/DateRangeSelector'
+import { GMCFixSingleButton } from '@/components/merchant/GMCFixButton'
 
 // Types
 interface MerchantSummary {
@@ -574,6 +575,33 @@ ${issueText}`
               <RotateCcw className="w-3 h-3" />
               Reset All
             </button>
+            <button
+              onClick={async () => {
+                try {
+                  const response = await fetch('/api/merchant/fix', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      action: 'generate-prompt',
+                      business
+                    })
+                  })
+                  const data = await response.json()
+                  if (data.success && data.prompt) {
+                    await navigator.clipboard.writeText(data.prompt)
+                    setSyncMessage({ type: 'success', text: 'Fix prompts copied to clipboard!' })
+                    setTimeout(() => setSyncMessage(null), 3000)
+                  }
+                } catch (err) {
+                  console.error('Failed to copy prompts:', err)
+                }
+              }}
+              className="flex items-center gap-2 px-3 py-1.5 text-xs bg-purple-900/50 text-purple-400 hover:bg-purple-800/50 rounded transition-colors"
+              title="Copy fix prompts for Claude Code"
+            >
+              <Copy className="w-3 h-3" />
+              Copy Fix Prompts ({auditData.issues.filter(i => i.status === 'pending').length})
+            </button>
             <div className="flex-1" />
             <span className="text-xs text-gray-500">
               {auditData.summary.by_status.pending} pending · {auditData.summary.by_status.fixed} fixed · {auditData.summary.by_status.verified} verified
@@ -638,6 +666,24 @@ ${issueText}`
                       {formatNumber(issue.total_impressions)}
                     </div>
                     <div className="col-span-2 flex justify-center gap-1">
+                      {/* Copy Fix Prompt Button */}
+                      <GMCFixSingleButton
+                        issue={{
+                          issue_code: issue.issue_code,
+                          severity: issue.severity,
+                          description: issue.description,
+                          resolution: issue.resolution,
+                          product_count: issue.product_count,
+                          total_impressions: issue.total_impressions,
+                          total_clicks: issue.total_clicks,
+                          fixability: issue.fixability,
+                          status: issue.status
+                        }}
+                        products={issue.products || []}
+                        business={business}
+                        compact={true}
+                        onFixStarted={() => fetchAudit()}
+                      />
                       {issue.status === 'pending' && (
                         <button
                           onClick={(e) => {
