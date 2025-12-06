@@ -18,6 +18,9 @@ interface CicdIssue {
   occurrence_count: number
   source: string
   branch: string
+  fix_status: 'pending' | 'in_progress' | 'failed' | 'resolved'
+  fix_attempt_count: number
+  last_fix_attempt_at: string | null
 }
 
 interface CicdStats {
