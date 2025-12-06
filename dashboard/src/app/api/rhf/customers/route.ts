@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-const supabase = createClient(
+function getSupabase() {
+  return createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
 )
 
 export async function GET(request: NextRequest) {
@@ -15,7 +17,7 @@ export async function GET(request: NextRequest) {
 
   try {
     // Build query
-    let query = supabase
+    let query = getSupabase()
       .from('rhf_customers')
       .select('*')
       .gt('order_count', 0)
@@ -39,7 +41,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get segment summary
-    const { data: allCustomers } = await supabase
+    const { data: allCustomers } = await getSupabase()
       .from('rhf_customers')
       .select('customer_segment, total_spent')
       .gt('order_count', 0)
@@ -84,7 +86,7 @@ export async function POST(request: NextRequest) {
     const { action } = await request.json()
 
     if (action === 'recalculate_rfm') {
-      const { error } = await supabase.rpc('rhf_calculate_rfm')
+      const { error } = await getSupabase().rpc('rhf_calculate_rfm')
       if (error) {
         return NextResponse.json({ error: error.message }, { status: 500 })
       }

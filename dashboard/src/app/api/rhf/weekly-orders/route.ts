@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+}
 
 // Get current week's Monday
 function getWeekStart(date: Date = new Date()): string {
@@ -21,21 +23,21 @@ export async function GET(request: NextRequest) {
 
   try {
     // Get suppliers
-    const { data: suppliers } = await supabase
+    const { data: suppliers } = await getSupabase()
       .from('rhf_suppliers')
       .select('id, name, code')
       .eq('active', true)
       .order('name')
 
     // Get box types
-    const { data: boxes } = await supabase
+    const { data: boxes } = await getSupabase()
       .from('rhf_boxes')
       .select('*')
       .eq('is_active', true)
       .order('sort_order')
 
     // Get existing orders for this week
-    const { data: orders } = await supabase
+    const { data: orders } = await getSupabase()
       .from('rhf_weekly_orders')
       .select(`
         *,
@@ -45,7 +47,7 @@ export async function GET(request: NextRequest) {
 
     // Get order lines
     const orderIds = orders?.map(o => o.id) || []
-    const { data: orderLines } = await supabase
+    const { data: orderLines } = await getSupabase()
       .from('rhf_order_lines')
       .select(`
         *,
@@ -54,7 +56,7 @@ export async function GET(request: NextRequest) {
       .in('order_id', orderIds.length > 0 ? orderIds : ['00000000-0000-0000-0000-000000000000'])
 
     // Get latest available products from each supplier
-    const { data: availableProducts } = await supabase
+    const { data: availableProducts } = await getSupabase()
       .from('rhf_supplier_products')
       .select(`
         id,
@@ -127,7 +129,7 @@ export async function POST(request: NextRequest) {
     const total = subtotal + gst
 
     // Upsert the order
-    const { data: order, error: orderError } = await supabase
+    const { data: order, error: orderError } = await getSupabase()
       .from('rhf_weekly_orders')
       .upsert({
         supplier_id,
@@ -149,13 +151,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Delete existing lines and insert new ones
-    await supabase
+    await getSupabase()
       .from('rhf_order_lines')
       .delete()
       .eq('order_id', order.id)
 
     if (lines.length > 0) {
-      const { error: linesError } = await supabase
+      const { error: linesError } = await getSupabase()
         .from('rhf_order_lines')
         .insert(lines.map((line: any) => ({
           order_id: order.id,
@@ -185,7 +187,7 @@ export async function PATCH(request: NextRequest) {
     const body = await request.json()
     const { order_id, status } = body
 
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('rhf_weekly_orders')
       .update({
         status,

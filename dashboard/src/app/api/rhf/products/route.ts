@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-const supabase = createClient(
+function getSupabase() {
+  return createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
 )
 
 export async function GET(request: NextRequest) {
@@ -15,14 +17,14 @@ export async function GET(request: NextRequest) {
 
   try {
     // Get suppliers
-    const { data: suppliers } = await supabase
+    const { data: suppliers } = await getSupabase()
       .from('rhf_suppliers')
       .select('id, name, code')
       .eq('active', true)
       .order('name')
 
     // Build supplier products query - get latest products from most recent pricelist
-    let query = supabase
+    let query = getSupabase()
       .from('rhf_supplier_products')
       .select(`
         id,
@@ -63,7 +65,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get existing mappings
-    const { data: mappings } = await supabase
+    const { data: mappings } = await getSupabase()
       .from('rhf_product_mappings')
       .select('supplier_product_id')
 
@@ -139,7 +141,7 @@ export async function POST(request: NextRequest) {
     let cost_per_sell_unit = null
     if (supplier_unit_kg && supplier_unit_kg > 0) {
       // Get supplier product price
-      const { data: sp } = await supabase
+      const { data: sp } = await getSupabase()
         .from('rhf_supplier_products')
         .select('cost_price')
         .eq('id', supplier_product_id)
@@ -151,7 +153,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Upsert the mapping
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('rhf_product_mappings')
       .upsert({
         supplier_product_id,
@@ -190,7 +192,7 @@ export async function DELETE(request: NextRequest) {
   }
 
   try {
-    const { error } = await supabase
+    const { error } = await getSupabase()
       .from('rhf_product_mappings')
       .delete()
       .eq('id', mappingId)

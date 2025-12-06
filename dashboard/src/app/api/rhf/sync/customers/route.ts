@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
 
       for (const order of orders) {
         // Upsert order
-        const { error: orderError } = await supabase
+        const { error: orderError } = await getSupabase()
           .from('rhf_woo_orders')
           .upsert({
             woo_id: order.id,
@@ -137,12 +137,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Update customer stats for affected customers
-    const { data: customers } = await supabase
+    const { data: customers } = await getSupabase()
       .from('rhf_customers')
       .select('id, woo_id')
 
     for (const customer of customers || []) {
-      const { data: orders } = await supabase
+      const { data: orders } = await getSupabase()
         .from('rhf_woo_orders')
         .select('total, date_created')
         .eq('woo_customer_id', customer.woo_id)
@@ -158,7 +158,7 @@ export async function POST(request: NextRequest) {
           (Date.now() - new Date(lastOrderDate).getTime()) / (1000 * 60 * 60 * 24)
         )
 
-        const { error: updateError } = await supabase
+        const { error: updateError } = await getSupabase()
           .from('rhf_customers')
           .update({
             order_count: orderCount,
@@ -224,7 +224,7 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   try {
     // Get segment summary
-    const { data: customers } = await supabase
+    const { data: customers } = await getSupabase()
       .from('rhf_customers')
       .select('customer_segment, total_spent')
       .gt('order_count', 0)
@@ -246,7 +246,7 @@ export async function GET() {
     })
 
     // Get latest sync logs
-    const { data: logs } = await supabase
+    const { data: logs } = await getSupabase()
       .from('integration_logs')
       .select('*')
       .eq('source', 'rhf')
