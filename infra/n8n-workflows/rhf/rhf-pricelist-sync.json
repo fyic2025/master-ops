@@ -9,17 +9,17 @@
               "triggerAtHour": 6,
               "triggerAtMinute": 0,
               "field": "cronExpression",
-              "expression": "0 6 * * 1,4"
+              "expression": "0 6 * * 1,3,4"
             }
           ]
         }
       },
       "id": "schedule-trigger",
-      "name": "Mon/Thu 6AM AEST",
+      "name": "Mon/Wed/Thu 6AM AEST",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [250, 300],
-      "notes": "Runs Mon & Thu at 6am to fetch supplier pricelists before ordering"
+      "notes": "Runs Mon/Wed/Thu at 6am to fetch supplier pricelists before ordering"
     },
     {
       "parameters": {
@@ -185,7 +185,7 @@
       ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1",
     "saveManualExecutions": true,

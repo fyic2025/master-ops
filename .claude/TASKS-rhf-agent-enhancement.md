@@ -56,8 +56,8 @@ Status: In Progress
 ## To Do - Co-Founder (Remote Tasks)
 
 ### High Priority
-- [ ] **Activate n8n workflow** - The `rhf-pricelist-sync` workflow is saved but `"active": false`
-  - Login to n8n and enable it
+- [x] **Activate n8n workflow** - Set `"active": true` in workflow JSON (Mon/Wed/Thu 6AM)
+  - Still needs to be imported/updated in n8n UI
 - [ ] **Run initial WooCommerce sync** - Populate Supabase with RHF products/orders/customers
   ```bash
   node creds.js load redhillfresh
@@ -67,6 +67,8 @@ Status: In Progress
 ### Database Migrations
 - [ ] **Run combined migration** - Execute `infra/supabase/migrations/COMBINED_20251206_all_pending.sql`
   - Includes: BOO checkout health, stock fix queue, dashboard pages, RHF unit conversion
+- [ ] **Run supplier seed** - Execute `infra/supabase/migrations/20251206_rhf_seed_suppliers.sql`
+  - Creates rhf_suppliers table and seeds 4 suppliers
 
 ### Specialist Agents
 - [ ] **Build priority specialist agents** with working scripts:
@@ -79,7 +81,8 @@ Status: In Progress
 ### Data Quality
 - [ ] **Add Supabase MCP for RHF** - Enable agents to query RHF data directly
 - [ ] **Clean up duplicate vault credentials** - Test `wp_password` vs `wp_admin_password`
-- [ ] **Populate rhf_suppliers table** - Add the 4 suppliers (poh, melba, ogg, bdm) with details
+- [x] **Populate rhf_suppliers table** - Migration created: `20251206_rhf_seed_suppliers.sql`
+  - Run in Supabase SQL Editor to seed POH, Melba, OGG, BDM
 
 ---
 
@@ -104,6 +107,7 @@ Status: In Progress
 | `dashboard/src/app/api/rhf/weekly-orders/route.ts` | Weekly ordering API |
 | `infra/n8n-workflows/rhf/rhf-pricelist-sync.json` | n8n scheduled workflow |
 | `infra/supabase/migrations/COMBINED_20251206_all_pending.sql` | Pending DB migrations |
+| `infra/supabase/migrations/20251206_rhf_seed_suppliers.sql` | Supplier seed data |
 
 ---
 
