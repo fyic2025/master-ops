@@ -37,12 +37,20 @@ trap "rm -f $LOCK_FILE" EXIT
 log "═══════════════════════════════════════════════════════════════"
 log "Task poller started"
 
-# Get Supabase credentials
+# Get Supabase credentials from .env
 SUPABASE_URL="https://qcvfxxsnqvdfmpbcgdni.supabase.co"
-SUPABASE_KEY=$(cd "$REPO_ROOT" && node creds.js get global master_supabase_service_role_key 2>/dev/null) || true
+
+# Source .env file to get credentials
+if [ -f "$REPO_ROOT/.env" ]; then
+    set -a
+    source "$REPO_ROOT/.env"
+    set +a
+fi
+
+SUPABASE_KEY="${SUPABASE_SERVICE_ROLE_KEY:-}"
 
 if [ -z "$SUPABASE_KEY" ]; then
-    log "ERROR: Could not retrieve Supabase service role key"
+    log "ERROR: SUPABASE_SERVICE_ROLE_KEY not set in $REPO_ROOT/.env"
     exit 1
 fi
 

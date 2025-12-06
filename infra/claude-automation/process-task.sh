@@ -112,10 +112,18 @@ log_info "Starting task processing: $TASK_ID"
 # ═══════════════════════════════════════════════════════════════════════════
 
 SUPABASE_URL="https://qcvfxxsnqvdfmpbcgdni.supabase.co"
-SUPABASE_KEY=$(cd "$REPO_ROOT" && node creds.js get global master_supabase_service_role_key 2>/dev/null) || true
+
+# Source .env file to get credentials
+if [ -f "$REPO_ROOT/.env" ]; then
+    set -a
+    source "$REPO_ROOT/.env"
+    set +a
+fi
+
+SUPABASE_KEY="${SUPABASE_SERVICE_ROLE_KEY:-}"
 
 if [ -z "$SUPABASE_KEY" ]; then
-    error_exit "Could not retrieve Supabase service role key"
+    error_exit "SUPABASE_SERVICE_ROLE_KEY not set in $REPO_ROOT/.env"
 fi
 
 log_debug "Supabase credentials loaded"
