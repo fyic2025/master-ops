@@ -178,7 +178,38 @@ node creds.js load redhillfresh
 | Customer Sync | Sync customers only | `npx tsx red-hill-fresh/scripts/sync-woo-customers.ts` |
 | Pricelist Reader | Read supplier pricelists from Gmail | `npx tsx red-hill-fresh/scripts/gmail-pricelist-reader.ts` |
 
-### WooCommerce Connector
+### WooCommerce MCP Server
+
+Add to `C:\Users\jayso\AppData\Roaming\Code\User\mcp.json`:
+
+```json
+{
+  "woocommerce-rhf": {
+    "command": "npx",
+    "args": ["-y", "woocommerce-mcp-server"],
+    "env": {
+      "WC_URL": "https://redhillfresh.com.au",
+      "WC_CONSUMER_KEY": "<run: node creds.js get redhillfresh wc_consumer_key>",
+      "WC_CONSUMER_SECRET": "<run: node creds.js get redhillfresh wc_consumer_secret>"
+    }
+  }
+}
+```
+
+**Get credentials (PowerShell):**
+```powershell
+. .\load-creds.ps1 redhillfresh
+$env:REDHILLFRESH_WC_CONSUMER_KEY
+$env:REDHILLFRESH_WC_CONSUMER_SECRET
+```
+
+**Available MCP tools after setup:**
+- `wc_list_products` - Get products
+- `wc_get_orders` - Get orders
+- `wc_list_customers` - Get customers
+- `wc_update_stock` - Update inventory
+
+### WooCommerce Connector (Script Alternative)
 
 ```typescript
 import { WooCommerceConnector } from '@/shared/libs/integrations/woocommerce'

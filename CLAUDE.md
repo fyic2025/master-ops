@@ -394,6 +394,7 @@ The following MCP servers are configured in VS Code for direct platform access:
 ### E-Commerce & Marketing
 | Server | Capabilities |
 |--------|--------------|
+| `woocommerce-rhf` | RHF WooCommerce products, orders, customers, inventory |
 | `shopify-dev` | Shopify API docs, GraphQL schema, dev tools |
 | `klaviyo-teelixir` | Teelixir email campaigns, flows, segments |
 | `klaviyo-boo` | BOO email campaigns, flows, segments |
