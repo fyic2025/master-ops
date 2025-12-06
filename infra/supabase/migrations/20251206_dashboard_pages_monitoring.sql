@@ -35,8 +35,8 @@ CREATE INDEX IF NOT EXISTS idx_dashboard_pages_category ON dashboard_pages(categ
 CREATE INDEX IF NOT EXISTS idx_dashboard_pages_status ON dashboard_pages(implementation_status);
 CREATE INDEX IF NOT EXISTS idx_dashboard_pages_score ON dashboard_pages(improvement_score);
 CREATE INDEX IF NOT EXISTS idx_dashboard_pages_last_analyzed ON dashboard_pages(last_analyzed_at);
-CREATE INDEX IF NOT EXISTS idx_dashboard_pages_stale ON dashboard_pages(last_analyzed_at)
-  WHERE last_analyzed_at < NOW() - INTERVAL '7 days' OR last_analyzed_at IS NULL;
+-- Note: Stale page filtering done via v_stale_pages view, not index predicate
+CREATE INDEX IF NOT EXISTS idx_dashboard_pages_stale ON dashboard_pages(last_analyzed_at NULLS FIRST);
 
 COMMENT ON TABLE dashboard_pages IS 'Catalog of all dashboard pages with metadata and improvement tracking';
 

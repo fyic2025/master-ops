@@ -14,8 +14,9 @@ import {
   AdjustmentsHorizontalIcon,
   DocumentTextIcon,
   MagnifyingGlassIcon,
+  ArrowsRightLeftIcon,
 } from '@heroicons/react/24/outline';
-import { Package as PackageIcon, AlertTriangle, TrendingDown, DollarSign, Boxes } from 'lucide-react';
+import { Package as PackageIcon, AlertTriangle, TrendingDown, DollarSign, Boxes, GitCompare } from 'lucide-react';
 
 // Types
 interface InventorySummary {
@@ -80,6 +81,44 @@ interface RecentAdjustment {
   product_title?: string;
 }
 
+// Comparison types for Unleashed Shadow Mode
+interface StockComparison {
+  product_code: string;
+  product_description: string;
+  unleashed_qty: number;
+  shopify_qty: number | null;
+  difference: number;
+  unleashed_cost: number | null;
+  shopify_cost: number | null;
+  cost_difference: number | null;
+  match_status: 'match' | 'mismatch' | 'unleashed_only' | 'shopify_only';
+  severity: 'ok' | 'low' | 'medium' | 'high' | 'critical';
+}
+
+interface ComparisonData {
+  summary: {
+    total_unleashed_products: number;
+    total_shopify_products: number;
+    matched_count: number;
+    mismatch_count: number;
+    unleashed_only_count: number;
+    shopify_only_count: number;
+    accuracy_percentage: number;
+    total_quantity_variance: number;
+  };
+  comparisons: StockComparison[];
+  syncStatus: {
+    last_sync: string | null;
+    sync_type: string | null;
+    records_synced: number;
+    status: string | null;
+  };
+  accuracyHistory: Array<{
+    date: string;
+    accuracy_percentage: number;
+  }>;
+}
+
 interface InventoryData {
   summary: InventorySummary;
   products: InventoryProduct[];
@@ -89,13 +128,14 @@ interface InventoryData {
   lastSynced: string | null;
 }
 
-type TabId = 'overview' | 'products' | 'levels' | 'adjustments' | 'orders' | 'bundles';
+type TabId = 'overview' | 'products' | 'levels' | 'adjustments' | 'comparison' | 'orders' | 'bundles';
 
 const tabs: { id: TabId; name: string; icon: typeof PackageIcon }[] = [
   { id: 'overview', name: 'Overview', icon: ChartBarIcon },
   { id: 'products', name: 'Products', icon: PackageIcon },
   { id: 'levels', name: 'Stock Levels', icon: Boxes },
   { id: 'adjustments', name: 'Adjustments', icon: AdjustmentsHorizontalIcon },
+  { id: 'comparison', name: 'Shadow Mode', icon: GitCompare },
   { id: 'orders', name: 'Purchase Orders', icon: TruckIcon },
   { id: 'bundles', name: 'Bundles', icon: CubeIcon },
 ];
@@ -103,6 +143,12 @@ const tabs: { id: TabId; name: string; icon: typeof PackageIcon }[] = [
 async function fetchInventoryData(store: string, view: string): Promise<InventoryData> {
   const res = await fetch(`/api/inventory?store=${store}&view=${view}`);
   if (!res.ok) throw new Error('Failed to fetch inventory data');
+  return res.json();
+}
+
+async function fetchComparisonData(store: string, filter: string): Promise<ComparisonData> {
+  const res = await fetch(`/api/inventory/comparison?store=${store}&filter=${filter}`);
+  if (!res.ok) throw new Error('Failed to fetch comparison data');
   return res.json();
 }
 
@@ -120,16 +166,39 @@ const alertLevelConfig = {
   ok: { label: 'OK', color: 'text-green-400', bg: 'bg-green-500', priority: 4 },
 };
 
+const comparisonSeverityConfig = {
+  ok: { label: 'Match', color: 'text-green-400', bg: 'bg-green-500/10', border: 'border-green-500/20' },
+  low: { label: 'Low', color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
+  medium: { label: 'Medium', color: 'text-yellow-400', bg: 'bg-yellow-500/10', border: 'border-yellow-500/20' },
+  high: { label: 'High', color: 'text-orange-400', bg: 'bg-orange-500/10', border: 'border-orange-500/20' },
+  critical: { label: 'Critical', color: 'text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/20' },
+};
+
+const matchStatusConfig = {
+  match: { label: 'Match', color: 'text-green-400', bg: 'bg-green-500/10' },
+  mismatch: { label: 'Mismatch', color: 'text-orange-400', bg: 'bg-orange-500/10' },
+  unleashed_only: { label: 'Unleashed Only', color: 'text-blue-400', bg: 'bg-blue-500/10' },
+  shopify_only: { label: 'Shopify Only', color: 'text-purple-400', bg: 'bg-purple-500/10' },
+};
+
 export default function InventoryPage() {
   const params = useParams();
   const business = params.business as string;
   const [activeTab, setActiveTab] = useState<TabId>('overview');
   const [searchQuery, setSearchQuery] = useState('');
+  const [comparisonFilter, setComparisonFilter] = useState<string>('all');
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['inventory', business, activeTab],
     queryFn: () => fetchInventoryData(business, activeTab),
     refetchInterval: 60000,
+  });
+
+  const { data: comparisonData, isLoading: comparisonLoading, refetch: refetchComparison } = useQuery({
+    queryKey: ['inventory-comparison', business, comparisonFilter],
+    queryFn: () => fetchComparisonData(business, comparisonFilter),
+    enabled: activeTab === 'comparison',
+    refetchInterval: 120000,
   });
 
   if (isLoading) {
@@ -645,6 +714,206 @@ export default function InventoryPage() {
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Shadow Mode / Comparison Tab */}
+        {activeTab === 'comparison' && (
+          <div className="space-y-6">
+            {/* Shadow Mode Header */}
+            <div className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-lg p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-purple-500/20 rounded-lg">
+                    <GitCompare className="h-8 w-8 text-purple-400" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-white">Unleashed Shadow Mode</h2>
+                    <p className="text-gray-400 text-sm">
+                      Comparing Unleashed inventory with Shopify in real-time
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  {comparisonData?.syncStatus?.last_sync && (
+                    <p className="text-sm text-gray-400">
+                      Last sync: {new Date(comparisonData.syncStatus.last_sync).toLocaleString()}
+                    </p>
+                  )}
+                  <button
+                    onClick={() => refetchComparison()}
+                    className="mt-2 flex items-center gap-2 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 rounded text-sm text-white transition-colors"
+                  >
+                    <ArrowPathIcon className="h-4 w-4" />
+                    Refresh
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {comparisonLoading ? (
+              <div className="grid grid-cols-4 gap-4">
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="h-24 bg-gray-800 rounded-lg animate-pulse"></div>
+                ))}
+              </div>
+            ) : comparisonData ? (
+              <>
+                {/* Accuracy Summary Cards */}
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                  <div className={`rounded-lg p-4 border ${
+                    comparisonData.summary.accuracy_percentage >= 99
+                      ? 'bg-green-500/10 border-green-500/20'
+                      : comparisonData.summary.accuracy_percentage >= 95
+                      ? 'bg-yellow-500/10 border-yellow-500/20'
+                      : 'bg-red-500/10 border-red-500/20'
+                  }`}>
+                    <div className={`text-3xl font-bold ${
+                      comparisonData.summary.accuracy_percentage >= 99
+                        ? 'text-green-400'
+                        : comparisonData.summary.accuracy_percentage >= 95
+                        ? 'text-yellow-400'
+                        : 'text-red-400'
+                    }`}>
+                      {comparisonData.summary.accuracy_percentage}%
+                    </div>
+                    <div className="text-sm text-gray-400">Accuracy</div>
+                  </div>
+
+                  <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                    <div className="text-3xl font-bold text-white">
+                      {comparisonData.summary.total_unleashed_products}
+                    </div>
+                    <div className="text-sm text-gray-400">Unleashed SKUs</div>
+                  </div>
+
+                  <div className="bg-green-500/10 rounded-lg p-4 border border-green-500/20">
+                    <div className="text-3xl font-bold text-green-400">
+                      {comparisonData.summary.matched_count}
+                    </div>
+                    <div className="text-sm text-gray-400">Matched</div>
+                  </div>
+
+                  <div className={`rounded-lg p-4 border ${
+                    comparisonData.summary.mismatch_count > 0
+                      ? 'bg-orange-500/10 border-orange-500/20'
+                      : 'bg-gray-800 border-gray-700'
+                  }`}>
+                    <div className={`text-3xl font-bold ${
+                      comparisonData.summary.mismatch_count > 0 ? 'text-orange-400' : 'text-white'
+                    }`}>
+                      {comparisonData.summary.mismatch_count}
+                    </div>
+                    <div className="text-sm text-gray-400">Mismatches</div>
+                  </div>
+
+                  <div className="bg-blue-500/10 rounded-lg p-4 border border-blue-500/20">
+                    <div className="text-3xl font-bold text-blue-400">
+                      {comparisonData.summary.unleashed_only_count}
+                    </div>
+                    <div className="text-sm text-gray-400">Unleashed Only</div>
+                  </div>
+
+                  <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                    <div className="text-3xl font-bold text-white">
+                      {comparisonData.summary.total_quantity_variance}
+                    </div>
+                    <div className="text-sm text-gray-400">Total Variance</div>
+                  </div>
+                </div>
+
+                {/* Filter Buttons */}
+                <div className="flex gap-2">
+                  {['all', 'mismatches', 'unleashed_only', 'shopify_only'].map((f) => (
+                    <button
+                      key={f}
+                      onClick={() => setComparisonFilter(f)}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        comparisonFilter === f
+                          ? 'bg-purple-600 text-white'
+                          : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                      }`}
+                    >
+                      {f === 'all' ? 'All' : f.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Comparison Table */}
+                <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
+                  <table className="w-full">
+                    <thead className="bg-gray-900">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">SKU</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Product</th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-400 uppercase">Unleashed</th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-400 uppercase">Shopify</th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-400 uppercase">Difference</th>
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase">Status</th>
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase">Severity</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-700">
+                      {comparisonData.comparisons.slice(0, 100).map((item, idx) => {
+                        const severityConfig = comparisonSeverityConfig[item.severity];
+                        const statusConfig = matchStatusConfig[item.match_status];
+                        return (
+                          <tr key={`${item.product_code}-${idx}`} className="hover:bg-gray-700/50">
+                            <td className="px-4 py-3 font-mono text-sm text-gray-300">
+                              {item.product_code || '-'}
+                            </td>
+                            <td className="px-4 py-3 text-white max-w-xs truncate">
+                              {item.product_description || '-'}
+                            </td>
+                            <td className="px-4 py-3 text-right text-blue-400 font-medium">
+                              {item.unleashed_qty}
+                            </td>
+                            <td className="px-4 py-3 text-right text-purple-400 font-medium">
+                              {item.shopify_qty ?? '-'}
+                            </td>
+                            <td className={`px-4 py-3 text-right font-bold ${
+                              item.difference === 0
+                                ? 'text-green-400'
+                                : item.difference > 0
+                                ? 'text-orange-400'
+                                : 'text-red-400'
+                            }`}>
+                              {item.difference > 0 ? '+' : ''}{item.difference}
+                            </td>
+                            <td className="px-4 py-3 text-center">
+                              <span className={`px-2 py-1 text-xs rounded-full ${statusConfig.bg} ${statusConfig.color}`}>
+                                {statusConfig.label}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-center">
+                              <span className={`px-2 py-1 text-xs rounded-full ${severityConfig.bg} ${severityConfig.color} ${severityConfig.border} border`}>
+                                {severityConfig.label}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                  {comparisonData.comparisons.length > 100 && (
+                    <div className="px-4 py-3 bg-gray-900 text-center text-sm text-gray-400">
+                      Showing 100 of {comparisonData.comparisons.length} items
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="bg-gray-800 rounded-lg p-8 border border-gray-700 text-center">
+                <GitCompare className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                <h2 className="text-xl font-semibold text-white mb-2">No Comparison Data</h2>
+                <p className="text-gray-400 mb-6 max-w-md mx-auto">
+                  Run the Unleashed sync to populate comparison data.
+                </p>
+                <code className="bg-gray-900 px-4 py-2 rounded text-sm text-gray-300 font-mono">
+                  npx tsx teelixir/scripts/sync-unleashed.ts --store=teelixir --type=stock
+                </code>
               </div>
             )}
           </div>
