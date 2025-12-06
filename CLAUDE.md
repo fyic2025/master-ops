@@ -433,6 +433,118 @@ doctl apps create-deployment 1a0eed70-aef6-415e-953f-d2b7f0c7c832 --force-rebuil
 
 For these services, SSH + PM2 restart is correct.
 
+### Database Migrations (Supabase)
+
+**Supabase SQL Editor:** https://supabase.com/dashboard/project/qcvfxxsnqvdfmpbcgdni/sql/new
+
+**Migration files location:** `infra/supabase/migrations/`
+
+**When a plan includes database changes, ALWAYS:**
+
+1. **Create migration file** - Save SQL to `infra/supabase/migrations/YYYYMMDD_description.sql`
+2. **Include SQL Editor link** - Add link in deployment checklist for easy execution
+3. **Include migration file link** - Reference the file path for copy-paste
+4. **Add deployment checklist** - Every plan with DB changes must end with:
+
+```markdown
+## Deployment Checklist
+
+### 1. Run SQL Migration
+**Supabase SQL Editor:** https://supabase.com/dashboard/project/qcvfxxsnqvdfmpbcgdni/sql/new
+
+**Migration file:** [migration-name.sql](infra/supabase/migrations/YYYYMMDD_migration-name.sql)
+
+### 2. Deploy Application
+[Relevant deploy commands]
+
+### 3. Verify Changes
+[Testing steps]
+```
+
+---
+
+## ⚠️ CRITICAL: Security & Secrets Management
+
+**NEVER commit secrets, tokens, or API keys to git.**
+
+### Secrets That MUST Use Environment Variables
+
+| Secret Type | Example | NEVER Hard-code |
+|-------------|---------|-----------------|
+| API tokens | `shpat_xxx`, `sk_xxx`, `pk_xxx` | ❌ |
+| Access tokens | `xoxb-xxx`, `Bearer xxx` | ❌ |
+| Private keys | `-----BEGIN PRIVATE KEY-----` | ❌ |
+| Passwords | `password=xxx` | ❌ |
+| Database URLs | `postgres://user:pass@host` | ❌ |
+| Webhook secrets | `whsec_xxx` | ❌ |
+
+### How to Handle Credentials
+
+1. **Use creds.js** for runtime credential access:
+   ```bash
+   node creds.js get <business> <key>
+   ```
+
+2. **Use environment variables** in code:
+   ```typescript
+   // ✅ CORRECT
+   const token = process.env.SHOPIFY_ACCESS_TOKEN
+
+   // ❌ NEVER DO THIS
+   const token = 'shpat_abc123...'
+   ```
+
+3. **Store new credentials** in Supabase vault:
+   ```bash
+   node creds.js set <business> <key> <value>
+   ```
+
+### Before EVERY Commit
+
+**AI assistants MUST run this check before committing:**
+
+```bash
+# Scan for potential secrets
+git diff --cached | grep -iE "(api_key|apikey|secret|token|password|shpat_|sk_|pk_|xoxb-|Bearer)" || echo "No secrets detected"
+```
+
+**If secrets are found:**
+1. ❌ DO NOT commit
+2. Remove the secret from code
+3. Replace with environment variable reference
+4. Add to `.gitignore` if it's a file
+
+### If a Secret is Accidentally Committed
+
+**Immediate actions required:**
+
+1. **Rotate the secret immediately** - Generate new credentials in the service's admin panel
+2. **Update Supabase vault** with new credentials
+3. **Remove from git history** using BFG Repo-Cleaner:
+   ```bash
+   # Install BFG
+   # Download from https://rtyley.github.io/bfg-repo-cleaner/
+
+   # Remove the secret from all commits
+   java -jar bfg.jar --replace-text passwords.txt .
+
+   # Force push (DANGEROUS - coordinate with team)
+   git reflog expire --expire=now --all
+   git gc --prune=now --aggressive
+   git push --force
+   ```
+
+4. **Report the incident** to Jayson
+
+### .gitignore Patterns (Already Applied)
+
+The following patterns are in `.gitignore`:
+- `.env*` - All environment files
+- `*credentials*.json` - Credential files
+- `*secret*.json` - Secret files
+- `*.key`, `*.pem` - Private keys
+- `MASTER-CREDENTIALS*.env` - Master credential files
+
 ---
 
 ## Quality Standards

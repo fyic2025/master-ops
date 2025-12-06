@@ -7,6 +7,13 @@
 import { vi } from 'vitest'
 import * as dotenv from 'dotenv'
 
+// Augment global namespace for test utilities
+declare global {
+  var testUtils: {
+    sleep: (ms: number) => Promise<unknown>
+  }
+}
+
 // Load test environment variables
 dotenv.config({ path: '.env.test' })
 

@@ -123,11 +123,25 @@ export async function GET(request: NextRequest) {
         return acc
       }, {} as Record<string, CicdIssue[]>)
 
+    // Group by fix status for 3-bucket UI
+    const byFixStatus: Record<string, CicdIssue[]> = {
+      pending: [],
+      in_progress: [],
+      failed: []
+    }
+    for (const issue of (issues || []) as CicdIssue[]) {
+      const status = issue.fix_status || 'pending'
+      if (byFixStatus[status]) {
+        byFixStatus[status].push(issue)
+      }
+    }
+
     return NextResponse.json({
       issues: issues || [],
       byType,
       byFile,
       byErrorCode: sortedByErrorCode,
+      byFixStatus,
       stats,
       recentScans: recentScans || [],
       lastUpdated: new Date().toISOString()

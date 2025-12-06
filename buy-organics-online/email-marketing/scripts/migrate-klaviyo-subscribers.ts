@@ -95,7 +95,7 @@ async function fetchKlaviyoProfiles(): Promise<KlaviyoProfile[]> {
       throw new Error(`Klaviyo API error ${response.status}: ${errorText}`);
     }
 
-    const data = await response.json();
+    const data = await response.json() as any;
     profiles.push(...data.data);
 
     // Get next page URL

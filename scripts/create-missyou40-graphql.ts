@@ -20,7 +20,7 @@ async function shopifyGraphQL(query: string, variables?: Record<string, any>): P
     }
   )
 
-  const result = await response.json()
+  const result = await response.json() as any
 
   if (result.errors) {
     console.error('GraphQL Errors:', JSON.stringify(result.errors, null, 2))

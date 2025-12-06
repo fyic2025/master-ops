@@ -22,7 +22,7 @@ import { createClient } from '@supabase/supabase-js';
 import * as readline from 'readline';
 import * as fs from 'fs';
 import * as path from 'path';
-import logger from '../../shared/libs/logger';
+import { logger } from '../../shared/libs/logger';
 
 // Types
 interface Account {

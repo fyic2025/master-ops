@@ -32,8 +32,8 @@ export class LiveChatConnector extends BaseConnector {
       },
       retry: {
         maxRetries: 3,
-        baseDelayMs: 1000,
-        maxDelayMs: 30000,
+        initialDelay: 1000,
+        maxDelay: 30000,
       },
       timeout: 30000,
       ...connectorConfig,

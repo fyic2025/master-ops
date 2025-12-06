@@ -21,6 +21,7 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 import { FixSingleButton, FixBatchButton, FixProgressTracker } from '@/components/cicd'
+import { VerifyFixesButton } from '@/components/cicd/VerifyFixesButton'
 
 interface CicdIssue {
   id: string
@@ -34,6 +35,9 @@ interface CicdIssue {
   first_seen_at: string
   last_seen_at: string
   occurrence_count: number
+  fix_status?: 'pending' | 'in_progress' | 'failed' | 'resolved'
+  fix_attempt_count?: number
+  last_fix_attempt_at?: string | null
 }
 
 interface CicdStats {
@@ -44,6 +48,9 @@ interface CicdStats {
   build_errors: number
   auto_fixable: number
   oldest_issue_hours: number
+  pending_count?: number
+  in_progress_count?: number
+  failed_count?: number
 }
 
 interface ScanHistory {
@@ -62,6 +69,7 @@ interface CicdResponse {
   byType: Record<string, CicdIssue[]>
   byFile: Record<string, CicdIssue[]>
   byErrorCode: Record<string, CicdIssue[]>
+  byFixStatus: Record<string, CicdIssue[]>
   stats: CicdStats
   recentScans: ScanHistory[]
   lastUpdated: string
@@ -255,9 +263,6 @@ export default function CicdDashboard() {
           <p className="text-gray-400 mt-1">Code quality monitoring and issue tracking</p>
         </div>
         <div className="flex gap-2">
-          {data && data.issues.length > 0 && (
-            <FixBatchButton issues={data.issues} maxBatchSize={10} />
-          )}
           <button
             onClick={() => refetch()}
             disabled={isRefetching}
@@ -268,6 +273,65 @@ export default function CicdDashboard() {
           </button>
         </div>
       </header>
+
+      {/* Fix Status Buckets - 3 bucket layout */}
+      {data && data.issues.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Pending Bucket */}
+          <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-white">Not Attempted</h3>
+              <span className="text-2xl font-bold text-slate-300">
+                {data.byFixStatus?.pending?.length || 0}
+              </span>
+            </div>
+            <p className="text-sm text-slate-400 mb-3">Issues waiting to be fixed</p>
+            {(data.byFixStatus?.pending?.length || 0) > 0 && (
+              <FixBatchButton
+                issues={data.byFixStatus.pending || []}
+                maxBatchSize={10}
+                onFixStarted={() => refetch()}
+              />
+            )}
+          </div>
+
+          {/* In Progress Bucket */}
+          <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-yellow-400">Fix In Progress</h3>
+              <span className="text-2xl font-bold text-yellow-400">
+                {data.byFixStatus?.in_progress?.length || 0}
+              </span>
+            </div>
+            <p className="text-sm text-slate-400 mb-3">Awaiting verification</p>
+            {(data.byFixStatus?.in_progress?.length || 0) > 0 && (
+              <VerifyFixesButton
+                inProgressIssues={data.byFixStatus.in_progress || []}
+                onVerificationComplete={() => refetch()}
+              />
+            )}
+          </div>
+
+          {/* Failed Bucket */}
+          <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-red-400">Failed (Retry)</h3>
+              <span className="text-2xl font-bold text-red-400">
+                {data.byFixStatus?.failed?.length || 0}
+              </span>
+            </div>
+            <p className="text-sm text-slate-400 mb-3">Fix attempts unsuccessful</p>
+            {(data.byFixStatus?.failed?.length || 0) > 0 && (
+              <FixBatchButton
+                issues={data.byFixStatus.failed || []}
+                maxBatchSize={10}
+                variant="retry"
+                onFixStarted={() => refetch()}
+              />
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Overall Status */}
       {isLoading ? (
@@ -452,6 +516,7 @@ export default function CicdDashboard() {
                       key={issue.id}
                       issue={issue}
                       onResolve={() => resolveMutation.mutate(issue.id)}
+                      onFixStarted={() => refetch()}
                     />
                   ))}
                 </div>
@@ -483,6 +548,7 @@ export default function CicdDashboard() {
                       key={issue.id}
                       issue={issue}
                       onResolve={() => resolveMutation.mutate(issue.id)}
+                      onFixStarted={() => refetch()}
                     />
                   ))}
                 </div>
@@ -549,6 +615,7 @@ export default function CicdDashboard() {
                       key={issue.id}
                       issue={issue}
                       onResolve={() => resolveMutation.mutate(issue.id)}
+                      onFixStarted={() => refetch()}
                       showFile={false}
                     />
                   ))}
@@ -627,10 +694,12 @@ function StatCard({
 function IssueRow({
   issue,
   onResolve,
+  onFixStarted,
   showFile = true
 }: {
   issue: CicdIssue
   onResolve: () => void
+  onFixStarted?: () => void
   showFile?: boolean
 }) {
   return (
@@ -647,11 +716,23 @@ function IssueRow({
             <p className="text-gray-500 text-xs mb-1">Line {issue.line_number}</p>
           )}
           <p className="text-white text-sm">{issue.message}</p>
-          {issue.code && (
-            <span className="inline-block mt-1 text-xs bg-gray-800 text-gray-400 px-2 py-0.5 rounded">
-              {issue.code}
-            </span>
-          )}
+          <div className="flex items-center gap-2 mt-1">
+            {issue.code && (
+              <span className="text-xs bg-gray-800 text-gray-400 px-2 py-0.5 rounded">
+                {issue.code}
+              </span>
+            )}
+            {issue.fix_status === 'in_progress' && (
+              <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded">
+                In Progress
+              </span>
+            )}
+            {issue.fix_status === 'failed' && (
+              <span className="text-xs bg-red-500/20 text-red-400 px-2 py-0.5 rounded">
+                Failed ({issue.fix_attempt_count || 1}x)
+              </span>
+            )}
+          </div>
         </div>
         <div className="flex items-center gap-2 text-xs text-gray-500">
           {issue.occurrence_count > 1 && (
@@ -663,7 +744,7 @@ function IssueRow({
               <Play className="w-3 h-3" />
             </span>
           )}
-          <FixSingleButton issue={issue} compact />
+          <FixSingleButton issue={issue} compact onFixStarted={onFixStarted} />
           <button
             onClick={onResolve}
             className="text-gray-400 hover:text-green-400"

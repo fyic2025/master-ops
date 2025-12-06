@@ -84,7 +84,7 @@ async function getShopifyCustomer(customerId: string): Promise<ShopifyCustomer |
     throw new Error(`Shopify API error: ${error}`)
   }
 
-  const data = await response.json()
+  const data = await response.json() as any
   return data.customer
 }
 

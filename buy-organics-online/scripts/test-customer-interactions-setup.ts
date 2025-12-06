@@ -201,7 +201,7 @@ async function testLiveChatConnection(): Promise<void> {
     });
 
     if (response.ok) {
-      const data = await response.json();
+      const data = await response.json() as any;
       const agentCount = data.length || 0;
       results.push({
         name: 'LiveChat Connection',

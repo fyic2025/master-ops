@@ -5,12 +5,13 @@
  * then logs them to the dashboard via API.
  *
  * Usage:
- *   npx tsx scripts/cicd-health-check.ts [--fix] [--api-url URL]
+ *   npx tsx scripts/cicd-health-check.ts [--fix] [--api-url URL] [--verify]
  *
  * Options:
  *   --fix       Attempt to auto-fix issues where possible
  *   --api-url   Dashboard API URL (default: https://ops.growthcohq.com)
  *   --local     Use local API (http://localhost:3000)
+ *   --verify    Output JSON format for dashboard verification (skips API logging)
  */
 
 import { execSync } from 'child_process'
@@ -33,6 +34,7 @@ const ROOT_DIR = path.resolve(__dirname, '..')
 const args = process.argv.slice(2)
 const shouldFix = args.includes('--fix')
 const useLocal = args.includes('--local')
+const verifyMode = args.includes('--verify')
 const apiUrlIndex = args.indexOf('--api-url')
 const API_URL = useLocal
   ? 'http://localhost:3000'
@@ -40,11 +42,14 @@ const API_URL = useLocal
     ? args[apiUrlIndex + 1]
     : 'https://ops.growthcohq.com'
 
-console.log('CI/CD Health Check')
-console.log('==================')
-console.log(`API URL: ${API_URL}`)
-console.log(`Auto-fix: ${shouldFix}`)
-console.log('')
+// In verify mode, suppress normal output
+if (!verifyMode) {
+  console.log('CI/CD Health Check')
+  console.log('==================')
+  console.log(`API URL: ${API_URL}`)
+  console.log(`Auto-fix: ${shouldFix}`)
+  console.log('')
+}
 
 const issues: Issue[] = []
 let autoFixed = 0
@@ -53,7 +58,7 @@ let autoFixed = 0
  * Run TypeScript check
  */
 function checkTypeScript(): void {
-  console.log('Checking TypeScript...')
+  if (!verifyMode) console.log('Checking TypeScript...')
 
   try {
     execSync('npx tsc --noEmit 2>&1', {
@@ -61,7 +66,7 @@ function checkTypeScript(): void {
       encoding: 'utf-8',
       maxBuffer: 10 * 1024 * 1024,
     })
-    console.log('  No TypeScript errors')
+    if (!verifyMode) console.log('  No TypeScript errors')
   } catch (error: any) {
     const output = error.stdout || error.message || ''
     // Normalize line endings for Windows compatibility
@@ -91,7 +96,7 @@ function checkTypeScript(): void {
       }
     }
 
-    console.log(`  Found ${issues.filter(i => i.type === 'typescript_error').length} TypeScript errors`)
+    if (!verifyMode) console.log(`  Found ${issues.filter(i => i.type === 'typescript_error').length} TypeScript errors`)
   }
 }
 
@@ -99,7 +104,7 @@ function checkTypeScript(): void {
  * Run tests and capture failures
  */
 function checkTests(): void {
-  console.log('Checking Tests...')
+  if (!verifyMode) console.log('Checking Tests...')
 
   try {
     execSync('npm test -- --run 2>&1', {
@@ -108,7 +113,7 @@ function checkTests(): void {
       maxBuffer: 10 * 1024 * 1024,
       timeout: 120000, // 2 minute timeout
     })
-    console.log('  All tests passing')
+    if (!verifyMode) console.log('  All tests passing')
   } catch (error: any) {
     const output = error.stdout || error.message || ''
 
@@ -138,7 +143,7 @@ function checkTests(): void {
     }
 
     const testFailures = issues.filter(i => i.type === 'test_failure').length
-    console.log(`  Found ${testFailures} test failures`)
+    if (!verifyMode) console.log(`  Found ${testFailures} test failures`)
   }
 }
 
@@ -146,7 +151,7 @@ function checkTests(): void {
  * Check for common fixable issues
  */
 function checkCommonIssues(): void {
-  console.log('Checking common issues...')
+  if (!verifyMode) console.log('Checking common issues...')
 
   // Check if archive folder is excluded from tsconfig
   try {
@@ -267,7 +272,7 @@ async function logToDashboard(): Promise<void> {
       return
     }
 
-    const result = await response.json()
+    const result = await response.json() as any
     console.log(`  Logged successfully: ${result.processed} processed, ${result.resolved} resolved`)
   } catch (error: any) {
     console.error(`  Failed to connect to dashboard: ${error.message}`)
@@ -321,6 +326,37 @@ async function main(): Promise<void> {
 
   // Run all checks
   checkTypeScript()
+
+  // In verify mode, only check TypeScript (main source of fixable issues)
+  // and output JSON for dashboard to parse
+  if (verifyMode) {
+    // Output JSON format for VerifyFixesButton to parse
+    const verifyOutput = {
+      timestamp: new Date().toISOString(),
+      issues: issues.map(i => ({
+        type: i.type,
+        file_path: i.file,
+        line_number: i.line,
+        message: i.message,
+        code: i.code,
+        severity: i.severity
+      })),
+      summary: {
+        total: issues.length,
+        typescript_errors: issues.filter(i => i.type === 'typescript_error').length,
+        test_failures: issues.filter(i => i.type === 'test_failure').length,
+        build_errors: issues.filter(i => i.type === 'build_error').length
+      }
+    }
+
+    // Output pure JSON - no other text
+    console.log(JSON.stringify(verifyOutput, null, 2))
+
+    // Exit with 0 even if there are issues (verify mode just reports)
+    process.exit(0)
+  }
+
+  // Normal mode: run all checks
   checkTests()
   checkCommonIssues()
 

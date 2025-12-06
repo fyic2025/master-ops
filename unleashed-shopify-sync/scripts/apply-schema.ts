@@ -69,7 +69,7 @@ async function checkSchema() {
   console.log('='.repeat(60))
   console.log('')
   console.log('1. Go to Supabase Dashboard:')
-  console.log(`   ${supabaseUrl.replace('.supabase.co', '.supabase.co/project/').replace('https://', 'https://supabase.com/dashboard/project/')}`)
+  console.log(`   ${supabaseUrl!.replace('.supabase.co', '.supabase.co/project/').replace('https://', 'https://supabase.com/dashboard/project/')}`)
   console.log('')
   console.log('2. Navigate to SQL Editor (left sidebar)')
   console.log('')

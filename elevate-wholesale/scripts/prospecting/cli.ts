@@ -286,7 +286,7 @@ async function previewBatch(): Promise<void> {
     process.exit(1)
   }
 
-  const data = await response.json()
+  const data = await response.json() as any
   const contacts = data.results || []
 
   if (contacts.length === 0) {
@@ -350,7 +350,7 @@ async function skipContact(hubspotId: string, reason: string): Promise<void> {
       process.exit(1)
     }
 
-    const contact = await response.json()
+    const contact = await response.json() as any
 
     const { error } = await supabase.from('prospecting_queue').insert({
       hubspot_contact_id: hubspotId,

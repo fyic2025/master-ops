@@ -21,7 +21,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import * as fs from 'fs';
-import logger from '../../shared/libs/logger';
+import { logger } from '../../shared/libs/logger';
 
 // Types
 interface JournalLine {

@@ -16,17 +16,55 @@
  * ```
  */
 
-// Service Clients
-export * from './hubspot/client'
-export * from './unleashed/client'
+// Service Clients - explicit exports to avoid naming conflicts
+export {
+  HubSpotConnector,
+  hubspotClient,
+  type HubSpotConfig,
+  type HubSpotContact,
+  type HubSpotCompany,
+  type HubSpotDeal,
+  type HubSpotProperty,
+  type ListResponse as HubSpotListResponse,
+} from './hubspot/client'
+
+export {
+  UnleashedConnector,
+  unleashedClient,
+  type UnleashedConfig,
+  type UnleashedCustomer,
+  type UnleashedProduct,
+  type UnleashedSalesOrder,
+  type ListResponse as UnleashedListResponse,
+} from './unleashed/client'
+
 export * from './n8n/client'
 export * from './shopify/client'
 export * from './xero/client'
 export * from './smartlead/client'
 
-// Shipping Carriers
-export * from './auspost'
-export * from './sendle'
+// Shipping Carriers - explicit exports to avoid BusinessCode conflict
+export {
+  createAusPostClient,
+  createCustomAusPostClient,
+  createAusPostAddress,
+  isDomestic,
+  getDefaultProductCode,
+  AusPostConnector,
+  type AusPostConfig,
+  type BusinessCode,
+} from './auspost'
+export * from './auspost/types'
+
+export {
+  createSendleClient,
+  createCustomSendleClient,
+  createSendleAddress,
+  SendleConnector,
+  type SendleConfig,
+  type BusinessCode as SendleBusinessCode,
+} from './sendle'
+export * from './sendle/types'
 
 // Base Infrastructure
 export * from './base'

@@ -14,6 +14,9 @@ export interface CicdIssue {
   first_seen_at: string
   last_seen_at: string
   occurrence_count: number
+  fix_status?: 'pending' | 'in_progress' | 'failed' | 'resolved'
+  fix_attempt_count?: number
+  last_fix_attempt_at?: string | null
 }
 
 const issueTypeLabels: Record<string, string> = {

@@ -158,3 +158,4 @@ scripts/list-do-droplets.ps1
 # This line explicitly ALLOWS the encrypted vault to be tracked
 !credentials.vault.enc
 cUsersjaysomaster-opstemp*
+.claude/settings.local.json

@@ -163,7 +163,7 @@ class LiveChatClient {
       throw new Error(`LiveChat API error: ${response.status} - ${error}`);
     }
 
-    const data = await response.json();
+    const data = await response.json() as any;
     return {
       chats: data.chats || [],
       nextPageId: data.next_page_id,

@@ -156,7 +156,7 @@ export class MockN8nAPI {
    */
   createMockFetch() {
     return vi.fn(async (url: string, options: RequestInit = {}) => {
-      const { method = 'GET', headers = {}, body } = options
+      const { method = 'GET', headers = {}, body } = options as { method?: string; headers?: Record<string, string>; body?: string | null }
       const apiKey = (headers as Record<string, string>)['X-N8N-API-KEY']
 
       // Validate API key
@@ -189,7 +189,7 @@ export class MockN8nAPI {
     method: string,
     segments: string[],
     params: URLSearchParams,
-    body?: BodyInit | null
+    body?: string | null
   ) {
     // GET /workflows - List workflows
     if (method === 'GET' && segments.length === 1) {
@@ -355,7 +355,7 @@ export class MockN8nAPI {
     method: string,
     segments: string[],
     params: URLSearchParams,
-    body?: BodyInit | null
+    body?: string | null
   ) {
     // GET /executions - List executions
     if (method === 'GET' && segments.length === 1) {
@@ -412,7 +412,7 @@ export class MockN8nAPI {
     method: string,
     segments: string[],
     params: URLSearchParams,
-    body?: BodyInit | null
+    body?: string | null
   ) {
     // GET /credentials - List credentials
     if (method === 'GET' && segments.length === 1) {

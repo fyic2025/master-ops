@@ -124,7 +124,7 @@ async function fetchAllShopifyCustomers(): Promise<Map<string, ShopifyCustomer>>
       body: JSON.stringify({ query, variables: { cursor } })
     })
 
-    const data = await resp.json()
+    const data = await resp.json() as any
 
     if (data.errors) {
       console.error('Shopify GraphQL error:', data.errors)
@@ -175,7 +175,7 @@ async function fetchUnleashedProductBrands(): Promise<Map<string, string>> {
       break
     }
 
-    const data = await resp.json()
+    const data = await resp.json() as any
     const products = data.Items || []
 
     for (const product of products) {
@@ -218,7 +218,7 @@ async function fetchAllUnleashedOrders(): Promise<UnleashedOrder[]> {
       break
     }
 
-    const data = await resp.json()
+    const data = await resp.json() as any
     const orders = data.Items || []
 
     for (const order of orders) {

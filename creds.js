@@ -28,13 +28,15 @@ const https = require('https');
 const crypto = require('crypto');
 
 // ═══════════════════════════════════════════════════════════════════════════
-// CONFIGURATION - Vault connection details
+// CONFIGURATION - Vault connection details (from environment variables)
 // ═══════════════════════════════════════════════════════════════════════════
 
+// SECURITY: These MUST be set via environment variables, never hardcoded
+// Set in .env file or system environment before running
 const CONFIG = {
-  SUPABASE_HOST: 'usibnysqelovfuctmkqw.supabase.co',
-  SUPABASE_SERVICE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzaWJueXNxZWxvdmZ1Y3Rta3F3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDQ4ODA4OCwiZXhwIjoyMDY2MDY0MDg4fQ.B9uihsaUvwkJWFAuKAtu7uij1KiXVoiHPHa9mm-Tz1s',
-  ENCRYPTION_KEY: 'mstr-ops-vault-2024-secure-key'
+  SUPABASE_HOST: process.env.VAULT_SUPABASE_HOST || (() => { throw new Error('VAULT_SUPABASE_HOST not set'); })(),
+  SUPABASE_SERVICE_KEY: process.env.VAULT_SERVICE_KEY || (() => { throw new Error('VAULT_SERVICE_KEY not set'); })(),
+  ENCRYPTION_KEY: process.env.VAULT_ENCRYPTION_KEY || (() => { throw new Error('VAULT_ENCRYPTION_KEY not set'); })()
 };
 
 // ═══════════════════════════════════════════════════════════════════════════

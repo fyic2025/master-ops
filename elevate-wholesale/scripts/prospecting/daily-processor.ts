@@ -109,7 +109,7 @@ async function getEligibleContacts(limit: number, leadCategory: string | null): 
     throw new Error(`HubSpot search failed: ${error}`)
   }
 
-  const data = await response.json()
+  const data = await response.json() as any
   return data.results || []
 }
 
@@ -178,7 +178,7 @@ async function createShopifyCustomer(contact: HubSpotContact): Promise<{ custome
     throw new Error(`Shopify customer creation failed: ${error}`)
   }
 
-  const customerData = await customerResponse.json()
+  const customerData = await customerResponse.json() as any
   return {
     customerId: customerData.customer.id.toString(),
   }

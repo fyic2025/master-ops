@@ -62,8 +62,8 @@ class SmartleadConnector extends BaseConnector {
       },
       retry: {
         maxRetries: 3,
-        initialDelayMs: 1000,
-        maxDelayMs: 10000,
+        initialDelay: 1000,
+        maxDelay: 10000,
         backoffMultiplier: 2,
       },
       timeout: 30000, // 30 second timeout

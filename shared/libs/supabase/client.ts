@@ -235,8 +235,8 @@ export class SupabaseClientWrapper {
     return this.client
       .channel(`${table}_changes`)
       .on(
-        'postgres_changes',
-        { event, schema: 'public', table },
+        'postgres_changes' as any,
+        { event, schema: 'public', table } as any,
         callback
       )
       .subscribe();
