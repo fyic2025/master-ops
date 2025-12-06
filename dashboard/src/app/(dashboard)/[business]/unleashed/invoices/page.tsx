@@ -15,6 +15,8 @@ import {
   XCircle,
   CreditCard,
   AlertCircle,
+  Download,
+  ExternalLink,
 } from 'lucide-react';
 
 interface Invoice {
@@ -260,6 +262,7 @@ export default function UnleashedInvoicesPage() {
                   <th className="text-right py-4 px-5 text-xs font-semibold text-gray-400 uppercase tracking-wider">Sub Total</th>
                   <th className="text-right py-4 px-5 text-xs font-semibold text-gray-400 uppercase tracking-wider">Tax</th>
                   <th className="text-right py-4 px-5 text-xs font-semibold text-gray-400 uppercase tracking-wider">Total</th>
+                  <th className="text-center py-4 px-5 text-xs font-semibold text-gray-400 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-800/50">
@@ -296,6 +299,17 @@ export default function UnleashedInvoicesPage() {
                       <td className="py-4 px-5 text-right text-gray-300">{formatCurrency(invoice.sub_total || 0)}</td>
                       <td className="py-4 px-5 text-right text-gray-400">{formatCurrency(invoice.tax_total || 0)}</td>
                       <td className="py-4 px-5 text-right text-white font-medium">{formatCurrency(invoice.total || 0)}</td>
+                      <td className="py-4 px-5 text-center">
+                        <a
+                          href={`/api/unleashed/invoices/${invoice.id}/pdf?store=${business}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white text-xs font-medium rounded-lg transition-colors"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                          View
+                        </a>
+                      </td>
                     </tr>
                   );
                 })}

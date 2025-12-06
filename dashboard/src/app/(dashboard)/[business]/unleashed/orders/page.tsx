@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -18,6 +18,8 @@ import {
   Pause,
   AlertCircle,
   Plus,
+  FileText,
+  Loader2,
 } from 'lucide-react';
 
 interface SalesOrder {
@@ -65,10 +67,45 @@ function formatDate(dateStr: string) {
 
 export default function UnleashedOrdersPage() {
   const params = useParams();
+  const queryClient = useQueryClient();
   const business = params.business as string;
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('all');
   const [page, setPage] = useState(1);
+  const [generatingInvoice, setGeneratingInvoice] = useState<string | null>(null);
+
+  // Invoice generation mutation
+  const generateInvoice = useMutation({
+    mutationFn: async (orderId: string) => {
+      const res = await fetch('/api/unleashed/invoices', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          store: business,
+          order_id: orderId,
+        }),
+      });
+      return res.json();
+    },
+    onSuccess: (data) => {
+      if (data.success) {
+        alert(`Invoice ${data.invoice_number} created successfully!`);
+        queryClient.invalidateQueries({ queryKey: ['unleashed-orders'] });
+      } else {
+        alert(`Error: ${data.error}`);
+      }
+      setGeneratingInvoice(null);
+    },
+    onError: (error) => {
+      alert('Failed to generate invoice');
+      setGeneratingInvoice(null);
+    },
+  });
+
+  const handleGenerateInvoice = (orderId: string) => {
+    setGeneratingInvoice(orderId);
+    generateInvoice.mutate(orderId);
+  };
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['unleashed-orders', business, status, search, page],
@@ -256,6 +293,7 @@ export default function UnleashedOrdersPage() {
                   <th className="text-right py-4 px-5 text-xs font-semibold text-gray-400 uppercase tracking-wider">Tax</th>
                   <th className="text-right py-4 px-5 text-xs font-semibold text-gray-400 uppercase tracking-wider">Total</th>
                   <th className="text-left py-4 px-5 text-xs font-semibold text-gray-400 uppercase tracking-wider">Warehouse</th>
+                  <th className="text-center py-4 px-5 text-xs font-semibold text-gray-400 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-800/50">
@@ -283,6 +321,24 @@ export default function UnleashedOrdersPage() {
                       <td className="py-4 px-5 text-right text-gray-400">{formatCurrency(order.tax_total || 0)}</td>
                       <td className="py-4 px-5 text-right text-white font-medium">{formatCurrency(order.total || 0)}</td>
                       <td className="py-4 px-5 text-gray-400">{order.warehouse_code || '-'}</td>
+                      <td className="py-4 px-5 text-center">
+                        {order.order_status !== 'Completed' ? (
+                          <button
+                            onClick={() => handleGenerateInvoice(order.id)}
+                            disabled={generatingInvoice === order.id}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {generatingInvoice === order.id ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <FileText className="w-3.5 h-3.5" />
+                            )}
+                            Invoice
+                          </button>
+                        ) : (
+                          <span className="text-xs text-gray-500">Invoiced</span>
+                        )}
+                      </td>
                     </tr>
                   );
                 })}

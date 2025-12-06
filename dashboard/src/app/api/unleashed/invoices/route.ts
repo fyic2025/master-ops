@@ -1,7 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
+import { v4 as uuidv4 } from 'uuid';
 
 export const dynamic = 'force-dynamic';
+
+// Generate next invoice number in sequence
+async function getNextInvoiceNumber(supabase: any, store: string): Promise<string> {
+  const { data } = await supabase
+    .from('ul_invoices')
+    .select('invoice_number')
+    .eq('store', store)
+    .like('invoice_number', 'INV-%')
+    .order('invoice_number', { ascending: false })
+    .limit(1);
+
+  if (data && data.length > 0) {
+    const lastNumber = data[0].invoice_number;
+    const numPart = parseInt(lastNumber.replace('INV-', '')) || 0;
+    return `INV-${String(numPart + 1).padStart(6, '0')}`;
+  }
+  return 'INV-000001';
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -81,5 +100,118 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Error in invoices API:', error);
     return NextResponse.json({ error: 'Failed to fetch invoices' }, { status: 500 });
+  }
+}
+
+// POST - Create invoice from sales order
+export async function POST(request: NextRequest) {
+  try {
+    const supabase = createServerClient();
+    const body = await request.json();
+    const { store, order_id, due_days = 14 } = body;
+
+    if (!store || !order_id) {
+      return NextResponse.json(
+        { error: 'Missing required fields: store, order_id' },
+        { status: 400 }
+      );
+    }
+
+    // Fetch the sales order
+    const { data: order, error: orderError } = await supabase
+      .from('ul_sales_orders')
+      .select('*')
+      .eq('id', order_id)
+      .eq('store', store)
+      .single();
+
+    if (orderError || !order) {
+      return NextResponse.json(
+        { error: 'Sales order not found' },
+        { status: 404 }
+      );
+    }
+
+    // Check if invoice already exists for this order
+    const { data: existingInvoice } = await supabase
+      .from('ul_invoices')
+      .select('invoice_number')
+      .eq('sales_order_number', order.order_number)
+      .eq('store', store)
+      .single();
+
+    if (existingInvoice) {
+      return NextResponse.json(
+        { error: `Invoice already exists: ${existingInvoice.invoice_number}` },
+        { status: 400 }
+      );
+    }
+
+    // Generate invoice number
+    const invoiceNumber = await getNextInvoiceNumber(supabase, store);
+    const invoiceGuid = uuidv4();
+    const invoiceDate = new Date().toISOString();
+    const dueDate = new Date(Date.now() + due_days * 24 * 60 * 60 * 1000).toISOString();
+
+    // Create invoice record
+    const invoiceData = {
+      guid: invoiceGuid,
+      store,
+      invoice_number: invoiceNumber,
+      invoice_date: invoiceDate,
+      due_date: dueDate,
+      invoice_status: 'Completed',
+      customer_guid: order.customer_guid,
+      customer_code: order.customer_code,
+      customer_name: order.customer_name,
+      sub_total: order.sub_total,
+      tax_total: order.tax_total,
+      total: order.total,
+      bc_status: 'Unpaid',
+      sales_order_number: order.order_number,
+      warehouse_code: order.warehouse_code,
+      invoice_lines: order.sales_order_lines,
+      source: 'dashboard',
+      raw_data: {
+        created_from_order: order_id,
+        created_at: invoiceDate,
+        order_data: order,
+      },
+      created_at: invoiceDate,
+      updated_at: invoiceDate,
+    };
+
+    const { error: insertError } = await supabase
+      .from('ul_invoices')
+      .insert(invoiceData);
+
+    if (insertError) {
+      console.error('Error creating invoice:', insertError);
+      return NextResponse.json(
+        { error: insertError.message },
+        { status: 500 }
+      );
+    }
+
+    // Update sales order status to Completed
+    await supabase
+      .from('ul_sales_orders')
+      .update({
+        order_status: 'Completed',
+        updated_at: invoiceDate,
+      })
+      .eq('id', order_id);
+
+    return NextResponse.json({
+      success: true,
+      invoice_number: invoiceNumber,
+      invoice_guid: invoiceGuid,
+    });
+  } catch (error) {
+    console.error('Error creating invoice:', error);
+    return NextResponse.json(
+      { error: 'Failed to create invoice' },
+      { status: 500 }
+    );
   }
 }
