@@ -145,7 +145,7 @@ class SlackAlerter {
   ): Promise<void> {
     const emoji = this.getEmoji(AlertType.CRITICAL)
 
-    const blocks = [
+    const blocks: any[] = [
       {
         type: 'header',
         text: {
