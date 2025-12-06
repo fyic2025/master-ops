@@ -136,14 +136,39 @@ node creds.js get redhillfresh wc_consumer_key
 node creds.js load redhillfresh
 ```
 
+#### Essential (WooCommerce API)
 | Credential | Env Variable | Purpose |
 |------------|--------------|---------|
-| `wc_url` | `REDHILLFRESH_WC_URL` | WooCommerce site URL |
+| `wp_url` | `REDHILLFRESH_WP_URL` | Site URL (https://redhillfresh.com.au) |
 | `wc_consumer_key` | `REDHILLFRESH_WC_CONSUMER_KEY` | WooCommerce API key |
 | `wc_consumer_secret` | `REDHILLFRESH_WC_CONSUMER_SECRET` | WooCommerce API secret |
-| `domain` | `REDHILLFRESH_DOMAIN` | redhillfresh.com.au |
-| `gmail_user` | `REDHILLFRESH_GMAIL_USER` | RHF Gmail account |
-| `gmail_app_password` | `REDHILLFRESH_GMAIL_APP_PASSWORD` | Gmail app password |
+
+#### WordPress Admin
+| Credential | Env Variable | Purpose |
+|------------|--------------|---------|
+| `wp_admin_user` | `REDHILLFRESH_WP_ADMIN_USER` | WordPress admin username |
+| `wp_admin_password` | `REDHILLFRESH_WP_ADMIN_PASSWORD` | WordPress admin password |
+| `wp_app_password` | `REDHILLFRESH_WP_APP_PASSWORD` | WordPress application password |
+
+#### Gmail (Pricelist Reading)
+| Credential | Env Variable | Purpose |
+|------------|--------------|---------|
+| `gmail_email` | `REDHILLFRESH_GMAIL_EMAIL` | eatfresh@redhillfresh.com.au |
+| `gmail_refresh_token` | `REDHILLFRESH_GMAIL_REFRESH_TOKEN` | OAuth2 refresh token |
+
+#### Xero (Accounting)
+| Credential | Env Variable | Purpose |
+|------------|--------------|---------|
+| `xero_client_id` | `REDHILLFRESH_XERO_CLIENT_ID` | Xero OAuth app |
+| `xero_client_secret` | `REDHILLFRESH_XERO_CLIENT_SECRET` | Xero OAuth secret |
+| `xero_tenant_id` | `REDHILLFRESH_XERO_TENANT_ID` | Xero organization |
+| `xero_refresh_token` | `REDHILLFRESH_XERO_REFRESH_TOKEN` | Xero OAuth token |
+
+#### Google (Ads/Merchant)
+| Credential | Env Variable | Purpose |
+|------------|--------------|---------|
+| `google_ads_customer_id` | `REDHILLFRESH_GOOGLE_ADS_CUSTOMER_ID` | Google Ads account |
+| `google_merchant_id` | `REDHILLFRESH_GOOGLE_MERCHANT_ID` | Merchant Center ID |
 
 ### Key Scripts
 
@@ -159,7 +184,7 @@ node creds.js load redhillfresh
 import { WooCommerceConnector } from '@/shared/libs/integrations/woocommerce'
 
 const wc = new WooCommerceConnector({
-  url: process.env.REDHILLFRESH_WC_URL,
+  url: process.env.REDHILLFRESH_WP_URL,  // https://redhillfresh.com.au
   consumerKey: process.env.REDHILLFRESH_WC_CONSUMER_KEY,
   consumerSecret: process.env.REDHILLFRESH_WC_CONSUMER_SECRET,
 })

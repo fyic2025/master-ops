@@ -1204,14 +1204,14 @@ async function main() {
 
   // Initialize WooCommerce connector
   // Credentials from vault: node creds.js load redhillfresh
-  const wcUrl = process.env.REDHILLFRESH_WC_URL || process.env.REDHILLFRESH_DOMAIN || process.env.RHF_WC_URL
-  const wcKey = process.env.REDHILLFRESH_WC_CONSUMER_KEY || process.env.RHF_WC_CONSUMER_KEY
-  const wcSecret = process.env.REDHILLFRESH_WC_CONSUMER_SECRET || process.env.RHF_WC_CONSUMER_SECRET
+  const wcUrl = process.env.REDHILLFRESH_WP_URL || 'https://redhillfresh.com.au'
+  const wcKey = process.env.REDHILLFRESH_WC_CONSUMER_KEY
+  const wcSecret = process.env.REDHILLFRESH_WC_CONSUMER_SECRET
 
-  if (!wcUrl || !wcKey || !wcSecret) {
+  if (!wcKey || !wcSecret) {
     console.error('❌ Missing WooCommerce credentials!')
     console.error('   Load from vault: node creds.js load redhillfresh')
-    console.error('   Expected: REDHILLFRESH_WC_URL, REDHILLFRESH_WC_CONSUMER_KEY, REDHILLFRESH_WC_CONSUMER_SECRET')
+    console.error('   Required: REDHILLFRESH_WC_CONSUMER_KEY, REDHILLFRESH_WC_CONSUMER_SECRET')
     process.exit(1)
   }
 
