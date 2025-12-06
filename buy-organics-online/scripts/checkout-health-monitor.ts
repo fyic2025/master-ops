@@ -14,6 +14,10 @@
  */
 
 import { createClient } from '@supabase/supabase-js'
+import * as dotenv from 'dotenv'
+
+// Load environment variables
+dotenv.config()
 
 // Configuration
 const DRY_RUN = process.argv.includes('--dry-run')
