@@ -91,16 +91,15 @@ const SUPPLIER_RULES = {
   elevate: { inventoryWhenInStock: null, respectActualStock: true }
 };
 
-// Check if product is a sale item (should be skipped)
-function isSaleItem(bcProduct) {
+// Check if product is a clearance/sale item (should be skipped - manual inventory control)
+function isClearanceItem(bcProduct) {
   const sku = (bcProduct.sku || '').toLowerCase();
-  const salePrice = bcProduct.sale_price || 0;
 
-  // Sale item if:
-  // 1. sale_price > 0 (has an active sale)
-  // 2. SKU starts with "copy of" (clearance/sale copy)
-  // 3. SKU contains "sale" (sale item marker)
-  return salePrice > 0 || sku.startsWith('copy of') || sku.includes('sale');
+  // Only skip products with explicit clearance markers in SKU:
+  // 1. SKU starts with "copy of" - clearance copies with manual inventory
+  // 2. SKU contains "sale" - explicit sale items
+  // NOTE: sale_price > 0 alone does NOT make it a clearance item - that's just a normal discount
+  return sku.startsWith('copy of') || sku.includes('sale');
 }
 
 // Check margin protection (8% max discount for normal products)
@@ -183,12 +182,12 @@ function determineUpdate(link) {
   const bcAvailability = bcProduct.availability;
   const bcInventory = bcProduct.inventory_level || 0;
 
-  // RULE 1: Sale items - SKIP (respect existing inventory)
-  if (isSaleItem(bcProduct)) {
+  // RULE 1: Clearance items (SKU "Copy of" or "sale") - SKIP (manual inventory control)
+  if (isClearanceItem(bcProduct)) {
     return {
       action: 'skip',
-      reason: `Sale item (sale_price=${bcProduct.sale_price}, sku=${bcProduct.sku}) - keeping current inventory`,
-      skipReason: 'sale_item'
+      reason: `Clearance item (sku=${bcProduct.sku}) - manual inventory control`,
+      skipReason: 'clearance_item'
     };
   }
 
@@ -256,7 +255,7 @@ async function updateBCAvailability(dryRun = false) {
   console.log('Business Rules Applied:');
   console.log('  • UHP/Oborne/Kadac: stock > 0 → inventory = 1000');
   console.log('  • Unleashed/Elevate: respect actual stock levels');
-  console.log('  • Sale items (sale_price > 0 or SKU "Copy of"): SKIP');
+  console.log('  • Clearance items (SKU "Copy of" or "sale"): SKIP');
   console.log('  • 8% margin protection: warning if exceeded\n');
 
   const startTime = Date.now();
@@ -319,7 +318,7 @@ async function updateBCAvailability(dryRun = false) {
   console.log(`  Products to ENABLE:  ${updates.enable.length}`);
   console.log(`  Products to DISABLE: ${updates.disable.length}`);
   console.log(`  Products to UPDATE:  ${updates.update.length}`);
-  console.log(`  Products SKIPPED:    ${updates.skip.length} (sale items)`);
+  console.log(`  Products SKIPPED:    ${updates.skip.length} (clearance items)`);
   console.log(`  No change needed:    ${updates.noChange.length}`);
   console.log(`  Margin warnings:     ${updates.marginWarnings.length}\n`);
 
@@ -337,7 +336,7 @@ async function updateBCAvailability(dryRun = false) {
 
   // Show skipped items
   if (updates.skip.length > 0) {
-    console.log('Sale items SKIPPED (inventory preserved):');
+    console.log('Clearance items SKIPPED (manual inventory control):');
     updates.skip.slice(0, 5).forEach(item => {
       console.log(`  [${item.sku}] ${item.name?.substring(0, 40)}`);
     });
@@ -351,7 +350,7 @@ async function updateBCAvailability(dryRun = false) {
 
   if (allUpdates.length === 0) {
     console.log('✅ All products are already in sync with supplier stock!');
-    console.log(`   (${updates.skip.length} sale items skipped as expected)\n`);
+    console.log(`   (${updates.skip.length} clearance items skipped as expected)\n`);
     return { enabled: 0, disabled: 0, updated: 0, skipped: updates.skip.length, errors: 0 };
   }
 
@@ -555,7 +554,7 @@ async function updateBCAvailability(dryRun = false) {
   console.log(`  Products ENABLED:  ${enabledCount}`);
   console.log(`  Products DISABLED: ${disabledCount}`);
   console.log(`  Products UPDATED:  ${updatedCount}`);
-  console.log(`  Products SKIPPED:  ${updates.skip.length} (sale items)`);
+  console.log(`  Products SKIPPED:  ${updates.skip.length} (clearance items)`);
   console.log(`  Margin Warnings:   ${updates.marginWarnings.length}`);
   console.log(`  Errors:            ${errorCount}`);
   console.log(`  Duration:          ${duration}s\n`);
