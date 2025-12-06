@@ -31,6 +31,9 @@ interface CicdStats {
   build_errors: number
   auto_fixable: number
   oldest_issue_hours: number
+  pending_count: number
+  in_progress_count: number
+  failed_count: number
 }
 
 // GET - Fetch all active CI/CD issues
