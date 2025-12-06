@@ -83,10 +83,11 @@ function normalizeBarcode(barcode: string | null | undefined): string | null {
 function extractSupplierSKU(bcSku: string, supplier: string): string | null {
   // Extract supplier SKU from BC SKU
   // E.g., "OB - ABC123" → "ABC123"
+  // Note: Use lowercase supplier names to match DB values
   const patterns: Record<string, RegExp> = {
-    'Oborne': /^(OB|NEWOB)\s*-\s*(.+)$/i,
-    'Kadac': /^(KAD|NEWKAD)\s*-\s*(.+)$/i,
-    'UHP': /^(UN|NEWUN)\s*-\s*(.+)$/i
+    'oborne': /^(OB|NEWOB)\s*-\s*(.+)$/i,
+    'kadac': /^(KAD|NEWKAD)\s*-\s*(.+)$/i,
+    'uhp': /^(UN|NEWUN)\s*-\s*(.+)$/i
   }
 
   const pattern = patterns[supplier]
@@ -187,8 +188,8 @@ async function linkProducts() {
         }
       }
 
-      // 2. Try SKU-based match
-      for (const supplier of ['Oborne', 'Kadac', 'UHP']) {
+      // 2. Try SKU-based match (use lowercase to match DB values)
+      for (const supplier of ['oborne', 'kadac', 'uhp']) {
         if (!matchedSuppliers.has(supplier)) {
           const supplierSku = extractSupplierSKU(ep.sku, supplier)
           if (supplierSku) {
@@ -212,11 +213,12 @@ async function linkProducts() {
 
       // Set priorities and active status
       if (productLinks.length > 0) {
-        // Sort by supplier priority: Oborne (1), Kadac (2), UHP (3)
+        // Sort by supplier priority: oborne (1), kadac (2), uhp (3), unleashed (4)
         const supplierPriority: Record<string, number> = {
-          'Oborne': 1,
-          'Kadac': 2,
-          'UHP': 3
+          'oborne': 1,
+          'kadac': 2,
+          'uhp': 3,
+          'unleashed': 4
         }
 
         productLinks.sort((a, b) => {
