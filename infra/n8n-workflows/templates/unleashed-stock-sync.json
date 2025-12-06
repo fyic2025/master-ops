@@ -1,0 +1,175 @@
+{
+  "name": "Unleashed Stock Sync (Every 15 Min)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Every 15 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://ops.growthcohq.com/api/cron/unleashed-sync",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"store\": \"teelixir\",\n  \"type\": \"stock\"\n}",
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "id": "sync-stock",
+      "name": "Sync Stock to Supabase",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.success }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "check-success",
+      "name": "Success?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO integration_logs (source, service, operation, level, status, message, details_json)\nVALUES (\n  'unleashed',\n  'stock_sync',\n  'sync',\n  'info',\n  'success',\n  'Synced {{ $json.summary.synced }} stock records from Unleashed',\n  '{{ JSON.stringify($json) }}'::jsonb\n)",
+        "options": {}
+      },
+      "id": "log-success",
+      "name": "Log Success",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [850, 200],
+      "credentials": {
+        "postgres": {
+          "id": "supabase",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO integration_logs (source, service, operation, level, status, message, details_json)\nVALUES (\n  'unleashed',\n  'stock_sync',\n  'sync',\n  'error',\n  'failed',\n  'Stock sync failed: {{ $json.error || \"Unknown error\" }}',\n  '{{ JSON.stringify($json) }}'::jsonb\n)",
+        "options": {}
+      },
+      "id": "log-error",
+      "name": "Log Error",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [850, 400],
+      "credentials": {
+        "postgres": {
+          "id": "supabase",
+          "name": "Supabase"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Every 15 Minutes": {
+      "main": [
+        [
+          {
+            "node": "Sync Stock to Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sync Stock to Supabase": {
+      "main": [
+        [
+          {
+            "node": "Success?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Success?": {
+      "main": [
+        [
+          {
+            "node": "Log Success",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1",
+  "id": "unleashed-stock-sync",
+  "meta": {
+    "instanceId": "master-ops"
+  },
+  "tags": [
+    {
+      "name": "teelixir"
+    },
+    {
+      "name": "unleashed"
+    },
+    {
+      "name": "sync"
+    }
+  ]
+}

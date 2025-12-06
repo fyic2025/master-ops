@@ -1,0 +1,284 @@
+{
+  "name": "Unleashed Orders & Invoices Sync (Hourly)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 1
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Every Hour",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://ops.growthcohq.com/api/cron/unleashed-sync",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"store\": \"teelixir\",\n  \"type\": \"orders\"\n}",
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "id": "sync-orders",
+      "name": "Sync Sales Orders",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [450, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://ops.growthcohq.com/api/cron/unleashed-sync",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"store\": \"teelixir\",\n  \"type\": \"invoices\"\n}",
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "id": "sync-invoices",
+      "name": "Sync Invoices",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [450, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://ops.growthcohq.com/api/cron/unleashed-sync",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"store\": \"teelixir\",\n  \"type\": \"customers\"\n}",
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "id": "sync-customers",
+      "name": "Sync Customers",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [450, 600]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Combine results from all sync operations\nconst orders = $('Sync Sales Orders').item.json;\nconst invoices = $('Sync Invoices').item.json;\nconst customers = $('Sync Customers').item.json;\n\nconst totalSynced = (orders.summary?.synced || 0) + (invoices.summary?.synced || 0) + (customers.summary?.synced || 0);\nconst totalFailed = (orders.summary?.failed || 0) + (invoices.summary?.failed || 0) + (customers.summary?.failed || 0);\nconst allSuccess = orders.success && invoices.success && customers.success;\n\nreturn [{\n  json: {\n    success: allSuccess,\n    summary: {\n      synced: totalSynced,\n      failed: totalFailed\n    },\n    results: {\n      orders: orders.summary,\n      invoices: invoices.summary,\n      customers: customers.summary\n    }\n  }\n}];"
+      },
+      "id": "merge-results",
+      "name": "Merge Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [700, 400]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.success }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "check-success",
+      "name": "Success?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [900, 400]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO integration_logs (source, service, operation, level, status, message, details_json)\nVALUES (\n  'unleashed',\n  'orders_sync',\n  'sync',\n  'info',\n  'success',\n  'Synced {{ $json.summary.synced }} records (orders, invoices, customers)',\n  '{{ JSON.stringify($json) }}'::jsonb\n)",
+        "options": {}
+      },
+      "id": "log-success",
+      "name": "Log Success",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [1100, 300],
+      "credentials": {
+        "postgres": {
+          "id": "supabase",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO integration_logs (source, service, operation, level, status, message, details_json)\nVALUES (\n  'unleashed',\n  'orders_sync',\n  'sync',\n  'error',\n  'failed',\n  'Orders sync had failures',\n  '{{ JSON.stringify($json) }}'::jsonb\n)",
+        "options": {}
+      },
+      "id": "log-error",
+      "name": "Log Error",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [1100, 500],
+      "credentials": {
+        "postgres": {
+          "id": "supabase",
+          "name": "Supabase"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Every Hour": {
+      "main": [
+        [
+          {
+            "node": "Sync Sales Orders",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Sync Invoices",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Sync Customers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sync Sales Orders": {
+      "main": [
+        [
+          {
+            "node": "Merge Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sync Invoices": {
+      "main": [
+        [
+          {
+            "node": "Merge Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sync Customers": {
+      "main": [
+        [
+          {
+            "node": "Merge Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Results": {
+      "main": [
+        [
+          {
+            "node": "Success?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Success?": {
+      "main": [
+        [
+          {
+            "node": "Log Success",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1",
+  "id": "unleashed-orders-sync",
+  "meta": {
+    "instanceId": "master-ops"
+  },
+  "tags": [
+    {
+      "name": "teelixir"
+    },
+    {
+      "name": "unleashed"
+    },
+    {
+      "name": "sync"
+    }
+  ]
+}
