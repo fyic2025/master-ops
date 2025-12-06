@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import {
   Zap, Mail, Gift, Clock, CheckCircle2, XCircle, ChevronRight, Loader2,
-  Target, Copy, CheckCircle, RefreshCw
+  Target, Copy, CheckCircle, RefreshCw, ShieldCheck
 } from 'lucide-react'
 import { getAutomationsForBusiness, AUTOMATION_REGISTRY } from '@/lib/automations/registry'
 import type { AutomationDefinition, AutomationConfig, AutomationStats } from '@/lib/automations/types'
@@ -17,6 +17,7 @@ const iconMap: Record<string, React.ElementType> = {
   Gift,
   Target,
   Zap,
+  ShieldCheck,
 }
 
 export default function AutomationsPage() {

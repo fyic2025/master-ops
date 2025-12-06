@@ -114,28 +114,33 @@ export const AUTOMATION_REGISTRY: Record<string, AutomationDefinition> = {
   // ============================================================================
   // BOO AUTOMATIONS
   // ============================================================================
-  boo_email_sequences: {
-    slug: 'boo_email_sequences',
-    name: 'Email Sequences',
-    description: 'Multi-step email automation for welcome, cart recovery, and winback',
-    category: 'email',
-    icon: 'Mail',
+  boo_checkout_health: {
+    slug: 'boo_checkout_health',
+    name: 'Checkout Health Monitor',
+    description: 'Proactive checkout issue detection - inventory, shipping, errors, API health',
+    category: 'monitoring',
+    icon: 'ShieldCheck',
     supportedBusinesses: ['boo'],
-    processScript: 'buy-organics-online/email-marketing/scripts/process-email-queue.ts',
+    processScript: 'buy-organics-online/scripts/checkout-health-monitor.ts',
     relevantFiles: [
-      'buy-organics-online/email-marketing/scripts/process-email-queue.ts',
-      'infra/supabase/migrations/20251201_boo_email_marketing.sql',
+      'buy-organics-online/scripts/checkout-health-monitor.ts',
+      'buy-organics-online/diagnose-checkout-issues.js',
+      'infra/supabase/schema-bigcommerce-checkout.sql',
     ],
-    configTable: 'boo_email_automation_config',
-    queueTable: 'boo_email_automation_queue',
+    configTable: 'boo_checkout_health_config',
+    logsTable: 'checkout_error_logs',
+    statsView: 'boo_checkout_health_stats',
     defaultConfig: {
-      daily_limit: 200,
-      send_window_start: 9,
-      send_window_end: 18,
+      check_interval_minutes: 15,
+      error_threshold: 5,
+      inventory_check_enabled: true,
+      shipping_check_enabled: true,
+      api_health_check_enabled: true,
     },
     endpoints: {
       config: '/api/automations/config',
-      stats: '/api/automations/boo/email/stats',
+      stats: '/api/automations/boo/checkout/stats',
+      recent: '/api/automations/boo/checkout/recent',
     },
   },
 }
