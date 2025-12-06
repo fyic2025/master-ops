@@ -205,7 +205,7 @@ export function generateSeoFixPrompt(issue: SeoIssue): string {
   const description = issueTypeDescriptions[issue.issue_type] || 'Unknown issue type'
   const autoFixable = isAutoFixable(issue.issue_type)
 
-  const trafficInfo = issue.traffic_before && issue.traffic_after !== undefined
+  const trafficInfo = issue.traffic_before && issue.traffic_after !== undefined && issue.traffic_after !== null
     ? `\n**Traffic Impact**: ${issue.traffic_before} → ${issue.traffic_after} impressions (${Math.round(((issue.traffic_after - issue.traffic_before) / issue.traffic_before) * 100)}%)`
     : ''
 

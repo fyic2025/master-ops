@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
-import { RefreshCw, TrendingUp, TrendingDown, MousePointerClick, Eye, Target, BarChart3, AlertTriangle, FileWarning, ExternalLink, Tag, FileText, FolderOpen, ShoppingBag, Home } from 'lucide-react'
+import { RefreshCw, TrendingUp, TrendingDown, MousePointerClick, Eye, Target, BarChart3, AlertTriangle, FileWarning, ExternalLink, Tag, FileText, FolderOpen, ShoppingBag, Home, Wrench } from 'lucide-react'
 import DateRangeSelector, { DateRange, getDatePresets, getCompareRange } from '@/components/DateRangeSelector'
+import { SeoIssuesPanel } from '@/components/seo'
 
 interface SEOMetrics {
   clicks: number | null
@@ -41,6 +42,7 @@ interface PagesResponse {
 }
 
 type PageTypeFilter = 'all' | 'homepage' | 'category' | 'brand' | 'blog' | 'other'
+type MainTab = 'performance' | 'issues'
 
 function formatNumber(value: number | null | undefined): string {
   if (value == null) return '--'
@@ -71,6 +73,9 @@ export default function SEODashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [pageTypeFilter, setPageTypeFilter] = useState<PageTypeFilter>('all')
+
+  // Tab state
+  const [mainTab, setMainTab] = useState<MainTab>('performance')
 
   // Date range state
   const presets = getDatePresets()
@@ -186,6 +191,47 @@ export default function SEODashboard() {
         </div>
       )}
 
+      {/* Main Tab Navigation */}
+      <div className="flex gap-1 p-1 bg-gray-900 border border-gray-800 rounded-lg w-fit">
+        <button
+          onClick={() => setMainTab('performance')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+            mainTab === 'performance'
+              ? 'bg-purple-600 text-white'
+              : 'text-gray-400 hover:text-white hover:bg-gray-800'
+          }`}
+        >
+          <BarChart3 className="w-4 h-4" />
+          Performance
+        </button>
+        <button
+          onClick={() => setMainTab('issues')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+            mainTab === 'issues'
+              ? 'bg-purple-600 text-white'
+              : 'text-gray-400 hover:text-white hover:bg-gray-800'
+          }`}
+        >
+          <Wrench className="w-4 h-4" />
+          Issues
+          {metrics?.totalIssues ? (
+            <span className={`px-1.5 py-0.5 rounded-full text-xs ${
+              mainTab === 'issues' ? 'bg-white/20' : 'bg-red-500/20 text-red-400'
+            }`}>
+              {metrics.totalIssues}
+            </span>
+          ) : null}
+        </button>
+      </div>
+
+      {/* Issues Tab */}
+      {mainTab === 'issues' && (
+        <SeoIssuesPanel business={business} />
+      )}
+
+      {/* Performance Tab */}
+      {mainTab === 'performance' && (
+        <>
       {/* Key Metrics Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <MetricCard
@@ -369,6 +415,8 @@ export default function SEODashboard() {
             Issue tracking data may still be available.
           </p>
         </section>
+      )}
+        </>
       )}
     </div>
   )
