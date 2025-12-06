@@ -7,7 +7,21 @@
  * from supplier_products. Stores stock info in notes JSON field.
  */
 
-require('dotenv').config({ path: '../MASTER-CREDENTIALS-COMPLETE.env' });
+// Load environment variables from multiple possible locations
+const dotenv = require('dotenv');
+const pathModule = require('path');
+
+const envPaths = [
+  pathModule.join(__dirname, '../.env'),
+  pathModule.join(__dirname, '../../.env'),
+  '/var/www/master-ops/.env',
+  pathModule.join(__dirname, '../MASTER-CREDENTIALS-COMPLETE.env')
+];
+
+for (const envPath of envPaths) {
+  dotenv.config({ path: envPath });
+}
+
 const { createClient } = require('@supabase/supabase-js');
 
 const supabase = createClient(

@@ -28,15 +28,21 @@ const supabase = createClient(
   process.env.BOO_SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzaWJueXNxZWxvdmZ1Y3Rta3F3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDQ4ODA4OCwiZXhwIjoyMDY2MDY0MDg4fQ.B9uihsaUvwkJWFAuKAtu7uij1KiXVoiHPHa9mm-Tz1s'
 );
 
-// Run a supplier loader script
+// Run a supplier loader script (from current directory)
 function runLoader(scriptName) {
+  const scriptPath = path.join(__dirname, scriptName);
+  return runScript(scriptPath, []);
+}
+
+// Run any script with optional arguments
+function runScript(scriptPath, args = []) {
   return new Promise((resolve, reject) => {
-    const scriptPath = path.join(__dirname, scriptName);
-    console.log(`\n>>> Running ${scriptName}...\n`);
+    const scriptName = path.basename(scriptPath);
+    console.log(`\n>>> Running ${scriptName}${args.length ? ' ' + args.join(' ') : ''}...\n`);
 
     const startTime = Date.now();
-    const child = spawn('node', [scriptPath], {
-      cwd: __dirname,
+    const child = spawn('node', [scriptPath, ...args], {
+      cwd: path.dirname(scriptPath),
       stdio: 'inherit',
       env: process.env
     });
@@ -141,6 +147,12 @@ async function syncAllSuppliers() {
   console.log('\n>>> Syncing stock status to product links...\n');
   const stockSyncResult = await runLoader('sync-stock-to-links.js');
   results.push(stockSyncResult);
+
+  // Push availability updates to BigCommerce
+  console.log('\n>>> Updating BigCommerce product availability...\n');
+  const bcUpdatePath = path.resolve(__dirname, '../../../buy-organics-online/update-bc-availability.js');
+  const bcUpdateResult = await runScript(bcUpdatePath, ['--live']);
+  results.push(bcUpdateResult);
 
   const totalDuration = ((Date.now() - startTime) / 1000).toFixed(1);
 

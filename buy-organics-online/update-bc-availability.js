@@ -11,7 +11,21 @@
  * - If supplier has NO stock AND BC is "available" → Update BC to "disabled"
  */
 
-require('dotenv').config({ path: '../MASTER-CREDENTIALS-COMPLETE.env' });
+// Load environment variables from multiple possible locations
+const dotenv = require('dotenv');
+const pathModule = require('path');
+
+const envPaths = [
+  pathModule.join(__dirname, '../.env'),
+  pathModule.join(__dirname, '../../.env'),
+  '/var/www/master-ops/.env',
+  pathModule.join(__dirname, '../MASTER-CREDENTIALS-COMPLETE.env')
+];
+
+for (const envPath of envPaths) {
+  dotenv.config({ path: envPath });
+}
+
 const { createClient } = require('@supabase/supabase-js');
 const axios = require('axios');
 
@@ -21,9 +35,9 @@ const supabase = createClient(
   process.env.BOO_SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzaWJueXNxZWxvdmZ1Y3Rta3F3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDQ4ODA4OCwiZXhwIjoyMDY2MDY0MDg4fQ.B9uihsaUvwkJWFAuKAtu7uij1KiXVoiHPHa9mm-Tz1s'
 );
 
-// BigCommerce API config
-const BC_STORE_HASH = process.env.BC_STORE_HASH || 'hhhi';
-const BC_ACCESS_TOKEN = process.env.BC_ACCESS_TOKEN || 'a96rfpx8xvhkb23h7esqy3y1i0jynpt';
+// BigCommerce API config (check multiple env var naming conventions)
+const BC_STORE_HASH = process.env.BC_BOO_STORE_HASH || process.env.BOO_BC_STORE_HASH || process.env.BC_STORE_HASH || 'hhhi';
+const BC_ACCESS_TOKEN = process.env.BC_BOO_ACCESS_TOKEN || process.env.BOO_BC_ACCESS_TOKEN || process.env.BC_ACCESS_TOKEN || 'a96rfpx8xvhkb23h7esqy3y1i0jynpt';
 const BC_API_URL = `https://api.bigcommerce.com/stores/${BC_STORE_HASH}/v3`;
 
 // Rate limiting

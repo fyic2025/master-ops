@@ -143,6 +143,36 @@ export const AUTOMATION_REGISTRY: Record<string, AutomationDefinition> = {
       recent: '/api/automations/boo/checkout/recent',
     },
   },
+
+  boo_supplier_sync: {
+    slug: 'boo_supplier_sync',
+    name: 'Supplier Stock Sync',
+    description: 'Daily sync of supplier stock levels to BigCommerce availability (8am/8pm AEST)',
+    category: 'sync',
+    icon: 'RefreshCw',
+    supportedBusinesses: ['boo'],
+    processScript: 'dashboard/scripts/boo/sync-all-suppliers.js',
+    relevantFiles: [
+      'dashboard/scripts/boo/sync-all-suppliers.js',
+      'dashboard/scripts/boo/sync-stock-to-links.js',
+      'buy-organics-online/update-bc-availability.js',
+      'buy-organics-online/link-products-to-suppliers.ts',
+      'dashboard/scripts/boo/load-uhp-products.js',
+      'dashboard/scripts/boo/load-kadac-products.js',
+      'dashboard/scripts/boo/load-oborne-products.js',
+      'dashboard/scripts/boo/load-unleashed-products.js',
+    ],
+    configTable: 'automation_logs',
+    defaultConfig: {
+      schedule: '8am and 8pm AEST',
+      suppliers: ['uhp', 'kadac', 'oborne', 'unleashed'],
+    },
+    endpoints: {
+      config: '/api/automations/config',
+      stats: '/api/automations/boo/supplier/stats',
+      recent: '/api/automations/boo/supplier/logs',
+    },
+  },
 }
 
 // Get automations for a specific business
