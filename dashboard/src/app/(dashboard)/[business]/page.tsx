@@ -9,6 +9,7 @@ import AwsMigrationWidget from '@/components/AwsMigrationWidget'
 import { DispatchProblemsWidget } from '@/components/DispatchProblemsWidget'
 import { DropletCapacityWidget } from '@/components/DropletCapacityWidget'
 import { PageImprovementsWidget } from '@/components/PageImprovementsWidget'
+import { CriticalSyncsWidget } from '@/components/CriticalSyncsWidget'
 
 export default function BusinessDashboard({
   params,
@@ -74,6 +75,12 @@ function HomeDashboard() {
             color="bg-amber-500"
           />
         </div>
+      </section>
+
+      {/* Critical Syncs - Most Important */}
+      <section>
+        <h2 className="text-xl font-semibold text-white mb-4">Critical Syncs</h2>
+        <CriticalSyncsWidget />
       </section>
 
       {/* Page Improvements Awaiting Review */}
