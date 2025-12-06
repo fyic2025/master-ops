@@ -8,6 +8,7 @@ import { JobMonitoringWidget } from '@/components/JobMonitoringWidget'
 import AwsMigrationWidget from '@/components/AwsMigrationWidget'
 import { DispatchProblemsWidget } from '@/components/DispatchProblemsWidget'
 import { DropletCapacityWidget } from '@/components/DropletCapacityWidget'
+import { PageImprovementsWidget } from '@/components/PageImprovementsWidget'
 
 export default function BusinessDashboard({
   params,
@@ -73,6 +74,12 @@ function HomeDashboard() {
             color="bg-amber-500"
           />
         </div>
+      </section>
+
+      {/* Page Improvements Awaiting Review */}
+      <section>
+        <h2 className="text-xl font-semibold text-white mb-4">Page Improvements</h2>
+        <PageImprovementsWidget />
       </section>
 
       {/* Job Monitoring + Integration Status */}

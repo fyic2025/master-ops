@@ -254,3 +254,96 @@ For task types requiring human approval initially:
    - Mark task type as "validated"
    - Human approval no longer required
    - Document in validated_tasks.md
+
+---
+
+## Dashboard Page Monitoring (Secondary Responsibility)
+
+You are responsible for monitoring and analyzing dashboard pages as a secondary task.
+
+### Database Tables
+
+- `dashboard_pages` - Catalog of all 42 pages with metadata
+- `dashboard_page_analysis` - Analysis history
+- `dashboard_page_improvements` - Suggested improvements awaiting review
+
+### Triggers
+
+1. **Page file changes** - Via git webhook when page.tsx files change
+2. **Daily sweep** - At 6:00 AM for pages not analyzed in 7+ days
+
+### Analysis Process
+
+For each page requiring analysis:
+
+1. **Detect change** → Load page code from file_path
+2. **Activate skills** → Load ALL skills_required for the page (MANDATORY)
+3. **Analyze comprehensively:**
+   - **UX** (frontend-design skill) - Navigation, layout, mobile, accessibility
+   - **Performance** (webapp-testing skill) - Component complexity, API efficiency
+   - **Code quality** - TypeScript strictness, deprecated patterns, security
+   - **Feature completeness** - Coming soon vs implemented status
+4. **Log findings** → Insert to `dashboard_page_analysis`
+5. **Create improvements** → Insert to `dashboard_page_improvements` (status: pending_review)
+6. **DO NOT auto-create tasks** → Jayson reviews on home page first
+
+### Mandatory Skill Activation
+
+**CRITICAL:** Before analyzing ANY dashboard page:
+
+1. Query `dashboard_pages` for the page's `skills_required` field
+2. Activate ALL listed skills using `/skill <name>`
+3. Log `skills_used` in the analysis record
+4. If `skills_required` is empty, use defaults: `frontend-design`, `webapp-testing`, `supabase-expert`
+
+Example:
+```
+Page: /:business/stock
+skills_required: ['frontend-design', 'supabase-expert', 'stock-alert-predictor']
+
+Before analysis, activate:
+/skill frontend-design
+/skill supabase-expert
+/skill stock-alert-predictor
+```
+
+### Improvement Types
+
+| Type | What to Check |
+|------|---------------|
+| `ux` | Navigation, layout, mobile responsiveness, accessibility, loading states |
+| `performance` | Component complexity, API call efficiency, bundle size, re-renders |
+| `feature` | Missing CRUD, missing error handling, coming_soon → implemented |
+| `code_quality` | TypeScript errors, deprecated patterns, security issues, test coverage |
+
+### Scoring
+
+Calculate `improvement_score` (0-100) based on:
+- UX quality: 25 points
+- Performance: 25 points
+- Feature completeness: 25 points
+- Code quality: 25 points
+
+### Escalation
+
+- **Improvement score < 50** → Flag as critical, notify Co-Founder
+- **5+ pending improvements for same page** → Notify Co-Founder
+- **Systemic issues** (same problem across multiple pages) → Escalate
+
+### Reporting
+
+Include in weekly CI report:
+```
+### Dashboard Page Health
+| Category | Pages | Avg Score | Pending | Stale |
+|----------|-------|-----------|---------|-------|
+| operations | X | X% | X | X |
+| marketing | X | X% | X | X |
+| ... | ... | ... | ... | ... |
+
+Critical pages (score < 50):
+- [Page name] - [Issue summary]
+
+Top improvements pending:
+1. [Page] - [Improvement title] - Priority X/10
+```

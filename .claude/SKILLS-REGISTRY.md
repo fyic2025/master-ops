@@ -22,6 +22,52 @@ Use this registry to identify applicable skills before starting ANY task.
 | **Automation** | n8n-workflow-manager, webhook-event-router | dashboard-automation |
 | **Lead Generation** | apify-expert | supabase-expert, email-campaign-manager |
 | **UI/UX Design** | frontend-design, canvas-design, web-artifacts-builder | brand-guidelines, theme-factory |
+| **Dashboard Page Analysis** | frontend-design, webapp-testing | supabase-expert, + page-specific skills |
+
+---
+
+## Dashboard Page Analysis (Mandatory Skills)
+
+**When working on ANY dashboard page task, you MUST:**
+
+1. Query `dashboard_pages` table for the page's `skills_required` field
+2. Activate ALL listed skills using `/skill <name>`
+3. Log `skills_used` in any analysis records
+
+### Default Skills for Page Analysis
+
+If `skills_required` is empty, use these defaults:
+- `frontend-design` - UX/layout analysis
+- `webapp-testing` - Quality checks
+- `supabase-expert` - Data patterns
+
+### Page Category → Required Skills
+
+| Category | Default Skills |
+|----------|---------------|
+| operations | frontend-design, supabase-expert, stock-alert-predictor |
+| marketing | frontend-design, google-ads-manager, gsc-expert |
+| finance | frontend-design, supabase-expert |
+| automation | frontend-design, n8n-workflow-manager, klaviyo-expert |
+| integrations | frontend-design, supabase-expert, integration-tester |
+| customers | frontend-design, shopify-expert, customer-segmentation-engine |
+
+### Example
+
+```
+Analyzing: /:business/stock page
+
+1. Query skills_required → ['frontend-design', 'supabase-expert', 'stock-alert-predictor']
+
+2. Activate skills:
+   /skill frontend-design
+   /skill supabase-expert
+   /skill stock-alert-predictor
+
+3. Perform analysis using all skill methodologies
+
+4. Log skills_used: ['frontend-design', 'supabase-expert', 'stock-alert-predictor']
+```
 
 ---
 

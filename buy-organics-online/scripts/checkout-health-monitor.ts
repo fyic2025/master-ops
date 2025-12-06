@@ -30,8 +30,8 @@ const supabase = createClient(
 )
 
 // BigCommerce config
-const BC_STORE_HASH = process.env.BOO_BC_STORE_HASH || 'hhhi'
-const BC_ACCESS_TOKEN = process.env.BOO_BC_ACCESS_TOKEN || ''
+const BC_STORE_HASH = process.env.BC_BOO_STORE_HASH || process.env.BOO_BC_STORE_HASH || 'hhhi'
+const BC_ACCESS_TOKEN = process.env.BC_BOO_ACCESS_TOKEN || process.env.BOO_BC_ACCESS_TOKEN || ''
 
 interface HealthCheckResult {
   check_type: string

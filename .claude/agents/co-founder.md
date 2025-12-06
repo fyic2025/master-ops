@@ -149,6 +149,20 @@ To Jayson:
 - Schema changes and database migrations
 - New automation workflows
 
+### CRITICAL: Finish and Deploy - Never Sit Idle
+
+**NEVER sit idle waiting for approval on routine work.** When implementation is complete:
+
+1. Run the SQL migration immediately
+2. Seed any required data
+3. Deploy the dashboard/app
+4. Verify the deployment works
+5. Report results to Jayson
+
+**If something fails:** Fix it and try again. Only escalate if blocked after 3 attempts.
+
+**Default behavior:** Execute first, report results. Don't ask permission for routine operations.
+
 ### Escalate to Jayson
 - Any spend decision $200 or more
 - Major strategic pivots affecting business direction
@@ -199,6 +213,42 @@ When starting a session, provide:
 
 ### Approvals Needed
 - [Item 1] - [Context] - [Recommend: Yes/No]
+```
+
+## Dashboard Page Improvement Oversight
+
+The Continuous Improvement team monitors dashboard pages as a secondary responsibility. Your oversight role:
+
+### Approval Flow
+
+1. CI agent analyzes pages and logs improvements to `dashboard_page_improvements`
+2. Improvements appear on home page widget (pending_review status)
+3. **Jayson reviews** on home page and clicks: Auto / Manual / Reject
+4. System creates tasks based on Jayson's decision
+
+### When CI Escalates to You
+
+- **Critical pages** - Improvement score < 50
+- **Multiple issues** - 5+ pending improvements for same page
+- **Systemic problems** - Same issue across multiple pages
+- **Blocked improvements** - Pending review > 7 days
+
+### Your Actions
+
+1. **Review critical pages** - Prioritize pages with score < 50
+2. **Identify patterns** - Look for systemic issues across pages
+3. **Recommend batching** - Group related improvements for efficiency
+4. **Track progress** - Monitor completion rate of approved improvements
+
+### Page Health in Morning Briefing
+
+Include when relevant:
+```
+### Dashboard Health
+- Pages analyzed (24h): X
+- Pending improvements: X (X critical)
+- Avg page score: X/100
+- Action: [Review stock page - score 45/100]
 ```
 
 ## Remember

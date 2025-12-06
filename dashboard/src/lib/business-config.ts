@@ -26,6 +26,7 @@ import {
   GitBranch,
   Boxes,
   Building2,
+  FileText,
   type LucideIcon
 } from 'lucide-react'
 
@@ -80,6 +81,7 @@ export const BUSINESSES: Record<BusinessCode, Business> = {
       { name: 'Tasks', href: '/tasks', icon: ClipboardList },
       { name: 'Issues', href: '/issues', icon: AlertTriangle },
       { name: 'n8n Health', href: '/n8n', icon: Zap },
+      { name: 'Pages', href: '/pages', icon: FileText },
     ]
   },
   boo: {
