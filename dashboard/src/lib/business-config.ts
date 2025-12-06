@@ -29,7 +29,6 @@ import {
   FileText,
   Link2,
   CalendarDays,
-  Users,
   type LucideIcon
 } from 'lucide-react'
 
