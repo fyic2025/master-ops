@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     // For now, return instructions to run script manually or deploy script runner
 
     // Check latest pricelists to confirm data freshness
-    const { data: latestPricelists, error: fetchError } = await supabase
+    const { data: latestPricelists, error: fetchError } = await getSupabase()
       .from('rhf_pricelists')
       .select('id, supplier_id, effective_date, item_count, created_at')
       .order('created_at', { ascending: false })
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get supplier names
-    const { data: suppliers } = await supabase
+    const { data: suppliers } = await getSupabase()
       .from('rhf_suppliers')
       .select('id, name')
 
@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   try {
     // Get latest sync logs
-    const { data: logs } = await supabase
+    const { data: logs } = await getSupabase()
       .from('integration_logs')
       .select('*')
       .eq('source', 'rhf')
@@ -118,7 +118,7 @@ export async function GET() {
       .limit(10)
 
     // Get pricelist stats
-    const { data: stats } = await supabase
+    const { data: stats } = await getSupabase()
       .from('rhf_pricelists')
       .select('supplier_id, created_at')
       .order('created_at', { ascending: false })
