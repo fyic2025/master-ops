@@ -78,6 +78,7 @@ interface Product {
   categories: number[]
   images: string[]
   last_synced_at: string
+  is_clearance: boolean
 }
 
 async function fetchPage(page: number): Promise<{ products: any[], hasMore: boolean, total: number }> {
@@ -106,8 +107,14 @@ async function fetchPage(page: number): Promise<{ products: any[], hasMore: bool
 }
 
 function transformProduct(p: any): Product {
+  const sku = p.sku || `BC-${p.id}`
+  const skuLower = sku.toLowerCase()
+
+  // Clearance items: SKU starts with "copy of" or contains "sale"
+  const is_clearance = skuLower.startsWith('copy of') || skuLower.includes('sale')
+
   return {
-    sku: p.sku || `BC-${p.id}`,
+    sku,
     product_id: p.id,
     name: p.name,
     price: parseFloat(p.price) || 0,
@@ -121,7 +128,8 @@ function transformProduct(p: any): Product {
     weight: p.weight ? parseFloat(p.weight) : null,
     categories: p.categories || [],
     images: (p.images || []).map((img: any) => img.url_standard || img.url_thumbnail),
-    last_synced_at: new Date().toISOString()
+    last_synced_at: new Date().toISOString(),
+    is_clearance
   }
 }
 

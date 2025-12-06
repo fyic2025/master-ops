@@ -98,12 +98,17 @@ const SUPPLIER_RULES = {
 
 // Check if product is a clearance/sale item (should be skipped - manual inventory control)
 function isClearanceItem(bcProduct) {
-  const sku = (bcProduct.sku || '').toLowerCase();
+  // Use is_clearance field from database if available (preferred)
+  if (bcProduct.is_clearance === true) {
+    return true;
+  }
 
+  // Fallback to SKU check for backwards compatibility
   // Only skip products with explicit clearance markers in SKU:
   // 1. SKU starts with "copy of" - clearance copies with manual inventory
   // 2. SKU contains "sale" - explicit sale items
   // NOTE: sale_price > 0 alone does NOT make it a clearance item - that's just a normal discount
+  const sku = (bcProduct.sku || '').toLowerCase();
   return sku.startsWith('copy of') || sku.includes('sale');
 }
 
@@ -275,7 +280,8 @@ async function fetchLinkedProducts() {
           inventory_level,
           is_visible,
           price,
-          sale_price
+          sale_price,
+          is_clearance
         ),
         supplier_products!inner(
           id,
