@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
         product_description,
         qty_on_hand,
         available_qty,
-        average_land_price,
+        avg_cost,
         warehouse_code,
         warehouse_guid
       `)
@@ -132,8 +132,8 @@ export async function GET(request: NextRequest) {
       const shopifyQty = shopify?.total_inventory ?? null;
       const difference = shopifyQty !== null ? unleashedQty - shopifyQty : unleashedQty;
 
-      const costDiff = (ul.average_land_price && shopify?.cost)
-        ? ul.average_land_price - shopify.cost
+      const costDiff = (ul.avg_cost && shopify?.cost)
+        ? ul.avg_cost - shopify.cost
         : null;
 
       let matchStatus: StockComparison['match_status'];
@@ -167,7 +167,7 @@ export async function GET(request: NextRequest) {
         unleashed_qty: unleashedQty,
         shopify_qty: shopifyQty,
         difference,
-        unleashed_cost: ul.average_land_price,
+        unleashed_cost: ul.avg_cost,
         shopify_cost: shopify?.cost || null,
         cost_difference: costDiff,
         match_status: matchStatus,
