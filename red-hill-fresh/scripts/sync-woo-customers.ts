@@ -213,52 +213,47 @@ async function syncOrders(woo: WooClient, daysBack: number, verbose: boolean) {
 async function updateCustomerStats() {
   console.log('Updating customer stats...')
 
-  // Update order count, total spent, and dates from orders
-  const { error: statsError } = await supabase.rpc('rhf_update_customer_stats')
+  // Get all customers with woo_id
+  const { data: customers } = await supabase
+    .from('rhf_customers')
+    .select('id, woo_id')
 
-  // If the function doesn't exist, do it manually
-  if (statsError?.message?.includes('does not exist')) {
-    console.log('  Running manual stats update...')
+  let updated = 0
+  for (const customer of customers || []) {
+    // Get order stats for this customer
+    const { data: orders } = await supabase
+      .from('rhf_woo_orders')
+      .select('total, date_created')
+      .eq('woo_customer_id', customer.woo_id)
+      .eq('status', 'completed')
+      .order('date_created', { ascending: false })
 
-    // Get all customers
-    const { data: customers } = await supabase
-      .from('rhf_customers')
-      .select('id, woo_id')
+    if (orders && orders.length > 0) {
+      const orderCount = orders.length
+      const totalSpent = orders.reduce((sum, o) => sum + Number(o.total), 0)
+      const lastOrderDate = orders[0].date_created
+      const firstOrderDate = orders[orders.length - 1].date_created
+      const daysSinceOrder = Math.floor(
+        (Date.now() - new Date(lastOrderDate).getTime()) / (1000 * 60 * 60 * 24)
+      )
 
-    for (const customer of customers || []) {
-      // Get order stats for this customer
-      const { data: orders } = await supabase
-        .from('rhf_woo_orders')
-        .select('total, date_created')
-        .eq('woo_customer_id', customer.woo_id)
-        .eq('status', 'completed')
-        .order('date_created', { ascending: false })
+      await supabase
+        .from('rhf_customers')
+        .update({
+          order_count: orderCount,
+          total_spent: totalSpent,
+          first_order_date: firstOrderDate,
+          last_order_date: lastOrderDate,
+          days_since_order: daysSinceOrder,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', customer.id)
 
-      if (orders && orders.length > 0) {
-        const orderCount = orders.length
-        const totalSpent = orders.reduce((sum, o) => sum + Number(o.total), 0)
-        const lastOrderDate = orders[0].date_created
-        const firstOrderDate = orders[orders.length - 1].date_created
-        const daysSinceOrder = Math.floor(
-          (Date.now() - new Date(lastOrderDate).getTime()) / (1000 * 60 * 60 * 24)
-        )
-
-        await supabase
-          .from('rhf_customers')
-          .update({
-            order_count: orderCount,
-            total_spent: totalSpent,
-            first_order_date: firstOrderDate,
-            last_order_date: lastOrderDate,
-            days_since_order: daysSinceOrder,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', customer.id)
-      }
+      updated++
     }
   }
 
-  console.log('  Stats updated')
+  console.log(`  Updated stats for ${updated} customers`)
 }
 
 async function calculateRFM() {
