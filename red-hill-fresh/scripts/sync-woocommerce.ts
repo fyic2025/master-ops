@@ -1203,13 +1203,15 @@ async function main() {
   }
 
   // Initialize WooCommerce connector
-  const wcUrl = process.env.RHF_WC_URL || process.env.RHF_DOMAIN
-  const wcKey = process.env.RHF_WC_CONSUMER_KEY
-  const wcSecret = process.env.RHF_WC_CONSUMER_SECRET
+  // Credentials from vault: node creds.js load redhillfresh
+  const wcUrl = process.env.REDHILLFRESH_WC_URL || process.env.REDHILLFRESH_DOMAIN || process.env.RHF_WC_URL
+  const wcKey = process.env.REDHILLFRESH_WC_CONSUMER_KEY || process.env.RHF_WC_CONSUMER_KEY
+  const wcSecret = process.env.REDHILLFRESH_WC_CONSUMER_SECRET || process.env.RHF_WC_CONSUMER_SECRET
 
   if (!wcUrl || !wcKey || !wcSecret) {
     console.error('❌ Missing WooCommerce credentials!')
-    console.error('   Set RHF_WC_URL, RHF_WC_CONSUMER_KEY, RHF_WC_CONSUMER_SECRET')
+    console.error('   Load from vault: node creds.js load redhillfresh')
+    console.error('   Expected: REDHILLFRESH_WC_URL, REDHILLFRESH_WC_CONSUMER_KEY, REDHILLFRESH_WC_CONSUMER_SECRET')
     process.exit(1)
   }
 

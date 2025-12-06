@@ -575,16 +575,21 @@ export class WooCommerceConnector extends BaseConnector {
 
 /**
  * Create WooCommerce connector for Red Hill Fresh
+ *
+ * Credentials from vault: node creds.js load redhillfresh
+ * See: .claude/agents/rhf/md.md for full credential reference
  */
 export function createRHFConnector(): WooCommerceConnector {
-  const url = process.env.RHF_WC_URL || process.env.RHF_DOMAIN
-  const consumerKey = process.env.RHF_WC_CONSUMER_KEY
-  const consumerSecret = process.env.RHF_WC_CONSUMER_SECRET
+  // Support both vault naming (REDHILLFRESH_*) and legacy (RHF_*)
+  const url = process.env.REDHILLFRESH_WC_URL || process.env.REDHILLFRESH_DOMAIN || process.env.RHF_WC_URL
+  const consumerKey = process.env.REDHILLFRESH_WC_CONSUMER_KEY || process.env.RHF_WC_CONSUMER_KEY
+  const consumerSecret = process.env.REDHILLFRESH_WC_CONSUMER_SECRET || process.env.RHF_WC_CONSUMER_SECRET
 
   if (!url || !consumerKey || !consumerSecret) {
     throw new Error(
       'Red Hill Fresh WooCommerce credentials not configured. ' +
-      'Set RHF_WC_URL, RHF_WC_CONSUMER_KEY, and RHF_WC_CONSUMER_SECRET environment variables.'
+      'Load from vault: node creds.js load redhillfresh\n' +
+      'Expected: REDHILLFRESH_WC_URL, REDHILLFRESH_WC_CONSUMER_KEY, REDHILLFRESH_WC_CONSUMER_SECRET'
     )
   }
 

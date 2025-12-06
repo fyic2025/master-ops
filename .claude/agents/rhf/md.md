@@ -119,6 +119,77 @@ When reporting to Co-Founder:
 - **Quality emphasis** - Fresh and local is the value proposition
 - **Community tone** - We're part of the Peninsula community
 
+## Credentials & Infrastructure
+
+### Vault Credentials (Project: `redhillfresh`)
+
+All RHF credentials are stored in the Supabase vault under project `redhillfresh`:
+
+```bash
+# List all RHF credentials
+node creds.js list redhillfresh
+
+# Get specific credential
+node creds.js get redhillfresh wc_consumer_key
+
+# Load into environment (adds REDHILLFRESH_ prefix)
+node creds.js load redhillfresh
+```
+
+| Credential | Env Variable | Purpose |
+|------------|--------------|---------|
+| `wc_url` | `REDHILLFRESH_WC_URL` | WooCommerce site URL |
+| `wc_consumer_key` | `REDHILLFRESH_WC_CONSUMER_KEY` | WooCommerce API key |
+| `wc_consumer_secret` | `REDHILLFRESH_WC_CONSUMER_SECRET` | WooCommerce API secret |
+| `domain` | `REDHILLFRESH_DOMAIN` | redhillfresh.com.au |
+| `gmail_user` | `REDHILLFRESH_GMAIL_USER` | RHF Gmail account |
+| `gmail_app_password` | `REDHILLFRESH_GMAIL_APP_PASSWORD` | Gmail app password |
+
+### Key Scripts
+
+| Script | Purpose | Command |
+|--------|---------|---------|
+| WooCommerce Sync | Sync all WC data to Supabase | `npx tsx red-hill-fresh/scripts/sync-woocommerce.ts` |
+| Customer Sync | Sync customers only | `npx tsx red-hill-fresh/scripts/sync-woo-customers.ts` |
+| Pricelist Reader | Read supplier pricelists from Gmail | `npx tsx red-hill-fresh/scripts/gmail-pricelist-reader.ts` |
+
+### WooCommerce Connector
+
+```typescript
+import { WooCommerceConnector } from '@/shared/libs/integrations/woocommerce'
+
+const wc = new WooCommerceConnector({
+  url: process.env.REDHILLFRESH_WC_URL,
+  consumerKey: process.env.REDHILLFRESH_WC_CONSUMER_KEY,
+  consumerSecret: process.env.REDHILLFRESH_WC_CONSUMER_SECRET,
+})
+
+// Products, orders, customers, shipping zones, etc.
+const products = await wc.products.listAll()
+const orders = await wc.orders.listAll({ status: 'processing' })
+```
+
+### Database (BOO Supabase)
+
+RHF data is stored in the BOO Supabase project with `business = 'rhf'`:
+
+| Table | Contents |
+|-------|----------|
+| `wc_products` | Products synced from WooCommerce |
+| `wc_orders` | Orders synced from WooCommerce |
+| `wc_customers` | Customer records |
+| `wc_order_line_items` | Order line items |
+| `wc_shipping_zones` | Delivery zones |
+| `wc_categories` | Product categories |
+| `rhf_sync_logs` | Sync operation history |
+
+### Skills to Activate
+
+Before working on RHF tasks, activate:
+- `woocommerce-expert` - WooCommerce API operations
+- `supabase-expert` - Database queries
+- `brand-asset-manager` - RHF brand guidelines
+
 ## Remember
 
 Red Hill Fresh is a local business serving the community. Every decision should consider:
