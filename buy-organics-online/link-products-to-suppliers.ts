@@ -46,31 +46,57 @@ interface ProductLink {
 async function fetchEcommerceProducts(): Promise<EcommerceProduct[]> {
   console.log('📦 Fetching BigCommerce products...')
 
-  const { data, error } = await supabase
-    .from('ecommerce_products')
-    .select('id, sku, name, barcode, gtin, upc, ean')
+  const PAGE_SIZE = 1000
+  let allData: EcommerceProduct[] = []
+  let page = 0
+  let hasMore = true
 
-  if (error) {
-    throw new Error(`Failed to fetch ecommerce products: ${error.message}`)
+  while (hasMore) {
+    const { data, error } = await supabase
+      .from('ecommerce_products')
+      .select('id, sku, name, barcode, gtin, upc, ean')
+      .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1)
+
+    if (error) {
+      throw new Error(`Failed to fetch ecommerce products: ${error.message}`)
+    }
+
+    allData = allData.concat(data)
+    hasMore = data.length === PAGE_SIZE
+    page++
+    console.log(`  → Fetched page ${page} (${allData.length} products so far)`)
   }
 
-  console.log(`  ✓ Fetched ${data.length} products\n`)
-  return data
+  console.log(`  ✓ Fetched ${allData.length} products total\n`)
+  return allData
 }
 
 async function fetchSupplierProducts(): Promise<SupplierProduct[]> {
   console.log('🏭 Fetching supplier products...')
 
-  const { data, error } = await supabase
-    .from('supplier_products')
-    .select('id, supplier_name, supplier_sku, barcode, product_name')
+  const PAGE_SIZE = 1000
+  let allData: SupplierProduct[] = []
+  let page = 0
+  let hasMore = true
 
-  if (error) {
-    throw new Error(`Failed to fetch supplier products: ${error.message}`)
+  while (hasMore) {
+    const { data, error } = await supabase
+      .from('supplier_products')
+      .select('id, supplier_name, supplier_sku, barcode, product_name')
+      .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1)
+
+    if (error) {
+      throw new Error(`Failed to fetch supplier products: ${error.message}`)
+    }
+
+    allData = allData.concat(data)
+    hasMore = data.length === PAGE_SIZE
+    page++
+    console.log(`  → Fetched page ${page} (${allData.length} products so far)`)
   }
 
-  console.log(`  ✓ Fetched ${data.length} products\n`)
-  return data
+  console.log(`  ✓ Fetched ${allData.length} products total\n`)
+  return allData
 }
 
 function normalizeBarcode(barcode: string | null | undefined): string | null {
