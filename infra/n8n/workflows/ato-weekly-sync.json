@@ -1,0 +1,248 @@
+{
+  "name": "ATO Rulings Weekly Sync",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 6 * * 1"
+            }
+          ]
+        }
+      },
+      "id": "weekly-monday-trigger",
+      "name": "Weekly Monday 6am AEST",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [260, 300],
+      "notes": "Runs every Monday at 6am AEST"
+    },
+    {
+      "parameters": {
+        "command": "cd /var/www/master-ops && npx tsx infra/scripts/sync-ato-rulings.ts --verbose 2>&1"
+      },
+      "id": "run-ato-sync",
+      "name": "Run ATO Sync Script",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [480, 300],
+      "credentials": {
+        "sshPassword": {
+          "id": "n8n-droplet",
+          "name": "n8n Primary Droplet"
+        }
+      },
+      "notes": "Syncs ATO rulings from RSS feed. Filters for relevant topics and detects supersession."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse sync output to extract counts\nconst output = $input.first().json.stdout || '';\n\n// Extract totals from summary\nconst foundMatch = output.match(/Found in feed:\\s*(\\d+)/);\nconst filteredMatch = output.match(/Filtered \\(skip\\):\\s*(\\d+)/);\nconst addedMatch = output.match(/Added \\(new\\):\\s*(\\d+)/);\nconst archivedMatch = output.match(/Archived:\\s*(\\d+)/);\n\nconst result = {\n  found: foundMatch ? parseInt(foundMatch[1]) : 0,\n  filtered: filteredMatch ? parseInt(filteredMatch[1]) : 0,\n  added: addedMatch ? parseInt(addedMatch[1]) : 0,\n  archived: archivedMatch ? parseInt(archivedMatch[1]) : 0,\n  success: !output.includes('Fatal error') && !output.includes('ERROR:'),\n  output: output.slice(-2000) // Last 2000 chars for logging\n};\n\nresult.shouldFetchFullText = result.added > 0;\n\nreturn result;"
+      },
+      "id": "parse-sync-output",
+      "name": "Parse Sync Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [700, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.shouldFetchFullText }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "check-new-rulings",
+      "name": "New Rulings Added?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [920, 300]
+    },
+    {
+      "parameters": {
+        "command": "cd /var/www/master-ops && npx tsx infra/scripts/fetch-ruling-fulltext.ts --pending-only --limit=20 --verbose 2>&1"
+      },
+      "id": "fetch-fulltext",
+      "name": "Fetch Full Text Content",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [1140, 200],
+      "credentials": {
+        "sshPassword": {
+          "id": "n8n-droplet",
+          "name": "n8n Primary Droplet"
+        }
+      },
+      "notes": "Fetches full ruling content from ATO website for new pending rulings."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://qcvfxxsnqvdfmpbcgdni.supabase.co/rest/v1/ato_sync_log",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=minimal"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"feed_url\": \"n8n_daily_sync\",\n  \"sync_type\": \"rss_poll\",\n  \"rulings_found\": {{ $json.found || 0 }},\n  \"rulings_added\": {{ $json.added || 0 }},\n  \"rulings_updated\": 0,\n  \"error_message\": {{ $json.success ? 'null' : JSON.stringify($json.output.slice(-500)) }},\n  \"completed_at\": \"{{ $now.toISO() }}\"\n}"
+      },
+      "id": "log-sync-result",
+      "name": "Log Sync to Supabase",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1140, 400]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ !$json.success }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "check-failure",
+      "name": "Sync Failed?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1360, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://qcvfxxsnqvdfmpbcgdni.supabase.co/rest/v1/dashboard_alerts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=minimal"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"business\": \"overall\",\n  \"type\": \"error\",\n  \"title\": \"ATO Rulings Sync Failed\",\n  \"message\": \"Daily sync failed. Check n8n logs.\",\n  \"action_url\": \"/overall/ato\",\n  \"action_label\": \"View ATO Rulings\"\n}"
+      },
+      "id": "create-failure-alert",
+      "name": "Create Failure Alert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1580, 300]
+    }
+  ],
+  "connections": {
+    "Weekly Monday 6am AEST": {
+      "main": [
+        [
+          {
+            "node": "Run ATO Sync Script",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run ATO Sync Script": {
+      "main": [
+        [
+          {
+            "node": "Parse Sync Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Sync Results": {
+      "main": [
+        [
+          {
+            "node": "New Rulings Added?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Log Sync to Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New Rulings Added?": {
+      "main": [
+        [
+          {
+            "node": "Fetch Full Text Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Sync to Supabase": {
+      "main": [
+        [
+          {
+            "node": "Sync Failed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sync Failed?": {
+      "main": [
+        [
+          {
+            "node": "Create Failure Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Australia/Melbourne"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "ato"
+    },
+    {
+      "name": "compliance"
+    },
+    {
+      "name": "daily"
+    }
+  ]
+}
