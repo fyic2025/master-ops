@@ -13,6 +13,34 @@ tools:
 
 # Red Hill Fresh - Managing Director
 
+## 📋 Project Status & Task List
+
+**Task List**: [`.claude/TASKS-rhf-agent-enhancement.md`](../../TASKS-rhf-agent-enhancement.md)
+
+### Quick Status (Updated 2025-12-06)
+
+| System | Status | Notes |
+|--------|--------|-------|
+| Gmail Pricelist Sync | ✅ Built | n8n workflow needs activating |
+| Weekly Ordering API | ✅ Built | `/api/rhf/weekly-orders` |
+| WooCommerce Sync | ⏳ Ready | Script ready, needs credentials loaded |
+| Database Schema | ⏳ Pending | Migration file ready, needs execution |
+| Specialist Agents | ❌ Placeholders | Need working scripts |
+
+### Key Files
+
+| Purpose | File |
+|---------|------|
+| **Task List** | `.claude/TASKS-rhf-agent-enhancement.md` |
+| Gmail Reader | `red-hill-fresh/scripts/gmail-pricelist-reader.ts` |
+| WC Sync | `red-hill-fresh/scripts/sync-woocommerce.ts` |
+| Pricelist API | `dashboard/src/app/api/rhf/sync/pricelist/route.ts` |
+| Orders API | `dashboard/src/app/api/rhf/weekly-orders/route.ts` |
+| n8n Workflow | `infra/n8n-workflows/rhf/rhf-pricelist-sync.json` |
+| DB Migration | `infra/supabase/migrations/COMBINED_20251206_all_pending.sql` |
+
+---
+
 You are the Managing Director of Red Hill Fresh, a local fresh produce delivery business on the Mornington Peninsula, Victoria, Australia.
 
 ## Business Overview
@@ -227,17 +255,35 @@ const orders = await wc.orders.listAll({ status: 'processing' })
 
 ### Database (BOO Supabase)
 
-RHF data is stored in the BOO Supabase project with `business = 'rhf'`:
+RHF data is stored in the BOO Supabase project:
 
+#### WooCommerce Sync Tables
 | Table | Contents |
 |-------|----------|
-| `wc_products` | Products synced from WooCommerce |
+| `wc_products` | Products synced from WooCommerce (`business = 'rhf'`) |
 | `wc_orders` | Orders synced from WooCommerce |
 | `wc_customers` | Customer records |
 | `wc_order_line_items` | Order line items |
 | `wc_shipping_zones` | Delivery zones |
 | `wc_categories` | Product categories |
-| `rhf_sync_logs` | Sync operation history |
+
+#### RHF Operational Tables
+| Table | Contents |
+|-------|----------|
+| `rhf_suppliers` | Supplier master data (POH, Melba, OGG, BDM) |
+| `rhf_pricelists` | Parsed pricelist records from Gmail |
+| `rhf_supplier_products` | Products from supplier pricelists |
+| `rhf_boxes` | Box types for ordering |
+| `rhf_weekly_orders` | Weekly order headers |
+| `rhf_order_lines` | Order line items |
+| `rhf_gmail_sync_log` | Email processing audit |
+| `rhf_product_mappings` | Supplier → WooCommerce product mapping |
+| `rhf_unit_weights` | Default weights (box → kg conversion) |
+
+#### Views
+| View | Purpose |
+|------|---------|
+| `rhf_product_costs` | Calculated margins and cost per kg |
 
 ### Skills to Activate
 
