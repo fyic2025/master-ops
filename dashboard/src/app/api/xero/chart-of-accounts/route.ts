@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
-import { xeroClient } from '@/shared/libs/integrations/xero/client'
+
 
 export const dynamic = 'force-dynamic'
 
@@ -74,96 +74,10 @@ export async function GET(request: NextRequest) {
 }
 
 // POST /api/xero/chart-of-accounts - Sync from Xero
-export async function POST(request: NextRequest) {
-  try {
-    const supabase = createServerClient()
-    const body = await request.json()
-
-    const { business } = body
-
-    if (!business) {
-      return NextResponse.json({ error: 'Business slug is required' }, { status: 400 })
-    }
-
-    // Get Xero tokens for this business
-    const { data: tokenData, error: tokenError } = await supabase
-      .from('xero_tokens')
-      .select('*')
-      .eq('business_slug', business)
-      .eq('status', 'active')
-      .single()
-
-    if (tokenError || !tokenData) {
-      return NextResponse.json(
-        { error: 'Xero not connected for this business. Please connect Xero first.' },
-        { status: 400 }
-      )
-    }
-
-    // Set tenant and tokens
-    xeroClient.setTenant(tokenData.tenant_id)
-    xeroClient.storeTokens(tokenData.tenant_id, {
-      access_token: tokenData.access_token,
-      refresh_token: tokenData.refresh_token,
-      token_type: 'Bearer',
-      expires_in: Math.floor((new Date(tokenData.expires_at).getTime() - Date.now()) / 1000),
-      scope: tokenData.scope || '',
-    })
-
-    // Fetch accounts from Xero
-    const xeroAccounts = await xeroClient.accounts.list()
-
-    // Sync to Supabase
-    const synced: any[] = []
-    const errors: any[] = []
-
-    for (const account of xeroAccounts) {
-      try {
-        // Upsert account
-        const { data: accountData, error: upsertError } = await supabase
-          .from('xero_chart_of_accounts')
-          .upsert(
-            {
-              business_slug: business,
-              xero_account_id: account.AccountID,
-              code: account.Code,
-              name: account.Name,
-              type: account.Type,
-              class: account.Class,
-              status: account.Status || 'ACTIVE',
-              tax_type: account.TaxType,
-              description: account.Description,
-              last_synced_at: new Date().toISOString(),
-              xero_raw_data: account,
-            },
-            {
-              onConflict: 'business_slug,xero_account_id',
-            }
-          )
-          .select()
-          .single()
-
-        if (upsertError) {
-          errors.push({ account: account.Code, error: upsertError.message })
-        } else {
-          synced.push(accountData)
-        }
-      } catch (err: any) {
-        errors.push({ account: account.Code, error: err.message })
-      }
-    }
-
-    return NextResponse.json({
-      success: true,
-      synced: synced.length,
-      errors: errors.length,
-      details: {
-        synced: synced.length,
-        errors,
-      },
-    })
-  } catch (error: any) {
-    console.error('Chart of accounts sync error:', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
-  }
+// TODO: Xero client integration pending - use server-side script for now
+export async function POST() {
+  return NextResponse.json(
+    { error: 'Xero sync not available in dashboard. Use CLI script.' },
+    { status: 501 }
+  )
 }

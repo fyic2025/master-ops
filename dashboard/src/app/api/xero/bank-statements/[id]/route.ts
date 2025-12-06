@@ -120,7 +120,7 @@ export async function PATCH(
         await supabase
           .from('xero_chart_of_accounts')
           .update({
-            use_count: supabase.raw('use_count + 1'),
+            // use_count increment removed
             last_used_at: new Date().toISOString(),
           })
           .eq('business_slug', statement.business_slug)
