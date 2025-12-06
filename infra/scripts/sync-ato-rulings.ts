@@ -92,8 +92,10 @@ interface SyncResult {
   feed: string
   success: boolean
   rulings_found: number
+  rulings_filtered: number  // Skipped as not relevant
   rulings_added: number
   rulings_updated: number
+  rulings_archived: number  // Superseded rulings archived
   error_message?: string
 }
 
@@ -196,6 +198,175 @@ function cleanDescription(description: string): string {
     .replace(/<[^>]*>/g, '') // Remove any HTML tags
     .replace(/\s+/g, ' ')
     .trim()
+}
+
+// ============================================================================
+// RELEVANCE FILTERING
+// ============================================================================
+
+/**
+ * Keywords that indicate a ruling is relevant to e-commerce/retail businesses
+ */
+const RELEVANT_KEYWORDS = [
+  // GST (all businesses collect/remit)
+  'gst', 'goods and services tax', 'taxable supply', 'input tax credit',
+  'gst-free', 'gst free', 'tax invoice',
+  // Small business
+  'small business', 'simplified depreciation', 'instant asset write-off',
+  'small business entity', 'aggregated turnover',
+  // Trading stock / Inventory
+  'trading stock', 'stock on hand', 'cost of goods', 'inventory',
+  // Deductions
+  'deduction', 'business expense', 'operating expense',
+  // Depreciation
+  'depreciation', 'capital allowance', 'effective life', 'asset write-off',
+  // Employment
+  'payg', 'withholding', 'superannuation', 'super guarantee', 'sgc',
+  'employee', 'wages', 'salary',
+  // FBT
+  'fringe benefit', 'fbt', 'car fringe',
+  // Home office
+  'home office', 'working from home', 'home-based business',
+  // Motor vehicle
+  'motor vehicle', 'car expense', 'logbook', 'cents per kilometre',
+  // Retail specific
+  'retail', 'e-commerce', 'online sales', 'delivery',
+  // Food (RHF relevant)
+  'food', 'fresh produce', 'perishable',
+  // Health products (Teelixir/BOO relevant)
+  'health product', 'supplement', 'therapeutic'
+]
+
+/**
+ * Keywords that indicate a ruling is NOT relevant (skip these)
+ */
+const IRRELEVANT_KEYWORDS = [
+  // Division 7A - private company loans (not applicable)
+  'division 7a', 'div 7a', 'private company loan',
+  // International/Transfer pricing (no international entities)
+  'transfer pricing', 'double tax agreement', 'foreign income',
+  'controlled foreign', 'thin capitalisation',
+  // Mining/Resources (not our industry)
+  'mining', 'petroleum', 'resource rent',
+  // Financial services (not our industry)
+  'managed investment', 'financial arrangement', 'forex',
+  // R&D (not applicable)
+  'research and development', 'r&d tax',
+  // Trusts - complex provisions (BOO is a trust but these are esoteric)
+  'streaming', 'trust distribution', 'division 6',
+  // CGT complex provisions
+  'capital gains tax', 'cgt event', 'cgt discount',
+  'rollover relief'
+]
+
+/**
+ * Check if a ruling is relevant to our e-commerce/retail businesses
+ * Returns true if ruling should be imported, false if it should be skipped
+ */
+function isRelevantTopic(title: string, description: string): boolean {
+  const text = `${title} ${description}`.toLowerCase()
+
+  // First check for irrelevant keywords - these are dealbreakers
+  for (const keyword of IRRELEVANT_KEYWORDS) {
+    if (text.includes(keyword)) {
+      return false
+    }
+  }
+
+  // Then check for relevant keywords - need at least one match
+  for (const keyword of RELEVANT_KEYWORDS) {
+    if (text.includes(keyword)) {
+      return true
+    }
+  }
+
+  // GST rulings are always relevant (ruling type check)
+  if (title.toUpperCase().startsWith('GSTR') || title.toUpperCase().startsWith('GSTD')) {
+    return true
+  }
+
+  // If no keywords match either way, skip (conservative - only import what we need)
+  return false
+}
+
+// ============================================================================
+// SUPERSESSION DETECTION
+// ============================================================================
+
+/**
+ * Parse supersession/withdrawal info from ruling description
+ * Returns array of ruling IDs that are superseded/withdrawn, or null if none
+ *
+ * Examples:
+ *   "This Ruling replaces TR 2020/1" -> ["TR 2020/1"]
+ *   "Supersedes GSTR 2018/2 and GSTR 2018/3" -> ["GSTR 2018/2", "GSTR 2018/3"]
+ *   "Withdrawal of TR 2015/3" -> ["TR 2015/3"]
+ */
+function parseSupersession(description: string): string[] | null {
+  const text = description.toLowerCase()
+  const superseded: string[] = []
+
+  // Patterns for supersession/replacement/withdrawal
+  const patterns = [
+    /(?:replaces?|supersedes?|withdraws?|withdrawal of|consolidates?)\s+([A-Z]{2,4}\s*\d{4}\/\d+)/gi,
+    /([A-Z]{2,4}\s*\d{4}\/\d+)\s+(?:is|has been)\s+(?:replaced|superseded|withdrawn)/gi
+  ]
+
+  for (const pattern of patterns) {
+    const matches = description.matchAll(pattern)
+    for (const match of matches) {
+      // Extract the ruling ID and normalize it
+      const rulingId = match[1].toUpperCase().replace(/\s+/g, ' ').trim()
+      if (!superseded.includes(rulingId)) {
+        superseded.push(rulingId)
+      }
+    }
+  }
+
+  return superseded.length > 0 ? superseded : null
+}
+
+/**
+ * Archive rulings that have been superseded
+ * Sets relevance_status to 'archived' and records superseded_by
+ */
+async function archiveSupersededRulings(
+  supabase: SupabaseClient,
+  newRulingId: string,
+  supersededIds: string[],
+  dryRun: boolean,
+  verbose: boolean
+): Promise<number> {
+  if (dryRun || supersededIds.length === 0) {
+    return supersededIds.length
+  }
+
+  let archived = 0
+
+  for (const oldId of supersededIds) {
+    const { error } = await supabase
+      .from('ato_rulings')
+      .update({
+        relevance_status: 'archived',
+        superseded_by: newRulingId,
+        review_notes: `Superseded by ${newRulingId} on ${new Date().toISOString().split('T')[0]}`
+      })
+      .eq('ruling_id', oldId)
+      .neq('relevance_status', 'archived') // Don't re-archive
+
+    if (error) {
+      if (verbose) {
+        console.warn(`    Warning: Could not archive ${oldId}: ${error.message}`)
+      }
+    } else {
+      archived++
+      if (verbose) {
+        console.log(`    Archived: ${oldId} (superseded by ${newRulingId})`)
+      }
+    }
+  }
+
+  return archived
 }
 
 /**
@@ -319,8 +490,10 @@ async function syncFeed(
     feed: feedConfig.name,
     success: false,
     rulings_found: 0,
+    rulings_filtered: 0,
     rulings_added: 0,
-    rulings_updated: 0
+    rulings_updated: 0,
+    rulings_archived: 0
   }
 
   try {
@@ -332,24 +505,65 @@ async function syncFeed(
       console.log(`  Found ${items.length} items in feed`)
     }
 
-    // Transform to rulings
+    // Transform to rulings with relevance filtering
     const rulings: AtoRuling[] = []
+    const supersessionMap: Map<string, string[]> = new Map() // newRulingId -> supersededIds
+
     for (const item of items) {
       const ruling = transformRssItem(item, feedConfig)
-      if (ruling) {
-        rulings.push(ruling)
+
+      if (!ruling) {
         if (config.verbose) {
-          console.log(`    ${ruling.ruling_id}: ${ruling.title.substring(0, 60)}...`)
+          console.log(`    [Parse Error] Could not parse: ${item.title.substring(0, 60)}...`)
+        }
+        continue
+      }
+
+      // Check relevance - only import rulings that matter to our businesses
+      if (!isRelevantTopic(item.title, item.description)) {
+        result.rulings_filtered++
+        if (config.verbose) {
+          console.log(`    [Filtered] Not relevant: ${ruling.ruling_id}`)
+        }
+        continue
+      }
+
+      rulings.push(ruling)
+
+      // Check for supersession
+      const supersedes = parseSupersession(item.description)
+      if (supersedes && supersedes.length > 0) {
+        supersessionMap.set(ruling.ruling_id, supersedes)
+        if (config.verbose) {
+          console.log(`    ${ruling.ruling_id}: ${ruling.title.substring(0, 50)}...`)
+          console.log(`      └─ Supersedes: ${supersedes.join(', ')}`)
         }
       } else if (config.verbose) {
-        console.log(`    [Skipped] Could not parse: ${item.title.substring(0, 60)}...`)
+        console.log(`    ${ruling.ruling_id}: ${ruling.title.substring(0, 60)}...`)
       }
     }
 
-    // Upsert to database
+    if (config.verbose) {
+      console.log(`  Relevant rulings: ${rulings.length} (filtered out: ${result.rulings_filtered})`)
+    }
+
+    // Upsert relevant rulings to database
     const { added, updated } = await upsertRulings(supabase, rulings, config.dryRun)
     result.rulings_added = added
     result.rulings_updated = updated
+
+    // Process supersession - archive old rulings
+    for (const [newId, supersededIds] of supersessionMap) {
+      const archived = await archiveSupersededRulings(
+        supabase,
+        newId,
+        supersededIds,
+        config.dryRun,
+        config.verbose
+      )
+      result.rulings_archived += archived
+    }
+
     result.success = true
 
     // Log sync
@@ -402,26 +616,36 @@ async function syncAllFeeds(config: SyncConfig): Promise<void> {
   console.log('=================================================')
 
   let totalFound = 0
+  let totalFiltered = 0
   let totalAdded = 0
   let totalUpdated = 0
+  let totalArchived = 0
   let hasErrors = false
 
   for (const result of results) {
     const status = result.success ? '✓' : '✗'
-    console.log(`  ${status} ${result.feed.toUpperCase()}: ${result.rulings_added} added, ${result.rulings_updated} updated (${result.rulings_found} found)`)
+    console.log(`  ${status} ${result.feed.toUpperCase()}:`)
+    console.log(`      Found: ${result.rulings_found} | Filtered: ${result.rulings_filtered} | Added: ${result.rulings_added} | Updated: ${result.rulings_updated} | Archived: ${result.rulings_archived}`)
 
     if (result.error_message) {
-      console.log(`    Error: ${result.error_message}`)
+      console.log(`      Error: ${result.error_message}`)
       hasErrors = true
     }
 
     totalFound += result.rulings_found
+    totalFiltered += result.rulings_filtered
     totalAdded += result.rulings_added
     totalUpdated += result.rulings_updated
+    totalArchived += result.rulings_archived
   }
 
   console.log('=================================================')
-  console.log(`  TOTAL: ${totalAdded} added, ${totalUpdated} updated (${totalFound} found)`)
+  console.log(`  TOTAL:`)
+  console.log(`    Found in feed:    ${totalFound}`)
+  console.log(`    Filtered (skip):  ${totalFiltered}`)
+  console.log(`    Added (new):      ${totalAdded}`)
+  console.log(`    Updated:          ${totalUpdated}`)
+  console.log(`    Archived:         ${totalArchived}`)
 
   if (config.dryRun) {
     console.log('\n  [DRY RUN] No changes were made to the database')
