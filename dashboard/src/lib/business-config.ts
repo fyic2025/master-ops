@@ -28,6 +28,7 @@ import {
   Building2,
   FileText,
   Link2,
+  CalendarDays,
   type LucideIcon
 } from 'lucide-react'
 
@@ -114,6 +115,7 @@ export const BUSINESSES: Record<BusinessCode, Business> = {
     navigation: [
       { name: 'Dashboard', href: '', icon: Home },
       { name: 'Orders', href: '/orders', icon: ShoppingCart },
+      { name: 'Weekly Orders', href: '/weekly-orders', icon: CalendarDays },
       { name: 'Product Matcher', href: '/product-matcher', icon: Link2 },
       { name: 'Accounting', href: '/accounting/bank-recon', icon: Building2 },
       { name: 'Automations', href: '/automations', icon: Zap },
