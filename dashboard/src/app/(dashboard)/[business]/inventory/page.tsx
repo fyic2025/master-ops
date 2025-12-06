@@ -459,7 +459,33 @@ export default function InventoryPage() {
       <div className="space-y-6">
         {/* Overview Tab */}
         {activeTab === 'overview' && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="space-y-6">
+            {/* Shadow Mode Status Widget */}
+            <div
+              className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-lg p-4 cursor-pointer hover:from-purple-500/15 hover:to-blue-500/15 transition-colors"
+              onClick={() => setActiveTab('comparison')}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-purple-500/20 rounded-lg">
+                    <GitCompare className="h-6 w-6 text-purple-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-white font-semibold">Unleashed Shadow Mode</h3>
+                    <p className="text-gray-400 text-sm">Click to view comparison details</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-purple-400">Active</p>
+                    <p className="text-xs text-gray-500">Monitoring Unleashed</p>
+                  </div>
+                  <ArrowsRightLeftIcon className="h-5 w-5 text-gray-500" />
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Low Stock Alerts */}
             <div className="lg:col-span-2 bg-gray-800 rounded-lg p-6 border border-gray-700">
               <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
@@ -536,6 +562,7 @@ export default function InventoryPage() {
                   ))}
                 </div>
               )}
+            </div>
             </div>
           </div>
         )}
