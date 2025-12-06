@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import {
   Users,
@@ -117,20 +117,8 @@ export default function CustomersPage() {
   const [sortBy, setSortBy] = useState('total_spent')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
 
-  // Only show for RHF
-  if (business !== 'rhf') {
-    return (
-      <div className="p-8">
-        <h1 className="text-2xl font-bold text-white">Customer analytics not available for this business</h1>
-      </div>
-    )
-  }
-
-  useEffect(() => {
-    fetchCustomers()
-  }, [selectedSegment, search, sortBy, sortOrder])
-
-  async function fetchCustomers() {
+  const fetchCustomers = useCallback(async () => {
+    if (business !== 'rhf') return
     setLoading(true)
     try {
       const urlParams = new URLSearchParams()
@@ -150,6 +138,19 @@ export default function CustomersPage() {
     } finally {
       setLoading(false)
     }
+  }, [business, selectedSegment, search, sortBy, sortOrder])
+
+  useEffect(() => {
+    fetchCustomers()
+  }, [fetchCustomers])
+
+  // Only show for RHF
+  if (business !== 'rhf') {
+    return (
+      <div className="p-8">
+        <h1 className="text-2xl font-bold text-white">Customer analytics not available for this business</h1>
+      </div>
+    )
   }
 
   async function recalculateRFM() {
