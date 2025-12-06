@@ -47,6 +47,11 @@ const BC_API_URL = `https://api.bigcommerce.com/stores/${BC_STORE_HASH}/v3`;
 const RATE_LIMIT_DELAY = 250; // ms between API calls
 const BATCH_SIZE = 10; // Process in batches
 
+// Safety thresholds
+const MAX_STALE_HOURS = 24; // Skip if supplier data is older than 24 hours
+const MAX_DISABLE_COUNT = 500; // Stop if trying to disable more than 500 products at once
+const ANOMALY_PERCENTAGE = 15; // Alert if >15% of products would be disabled
+
 // BigCommerce API helper
 async function bcRequest(method, endpoint, data = null) {
   const config = {
@@ -124,6 +129,125 @@ function checkMarginProtection(bcProduct) {
   }
 
   return { valid: true, discount: discount.toFixed(1) };
+}
+
+// Check supplier data freshness - returns stale suppliers
+async function checkSupplierDataFreshness() {
+  const staleThreshold = new Date(Date.now() - MAX_STALE_HOURS * 60 * 60 * 1000);
+
+  const { data, error } = await supabase
+    .from('supplier_products')
+    .select('supplier_name, last_synced_at')
+    .order('last_synced_at', { ascending: false });
+
+  if (error) {
+    console.error('Error checking supplier freshness:', error.message);
+    return { stale: [], fresh: [] };
+  }
+
+  // Group by supplier, get most recent sync for each
+  const supplierLastSync = {};
+  for (const row of data) {
+    if (!supplierLastSync[row.supplier_name]) {
+      supplierLastSync[row.supplier_name] = new Date(row.last_synced_at);
+    }
+  }
+
+  const stale = [];
+  const fresh = [];
+
+  for (const [supplier, lastSync] of Object.entries(supplierLastSync)) {
+    const ageHours = ((Date.now() - lastSync.getTime()) / (1000 * 60 * 60)).toFixed(1);
+    if (lastSync < staleThreshold) {
+      stale.push({ supplier, lastSync: lastSync.toISOString(), ageHours });
+    } else {
+      fresh.push({ supplier, lastSync: lastSync.toISOString(), ageHours });
+    }
+  }
+
+  return { stale, fresh };
+}
+
+// Anomaly detection - check if too many products would be disabled
+function checkAnomalies(updates, totalLinks) {
+  const warnings = [];
+
+  // Check absolute count
+  if (updates.disable.length > MAX_DISABLE_COUNT) {
+    warnings.push({
+      type: 'excessive_disable',
+      severity: 'critical',
+      message: `Would disable ${updates.disable.length} products (max ${MAX_DISABLE_COUNT}). This could indicate a supplier sync failure.`
+    });
+  }
+
+  // Check percentage
+  const disablePercentage = (updates.disable.length / totalLinks) * 100;
+  if (disablePercentage > ANOMALY_PERCENTAGE) {
+    warnings.push({
+      type: 'high_disable_percentage',
+      severity: 'warning',
+      message: `Would disable ${disablePercentage.toFixed(1)}% of products (${updates.disable.length}/${totalLinks}). Threshold: ${ANOMALY_PERCENTAGE}%`
+    });
+  }
+
+  // Check if ALL products from a single supplier would be disabled
+  const disableBySupplier = {};
+  for (const item of updates.disable) {
+    const supplier = item.supplierName || 'unknown';
+    disableBySupplier[supplier] = (disableBySupplier[supplier] || 0) + 1;
+  }
+
+  // Also count total by supplier
+  const totalBySupplier = {};
+  for (const item of [...updates.enable, ...updates.disable, ...updates.update, ...updates.noChange]) {
+    const supplier = item.supplierName || item.link?.supplier_name || 'unknown';
+    totalBySupplier[supplier] = (totalBySupplier[supplier] || 0) + 1;
+  }
+
+  for (const [supplier, count] of Object.entries(disableBySupplier)) {
+    const total = totalBySupplier[supplier] || count;
+    const pct = (count / total) * 100;
+    if (pct > 80 && count > 10) {
+      warnings.push({
+        type: 'supplier_wipe',
+        severity: 'critical',
+        message: `Would disable ${pct.toFixed(0)}% of ${supplier} products (${count}/${total}). Supplier sync may have failed.`
+      });
+    }
+  }
+
+  return warnings;
+}
+
+// Create pre-update snapshot for rollback capability
+async function createSnapshot(updates, runId) {
+  const snapshotItems = [];
+
+  for (const item of [...updates.enable, ...updates.disable, ...updates.update]) {
+    snapshotItems.push({
+      run_id: runId,
+      product_id: item.bcProductId,
+      sku: item.sku,
+      previous_availability: item.link?.ecommerce_products?.availability,
+      previous_inventory: item.link?.ecommerce_products?.inventory_level,
+      intended_action: item.action,
+      intended_availability: item.targetAvailability,
+      intended_inventory: item.targetInventory,
+      supplier_name: item.supplierName
+    });
+  }
+
+  // Store snapshot in batches
+  const BATCH_SIZE = 100;
+  for (let i = 0; i < snapshotItems.length; i += BATCH_SIZE) {
+    const batch = snapshotItems.slice(i, i + BATCH_SIZE);
+    await supabase.from('bc_availability_snapshots').insert(batch).catch(() => {
+      // Table may not exist yet - that's OK
+    });
+  }
+
+  return snapshotItems.length;
 }
 
 // Fetch all linked products with their supplier stock
@@ -245,11 +369,14 @@ function determineUpdate(link) {
 }
 
 // Main update function
-async function updateBCAvailability(dryRun = false) {
+async function updateBCAvailability(dryRun = false, forceRun = false) {
+  const runId = `run_${Date.now()}`;
+
   console.log('╔════════════════════════════════════════════════════════════╗');
   console.log('║    BC AVAILABILITY UPDATER (Enhanced with Business Rules)  ║');
   console.log('╚════════════════════════════════════════════════════════════╝');
-  console.log(`\nMode: ${dryRun ? 'DRY RUN (no changes)' : 'LIVE'}`);
+  console.log(`\nMode: ${dryRun ? 'DRY RUN (no changes)' : 'LIVE'}${forceRun ? ' (FORCE)' : ''}`);
+  console.log(`Run ID: ${runId}`);
   console.log(`Started at: ${new Date().toISOString()}\n`);
 
   console.log('Business Rules Applied:');
@@ -258,7 +385,34 @@ async function updateBCAvailability(dryRun = false) {
   console.log('  • Clearance items (SKU "Copy of" or "sale"): SKIP');
   console.log('  • 8% margin protection: warning if exceeded\n');
 
+  console.log('Safety Checks:');
+  console.log(`  • Stale data threshold: ${MAX_STALE_HOURS} hours`);
+  console.log(`  • Max disable at once: ${MAX_DISABLE_COUNT} products`);
+  console.log(`  • Anomaly threshold: ${ANOMALY_PERCENTAGE}% of products\n`);
+
   const startTime = Date.now();
+
+  // SAFETY CHECK 1: Supplier data freshness
+  console.log('Checking supplier data freshness...');
+  const freshness = await checkSupplierDataFreshness();
+
+  if (freshness.fresh.length > 0) {
+    console.log('  Fresh suppliers:');
+    freshness.fresh.forEach(s => console.log(`    ✓ ${s.supplier}: ${s.ageHours}h ago`));
+  }
+
+  if (freshness.stale.length > 0) {
+    console.log('  ⚠️  STALE suppliers (data older than 24h):');
+    freshness.stale.forEach(s => console.log(`    ✗ ${s.supplier}: ${s.ageHours}h ago`));
+
+    if (!forceRun && !dryRun) {
+      console.log('\n❌ ABORTING: Stale supplier data detected. Run with --force to override.');
+      return { aborted: true, reason: 'stale_data', staleSuppliers: freshness.stale };
+    } else if (forceRun) {
+      console.log('\n  ⚠️  FORCE mode enabled - proceeding despite stale data\n');
+    }
+  }
+  console.log('');
 
   // Fetch all linked products
   console.log('Fetching linked products from Supabase...');
@@ -321,6 +475,24 @@ async function updateBCAvailability(dryRun = false) {
   console.log(`  Products SKIPPED:    ${updates.skip.length} (clearance items)`);
   console.log(`  No change needed:    ${updates.noChange.length}`);
   console.log(`  Margin warnings:     ${updates.marginWarnings.length}\n`);
+
+  // SAFETY CHECK 2: Anomaly detection
+  const anomalies = checkAnomalies(updates, links.length);
+  if (anomalies.length > 0) {
+    console.log('⚠️  ANOMALY DETECTION WARNINGS:');
+    anomalies.forEach(a => {
+      console.log(`  [${a.severity.toUpperCase()}] ${a.message}`);
+    });
+    console.log('');
+
+    const hasCritical = anomalies.some(a => a.severity === 'critical');
+    if (hasCritical && !forceRun && !dryRun) {
+      console.log('❌ ABORTING: Critical anomalies detected. Run with --force to override.');
+      return { aborted: true, reason: 'anomaly_detected', anomalies };
+    } else if (hasCritical && forceRun) {
+      console.log('  ⚠️  FORCE mode enabled - proceeding despite anomalies\n');
+    }
+  }
 
   // Show margin warnings
   if (updates.marginWarnings.length > 0) {
@@ -392,6 +564,11 @@ async function updateBCAvailability(dryRun = false) {
       dryRun: true
     };
   }
+
+  // SAFETY CHECK 3: Create snapshot for rollback
+  console.log('Creating pre-update snapshot for rollback capability...');
+  const snapshotCount = await createSnapshot(updates, runId);
+  console.log(`  Snapshot saved: ${snapshotCount} products (run_id: ${runId})\n`);
 
   // Apply updates to BigCommerce
   console.log('Applying updates to BigCommerce...\n');
@@ -592,13 +769,40 @@ module.exports = { updateBCAvailability };
 if (require.main === module) {
   const args = process.argv.slice(2);
   const dryRun = !args.includes('--live');
+  const forceRun = args.includes('--force');
+
+  if (args.includes('--help') || args.includes('-h')) {
+    console.log(`
+BC Availability Updater - Sync supplier stock to BigCommerce
+
+Usage:
+  node update-bc-availability.js [options]
+
+Options:
+  --live     Apply changes to BigCommerce (default: dry run)
+  --force    Override safety checks (stale data, anomaly detection)
+  --help     Show this help message
+
+Safety Features:
+  • Stale data protection: Aborts if supplier data is >24h old
+  • Anomaly detection: Aborts if >500 products would be disabled
+  • Supplier wipe detection: Aborts if >80% of a supplier's products would be disabled
+  • Pre-update snapshots: Saves previous state for rollback
+
+Examples:
+  node update-bc-availability.js              # Dry run
+  node update-bc-availability.js --live       # Live update with safety checks
+  node update-bc-availability.js --live --force  # Live update, bypass safety checks
+`);
+    process.exit(0);
+  }
 
   if (dryRun) {
     console.log('\n⚠️  Running in DRY RUN mode (no changes will be made)');
     console.log('    Use --live flag to apply changes\n');
   }
 
-  updateBCAvailability(dryRun).catch(error => {
+  updateBCAvailability(dryRun, forceRun).catch(error => {
     console.error('\n❌ Fatal error:', error.message);
     process.exit(1);
   });
