@@ -59,7 +59,7 @@ const STORES: Record<string, StoreConfig> = {
   },
 }
 
-type SyncType = 'stock' | 'products' | 'orders' | 'customers' | 'full'
+type SyncType = 'stock' | 'products' | 'orders' | 'customers' | 'invoices' | 'purchasing' | 'suppliers' | 'warehouses' | 'bom' | 'adjustments' | 'reference' | 'full'
 
 interface SyncOptions {
   store: string
@@ -159,10 +159,11 @@ async function syncStockOnHand(
   let synced = 0
   let failed = 0
 
-  // Use a Map to dedupe by product_guid + warehouse_guid
+  // Use a Map to dedupe by product_guid + warehouse_guid (empty string for null)
   const stockMap = new Map<string, any>()
   for (const item of items) {
-    const key = `${item.ProductGuid || item.Guid}|${item.Warehouse?.Guid || ''}`
+    const warehouseGuid = item.Warehouse?.Guid || ''
+    const key = `${item.ProductGuid || item.Guid}|${warehouseGuid}`
     stockMap.set(key, item)
   }
 
@@ -181,7 +182,7 @@ async function syncStockOnHand(
       on_purchase: item.OnPurchase || 0,
       avg_cost: item.AvgCost || 0,
       total_cost: item.TotalCost || 0,
-      warehouse_guid: item.Warehouse?.Guid || null,
+      warehouse_guid: item.Warehouse?.Guid || '',  // Use empty string for NULL to match unique index
       warehouse_code: item.Warehouse?.WarehouseCode || null,
       warehouse_name: item.Warehouse?.WarehouseName || null,
       last_modified_on: parseDate(item.LastModifiedOn),
@@ -196,6 +197,9 @@ async function syncStockOnHand(
     })
 
     if (error) {
+      if (failed < 3) {
+        console.error(`  Error syncing ${record.product_code}: ${error.message}`)
+      }
       failed++
     } else {
       synced++
@@ -420,6 +424,715 @@ async function syncCustomers(
 }
 
 // =============================================================================
+// Priority 1 Sync Functions - Financial Data
+// =============================================================================
+
+async function syncInvoices(
+  client: UnleashedClient,
+  supabase: SupabaseClient,
+  store: string
+): Promise<{ synced: number; failed: number }> {
+  console.log('  Fetching Invoices from Unleashed...')
+  const items = await client.fetchAll('Invoices')
+  console.log(`  Retrieved ${items.length} invoices`)
+
+  let synced = 0
+  let failed = 0
+
+  for (const item of items) {
+    const invoiceRecord = {
+      store,
+      guid: item.Guid,
+      invoice_number: item.InvoiceNumber,
+      order_number: item.OrderNumber,
+      invoice_status: item.InvoiceStatus,
+      invoice_date: parseDate(item.InvoiceDate),
+      due_date: parseDate(item.DueDate),
+      customer_guid: item.Customer?.Guid,
+      customer_code: item.Customer?.CustomerCode,
+      customer_name: item.Customer?.CustomerName,
+      currency_guid: item.Currency?.Guid,
+      currency_code: item.Currency?.CurrencyCode,
+      exchange_rate: item.ExchangeRate || 1,
+      sub_total: item.SubTotal || 0,
+      tax_total: item.TaxTotal || 0,
+      total: item.Total || 0,
+      bc_sub_total: item.BCSubTotal || 0,
+      bc_tax_total: item.BCTaxTotal || 0,
+      bc_total: item.BCTotal || 0,
+      payment_received: item.PaymentReceived ?? false,
+      postal_address_city: item.PostalAddress?.City,
+      postal_address_country: item.PostalAddress?.Country,
+      postal_address_postal_code: item.PostalAddress?.PostalCode,
+      postal_address_region: item.PostalAddress?.Region,
+      postal_address_street: item.PostalAddress?.StreetAddress,
+      created_by: item.CreatedBy,
+      last_modified_by: item.LastModifiedBy,
+      last_modified_on: parseDate(item.LastModifiedOn),
+      raw_data: item,
+      synced_at: new Date(),
+      updated_at: new Date(),
+    }
+
+    const { data: invoice, error: invoiceError } = await supabase
+      .from('ul_invoices')
+      .upsert(invoiceRecord, { onConflict: 'store,guid' })
+      .select('id')
+      .single()
+
+    if (invoiceError) {
+      if (failed < 3) {
+        console.error(`  Error syncing invoice ${item.InvoiceNumber}: ${invoiceError.message}`)
+      }
+      failed++
+      continue
+    }
+
+    synced++
+
+    // Sync invoice lines
+    const lines = item.InvoiceLines || []
+    for (const line of lines) {
+      const lineRecord = {
+        store,
+        invoice_id: invoice.id,
+        invoice_guid: item.Guid,
+        guid: line.Guid,
+        line_number: line.LineNumber,
+        product_guid: line.Product?.Guid,
+        product_code: line.Product?.ProductCode || line.ProductCode,
+        product_description: line.Product?.ProductDescription || line.ProductDescription,
+        invoice_quantity: line.InvoiceQuantity || 0,
+        unit_price: line.UnitPrice || 0,
+        discount_rate: line.DiscountRate || 0,
+        line_total: line.LineTotal || 0,
+        line_tax: line.LineTax || 0,
+        last_modified_on: parseDate(line.LastModifiedOn),
+        synced_at: new Date(),
+      }
+
+      await supabase.from('ul_invoice_lines').upsert(lineRecord, { onConflict: 'store,guid' })
+    }
+  }
+
+  return { synced, failed }
+}
+
+async function syncPurchaseOrders(
+  client: UnleashedClient,
+  supabase: SupabaseClient,
+  store: string
+): Promise<{ synced: number; failed: number }> {
+  console.log('  Fetching PurchaseOrders from Unleashed...')
+  const items = await client.fetchAll('PurchaseOrders')
+  console.log(`  Retrieved ${items.length} purchase orders`)
+
+  let synced = 0
+  let failed = 0
+
+  for (const item of items) {
+    const poRecord = {
+      store,
+      guid: item.Guid,
+      order_number: item.OrderNumber,
+      order_status: item.OrderStatus,
+      order_date: parseDate(item.OrderDate),
+      delivery_date: parseDate(item.DeliveryDate || item.RequiredDate),
+      received_date: parseDate(item.ReceivedDate),
+      completed_date: parseDate(item.CompletedDate),
+      supplier_invoice_date: parseDate(item.SupplierInvoiceDate),
+      supplier_guid: item.Supplier?.Guid,
+      supplier_code: item.Supplier?.SupplierCode,
+      supplier_name: item.Supplier?.SupplierName,
+      warehouse_guid: item.Warehouse?.Guid,
+      warehouse_code: item.Warehouse?.WarehouseCode,
+      warehouse_name: item.Warehouse?.WarehouseName,
+      currency_guid: item.Currency?.Guid,
+      currency_code: item.Currency?.CurrencyCode,
+      exchange_rate: item.ExchangeRate || 1,
+      sub_total: item.SubTotal || 0,
+      tax_total: item.TaxTotal || 0,
+      total: item.Total || 0,
+      discount_rate: item.DiscountRate || 0,
+      bc_sub_total: item.BCSubTotal || 0,
+      bc_tax_total: item.BCTaxTotal || 0,
+      bc_total: item.BCTotal || 0,
+      tax_code: item.TaxCode,
+      tax_rate: item.TaxRate || 0,
+      xero_tax_code: item.XeroTaxCode,
+      total_weight: item.TotalWeight || 0,
+      total_volume: item.TotalVolume || 0,
+      created_by: item.CreatedBy,
+      created_on: parseDate(item.CreatedOn),
+      last_modified_by: item.LastModifiedBy,
+      last_modified_on: parseDate(item.LastModifiedOn),
+      raw_data: item,
+      synced_at: new Date(),
+      updated_at: new Date(),
+    }
+
+    const { data: po, error: poError } = await supabase
+      .from('ul_purchase_orders')
+      .upsert(poRecord, { onConflict: 'store,guid' })
+      .select('id')
+      .single()
+
+    if (poError) {
+      if (failed < 3) {
+        console.error(`  Error syncing PO ${item.OrderNumber}: ${poError.message}`)
+      }
+      failed++
+      continue
+    }
+
+    synced++
+
+    // Sync PO lines
+    const lines = item.PurchaseOrderLines || []
+    for (const line of lines) {
+      const lineRecord = {
+        store,
+        purchase_order_id: po.id,
+        purchase_order_guid: item.Guid,
+        guid: line.Guid,
+        line_number: line.LineNumber,
+        product_guid: line.Product?.Guid,
+        product_code: line.Product?.ProductCode || line.ProductCode,
+        product_description: line.Product?.ProductDescription || line.ProductDescription,
+        order_quantity: line.OrderQuantity || 0,
+        received_quantity: line.ReceivedQuantity || 0,
+        unit_price: line.UnitPrice || 0,
+        discount_rate: line.DiscountRate || 0,
+        line_total: line.LineTotal || 0,
+        line_tax: line.LineTax || 0,
+        bc_unit_price: line.BCUnitPrice || 0,
+        bc_line_total: line.BCLineTotal || 0,
+        last_modified_on: parseDate(line.LastModifiedOn),
+        synced_at: new Date(),
+      }
+
+      await supabase.from('ul_purchase_order_lines').upsert(lineRecord, { onConflict: 'store,guid' })
+    }
+  }
+
+  return { synced, failed }
+}
+
+async function syncSuppliers(
+  client: UnleashedClient,
+  supabase: SupabaseClient,
+  store: string
+): Promise<{ synced: number; failed: number }> {
+  console.log('  Fetching Suppliers from Unleashed...')
+  const items = await client.fetchAll('Suppliers')
+  console.log(`  Retrieved ${items.length} suppliers`)
+
+  let synced = 0
+  let failed = 0
+
+  for (const item of items) {
+    const record = {
+      store,
+      guid: item.Guid,
+      supplier_code: item.SupplierCode,
+      supplier_name: item.SupplierName,
+      email: item.Email,
+      phone: item.PhoneNumber,
+      mobile: item.MobileNumber,
+      contact_name: item.ContactFirstName
+        ? `${item.ContactFirstName} ${item.ContactLastName || ''}`.trim()
+        : null,
+      currency_guid: item.Currency?.Guid,
+      currency_code: item.Currency?.CurrencyCode,
+      obsolete: item.Obsolete ?? false,
+      created_by: item.CreatedBy,
+      created_on: parseDate(item.CreatedOn),
+      last_modified_by: item.LastModifiedBy,
+      last_modified_on: parseDate(item.LastModifiedOn),
+      raw_data: item,
+      synced_at: new Date(),
+      updated_at: new Date(),
+    }
+
+    const { error } = await supabase.from('ul_suppliers').upsert(record, { onConflict: 'store,guid' })
+
+    if (error) {
+      if (failed < 3) {
+        console.error(`  Error syncing supplier ${item.SupplierCode}: ${error.message}`)
+      }
+      failed++
+    } else {
+      synced++
+    }
+  }
+
+  return { synced, failed }
+}
+
+// =============================================================================
+// Priority 2 Sync Functions - Operational Data
+// =============================================================================
+
+async function syncWarehouses(
+  client: UnleashedClient,
+  supabase: SupabaseClient,
+  store: string
+): Promise<{ synced: number; failed: number }> {
+  console.log('  Fetching Warehouses from Unleashed...')
+  const items = await client.fetchAll('Warehouses')
+  console.log(`  Retrieved ${items.length} warehouses`)
+
+  let synced = 0
+  let failed = 0
+
+  for (const item of items) {
+    const record = {
+      store,
+      guid: item.Guid,
+      warehouse_code: item.WarehouseCode,
+      warehouse_name: item.WarehouseName,
+      address_line1: item.AddressLine1,
+      street_no: item.StreetNo,
+      suburb: item.Suburb,
+      city: item.City,
+      region: item.Region,
+      post_code: item.PostCode,
+      country: item.Country,
+      contact_name: item.ContactName,
+      ddi_number: item.DDINumber,
+      is_default: item.IsDefault ?? false,
+      obsolete: item.Obsolete ?? false,
+      last_modified_on: parseDate(item.LastModifiedOn),
+      raw_data: item,
+      synced_at: new Date(),
+      updated_at: new Date(),
+    }
+
+    const { error } = await supabase.from('ul_warehouses').upsert(record, { onConflict: 'store,guid' })
+
+    if (error) {
+      if (failed < 3) {
+        console.error(`  Error syncing warehouse ${item.WarehouseCode}: ${error.message}`)
+      }
+      failed++
+    } else {
+      synced++
+    }
+  }
+
+  return { synced, failed }
+}
+
+async function syncBillOfMaterials(
+  client: UnleashedClient,
+  supabase: SupabaseClient,
+  store: string
+): Promise<{ synced: number; failed: number }> {
+  console.log('  Fetching BillOfMaterials from Unleashed...')
+  const items = await client.fetchAll('BillOfMaterials')
+  console.log(`  Retrieved ${items.length} BOMs`)
+
+  let synced = 0
+  let failed = 0
+
+  for (const item of items) {
+    const bomRecord = {
+      store,
+      product_guid: item.Product?.Guid || item.Guid,
+      product_code: item.Product?.ProductCode,
+      product_description: item.Product?.ProductDescription,
+      created_on: parseDate(item.CreatedOn),
+      last_modified_on: parseDate(item.LastModifiedOn),
+      raw_data: item,
+      synced_at: new Date(),
+      updated_at: new Date(),
+    }
+
+    const { data: bom, error: bomError } = await supabase
+      .from('ul_bill_of_materials')
+      .upsert(bomRecord, { onConflict: 'store,product_guid' })
+      .select('id')
+      .single()
+
+    if (bomError) {
+      if (failed < 3) {
+        console.error(`  Error syncing BOM ${item.Product?.ProductCode}: ${bomError.message}`)
+      }
+      failed++
+      continue
+    }
+
+    synced++
+
+    // Sync BOM lines
+    const lines = item.BillOfMaterialsLines || []
+    for (const line of lines) {
+      const lineRecord = {
+        store,
+        bom_id: bom.id,
+        parent_product_guid: item.Product?.Guid || item.Guid,
+        guid: line.Guid,
+        component_product_guid: line.Product?.Guid,
+        component_product_code: line.Product?.ProductCode,
+        component_product_description: line.Product?.ProductDescription,
+        quantity: line.Quantity || 0,
+        wastage: line.Wastage || 0,
+        line_total_cost: line.LineTotalCost || 0,
+        created_on: parseDate(line.CreatedOn),
+        last_modified_on: parseDate(line.LastModifiedOn),
+        synced_at: new Date(),
+      }
+
+      await supabase.from('ul_bom_lines').upsert(lineRecord, { onConflict: 'store,guid' })
+    }
+  }
+
+  return { synced, failed }
+}
+
+async function syncStockAdjustments(
+  client: UnleashedClient,
+  supabase: SupabaseClient,
+  store: string
+): Promise<{ synced: number; failed: number }> {
+  console.log('  Fetching StockAdjustments from Unleashed...')
+  const items = await client.fetchAll('StockAdjustments')
+  console.log(`  Retrieved ${items.length} stock adjustments`)
+
+  let synced = 0
+  let failed = 0
+
+  for (const item of items) {
+    const record = {
+      store,
+      guid: item.Guid,
+      adjustment_number: item.AdjustmentNumber,
+      adjustment_reason: item.AdjustmentReason,
+      adjustment_status: item.AdjustmentStatus,
+      adjustment_date: parseDate(item.AdjustmentDate),
+      warehouse_guid: item.Warehouse?.Guid,
+      warehouse_code: item.Warehouse?.WarehouseCode,
+      created_by: item.CreatedBy,
+      created_on: parseDate(item.CreatedOn),
+      last_modified_by: item.LastModifiedBy,
+      last_modified_on: parseDate(item.LastModifiedOn),
+      raw_data: item,
+      synced_at: new Date(),
+      updated_at: new Date(),
+    }
+
+    const { error } = await supabase.from('ul_stock_adjustments').upsert(record, { onConflict: 'store,guid' })
+
+    if (error) {
+      if (failed < 3) {
+        console.error(`  Error syncing adjustment ${item.AdjustmentNumber}: ${error.message}`)
+      }
+      failed++
+    } else {
+      synced++
+    }
+  }
+
+  return { synced, failed }
+}
+
+// =============================================================================
+// Priority 3 Sync Functions - Reference Data
+// =============================================================================
+
+async function syncProductGroups(
+  client: UnleashedClient,
+  supabase: SupabaseClient,
+  store: string
+): Promise<{ synced: number; failed: number }> {
+  console.log('  Fetching ProductGroups from Unleashed...')
+  const items = await client.fetchAll('ProductGroups')
+  console.log(`  Retrieved ${items.length} product groups`)
+
+  let synced = 0
+  let failed = 0
+
+  for (const item of items) {
+    const record = {
+      store,
+      guid: item.Guid,
+      group_name: item.GroupName,
+      parent_group_guid: item.ParentGroup?.Guid,
+      last_modified_on: parseDate(item.LastModifiedOn),
+      raw_data: item,
+      synced_at: new Date(),
+      updated_at: new Date(),
+    }
+
+    const { error } = await supabase.from('ul_product_groups').upsert(record, { onConflict: 'store,guid' })
+
+    if (error) {
+      failed++
+    } else {
+      synced++
+    }
+  }
+
+  return { synced, failed }
+}
+
+async function syncSellPriceTiers(
+  client: UnleashedClient,
+  supabase: SupabaseClient,
+  store: string
+): Promise<{ synced: number; failed: number }> {
+  console.log('  Fetching SellPriceTiers from Unleashed...')
+  const items = await client.fetchAll('SellPriceTiers')
+  console.log(`  Retrieved ${items.length} sell price tiers`)
+
+  let synced = 0
+  let failed = 0
+
+
+  for (const item of items) {
+    // SellPriceTiers API doesn't return Guid, use Tier number as unique identifier
+    const tierGuid = `tier-${item.Tier || item.Name?.toLowerCase().replace(/\s+/g, '-') || 'unknown'}`
+    const record = {
+      store,
+      guid: tierGuid,
+      tier_name: item.Name || `Tier ${item.Tier}`,
+      raw_data: item,
+      synced_at: new Date(),
+      updated_at: new Date(),
+    }
+
+    const { error } = await supabase.from('ul_sell_price_tiers').upsert(record, { onConflict: 'store,guid' })
+
+    if (error) {
+      if (failed === 0) console.log(`  First error: ${error.message}`)
+      failed++
+    } else {
+      synced++
+    }
+  }
+
+  return { synced, failed }
+}
+
+async function syncPaymentTerms(
+  client: UnleashedClient,
+  supabase: SupabaseClient,
+  store: string
+): Promise<{ synced: number; failed: number }> {
+  console.log('  Fetching PaymentTerms from Unleashed...')
+  const items = await client.fetchAll('PaymentTerms')
+  console.log(`  Retrieved ${items.length} payment terms`)
+
+  let synced = 0
+  let failed = 0
+
+  for (const item of items) {
+    // PaymentTerms uses PaymentTermDescription and Days (not TermsName and DueDays)
+    const record = {
+      store,
+      guid: item.Guid,
+      terms_name: item.PaymentTermDescription || item.Name || 'Unknown',
+      due_days: item.Days,
+      obsolete: item.Obsolete ?? false,
+      raw_data: item,
+      synced_at: new Date(),
+      updated_at: new Date(),
+    }
+
+    const { error } = await supabase.from('ul_payment_terms').upsert(record, { onConflict: 'store,guid' })
+
+    if (error) {
+      if (failed === 0) console.log(`  First error: ${error.message}`)
+      failed++
+    } else {
+      synced++
+    }
+  }
+
+  return { synced, failed }
+}
+async function syncCurrencies(
+  client: UnleashedClient,
+  supabase: SupabaseClient,
+  store: string
+): Promise<{ synced: number; failed: number }> {
+  console.log('  Fetching Currencies from Unleashed...')
+  const items = await client.fetchAll('Currencies')
+  console.log(`  Retrieved ${items.length} currencies`)
+
+  let synced = 0
+  let failed = 0
+
+  for (const item of items) {
+    const record = {
+      store,
+      guid: item.Guid,
+      currency_code: item.CurrencyCode,
+      description: item.Description,
+      default_sell_rate: item.DefaultSellRate,
+      default_buy_rate: item.DefaultBuyRate,
+      last_modified_on: parseDate(item.LastModifiedOn),
+      raw_data: item,
+      synced_at: new Date(),
+      updated_at: new Date(),
+    }
+
+    const { error } = await supabase.from('ul_currencies').upsert(record, { onConflict: 'store,guid' })
+
+    if (error) {
+      failed++
+    } else {
+      synced++
+    }
+  }
+
+  return { synced, failed }
+}
+
+async function syncCompanies(
+  client: UnleashedClient,
+  supabase: SupabaseClient,
+  store: string
+): Promise<{ synced: number; failed: number }> {
+  console.log('  Fetching Companies from Unleashed...')
+  const items = await client.fetchAll('Companies')
+  console.log(`  Retrieved ${items.length} companies`)
+
+  let synced = 0
+  let failed = 0
+
+  for (const item of items) {
+    const record = {
+      store,
+      guid: item.Guid,
+      company_name: item.CompanyName,
+      base_currency_code: item.BaseCurrency?.CurrencyCode,
+      default_tax_rate: item.DefaultTaxRate || 0,
+      raw_data: item,
+      synced_at: new Date(),
+      updated_at: new Date(),
+    }
+
+    const { error } = await supabase.from('ul_companies').upsert(record, { onConflict: 'store,guid' })
+
+    if (error) {
+      failed++
+    } else {
+      synced++
+    }
+  }
+
+  return { synced, failed }
+}
+
+async function syncUnitsOfMeasure(
+  client: UnleashedClient,
+  supabase: SupabaseClient,
+  store: string
+): Promise<{ synced: number; failed: number }> {
+  console.log('  Fetching UnitOfMeasures from Unleashed...')
+  const items = await client.fetchAll('UnitOfMeasures')
+  console.log(`  Retrieved ${items.length} units of measure`)
+
+  let synced = 0
+  let failed = 0
+
+  for (const item of items) {
+    const record = {
+      store,
+      guid: item.Guid,
+      name: item.Name,
+      obsolete: item.Obsolete ?? false,
+      raw_data: item,
+      synced_at: new Date(),
+      updated_at: new Date(),
+    }
+
+    const { error } = await supabase.from('ul_units_of_measure').upsert(record, { onConflict: 'store,guid' })
+
+    if (error) {
+      failed++
+    } else {
+      synced++
+    }
+  }
+
+  return { synced, failed }
+}
+
+async function syncDeliveryMethods(
+  client: UnleashedClient,
+  supabase: SupabaseClient,
+  store: string
+): Promise<{ synced: number; failed: number }> {
+  console.log('  Fetching DeliveryMethods from Unleashed...')
+  const items = await client.fetchAll('DeliveryMethods')
+  console.log(`  Retrieved ${items.length} delivery methods`)
+
+  let synced = 0
+  let failed = 0
+
+  for (const item of items) {
+    const record = {
+      store,
+      guid: item.Guid,
+      name: item.Name,
+      obsolete: item.Obsolete ?? false,
+      last_modified_on: parseDate(item.LastModifiedOn),
+      raw_data: item,
+      synced_at: new Date(),
+      updated_at: new Date(),
+    }
+
+    const { error } = await supabase.from('ul_delivery_methods').upsert(record, { onConflict: 'store,guid' })
+
+    if (error) {
+      failed++
+    } else {
+      synced++
+    }
+  }
+
+  return { synced, failed }
+}
+
+async function syncSalesOrderGroups(
+  client: UnleashedClient,
+  supabase: SupabaseClient,
+  store: string
+): Promise<{ synced: number; failed: number }> {
+  console.log('  Fetching SalesOrderGroups from Unleashed...')
+  const items = await client.fetchAll('SalesOrderGroups')
+  console.log(`  Retrieved ${items.length} sales order groups`)
+
+  let synced = 0
+  let failed = 0
+
+  for (const item of items) {
+    const record = {
+      store,
+      guid: item.Guid,
+      group_name: item.GroupName || item.Name,
+      obsolete: item.Obsolete ?? false,
+      last_modified_on: parseDate(item.LastModifiedOn),
+      raw_data: item,
+      synced_at: new Date(),
+      updated_at: new Date(),
+    }
+
+    const { error } = await supabase.from('ul_sales_order_groups').upsert(record, { onConflict: 'store,guid' })
+
+    if (error) {
+      failed++
+    } else {
+      synced++
+    }
+  }
+
+  return { synced, failed }
+}
+
+// =============================================================================
 // Main Sync Runner
 // =============================================================================
 
@@ -493,6 +1206,93 @@ async function runSync(options: SyncOptions): Promise<void> {
       const result = await syncCustomers(client, supabase, store)
       console.log(`  Synced: ${result.synced}, Failed: ${result.failed}`)
       results.push({ table: 'Customers', ...result })
+    }
+
+    // Priority 1 - Financial
+    if (type === 'invoices' || type === 'full') {
+      console.log('\n[Invoices]')
+      const result = await syncInvoices(client, supabase, store)
+      console.log(`  Synced: ${result.synced}, Failed: ${result.failed}`)
+      results.push({ table: 'Invoices', ...result })
+    }
+
+    if (type === 'purchasing' || type === 'suppliers' || type === 'full') {
+      console.log('\n[Suppliers]')
+      const result = await syncSuppliers(client, supabase, store)
+      console.log(`  Synced: ${result.synced}, Failed: ${result.failed}`)
+      results.push({ table: 'Suppliers', ...result })
+    }
+
+    if (type === 'purchasing' || type === 'full') {
+      console.log('\n[PurchaseOrders]')
+      const result = await syncPurchaseOrders(client, supabase, store)
+      console.log(`  Synced: ${result.synced}, Failed: ${result.failed}`)
+      results.push({ table: 'PurchaseOrders', ...result })
+    }
+
+    // Priority 2 - Operational
+    if (type === 'warehouses' || type === 'full') {
+      console.log('\n[Warehouses]')
+      const result = await syncWarehouses(client, supabase, store)
+      console.log(`  Synced: ${result.synced}, Failed: ${result.failed}`)
+      results.push({ table: 'Warehouses', ...result })
+    }
+
+    if (type === 'bom' || type === 'full') {
+      console.log('\n[BillOfMaterials]')
+      const result = await syncBillOfMaterials(client, supabase, store)
+      console.log(`  Synced: ${result.synced}, Failed: ${result.failed}`)
+      results.push({ table: 'BillOfMaterials', ...result })
+    }
+
+    if (type === 'adjustments' || type === 'full') {
+      console.log('\n[StockAdjustments]')
+      const result = await syncStockAdjustments(client, supabase, store)
+      console.log(`  Synced: ${result.synced}, Failed: ${result.failed}`)
+      results.push({ table: 'StockAdjustments', ...result })
+    }
+
+    // Priority 3 - Reference Data
+    if (type === 'reference' || type === 'full') {
+      console.log('\n[ProductGroups]')
+      let result = await syncProductGroups(client, supabase, store)
+      console.log(`  Synced: ${result.synced}, Failed: ${result.failed}`)
+      results.push({ table: 'ProductGroups', ...result })
+
+      console.log('\n[SellPriceTiers]')
+      result = await syncSellPriceTiers(client, supabase, store)
+      console.log(`  Synced: ${result.synced}, Failed: ${result.failed}`)
+      results.push({ table: 'SellPriceTiers', ...result })
+
+      console.log('\n[PaymentTerms]')
+      result = await syncPaymentTerms(client, supabase, store)
+      console.log(`  Synced: ${result.synced}, Failed: ${result.failed}`)
+      results.push({ table: 'PaymentTerms', ...result })
+
+      console.log('\n[Currencies]')
+      result = await syncCurrencies(client, supabase, store)
+      console.log(`  Synced: ${result.synced}, Failed: ${result.failed}`)
+      results.push({ table: 'Currencies', ...result })
+
+      console.log('\n[Companies]')
+      result = await syncCompanies(client, supabase, store)
+      console.log(`  Synced: ${result.synced}, Failed: ${result.failed}`)
+      results.push({ table: 'Companies', ...result })
+
+      console.log('\n[UnitsOfMeasure]')
+      result = await syncUnitsOfMeasure(client, supabase, store)
+      console.log(`  Synced: ${result.synced}, Failed: ${result.failed}`)
+      results.push({ table: 'UnitsOfMeasure', ...result })
+
+      console.log('\n[DeliveryMethods]')
+      result = await syncDeliveryMethods(client, supabase, store)
+      console.log(`  Synced: ${result.synced}, Failed: ${result.failed}`)
+      results.push({ table: 'DeliveryMethods', ...result })
+
+      console.log('\n[SalesOrderGroups]')
+      result = await syncSalesOrderGroups(client, supabase, store)
+      console.log(`  Synced: ${result.synced}, Failed: ${result.failed}`)
+      results.push({ table: 'SalesOrderGroups', ...result })
     }
 
     // Update sync run
@@ -569,14 +1369,34 @@ Usage:
 Options:
   --store=NAME    Store to sync (teelixir, elevate) [default: teelixir]
   --type=TYPE     Sync type [default: stock]
+
+                  Core data (high frequency):
                   - stock: StockOnHand only (fastest, every 15 min)
                   - products: Products only
                   - orders: SalesOrders + lines
                   - customers: Customers only
-                  - full: All tables
+
+                  Financial (Priority 1):
+                  - invoices: Invoices + lines
+                  - purchasing: Suppliers + PurchaseOrders + lines
+                  - suppliers: Suppliers only
+
+                  Operational (Priority 2):
+                  - warehouses: Warehouses
+                  - bom: BillOfMaterials + lines
+                  - adjustments: StockAdjustments
+
+                  Reference data (Priority 3 - sync once daily):
+                  - reference: ProductGroups, SellPriceTiers, PaymentTerms,
+                              Currencies, Companies, UnitsOfMeasure,
+                              DeliveryMethods, SalesOrderGroups
+
+                  - full: ALL tables (complete sync)
 
 Examples:
   npx tsx sync-unleashed.ts --store=teelixir --type=stock
+  npx tsx sync-unleashed.ts --store=teelixir --type=invoices
+  npx tsx sync-unleashed.ts --store=teelixir --type=reference
   npx tsx sync-unleashed.ts --store=teelixir --type=full
 `)
       process.exit(0)
