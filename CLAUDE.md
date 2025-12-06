@@ -399,6 +399,47 @@ Common keys:
 
 ---
 
+## Script Security: No Hardcoded Credentials
+
+**NEVER hardcode credentials as fallback values in scripts.**
+
+### Correct Pattern (ALWAYS use this)
+```typescript
+import * as dotenv from 'dotenv'
+import * as path from 'path'
+
+// Load environment variables
+dotenv.config({ path: path.join(__dirname, '..', '..', '.env') })
+
+// Get from environment - NO FALLBACK VALUES
+const API_KEY = process.env.MY_API_KEY
+
+// Validate and exit with helpful error
+if (!API_KEY) {
+  console.error('ERROR: Missing MY_API_KEY environment variable')
+  console.error('Set in .env file or run: node creds.js export global')
+  process.exit(1)
+}
+```
+
+### Incorrect Pattern (NEVER do this)
+```typescript
+// SECURITY RISK - exposes secrets in source code!
+const API_KEY = process.env.MY_API_KEY || 'sk-hardcoded-secret-here'
+```
+
+### Why This Matters
+- Hardcoded credentials get committed to Git
+- They persist in Git history even after removal
+- They may be exposed in logs, error messages, or stack traces
+- They violate security best practices and compliance requirements
+
+### Reference Implementations
+- `creds.js` - Vault-based credential loader (throws if missing)
+- `infra/scripts/elevate-customer-sync.ts` - Correct dotenv pattern
+
+---
+
 ## ⚠️ CRITICAL: Infrastructure & Deployment
 
 ### Dashboard (ops.growthcohq.com)

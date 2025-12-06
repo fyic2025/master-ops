@@ -22,15 +22,33 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import axios from 'axios'
 import * as cheerio from 'cheerio'
+import * as dotenv from 'dotenv'
 import * as path from 'path'
+
+// Load environment variables from .env files
+dotenv.config({ path: path.join(__dirname, '..', '..', '.env') })
+dotenv.config({ path: path.join(__dirname, '..', '..', 'dashboard', '.env.local') })
 
 // ============================================================================
 // CONFIGURATION
 // ============================================================================
 
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://qcvfxxsnqvdfmpbcgdni.supabase.co'
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY ||
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjdmZ4eHNucXZkZm1wYmNnZG5pIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0ODU2NzIyNywiZXhwIjoyMDY0MTQzMjI3fQ.JLTj1pOvZLoWUKfCV5NtctNI-lkEBhCzF7C9Axm6nf8'
+// SECURITY: Credentials must be provided via environment variables
+// See: creds.js and elevate-customer-sync.ts for reference
+const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+if (!SUPABASE_URL) {
+  console.error('ERROR: Missing SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL environment variable')
+  console.error('Set in .env file or run: node creds.js export global')
+  process.exit(1)
+}
+
+if (!SUPABASE_SERVICE_KEY) {
+  console.error('ERROR: Missing SUPABASE_SERVICE_ROLE_KEY environment variable')
+  console.error('Set in .env file or run: node creds.js export global')
+  process.exit(1)
+}
 
 const ATO_BASE_URL = 'https://www.ato.gov.au'
 
@@ -147,8 +165,18 @@ function parseRulingId(title: string): { ruling_id: string; ruling_type: string 
  * Example: "Wed, 03 Dec 2025 00:00:00 +1100" -> "2025-12-03"
  */
 function parseRssDate(dateStr: string): string {
+  // Handle empty or missing date strings
+  if (!dateStr || dateStr.trim() === '') {
+    return new Date().toISOString().split('T')[0]
+  }
+
   try {
     const date = new Date(dateStr)
+    // Check for Invalid Date (NaN check)
+    if (isNaN(date.getTime())) {
+      console.warn(`  Warning: Invalid date "${dateStr}", using today's date`)
+      return new Date().toISOString().split('T')[0]
+    }
     return date.toISOString().split('T')[0]
   } catch {
     // Fallback to today's date if parsing fails
@@ -354,7 +382,8 @@ async function syncAllFeeds(config: SyncConfig): Promise<void> {
     feedsToSync = RSS_FEEDS.filter(f => f.name === config.feedFilter)
     if (feedsToSync.length === 0) {
       console.error(`Unknown feed: ${config.feedFilter}`)
-      console.log('Available feeds: tax, gst, super, all')
+      console.log('Available feeds: all')
+      console.log('Note: "all" feed (pbr_all.rss) captures all ruling types')
       process.exit(1)
     }
   }
