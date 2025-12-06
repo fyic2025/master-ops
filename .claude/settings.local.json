@@ -84,7 +84,8 @@
       "Bash(claude /plugins)",
       "Bash(git clone:*)",
       "Bash(del c:Usersjaysomaster-opstemp-check-unleashed-lines.js)",
-      "Bash(ELEVATE_UNLEASHED_API_ID=\"336a6015-eae0-43ab-83eb-e08121e7655d\" ELEVATE_UNLEASHED_API_KEY=\"SNX5bNJMLV3VaTbMK1rXMAiEUFdO96bLT5epp6ph8DJvc1WH5aJMRLihc2J0OyzVfKsA3xXpQgWIQANLxkQ==\" ELEVATE_SHOPIFY_ACCESS_TOKEN=\"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\" npx tsx infra/scripts/elevate-customer-sync.ts)"
+      "Bash(ELEVATE_UNLEASHED_API_ID=\"336a6015-eae0-43ab-83eb-e08121e7655d\" ELEVATE_UNLEASHED_API_KEY=\"SNX5bNJMLV3VaTbMK1rXMAiEUFdO96bLT5epp6ph8DJvc1WH5aJMRLihc2J0OyzVfKsA3xXpQgWIQANLxkQ==\" ELEVATE_SHOPIFY_ACCESS_TOKEN=\"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\" npx tsx infra/scripts/elevate-customer-sync.ts)",
+      "Bash(del c:/Users/jayso/master-ops/tmp-tasks.json c:/Users/jayso/master-ops/check-auto-tasks.js)"
     ],
     "deny": [],
     "ask": []
