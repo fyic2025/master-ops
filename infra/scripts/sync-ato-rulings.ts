@@ -86,6 +86,7 @@ interface AtoRuling {
   publication_date: string
   summary: string
   url: string
+  applicable_businesses: string[]
 }
 
 interface SyncResult {
@@ -290,6 +291,128 @@ function isRelevantTopic(title: string, description: string): boolean {
 }
 
 // ============================================================================
+// BUSINESS TAGGING
+// ============================================================================
+
+/**
+ * Our 4 businesses with their characteristics
+ *
+ * teelixir: Company - Premium adaptogens & mushroom supplements
+ * boo: Trust - Organic products marketplace (11K+ products)
+ * elevate: Company - B2B wholesale platform
+ * rhf: Company - Local fresh produce delivery
+ */
+type BusinessSlug = 'teelixir' | 'boo' | 'elevate' | 'rhf'
+
+/**
+ * Auto-tag which businesses a ruling applies to based on content
+ *
+ * Tagging rules:
+ * - All GST rulings apply to all businesses (all collect/remit GST)
+ * - Trust-specific rulings only apply to BOO (our only trust)
+ * - Company-specific rulings apply to Teelixir, Elevate, RHF
+ * - Food/produce rulings apply to RHF and BOO
+ * - Wholesale rulings apply to Elevate
+ * - Health/supplement rulings apply to Teelixir and BOO
+ */
+function tagApplicableBusinesses(title: string, description: string, rulingType: string): BusinessSlug[] {
+  const text = `${title} ${description}`.toLowerCase()
+  const businesses = new Set<BusinessSlug>()
+
+  // GST rulings apply to all businesses
+  if (rulingType === 'GSTR' || rulingType === 'GSTD' || text.includes('gst')) {
+    businesses.add('teelixir')
+    businesses.add('boo')
+    businesses.add('elevate')
+    businesses.add('rhf')
+    return Array.from(businesses)
+  }
+
+  // Trust-specific → BOO only (our only trust structure)
+  if (text.includes('trust') && !text.includes('company')) {
+    businesses.add('boo')
+  }
+
+  // Company-specific → Teelixir, Elevate, RHF (all are companies)
+  if (text.includes('company') || text.includes('corporation') || text.includes('private company')) {
+    businesses.add('teelixir')
+    businesses.add('elevate')
+    businesses.add('rhf')
+  }
+
+  // Food/produce → RHF (primary), BOO (sells food products)
+  if (text.includes('food') || text.includes('fresh produce') || text.includes('perishable') ||
+      text.includes('grocery') || text.includes('catering')) {
+    businesses.add('rhf')
+    businesses.add('boo')
+  }
+
+  // Wholesale/B2B → Elevate
+  if (text.includes('wholesale') || text.includes('b2b') || text.includes('reseller') ||
+      text.includes('distributor')) {
+    businesses.add('elevate')
+  }
+
+  // Health products/supplements → Teelixir (primary), BOO (sells supplements)
+  if (text.includes('health product') || text.includes('supplement') || text.includes('therapeutic') ||
+      text.includes('medicinal') || text.includes('nutraceutical') || text.includes('adaptogen')) {
+    businesses.add('teelixir')
+    businesses.add('boo')
+  }
+
+  // Retail/e-commerce → All businesses
+  if (text.includes('retail') || text.includes('e-commerce') || text.includes('online sales') ||
+      text.includes('online store') || text.includes('web sales')) {
+    businesses.add('teelixir')
+    businesses.add('boo')
+    businesses.add('elevate')
+    businesses.add('rhf')
+  }
+
+  // Small business concessions → All businesses (all qualify as SBE)
+  if (text.includes('small business') || text.includes('sbe') || text.includes('aggregated turnover')) {
+    businesses.add('teelixir')
+    businesses.add('boo')
+    businesses.add('elevate')
+    businesses.add('rhf')
+  }
+
+  // Employment/PAYG/Super → All businesses have employees
+  if (text.includes('employee') || text.includes('wages') || text.includes('payg') ||
+      text.includes('superannuation') || text.includes('super guarantee') ||
+      text.includes('fringe benefit') || text.includes('fbt')) {
+    businesses.add('teelixir')
+    businesses.add('boo')
+    businesses.add('elevate')
+    businesses.add('rhf')
+  }
+
+  // Trading stock → All (all have inventory)
+  if (text.includes('trading stock') || text.includes('inventory') || text.includes('stock on hand')) {
+    businesses.add('teelixir')
+    businesses.add('boo')
+    businesses.add('elevate')
+    businesses.add('rhf')
+  }
+
+  // Delivery/logistics → RHF (primary), all have shipping
+  if (text.includes('delivery') || text.includes('freight') || text.includes('shipping')) {
+    businesses.add('rhf') // Primary focus
+    // Other businesses also ship but less relevant
+  }
+
+  // Default: If no specific match, apply to all (conservative)
+  if (businesses.size === 0) {
+    businesses.add('teelixir')
+    businesses.add('boo')
+    businesses.add('elevate')
+    businesses.add('rhf')
+  }
+
+  return Array.from(businesses).sort()
+}
+
+// ============================================================================
 // SUPERSESSION DETECTION
 // ============================================================================
 
@@ -386,13 +509,18 @@ function transformRssItem(item: RssItem, feedConfig: RssFeedConfig): AtoRuling |
     url = `${ATO_BASE_URL}${url}`
   }
 
+  // Auto-tag applicable businesses
+  const cleanedDescription = cleanDescription(item.description)
+  const applicableBusinesses = tagApplicableBusinesses(item.title, cleanedDescription, parsed.ruling_type)
+
   return {
     ruling_id: parsed.ruling_id,
     ruling_type: parsed.ruling_type,
     title: item.title,
     publication_date: parseRssDate(item.pubDate),
-    summary: cleanDescription(item.description),
-    url: url
+    summary: cleanedDescription,
+    url: url,
+    applicable_businesses: applicableBusinesses
   }
 }
 
@@ -443,7 +571,8 @@ async function upsertRulings(
       .update({
         title: ruling.title,
         summary: ruling.summary,
-        url: ruling.url
+        url: ruling.url,
+        applicable_businesses: ruling.applicable_businesses
       })
       .eq('ruling_id', ruling.ruling_id)
 
@@ -536,10 +665,12 @@ async function syncFeed(
         supersessionMap.set(ruling.ruling_id, supersedes)
         if (config.verbose) {
           console.log(`    ${ruling.ruling_id}: ${ruling.title.substring(0, 50)}...`)
+          console.log(`      ├─ Businesses: [${ruling.applicable_businesses.join(', ')}]`)
           console.log(`      └─ Supersedes: ${supersedes.join(', ')}`)
         }
       } else if (config.verbose) {
-        console.log(`    ${ruling.ruling_id}: ${ruling.title.substring(0, 60)}...`)
+        console.log(`    ${ruling.ruling_id}: ${ruling.title.substring(0, 50)}...`)
+        console.log(`      └─ Businesses: [${ruling.applicable_businesses.join(', ')}]`)
       }
     }
 

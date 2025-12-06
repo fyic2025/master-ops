@@ -1,11 +1,12 @@
 /**
  * Deploy ATO Rulings Schema to Supabase
  *
- * Usage: node deploy-ato-schema.js [--check] [--rls-only]
+ * Usage: node deploy-ato-schema.js [--check] [--rls-only] [--tagging-only]
  *
  * Options:
- *   --check     Only verify if tables exist
- *   --rls-only  Only deploy RLS fix migration
+ *   --check         Only verify if tables exist
+ *   --rls-only      Only deploy RLS fix migration
+ *   --tagging-only  Only deploy business tagging migration
  */
 
 require('dotenv').config({ path: require('path').join(__dirname, '..', '..', '.env') })
@@ -130,10 +131,40 @@ async function deployRlsFix() {
   console.log('')
 }
 
+async function deployBusinessTagging() {
+  console.log('\n=== Deploying Business Tagging Migration ===\n')
+
+  const taggingPath = path.join(__dirname, 'migrations', '20251206_ato_business_tagging.sql')
+
+  if (!fs.existsSync(taggingPath)) {
+    console.error('Business tagging file not found:', taggingPath)
+    process.exit(1)
+  }
+
+  const sql = fs.readFileSync(taggingPath, 'utf8')
+
+  console.log('Business tagging file loaded:', taggingPath)
+  console.log('SQL length:', sql.length, 'characters')
+  console.log('')
+  console.log('This migration adds:')
+  console.log('  - applicable_businesses column (TEXT[])')
+  console.log('  - GIN index for efficient filtering')
+  console.log('  - View: v_ato_rulings_by_business')
+  console.log('  - Function: get_rulings_for_business(slug)')
+  console.log('')
+  console.log('Paste in SQL Editor:')
+  console.log('  https://supabase.com/dashboard/project/qcvfxxsnqvdfmpbcgdni/sql')
+  console.log('')
+  console.log('After deploying, run the backfill script:')
+  console.log('  npx tsx infra/scripts/backfill-ruling-businesses.ts')
+  console.log('')
+}
+
 async function main() {
   const args = process.argv.slice(2)
   const checkOnly = args.includes('--check')
   const rlsOnly = args.includes('--rls-only')
+  const taggingOnly = args.includes('--tagging-only')
 
   const { exists, needsRls } = await checkTables()
 
@@ -153,10 +184,17 @@ async function main() {
     return
   }
 
+  if (taggingOnly) {
+    await deployBusinessTagging()
+    return
+  }
+
   if (!exists) {
     await deploySchema()
   } else {
-    console.log('\nTables already exist. Use --rls-only to update RLS policies.')
+    console.log('\nTables already exist.')
+    console.log('  --rls-only      Update RLS policies')
+    console.log('  --tagging-only  Add business tagging column')
   }
 }
 
