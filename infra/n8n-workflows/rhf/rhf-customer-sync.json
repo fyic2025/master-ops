@@ -1,0 +1,319 @@
+{
+  "name": "RHF Customer Sync",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 10,
+              "triggerAtMinute": 0,
+              "field": "cronExpression",
+              "expression": "0 10 * * 1"
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Monday 10AM AEST",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [250, 300],
+      "notes": "Runs Monday 10am after weekend orders - before weekly planning"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://ops.growthcohq.com/api/rhf/sync/customers",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"action\": \"sync\",\n  \"days\": 30\n}",
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "id": "trigger-customer-sync",
+      "name": "Trigger Customer Sync",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [450, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "rhf-webhook-auth",
+          "name": "RHF Webhook Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "success-check",
+              "leftValue": "={{ $json.success }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-success",
+      "name": "Success?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO integration_logs (source, service, operation, level, status, message, details_json) VALUES ('rhf', 'customer_sync', 'n8n_complete', 'info', 'success', 'Customer sync completed: {{ $json.orders_processed }} orders, {{ $json.customers_updated }} customers', '{{ JSON.stringify($json) }}'::jsonb)",
+        "options": {}
+      },
+      "id": "log-success",
+      "name": "Log Success",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.3,
+      "position": [850, 200],
+      "credentials": {
+        "postgres": {
+          "id": "supabase",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO integration_logs (source, service, operation, level, status, message, details_json) VALUES ('rhf', 'customer_sync', 'n8n_error', 'error', 'failed', 'Customer sync failed: {{ $json.error }}', '{{ JSON.stringify($json) }}'::jsonb)",
+        "options": {}
+      },
+      "id": "log-failure",
+      "name": "Log Failure",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.3,
+      "position": [850, 400],
+      "credentials": {
+        "postgres": {
+          "id": "supabase",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "at-risk-check",
+              "leftValue": "={{ $json.segments?.at_risk?.count }}",
+              "rightValue": 5,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-at-risk",
+      "name": "At-Risk Customers > 5?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1050, 200]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "alert-message",
+              "name": "message",
+              "value": "=RHF At-Risk Customer Alert\n\n{{ $json.segments?.at_risk?.count || 0 }} customers are at risk of churning!\n\nTotal Revenue at Risk: ${{ Math.round($json.segments?.at_risk?.revenue || 0) }}\n\nView dashboard: https://ops.growthcohq.com/rhf/customers?segment=at_risk",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "format-at-risk-alert",
+      "name": "Format At-Risk Alert",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.2,
+      "position": [1250, 100]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "error-message",
+              "name": "message",
+              "value": "=RHF Customer Sync Failed\n\nTime: {{ $now.toISO() }}\nError: {{ $json.error || 'Unknown error' }}\n\nCheck integration_logs for details.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "format-error-alert",
+      "name": "Format Error Alert",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.2,
+      "position": [1050, 400]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://ops.growthcohq.com/api/rhf/sync/customers",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "get-segment-stats",
+      "name": "Get Segment Stats",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1050, 100],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "rhf-webhook-auth",
+          "name": "RHF Webhook Auth"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Monday 10AM AEST": {
+      "main": [
+        [
+          {
+            "node": "Trigger Customer Sync",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trigger Customer Sync": {
+      "main": [
+        [
+          {
+            "node": "Success?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Success?": {
+      "main": [
+        [
+          {
+            "node": "Log Success",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Success": {
+      "main": [
+        [
+          {
+            "node": "Get Segment Stats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Segment Stats": {
+      "main": [
+        [
+          {
+            "node": "At-Risk Customers > 5?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "At-Risk Customers > 5?": {
+      "main": [
+        [
+          {
+            "node": "Format At-Risk Alert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Log Failure": {
+      "main": [
+        [
+          {
+            "node": "Format Error Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "timezone": "Australia/Melbourne"
+  },
+  "versionId": "1",
+  "meta": {
+    "instanceId": "master-ops",
+    "templateCredsSetupCompleted": true
+  },
+  "id": "rhf-customer-sync",
+  "tags": [
+    {
+      "id": "rhf",
+      "name": "rhf"
+    },
+    {
+      "id": "sync",
+      "name": "sync"
+    },
+    {
+      "id": "customers",
+      "name": "customers"
+    }
+  ]
+}
